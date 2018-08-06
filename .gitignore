@@ -1,3 +1,6 @@
+# Java compiled classes
+LightJason/target/*
+
 # Prerequisites
 *.d
 
