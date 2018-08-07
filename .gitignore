@@ -1,5 +1,11 @@
 # Java compiled classes
 LightJason/target/*
+LightJason/out/*
+
+VeinsBDI/src/*_dbg
+VeinsBDI/src/*_release
+
+*.idea
 
 # Prerequisites
 *.d
