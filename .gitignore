@@ -6,6 +6,8 @@ VeinsBDI/src/*_dbg
 VeinsBDI/src/*_release
 
 *.idea
+veinsBDI/out/
+veinsBDI/src/veinsBDI_dbg
 
 # Prerequisites
 *.d
