@@ -1,12 +1,12 @@
 #
-# OMNeT++/OMNEST Makefile for veinstest
+# OMNeT++/OMNEST Makefile for veinsBDI
 #
 # This file was generated with the command:
 #  opp_makemake -f --deep -KVEINS_PROJ=/home/miguel/Documents/Veins -I$$\(VEINS_PROJ\)/src -L$$\(VEINS_PROJ\)/src -lveins$$\(D\)
 #
 
 # Name of target to be created (-o option)
-TARGET = veinstest$(D)$(EXE_SUFFIX)
+TARGET = veinsBDI$(D)$(EXE_SUFFIX)
 TARGET_DIR = .
 
 # User interface (uncomment one) (-u option)
@@ -30,7 +30,7 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cpp, .msg and .sm files
-OBJS = $O/LightJasonManager.o $O/LightJasonManagerEx.o $O/TutorialAppl.o
+OBJS = $O/AgentAppl.o $O/JasoNetProtocol.o $O/LightJasonManager.o
 
 # Message files
 MSGFILES =

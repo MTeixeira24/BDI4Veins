@@ -15,12 +15,8 @@
 
 package veinsbdi;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.LightJasonManager;
+import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
 
-network LightJasonScenario extends Scenario
-{
-    submodules:
-        ljmanager: LightJasonManager;
-    connections allowunconnected:
+simple AgentAppl extends BaseWaveApplLayer{
+ 	@class(AgentAppl);   
 }

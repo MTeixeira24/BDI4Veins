@@ -16,19 +16,22 @@
 #include <string.h>
 #include <omnetpp.h>
 #include <map>
-#include "TutorialAppl.h"
+
+#include "AgentAppl.h"
+#include "JasoNetProtocol.h"
 using namespace omnetpp;
-class TutorialAppl;
+class AgentAppl;
 class LightJasonManager : public cSimpleModule{
 public:
     LightJasonManager();
     ~LightJasonManager();
-    uint8_t subscribeVehicle(TutorialAppl* vehicle, uint32_t id);
+    uint8_t subscribeVehicle(AgentAppl* vehicle, uint32_t id);
     uint8_t sendInformationToAgents(int id, std::string belief, std::string value);
+    void notifyNodes(uint32_t id, std::string action, std::string data);
     virtual void initialize(int stage) override;
 protected:
     int port;
-    std::map <int, TutorialAppl*> vehicles;
+    std::map <int, AgentAppl*> vehicles;
     simtime_t updateInterval;
     cModule *module;
     cMessage *notificationMsg;
@@ -39,10 +42,10 @@ protected:
 
     // state
     //int64_t baseTime; // in microseconds, as returned by opp_get_monotonic_clock_usecs()
-    SOCKET listenerSocket;
     SOCKET connSocket;
+    JasoNetProtocol jp;
     virtual void handleMessage(cMessage *msg) override;
-    int writeToSocket(std::string data, char* buffer);
+    std::string writeToSocket(std::string data);
 
     //virtual void setupListener();
 };
