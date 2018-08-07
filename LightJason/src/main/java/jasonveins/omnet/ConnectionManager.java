@@ -9,7 +9,9 @@ public final class ConnectionManager extends Thread {
 
     private final int port = 4242;
     private final String hostname = "localhost";
-    private Socket socket;
+    private ServerSocket serverSocket;
+    private Socket clientSocket;
+    private PrintWriter out;
     private AgentManager am;
 
     public ConnectionManager(){
@@ -20,53 +22,17 @@ public final class ConnectionManager extends Thread {
         am = m_am;
     }
 
-    private void startServer(){
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
-            Socket clientSocket = serverSocket.accept();
-            PrintWriter out =
-                    new PrintWriter(clientSocket.getOutputStream(), true);
+    private void startServer() throws IOException {
+        try{
+            serverSocket = new ServerSocket(port);
+            clientSocket = serverSocket.accept();
+            out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
-            String inputLine, outputLine;
-
-            // Initiate conversation with client
-            JasoNetProtocol jnp = new JasoNetProtocol();
-            String action[];
-            //outputLine = kkp.processInput(null);
-            //out.println(outputLine);
+            String inputLine;
             while ( true ) {
                 if((inputLine = in.readLine()) != null){
-                    action = inputLine.split("-");
-                    switch (action[0]) {
-                        case "Add":
-                            am.createNewAgent(Integer.parseInt(action[1]));
-                            outputLine = "Agent Added";
-                            out.println(outputLine);
-                            break;
-                        case "BeliefUpdate":
-                            am.updateBeliefs(Integer.parseInt(action[1]), action[2], action[3]);
-                            outputLine = "Beliefs updated";
-                            out.println(outputLine);
-                            break;
-                        case "Query":
-                            if (am.existsInstructions()) {
-                                outputLine = "";
-                                CopyOnWriteArrayList<String> inst = am.extractInstructions();
-                                for (int i = 0; i < inst.size(); i++) {
-                                    outputLine = outputLine.concat(inst.get(i) + ":");
-                                }
-                                out.println(outputLine);
-                            } else {
-                                outputLine = "Ok";
-                                out.println(outputLine);
-                            }
-                            break;
-                        default:
-                            outputLine = "Ok";
-                            out.println(outputLine);
-                            break;
-                    }
+                    processInput(inputLine);
                 }else{
                     break;
                 }
@@ -75,11 +41,55 @@ public final class ConnectionManager extends Thread {
             System.out.println("Exception caught when trying to listen on port "
                     + port + " or listening for a connection");
             System.out.println(e.getMessage());
+        }finally {
+            serverSocket.close();
+            clientSocket.close();
+            out.close();
         }
     }
 
     public void run(){
-        startServer();
+        try {
+            startServer();
+        } catch (IOException e) {
+            System.out.println("Exception caught when trying to listen on port "
+                    + port + " or listening for a connection");
+            e.printStackTrace();
+        }
+    }
+
+    private void processInput(@Nonnull String inputLine){
+        String [] action = inputLine.split("-");
+        String outputLine;
+        switch (action[0]) {
+            case "Add":
+                am.createNewAgent(Integer.parseInt(action[1]));
+                outputLine = "Agent Added";
+                out.println(outputLine);
+                break;
+            case "BeliefUpdate":
+                am.updateBeliefs(Integer.parseInt(action[1]), action[2], action[3]);
+                outputLine = "Beliefs updated";
+                out.println(outputLine);
+                break;
+            case "Query":
+                if (am.existsInstructions()) {
+                    outputLine = "";
+                    CopyOnWriteArrayList<String> inst = am.extractInstructions();
+                    for (String anInst : inst) {
+                        outputLine = outputLine.concat(anInst + ":");
+                    }
+                    out.println(outputLine);
+                } else {
+                    outputLine = "Ok";
+                    out.println(outputLine);
+                }
+                break;
+            default:
+                outputLine = "Ok";
+                out.println(outputLine);
+                break;
+        }
     }
 
 }
