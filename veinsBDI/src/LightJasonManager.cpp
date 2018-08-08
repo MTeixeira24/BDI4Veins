@@ -45,9 +45,14 @@ void LightJasonManager::handleMessage(cMessage* msg){
         std::string data;
         std::string action;
         data = jp.parseResponse(result, &id, action);
-        notifyNodes(id, action, data);
-        queryMsg = new cMessage("query");
-        scheduleAt(simTime() + updateInterval, queryMsg);
+        if(action.compare("EndConnection") == 0){
+            close(connSocket);
+        }else{
+            notifyNodes(id, action, data);
+            queryMsg = new cMessage("query");
+            scheduleAt(simTime() + updateInterval, queryMsg);
+        }
+
     }
 }
 
@@ -67,6 +72,14 @@ uint8_t LightJasonManager::subscribeVehicle(AgentAppl* vehicle, uint32_t id){
     EV << result;
     return 0;
 }
+
+void LightJasonManager::unsubscribeVehicle(int id){
+    std::string msg = jp.buildRemoveRequest(id);
+    std:: string result = writeToSocket(msg);
+    vehicles.erase(id);
+    EV << result;
+}
+
 uint8_t LightJasonManager::sendInformationToAgents(int id, std::string belief, std::string value){
     std::string msg = jp.buildBeliefUpdateRequest(id, belief, value);
     std:: string result = writeToSocket(msg);

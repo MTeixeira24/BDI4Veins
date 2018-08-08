@@ -19,6 +19,8 @@ class LightJasonManager;
 class AgentAppl : public BaseWaveApplLayer {
 public:
     virtual void initialize(int stage);
+    virtual void finish();
+    //~AgentAppl();
     virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details);
 protected:
     TraCIMobility* mobility;

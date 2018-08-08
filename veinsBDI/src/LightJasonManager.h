@@ -29,6 +29,7 @@ public:
     uint8_t sendInformationToAgents(int id, std::string belief, std::string value);
     void notifyNodes(uint32_t id, std::string action, std::string data);
     virtual void initialize(int stage) override;
+    void unsubscribeVehicle(int id);
 protected:
     int port;
     std::map <int, AgentAppl*> vehicles;

@@ -14,6 +14,10 @@ using Veins::AnnotationManagerAccess;
 
 Define_Module(AgentAppl);
 
+/*AgentAppl::~AgentAppl(){
+    manager->unsubscribeVehicle(myId);
+}*/
+
  void AgentAppl::initialize(int stage){
     BaseWaveApplLayer::initialize(stage);
     if(stage == 0){
@@ -85,5 +89,9 @@ void AgentAppl::sendMessage(std::string msg){
 
 void AgentAppl::changeSpeed(double speed){
     EV << "Slowing down to speed on agent command\n";
-    traciVehicle->setMaxSpeed(speed);
+    //traciVehicle->setMaxSpeed(speed);
+}
+
+void AgentAppl::finish(){
+    manager->unsubscribeVehicle(myId);
 }

@@ -20,6 +20,7 @@ public:
     std::string buildBeliefUpdateRequest(uint32_t id, std::string belief, std::string value);
     /*Extracts the vehicle id and associated action from response and returns the associated data*/
     std::string parseResponse(std::string response, uint32_t* id, std::string & action);
+    std::string buildRemoveRequest(int id);
 };
 
 

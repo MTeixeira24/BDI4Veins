@@ -22,6 +22,13 @@ std::string JasoNetProtocol::buildSubscriptionRequest(uint32_t id){
     return msg;
 }
 
+std::string JasoNetProtocol::buildRemoveRequest(int id){
+     std::string msg ("Remove-");
+     msg.append(std::to_string(id));
+     msg.append("\n");
+     return msg;
+}
+
 std::string JasoNetProtocol::buildConnectionRequest(){
     std::string msg("Connect\n");
     return msg;
@@ -41,6 +48,11 @@ std::string JasoNetProtocol::buildBeliefUpdateRequest(uint32_t id, std::string b
 
 std::string JasoNetProtocol::parseResponse(std::string response, uint32_t *id, std::string & action){
     std::string data;
+    if(response.compare("EndConnection\n") == 0){
+        action = "EndConnection";
+        data ="";
+        return data;
+    }
     if(response.compare("Ok\n") != 0){
         size_t pos = 0, spos = 0;
         std::string token, stoken;

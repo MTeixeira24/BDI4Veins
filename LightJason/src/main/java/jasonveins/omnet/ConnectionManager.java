@@ -14,8 +14,18 @@ public final class ConnectionManager extends Thread {
     private PrintWriter out;
     private AgentManager am;
 
+    private enum State{
+        DISCONNECTED, WAITINGFORAGENT, RUNNINGLOOP, FINISH
+    }
+
+    private State state = State.DISCONNECTED;
+
     public ConnectionManager(){
         super("ConnectionManager");
+    }
+
+    public void finish() {
+        state = State.FINISH;
     }
 
     public void setAgentManager(AgentManager m_am){
@@ -26,6 +36,7 @@ public final class ConnectionManager extends Thread {
         try{
             serverSocket = new ServerSocket(port);
             clientSocket = serverSocket.accept();
+            state = State.WAITINGFORAGENT;
             out = new PrintWriter(clientSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(clientSocket.getInputStream()));
@@ -33,15 +44,28 @@ public final class ConnectionManager extends Thread {
             while ( true ) {
                 if((inputLine = in.readLine()) != null){
                     processInput(inputLine);
+                    if(state == State.FINISH) break;
                 }else{
+                    System.out.println("Terminating connection");
+                    state = State.DISCONNECTED;
+                    am.toggleAgentLoop(true, false);
+                    System.exit(0);
                     break;
                 }
             }
+        } catch(SocketException e){
+            System.err.println("Abrupt connection termination! Ending agent loop");
+            state = State.DISCONNECTED;
+            am.toggleAgentLoop(true, false);
+            System.exit(0);
         } catch (IOException e) {
             System.out.println("Exception caught when trying to listen on port "
                     + port + " or listening for a connection");
-            System.out.println(e.getMessage());
-        }finally {
+            e.printStackTrace();
+            state = State.DISCONNECTED;
+            am.toggleAgentLoop(true, false);
+            System.exit(0);
+        } finally {
             serverSocket.close();
             clientSocket.close();
             out.close();
@@ -61,10 +85,18 @@ public final class ConnectionManager extends Thread {
     private void processInput(@Nonnull String inputLine){
         String [] action = inputLine.split("-");
         String outputLine;
+        if(state == State.FINISH){
+            out.println("EndConnection");
+            return;
+        }
         switch (action[0]) {
             case "Add":
                 am.createNewAgent(Integer.parseInt(action[1]));
                 outputLine = "Agent Added";
+                if(state == State.WAITINGFORAGENT){
+                    am.toggleAgentLoop(false, true);
+                    state = State.RUNNINGLOOP;
+                }
                 out.println(outputLine);
                 break;
             case "BeliefUpdate":
@@ -84,6 +116,11 @@ public final class ConnectionManager extends Thread {
                     outputLine = "Ok";
                     out.println(outputLine);
                 }
+                break;
+            case "Remove":
+                am.removeAgent(Integer.parseInt(action[1]));
+                outputLine = "Agent removed";
+                out.println(outputLine);
                 break;
             default:
                 outputLine = "Ok";
