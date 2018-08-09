@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-	<copy file="custom.net.xml" />
-	<copy file="custom.rou.xml" />
-	<!--copy file="demo.settings.xml" /-->
-	<copy file="custom.sumo.cfg" type="config" />
-</launch>
