@@ -1,0 +1,29 @@
+FROM ubuntu:16.04
+#Docker file in order to build an image containing Omnet, sumo and plexe.
+#Used as the base image for the Veins side of BDI4Veins
+#Since omnetpp does not allow for command line downloads, the docker file requires omnetpp, sumo-plexe and veins-plexe be in its build context
+#based on https://github.com/bogaotory/docker-sumo
+RUN apt-get -y update
+RUN apt-get -y upgrade
+RUN apt-get -y install bison flex blt lmodern giftrans doxygen libxml2-dev graphviz imagemagick
+RUN apt-get -y install tcl8.4 tk8.4 tcl8.4-dev tk8.4-dev qt5-qmake qt5-default
+RUN apt-get -y install software-properties-common && add-apt-repository ppa:ubuntugis/ppa && apt-get -y update
+RUN apt-get -y install libopenscenegraph-dev libosgearth-dev osgearth
+
+COPY ./omnetpp /usr/share/omnetpp/
+COPY ./Veins/ /usr/share/veins
+ENV PATH "$PATH:/usr/share/omnetpp/bin/:/usr/share/veins/"
+ENV VEINS_HOME "/usr/share/veins/"
+
+ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/omnetpp/lib
+ENV TCL_LIBRARY=/usr/share/tcltk/tcl8.4
+
+RUN cd /usr/share/omnetpp/ && ./configure && make
+RUN cd /usr/share/veins/ && make && make MODE=debug
+
+COPY ./sumo /usr/share/sumo/
+ENV SUMO_HOME /usr/share/sumo
+RUN apt-get -y install cmake libgdal-dev libxerces-c-dev libproj-dev libfox-1.6-dev
+RUN cd /usr/share/sumo/build-release && cmake -DCMAKE_BUILD_TYPE=Release .. && make
+ENV PATH "$PATH:/usr/share/sumo/bin"
+CMD sumo-gui #echo $PATH

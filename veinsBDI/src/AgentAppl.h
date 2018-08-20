@@ -16,7 +16,7 @@ using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;
 //using Veins::AnnotationManager; //Add for annotations
 class LightJasonManager;
-class AgentAppl : public BaseWaveApplLayer {
+class AgentAppl : public Veins::BaseWaveApplLayer {
 public:
     virtual void initialize(int stage);
     virtual void finish();
@@ -29,11 +29,11 @@ protected:
     simtime_t lastSent; //last time this sent a message
     LightJasonManager* manager;
 
-    virtual void onWSM(WaveShortMessage* wsm);
-    virtual void onBeacon(WaveShortMessage* wsm);
+    virtual void onWSM(Veins::WaveShortMessage* wsm);
+    virtual void onBeacon(Veins::WaveShortMessage* wsm);
     virtual void handlePositionUpdate(cObject* obj);
     void sendMessage(std::string msg);
-    virtual void sendWSM(WaveShortMessage* wsm);
+    virtual void sendWSM(Veins::WaveShortMessage* wsm);
 public:
     void changeSpeed(double speed);
 };

@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for veinsBDI
 #
 # This file was generated with the command:
-#  opp_makemake -f --deep -KVEINS_PROJ=/home/miguel/Documents/Veins -I$$\(VEINS_PROJ\)/src -L$$\(VEINS_PROJ\)/src -lveins$$\(D\)
+#  opp_makemake -f --deep -KPLEXE_VEINS_PROJ=/home/miguel/Documents/plexe-veins -I$$\(PLEXE_VEINS_PROJ\)/src -L$$\(PLEXE_VEINS_PROJ\)/src -lveins$$\(D\)
 #
 
 # Name of target to be created (-o option)
@@ -16,13 +16,13 @@ USERIF_LIBS = $(ALL_ENV_LIBS) # that is, $(TKENV_LIBS) $(QTENV_LIBS) $(CMDENV_LI
 #USERIF_LIBS = $(QTENV_LIBS)
 
 # C++ include paths (with -I)
-INCLUDE_PATH = -I$(VEINS_PROJ)/src
+INCLUDE_PATH = -I$(PLEXE_VEINS_PROJ)/src
 
 # Additional object and library files to link with
 EXTRA_OBJS =
 
 # Additional libraries (-L, -l options)
-LIBS = $(LDFLAG_LIBPATH)$(VEINS_PROJ)/src  -lveins$(D)
+LIBS = $(LDFLAG_LIBPATH)$(PLEXE_VEINS_PROJ)/src  -lveins$(D)
 
 # Output directory
 PROJECT_OUTPUT_DIR = ../out
@@ -39,7 +39,7 @@ MSGFILES =
 SMFILES =
 
 # Other makefile variables (-K)
-VEINS_PROJ=/home/miguel/Documents/Veins
+PLEXE_VEINS_PROJ=/home/miguel/Documents/plexe-veins
 
 #------------------------------------------------------------------------------
 
@@ -64,7 +64,7 @@ include $(CONFIGFILE)
 # Simulation kernel and user interface libraries
 OMNETPP_LIBS = $(OPPMAIN_LIB) $(USERIF_LIBS) $(KERNEL_LIBS) $(SYS_LIBS)
 ifneq ($(TOOLCHAIN_NAME),clangc2)
-LIBS += -Wl,-rpath,$(abspath $(VEINS_PROJ)/src)
+LIBS += -Wl,-rpath,$(abspath $(PLEXE_VEINS_PROJ)/src)
 endif
 
 COPTS = $(CFLAGS) $(IMPORT_DEFINES)  $(INCLUDE_PATH) -I$(OMNETPP_INCL_DIR)

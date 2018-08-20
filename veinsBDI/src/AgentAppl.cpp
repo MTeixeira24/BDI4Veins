@@ -26,7 +26,7 @@ Define_Module(AgentAppl);
         traci = mobility->getCommandInterface();
         traciVehicle = mobility->getVehicleCommandInterface();
         lastSent = simTime();
-        manager = FindModule<LightJasonManager*>::findSubModule(getParentModule()->getParentModule()); //The network is 2 modules up
+        manager = Veins::FindModule<LightJasonManager*>::findSubModule(getParentModule()->getParentModule()); //The network is 2 modules up
         if(manager == nullptr){
             printf("STOP");
         }
@@ -44,7 +44,7 @@ Define_Module(AgentAppl);
     }
 }
 
- void AgentAppl::onWSM(WaveShortMessage* wsm){
+ void AgentAppl::onWSM(Veins::WaveShortMessage* wsm){
     //Receive a message with a target speed, slow down to that speed
     std::string msg = wsm->getWsmData();
     std::string del ("|");
@@ -57,7 +57,7 @@ Define_Module(AgentAppl);
     //traciVehicle->slowDown(message_speed, 100); //slow down over 1s
 }
 
- void AgentAppl::onBeacon(WaveShortMessage* wsm){
+ void AgentAppl::onBeacon(Veins::WaveShortMessage* wsm){
      //Receive a message with a target speed, slow down to that speed
      float message_speed = atof(wsm->getWsmData());
      EV << "Slowing down to speed " << message_speed << "\n";
@@ -77,19 +77,19 @@ Define_Module(AgentAppl);
 
 void AgentAppl::sendMessage(std::string msg){
     t_channel channel = dataOnSch ? type_SCH : type_CCH;
-    WaveShortMessage *wsm = new WaveShortMessage("data", channel);
+    Veins::WaveShortMessage *wsm = new Veins::WaveShortMessage("data", channel);
     std::string m_msg = std::to_string(myId);
     wsm->setWsmData((msg + "|" + m_msg).c_str());
     sendWSM(wsm);
 }
 
- void AgentAppl::sendWSM(WaveShortMessage* wsm){
+ void AgentAppl::sendWSM(Veins::WaveShortMessage* wsm){
     sendDown(wsm); //message delay
 }
 
 void AgentAppl::changeSpeed(double speed){
     EV << "Slowing down to speed on agent command\n";
-    //traciVehicle->setMaxSpeed(speed);
+    traciVehicle->setMaxSpeed(speed);
 }
 
 void AgentAppl::finish(){
