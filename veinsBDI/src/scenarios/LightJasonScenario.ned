@@ -13,10 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi;
+package veinsbdi.scenarios;
 
-import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
+import org.car2x.veins.nodes.Scenario;
+import veinsbdi.base.manager.LightJasonManager;
 
-simple AgentAppl extends BaseWaveApplLayer{
- 	@class(AgentAppl);   
+network LightJasonScenario extends Scenario
+{
+    submodules:
+        ljmanager: LightJasonManager;
+    connections allowunconnected:
 }

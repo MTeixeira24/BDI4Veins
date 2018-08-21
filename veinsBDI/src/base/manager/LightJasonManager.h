@@ -17,7 +17,7 @@
 #include <omnetpp.h>
 #include <map>
 
-#include "AgentAppl.h"
+#include "../../app/veinsappl/AgentAppl.h"
 #include "JasoNetProtocol.h"
 using namespace omnetpp;
 class AgentAppl;

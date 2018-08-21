@@ -13,12 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi;
+package veinsbdi.app.veinsappl;
 
-simple LightJasonManager{
-    parameters:
-        @class(LightJasonManager);
-        int port = default(4242);
-        string hostname = default("localhost");
-        double updateInterval @unit("s") = default(1s); //Update interval synchronized with TraCI updates 
+import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
+
+simple AgentAppl extends BaseWaveApplLayer{
+ 	@class(AgentAppl);   
 }

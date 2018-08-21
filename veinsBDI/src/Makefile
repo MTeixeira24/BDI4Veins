@@ -30,7 +30,7 @@ PROJECTRELATIVE_PATH = src
 O = $(PROJECT_OUTPUT_DIR)/$(CONFIGNAME)/$(PROJECTRELATIVE_PATH)
 
 # Object files for local .cpp, .msg and .sm files
-OBJS = $O/AgentAppl.o $O/JasoNetProtocol.o $O/LightJasonManager.o
+OBJS = $O/app/veinsappl/AgentAppl.o $O/base/manager/JasoNetProtocol.o $O/base/manager/LightJasonManager.o
 
 # Message files
 MSGFILES =

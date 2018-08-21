@@ -28,7 +28,7 @@ Define_Module(AgentAppl);
         lastSent = simTime();
         manager = Veins::FindModule<LightJasonManager*>::findSubModule(getParentModule()->getParentModule()); //The network is 2 modules up
         if(manager == nullptr){
-            printf("STOP");
+            throw new cRuntimeError("LightJason Application: No manager found");
         }
         manager->subscribeVehicle(this, myId);
         //Save pointer to LightJason Manager

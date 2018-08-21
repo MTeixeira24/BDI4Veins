@@ -24,19 +24,12 @@ void LightJasonManager::initialize(int stage){
     sinInterface.sin_family = AF_INET;
     sinInterface.sin_addr.s_addr = inet_addr("127.0.0.1"); //TODO: Have this setting be determine by whether or not we are in a docker container https://forums.docker.com/t/localhost-and-docker-compose-networking-issue/23100
     sinInterface.sin_port = htons(4242);
-    int n, timeout = 0;
-    while(true){
+    int n;
+    for(int timeout = 0; timeout <= 10; timeout++){
         n = connect(connSocket, (sockaddr *)&sinInterface, sizeof(sockaddr_in));
-        if (n >= 0){
-            break;
-        }else{
-            timeout++;
-            if(timeout == 10){
-                throw cRuntimeError("LightJasonManager: socket connect() failed");
-            }else{
-                sleep(1);
-            }
-        }
+        if (n >= 0) break;
+        if(timeout == 10) throw cRuntimeError("LightJasonManager: socket connect() failed");
+        sleep(1);
     }
     std::string msg = jp.buildConnectionRequest();
     std::string result = writeToSocket(msg);

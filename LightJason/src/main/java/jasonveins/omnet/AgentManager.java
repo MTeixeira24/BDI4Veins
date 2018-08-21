@@ -107,7 +107,7 @@ public class AgentManager {
 
     public void loop(){
         System.out.println("Agent loop: Awaiting agent input");
-        while(!simulate.get());
+        while(!simulate.get()); //TODO: Add logic to break out of this waiting state in event of sudden disconnect
         System.out.println("Agent loop: Starting agent loop");
         while(true){
             if(execute.get()){
