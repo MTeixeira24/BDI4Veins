@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.IntBinaryOperator;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public class AgentManager {
     protected AtomicBoolean execute, cycleEnd, simulate; //Flags to control the agent cycle. //
     // execute flag determines if new cycles should be made.
     // cycleEnd confirms if a cycle has properly finished in order to allow mutations to the agentSet
-    protected final Map<Integer, ManagerAgent> agentMap = new ConcurrentHashMap<>();
+    protected final Map<Integer, NormalVehicleAgent> agentMap = new ConcurrentHashMap<>();
     //Map agent Ids to their references.
     protected final ConnectionManager cmanager;
     protected final CopyOnWriteArrayList<String> instructionsList = new CopyOnWriteArrayList<>();
@@ -43,7 +42,7 @@ public class AgentManager {
         {
             final int l_agentNumber = 1;
             l_agents =
-                    new ManagerGenerator( l_stream, this )
+                    new NormalVehicleGenerator( l_stream, this )
                             .generatemultiple( l_agentNumber, 0 )
                             .collect( Collectors.toSet()
 
@@ -65,7 +64,7 @@ public class AgentManager {
                 throw new RuntimeException();
             }
             while(!cycleEnd.get()); //Wait until current stream is over
-            ManagerAgent m_ag = new ManagerGenerator(l_stream, this).generatesingle(id);
+            NormalVehicleAgent m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id);
             l_agents.add(m_ag);
             agentMap.putIfAbsent(id, m_ag);
             agentCount.incrementAndGet();
@@ -85,7 +84,7 @@ public class AgentManager {
                         CRawTerm.from(Double.valueOf(value))
                 )//belief(<value>)
         );
-        ManagerAgent vehicle = agentMap.get(id);
+        NormalVehicleAgent vehicle = agentMap.get(id);
         if(vehicle == null) throw new RuntimeException();
         vehicle.trigger(trigger);
     }
@@ -143,7 +142,7 @@ public class AgentManager {
                 throw new RuntimeException();
             }
             while(!cycleEnd.get()); //Wait until current stream is over
-            Predicate<IAgent<?>> removePredicate = a -> ((ManagerAgent)a).id() == agentId;
+            Predicate<IAgent<?>> removePredicate = a -> ((NormalVehicleAgent)a).id() == agentId;
             l_agents.removeIf(removePredicate);
             agentMap.remove(agentId);
             if(agentMap.size() == 0){
