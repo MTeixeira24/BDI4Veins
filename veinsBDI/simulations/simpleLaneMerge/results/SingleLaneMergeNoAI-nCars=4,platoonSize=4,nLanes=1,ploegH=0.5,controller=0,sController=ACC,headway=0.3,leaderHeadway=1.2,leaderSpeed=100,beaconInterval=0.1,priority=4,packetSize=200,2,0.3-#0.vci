@@ -1,0 +1,240 @@
+                                                                
+version 2
+run SingleLaneMergeNoAI-0-20180822-22:40:33-18356
+attr configname SingleLaneMergeNoAI
+attr datetime 20180822-22:40:33
+attr experiment SingleLaneMergeNoAI
+attr inifile omnetpp.ini
+attr iterationvars "$nCars=4, $platoonSize=4, $nLanes=1, $ploegH=0.5, $controller=0, $sController=\"ACC\", $headway=0.3, $leaderHeadway=1.2, $leaderSpeed=100, $beaconInterval=0.1, $priority=4, $packetSize=200, $0=2, $1=0.3"
+attr iterationvarsf nCars=4,platoonSize=4,nLanes=1,ploegH=0.5,controller=0,sController=ACC,headway=0.3,leaderHeadway=1.2,leaderSpeed=100,beaconInterval=0.1,priority=4,packetSize=200,2,0.3-
+attr measurement "$nCars=4, $platoonSize=4, $nLanes=1, $ploegH=0.5, $controller=0, $sController=\"ACC\", $headway=0.3, $leaderHeadway=1.2, $leaderSpeed=100, $beaconInterval=0.1, $priority=4, $packetSize=200, $0=2, $1=0.3"
+attr network veinsbdi.simulations.simpleLaneMerge.LaneMergeScenario
+attr processid 18356
+attr repetition 0
+attr replication #0
+attr resultdir results
+attr runnumber 0
+attr seedset 0
+itervar beaconInterval 0.1
+itervar controller 0
+itervar headway 0.3
+itervar leaderHeadway 1.2
+itervar leaderSpeed 100
+itervar nCars 4
+itervar nLanes 1
+itervar packetSize 200
+itervar platoonSize 4
+itervar ploegH 0.5
+itervar priority 4
+itervar sController "\"ACC\""
+param *.node[*].appl_type "\"GeneralPlatooningApp\""
+param *.node[*].appl.joinManeuver "\"JoinAtBack\""
+param *.manager.useGui true
+param *.node[*].scenario_type "\"veinsbdi.scenarios.LaneMergeScenario\""
+param *.playgroundSizeX 65000m
+param *.playgroundSizeY 25000m
+param *.playgroundSizeZ 50m
+param **.debug false
+param **.coreDebug false
+param *.annotations.draw false
+param *.obstacles.debug false
+param *.world.useTorus false
+param *.world.use2D false
+param *.*.updateInterval 0.01s
+param *.manager.host "\"localhost\""
+param *.manager.moduleType "\"vtypeauto=org.car2x.veins.modules.application.platooning.PlatoonCar vtypemerger=org.car2x.veins.modules.application.platooning.PlatoonCar\""
+param *.manager.moduleName "\"vtypeauto=node vtypemerger=merger\""
+param *.manager.moduleDisplayString "\"\""
+param *.manager.autoShutdown true
+param *.manager.margin 25
+param *.connectionManager.sendDirect true
+param *.connectionManager.maxInterfDist 2600m
+param *.connectionManager.drawMaxIntfDist false
+param *.**.nic.mac1609_4.useServiceChannel false
+param *.**.nic.mac1609_4.txPower 100mW
+param *.**.nic.mac1609_4.bitrate 6Mbps
+param *.**.nic.phy80211p.sensitivity -94dBm
+param *.**.nic.phy80211p.maxTXPower 100mW
+param *.**.nic.phy80211p.useThermalNoise true
+param *.**.nic.phy80211p.thermalNoise -95dBm
+param *.**.nic.phy80211p.decider "xmldoc(\"config.xml\")"
+param *.**.nic.phy80211p.analogueModels "xmldoc(\"config.xml\")"
+param *.**.nic.phy80211p.usePropagationDelay true
+param *.node[*].mobility.x 0
+param *.node[*].mobility.y 0
+param *.node[*].mobility.z 1.895
+param **.seed 0
+param *.manager.configFile "\"./sumocfg/slm.sumo.cfg\""
+param **.numberOfCars 4
+param **.numberOfCarsPerPlatoon 4
+param **.numberOfLanes 1
+param *.node[*].helper_type "\"LocalPlatoonPositionHelper\""
+param *.node[*].scenario.caccC1 0.5
+param *.node[*].scenario.caccXi 1
+param *.node[*].scenario.caccOmegaN "0.2 Hz"
+param *.node[*].scenario.engineTau "0.5 s"
+param *.node[*].scenario.ploegH 0.5s
+param *.node[*].scenario.ploegKp 0.2
+param *.node[*].scenario.ploegKd 0.7
+param *.node[*].scenario.useRealisticEngine false
+param *.node[*].scenario.useControllerAcceleration true
+param **.numericController 0
+param *.node[*].scenario.controller "\"ACC\""
+param **.headway 0.3s
+param *.node[*].scenario.accHeadway 0.3s
+param *.node[*].scenario.leaderHeadway 1.2s
+param *.node[*].scenario.leaderSpeed 100kmph
+param *.node[*].protocol_type "\"SimplePlatooningBeaconing\""
+param *.node[*].prot.beaconingInterval 0.1s
+param *.node[*].prot.priority 4
+param *.node[*].prot.packetSize 200
+param *.node[*].unicast.packetLossRate 0
+param **.traffic_type "\"veinsbdi.traffic.LaneMergeTrafficManager\""
+param **.traffic.platoonInsertTime "1 s"
+param **.traffic.platoonInsertSpeed 100kmph
+param **.traffic.nCars 4
+param **.traffic.platoonSize 4
+param **.traffic.nLanes 1
+param **.traffic.platooningVType "\"vtypeauto\""
+param **.traffic.platoonInsertDistance 2m
+param **.traffic.platoonInsertHeadway 0.3s
+param **.traffic.platoonLeaderHeadway 1.2s
+
+vector 0 LaneMergeScenario.node[0].appl distance ETV
+vector 1 LaneMergeScenario.node[0].appl relativeSpeed ETV
+vector 2 LaneMergeScenario.node[0].appl nodeId ETV
+vector 3 LaneMergeScenario.node[0].appl acceleration ETV
+vector 4 LaneMergeScenario.node[0].appl controllerAcceleration ETV
+vector 5 LaneMergeScenario.node[0].appl speed ETV
+vector 6 LaneMergeScenario.node[0].appl posx ETV
+vector 7 LaneMergeScenario.node[0].appl posy ETV
+vector 8 LaneMergeScenario.node[1].appl distance ETV
+vector 9 LaneMergeScenario.node[1].appl relativeSpeed ETV
+vector 10 LaneMergeScenario.node[1].appl nodeId ETV
+vector 11 LaneMergeScenario.node[1].appl acceleration ETV
+vector 12 LaneMergeScenario.node[1].appl controllerAcceleration ETV
+vector 13 LaneMergeScenario.node[1].appl speed ETV
+vector 14 LaneMergeScenario.node[1].appl posx ETV
+vector 15 LaneMergeScenario.node[1].appl posy ETV
+vector 16 LaneMergeScenario.node[2].appl distance ETV
+vector 17 LaneMergeScenario.node[2].appl relativeSpeed ETV
+vector 18 LaneMergeScenario.node[2].appl nodeId ETV
+vector 19 LaneMergeScenario.node[2].appl acceleration ETV
+vector 20 LaneMergeScenario.node[2].appl controllerAcceleration ETV
+vector 21 LaneMergeScenario.node[2].appl speed ETV
+vector 22 LaneMergeScenario.node[2].appl posx ETV
+vector 23 LaneMergeScenario.node[2].appl posy ETV
+vector 24 LaneMergeScenario.node[3].appl distance ETV
+vector 25 LaneMergeScenario.node[3].appl relativeSpeed ETV
+vector 26 LaneMergeScenario.node[3].appl nodeId ETV
+vector 27 LaneMergeScenario.node[3].appl acceleration ETV
+vector 28 LaneMergeScenario.node[3].appl controllerAcceleration ETV
+vector 29 LaneMergeScenario.node[3].appl speed ETV
+vector 30 LaneMergeScenario.node[3].appl posx ETV
+vector 31 LaneMergeScenario.node[3].appl posy ETV
+vector 32 LaneMergeScenario.node[3].prot frontDelay ETV
+vector 33 LaneMergeScenario.node[3].prot frontDelayId ETV
+vector 34 LaneMergeScenario.node[2].prot frontDelay ETV
+vector 35 LaneMergeScenario.node[2].prot frontDelayId ETV
+vector 36 LaneMergeScenario.node[1].prot leaderDelay ETV
+vector 37 LaneMergeScenario.node[1].prot leaderDelayId ETV
+vector 38 LaneMergeScenario.node[1].prot frontDelay ETV
+vector 39 LaneMergeScenario.node[1].prot frontDelayId ETV
+vector 40 LaneMergeScenario.node[2].prot leaderDelay ETV
+vector 41 LaneMergeScenario.node[2].prot leaderDelayId ETV
+vector 42 LaneMergeScenario.node[3].prot leaderDelay ETV
+vector 43 LaneMergeScenario.node[3].prot leaderDelayId ETV
+vector 44 LaneMergeScenario.node[0].prot nodeId ETV
+vector 45 LaneMergeScenario.node[0].prot busyTime ETV
+vector 46 LaneMergeScenario.node[0].prot collisions ETV
+vector 47 LaneMergeScenario.node[1].prot nodeId ETV
+vector 48 LaneMergeScenario.node[1].prot busyTime ETV
+vector 49 LaneMergeScenario.node[1].prot collisions ETV
+vector 50 LaneMergeScenario.node[2].prot nodeId ETV
+vector 51 LaneMergeScenario.node[2].prot busyTime ETV
+vector 52 LaneMergeScenario.node[2].prot collisions ETV
+vector 53 LaneMergeScenario.node[3].prot nodeId ETV
+vector 54 LaneMergeScenario.node[3].prot busyTime ETV
+vector 55 LaneMergeScenario.node[3].prot collisions ETV
+vector 56 LaneMergeScenario.node[4].appl distance ETV
+vector 57 LaneMergeScenario.node[4].appl relativeSpeed ETV
+vector 58 LaneMergeScenario.node[4].appl nodeId ETV
+vector 59 LaneMergeScenario.node[4].appl acceleration ETV
+vector 60 LaneMergeScenario.node[4].appl controllerAcceleration ETV
+vector 61 LaneMergeScenario.node[4].appl speed ETV
+vector 62 LaneMergeScenario.node[4].appl posx ETV
+vector 63 LaneMergeScenario.node[4].appl posy ETV
+vector 64 LaneMergeScenario.node[4].prot leaderDelay ETV
+vector 65 LaneMergeScenario.node[4].prot leaderDelayId ETV
+vector 66 LaneMergeScenario.node[4].prot nodeId ETV
+vector 67 LaneMergeScenario.node[4].prot busyTime ETV
+vector 68 LaneMergeScenario.node[4].prot collisions ETV
+0	8103 1629 228 23771 1.11 11.41 104 -1 -1 -104 104
+1	9732 1525 228 23771 1.11 11.41 104 0 0 0 0
+2	11257 1525 228 23771 1.11 11.41 104 0 0 0 0
+3	12782 2595 228 23771 1.11 11.41 104 -0.00141557 6.29785e-05 -0.0219841353312 2.4203248957853e-05
+4	15377 2599 228 23771 1.11 11.41 104 -0.00218518 9.78798e-05 -0.0212300391378 3.4726143269859e-05
+5	17976 2146 228 23771 1.11 11.41 104 27.7777 27.78 2888.912 80248.1975658
+6	20122 2137 228 23771 1.11 11.41 104 53.9402 340.054 20487.7682 4759274.1971443
+7	22259 1837 228 23771 1.11 11.41 104 75.2 75.2 7820.8 588124.16
+8	24096 2131 229 23772 1.11 11.41 104 7.03445 10.33 922.5462 8306.4699372258
+9	26227 2362 229 23772 1.11 11.41 104 -0.424213 -1.84044e-05 -33.0836354744 11.954823998694
+10	28589 1629 229 23772 1.11 11.41 104 1 1 104 104
+11	30218 2487 229 23772 1.11 11.41 104 -0.0342717 0.160142 2.817818339 0.53755628381933
+12	32705 2493 229 23772 1.11 11.41 104 -0.0345519 0.210863 2.65960711446 0.66388057620926
+13	35198 2233 229 23772 1.11 11.41 104 27.78 28.202 2921.9955 82098.12737887
+14	37431 2247 229 23772 1.11 11.41 104 39.6102 329.019 19149.2211 4268001.9885903
+15	39678 1941 229 23772 1.11 11.41 104 75.2 75.2 7820.8 588124.16
+16	41619 2236 230 23773 1.11 11.41 104 7.78249 10.34 970.24393 9122.9773627405
+17	43855 2458 230 23773 1.11 11.41 104 -0.336818 0 -25.70950398062 7.5640901942569
+18	46313 1629 230 23773 1.11 11.41 104 2 2 208 416
+19	47942 2456 230 23773 1.11 11.41 104 -0.052783 0.249851 5.80044365 1.4208594479806
+20	50398 2474 230 23773 1.11 11.41 104 -0.0534341 0.317032 5.549377685 1.6881856936797
+21	52872 2240 230 23773 1.11 11.41 104 27.78 28.5243 2947.7054 83552.74425904
+22	55112 2240 230 23773 1.11 11.41 104 25.2702 317.237 17762.9789 3790427.6113229
+23	57352 1941 230 23773 1.11 11.41 104 75.2 75.2 7820.8 588124.16
+24	59293 2231 231 23774 1.11 11.41 104 8.4134 10.33 1002.97109 9711.1634643781
+25	61524 2472 231 23774 1.11 11.41 104 -0.283538 1.14595e-06 -19.29226309805 4.5642765651817
+26	63996 1629 231 23774 1.11 11.41 104 3 3 312 936
+27	65625 2445 231 23774 1.11 11.41 104 -0.0581148 0.299692 8.60469347 2.2090311285902
+28	68070 2453 231 23774 1.11 11.41 104 -0.0609963 0.36868 8.331228218 2.5534667999344
+29	70523 2239 231 23774 1.11 11.41 104 27.78 28.7759 2966.9978 84654.8133398
+30	72762 2243 231 23774 1.11 11.41 104 10.9402 304.823 16344.0066 3335660.9577561
+31	75005 1941 231 23774 1.11 11.41 104 75.2 75.2 7820.8 588124.16
+32	76946 3960 414 23806 1.214067334666 11.414073439654 103 0.099989345653 0.100006286865 10.299999391854 1.0299998812436
+33	80906 2639 414 23806 1.214067334666 11.414073439654 103 3 3 309 927
+34	83545 3971 456 23850 1.229832382532 11.429825476831 103 0.099989337689 0.100006286866 10.299999381165 1.0299998791093
+35	87516 2637 456 23850 1.229832382532 11.429825476831 103 2 2 206 412
+36	90153 3919 490 23657 1.254671430298 11.354662181226 102 0.099989333715 0.100006286865 10.199997037793 1.0199994104309
+37	94072 2607 490 23657 1.254671430298 11.354662181226 102 1 1 102 102
+38	96679 3919 490 23657 1.254671430298 11.354662181226 102 0.099989333715 0.100006286865 10.199997037793 1.0199994104309
+39	100598 2607 490 23657 1.254671430298 11.354662181226 102 1 1 102 102
+40	103205 3923 496 23663 1.254671478131 11.354662220578 102 0.099989333615 0.100006286865 10.199997029312 1.0199994087347
+41	107128 2608 496 23663 1.254671478131 11.354662220578 102 2 2 204 408
+42	109736 3914 502 23669 1.254671525931 11.354662262031 102 0.09998933352 0.100006286865 10.199997022965 1.0199994074653
+43	113650 2607 502 23669 1.254671525931 11.354662262031 102 3 3 306 918
+44	116257 128 1636 22782 2 11 10 0 0 0 0
+45	116385 190 1636 22782 2 11 10 0.017369 0.02481 0.240163 0.005817141557
+46	116575 128 1636 22782 2 11 10 0 0 0 0
+47	116703 128 1637 22783 2 11 10 1 1 10 10
+48	116831 190 1637 22783 2 11 10 0.017369 0.02481 0.240163 0.005817141557
+49	117021 128 1637 22783 2 11 10 0 0 0 0
+50	117149 128 1638 22784 2 11 10 2 2 20 40
+51	117277 190 1638 22784 2 11 10 0.017369 0.02481 0.240163 0.005817141557
+52	117467 128 1638 22784 2 11 10 0 0 0 0
+53	117595 128 1639 22785 2 11 10 3 3 30 90
+54	117723 190 1639 22785 2 11 10 0.017368 0.02481 0.240162 0.00581710682
+55	117913 128 1639 22785 2 11 10 0 0 0 0
+56	118041 1578 1874 23775 2.11 11.41 94 -1 -1 -94 94
+57	119619 1484 1874 23775 2.11 11.41 94 0 0 0 0
+58	121103 1484 1874 23775 2.11 11.41 94 4 4 376 1504
+59	122587 1484 1874 23775 2.11 11.41 94 0 0 0 0
+60	124071 1484 1874 23775 2.11 11.41 94 0 0 0 0
+61	125555 1860 1874 23775 2.11 11.41 94 27.78 27.78 2611.32 72542.4696
+62	127415 2037 1874 23775 2.11 11.41 94 58.4637 308.669 17255.2576 3668424.0981931
+63	129452 2059 1874 23775 2.11 11.41 94 -12.7821 51.561 1822.608246 68467.016438444
+64	131511 3588 2009 23675 2.15466326554 11.354662276013 93 0.099989332625 0.100002742798 9.299992294774 0.92999846144922
+65	135099 2385 2009 23675 2.15466326554 11.354662276013 93 4 4 372 1488
+66	137484 116 3946 22786 3 11 9 4 4 36 144
+67	137600 171 3946 22786 3 11 9 0.023817 0.02481 0.222297 0.005491538289
+68	137771 116 3946 22786 3 11 9 0 0 0 0

@@ -1,24 +1,19 @@
 /*
- * AgentAppl.cpp
+ * BaseVeinsAgentAppl.cpp
  *
- *  Created on: Jul 30, 2018
+ *  Created on: 22/08/2018
  *      Author: miguel
  */
 
-#include <stdlib.h>
-#include "AgentAppl.h"
+#include "BaseVeinsAgentAppl.h"
 
 using Veins::TraCIMobilityAccess;
 using Veins::AnnotationManagerAccess;
 
-Define_Module(AgentAppl);
+Define_Module(BaseVeinsAgentAppl);
 
-/*AgentAppl::~AgentAppl(){
-    manager->unsubscribeVehicle(myId);
-}*/
-
- void AgentAppl::initialize(int stage){
-    BaseWaveApplLayer::initialize(stage);
+ void BaseVeinsAgentAppl::initialize(int stage){
+     BaseAgentAppl::initialize(stage);
     if(stage == 0){
         //setup veins pointers
         mobility = TraCIMobilityAccess().get(getParentModule());
@@ -29,21 +24,21 @@ Define_Module(AgentAppl);
         if(manager == nullptr){
             throw new cRuntimeError("LightJason Application: No manager found");
         }
-        //manager->subscribeVehicle(this, myId);
+        manager->subscribeVehicle(this, myId);
         //Save pointer to LightJason Manager
         //Call registration service with node identifier
         //traciVehicle->setLaneChangeMode(0);
     }
 }
 
- void AgentAppl::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){
+ void BaseVeinsAgentAppl::receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){
     Enter_Method_Silent();
     if(signalID == mobilityStateChangedSignal){
         handlePositionUpdate(obj);
     }
 }
 
- void AgentAppl::onWSM(Veins::WaveShortMessage* wsm){
+ void BaseVeinsAgentAppl::onWSM(Veins::WaveShortMessage* wsm){
     //Receive a message with a target speed, slow down to that speed
     std::string msg = wsm->getWsmData();
     std::string del ("|");
@@ -56,15 +51,15 @@ Define_Module(AgentAppl);
     //traciVehicle->slowDown(message_speed, 100); //slow down over 1s
 }
 
- void AgentAppl::onBeacon(Veins::WaveShortMessage* wsm){
+ void BaseVeinsAgentAppl::onBeacon(Veins::WaveShortMessage* wsm){
      //Receive a message with a target speed, slow down to that speed
      float message_speed = atof(wsm->getWsmData());
      EV << "Slowing down to speed " << message_speed << "\n";
      traciVehicle->slowDown(message_speed, 1000); //slow down over 1ss
 }
 
- void AgentAppl::handlePositionUpdate(cObject* obj){
-    BaseWaveApplLayer::handlePositionUpdate(obj);
+ void BaseVeinsAgentAppl::handlePositionUpdate(cObject* obj){
+     BaseAgentAppl::handlePositionUpdate(obj);
     manager->sendInformationToAgents(myId, "speed", std::to_string(mobility->getSpeed()));
     //sends message every 5 seconds
     if(simTime() - lastSent >= 5){
@@ -74,7 +69,7 @@ Define_Module(AgentAppl);
     }
 }
 
-void AgentAppl::sendMessage(std::string msg){
+void BaseVeinsAgentAppl::sendMessage(std::string msg){
     t_channel channel = dataOnSch ? type_SCH : type_CCH;
     Veins::WaveShortMessage *wsm = new Veins::WaveShortMessage("data", channel);
     std::string m_msg = std::to_string(myId);
@@ -82,15 +77,15 @@ void AgentAppl::sendMessage(std::string msg){
     sendWSM(wsm);
 }
 
- void AgentAppl::sendWSM(Veins::WaveShortMessage* wsm){
+ void BaseVeinsAgentAppl::sendWSM(Veins::WaveShortMessage* wsm){
     sendDown(wsm); //message delay
 }
 
-void AgentAppl::changeSpeed(double speed){
+void BaseVeinsAgentAppl::changeSpeed(double speed){
     EV << "Slowing down to speed on agent command\n";
     traciVehicle->setMaxSpeed(speed);
 }
 
-void AgentAppl::finish(){
+void BaseVeinsAgentAppl::finish(){
     manager->unsubscribeVehicle(myId);
 }

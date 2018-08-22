@@ -68,7 +68,7 @@ void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string
     }
 }
 
-uint8_t LightJasonManager::subscribeVehicle(AgentAppl* vehicle, uint32_t id){
+uint8_t LightJasonManager::subscribeVehicle(/*AgentAppl*/BaseAgentAppl* vehicle, uint32_t id){
     vehicles[id] = vehicle;
     std::string msg = jp.buildSubscriptionRequest(id);
     std::string result = writeToSocket(msg);

@@ -30,7 +30,7 @@ void LaneMergeTrafficManager::handleSelfMsg(cMessage* msg)
 
 void LaneMergeTrafficManager::insertArterial()
 {
-    automated.position = 5;
+    automated.position = 8;
     automated.lane = 0;
     addVehicleToQueue(2, automated);
 }

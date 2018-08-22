@@ -1,15 +1,15 @@
                                                                 
 version 2
-run SingeLaneMerge-0-20180821-22:51:54-27778
+run SingeLaneMerge-0-20180822-22:38:35-18198
 attr configname SingeLaneMerge
-attr datetime 20180821-22:51:54
+attr datetime 20180822-22:38:35
 attr experiment SingeLaneMerge
 attr inifile omnetpp.ini
 attr iterationvars "$nCars=4, $platoonSize=4, $nLanes=1, $ploegH=0.5, $controller=0, $sController=\"ACC\", $headway=0.3, $leaderHeadway=1.2, $leaderSpeed=100, $beaconInterval=0.1, $priority=4, $packetSize=200, $0=2, $1=0.3"
 attr iterationvarsf nCars=4,platoonSize=4,nLanes=1,ploegH=0.5,controller=0,sController=ACC,headway=0.3,leaderHeadway=1.2,leaderSpeed=100,beaconInterval=0.1,priority=4,packetSize=200,2,0.3-
 attr measurement "$nCars=4, $platoonSize=4, $nLanes=1, $ploegH=0.5, $controller=0, $sController=\"ACC\", $headway=0.3, $leaderHeadway=1.2, $leaderSpeed=100, $beaconInterval=0.1, $priority=4, $packetSize=200, $0=2, $1=0.3"
 attr network veinsbdi.simulations.simpleLaneMerge.LaneMergeScenario
-attr processid 27778
+attr processid 18198
 attr repetition 0
 attr replication #0
 attr resultdir results
@@ -92,93 +92,4 @@ param *.node[*].unicast.packetLossRate 0
 param **.traffic_type "\"veinsbdi.traffic.LaneMergeTrafficManager\""
 param **.traffic.platoonInsertTime "1 s"
 param **.traffic.platoonInsertSpeed 100kmph
-param **.traffic.nCars 4
-param **.traffic.platoonSize 4
-param **.traffic.nLanes 1
-param **.traffic.platooningVType "\"vtypeauto\""
-param **.traffic.platoonInsertDistance 2m
-param **.traffic.platoonInsertHeadway 0.3s
-param **.traffic.platoonLeaderHeadway 1.2s
-
-vector 0 LaneMergeScenario.node[0].appl distance ETV
-vector 1 LaneMergeScenario.node[0].appl relativeSpeed ETV
-vector 2 LaneMergeScenario.node[0].appl nodeId ETV
-vector 3 LaneMergeScenario.node[0].appl acceleration ETV
-vector 4 LaneMergeScenario.node[0].appl controllerAcceleration ETV
-vector 5 LaneMergeScenario.node[0].appl speed ETV
-vector 6 LaneMergeScenario.node[0].appl posx ETV
-vector 7 LaneMergeScenario.node[0].appl posy ETV
-vector 8 LaneMergeScenario.node[1].appl distance ETV
-vector 9 LaneMergeScenario.node[1].appl relativeSpeed ETV
-vector 10 LaneMergeScenario.node[1].appl nodeId ETV
-vector 11 LaneMergeScenario.node[1].appl acceleration ETV
-vector 12 LaneMergeScenario.node[1].appl controllerAcceleration ETV
-vector 13 LaneMergeScenario.node[1].appl speed ETV
-vector 14 LaneMergeScenario.node[1].appl posx ETV
-vector 15 LaneMergeScenario.node[1].appl posy ETV
-vector 16 LaneMergeScenario.node[2].appl distance ETV
-vector 17 LaneMergeScenario.node[2].appl relativeSpeed ETV
-vector 18 LaneMergeScenario.node[2].appl nodeId ETV
-vector 19 LaneMergeScenario.node[2].appl acceleration ETV
-vector 20 LaneMergeScenario.node[2].appl controllerAcceleration ETV
-vector 21 LaneMergeScenario.node[2].appl speed ETV
-vector 22 LaneMergeScenario.node[2].appl posx ETV
-vector 23 LaneMergeScenario.node[2].appl posy ETV
-vector 24 LaneMergeScenario.node[3].appl distance ETV
-vector 25 LaneMergeScenario.node[3].appl relativeSpeed ETV
-vector 26 LaneMergeScenario.node[3].appl nodeId ETV
-vector 27 LaneMergeScenario.node[3].appl acceleration ETV
-vector 28 LaneMergeScenario.node[3].appl controllerAcceleration ETV
-vector 29 LaneMergeScenario.node[3].appl speed ETV
-vector 30 LaneMergeScenario.node[3].appl posx ETV
-vector 31 LaneMergeScenario.node[3].appl posy ETV
-vector 32 LaneMergeScenario.node[3].prot frontDelay ETV
-vector 33 LaneMergeScenario.node[3].prot frontDelayId ETV
-vector 34 LaneMergeScenario.node[2].prot frontDelay ETV
-vector 35 LaneMergeScenario.node[2].prot frontDelayId ETV
-vector 36 LaneMergeScenario.node[1].prot leaderDelay ETV
-vector 37 LaneMergeScenario.node[1].prot leaderDelayId ETV
-vector 38 LaneMergeScenario.node[1].prot frontDelay ETV
-vector 39 LaneMergeScenario.node[1].prot frontDelayId ETV
-vector 40 LaneMergeScenario.node[2].prot leaderDelay ETV
-vector 41 LaneMergeScenario.node[2].prot leaderDelayId ETV
-vector 42 LaneMergeScenario.node[3].prot leaderDelay ETV
-vector 43 LaneMergeScenario.node[3].prot leaderDelayId ETV
-vector 44 LaneMergeScenario.node[0].prot nodeId ETV
-vector 45 LaneMergeScenario.node[0].prot busyTime ETV
-vector 46 LaneMergeScenario.node[0].prot collisions ETV
-vector 47 LaneMergeScenario.node[1].prot nodeId ETV
-vector 48 LaneMergeScenario.node[1].prot busyTime ETV
-vector 49 LaneMergeScenario.node[1].prot collisions ETV
-vector 50 LaneMergeScenario.node[2].prot nodeId ETV
-vector 51 LaneMergeScenario.node[2].prot busyTime ETV
-vector 52 LaneMergeScenario.node[2].prot collisions ETV
-vector 53 LaneMergeScenario.node[3].prot nodeId ETV
-vector 54 LaneMergeScenario.node[3].prot busyTime ETV
-vector 55 LaneMergeScenario.node[3].prot collisions ETV
-vector 56 LaneMergeScenario.node[4].appl distance ETV
-vector 57 LaneMergeScenario.node[4].appl relativeSpeed ETV
-vector 58 LaneMergeScenario.node[4].appl nodeId ETV
-vector 59 LaneMergeScenario.node[4].appl acceleration ETV
-vector 60 LaneMergeScenario.node[4].appl controllerAcceleration ETV
-vector 61 LaneMergeScenario.node[4].appl speed ETV
-vector 62 LaneMergeScenario.node[4].appl posx ETV
-vector 63 LaneMergeScenario.node[4].appl posy ETV
-vector 64 LaneMergeScenario.node[4].prot leaderDelay ETV
-vector 65 LaneMergeScenario.node[4].prot leaderDelayId ETV
-vector 66 LaneMergeScenario.node[4].prot nodeId ETV
-vector 67 LaneMergeScenario.node[4].prot busyTime ETV
-vector 68 LaneMergeScenario.node[4].prot collisions ETV
-60	8088 2062 1874 31780 2.11 14.81 128 0 0 0 0
-59	10150 2062 1874 31780 2.11 14.81 128 0 0 0 0
-63	12212 2836 1874 31780 2.11 14.81 128 -12.7821 74.9549 3990.631646 208336.17162718
-62	15048 2815 1874 31780 2.11 14.81 128 58.4637 399.733 29347.8356 7992794.0078171
-61	17863 2574 1874 31780 2.11 14.81 128 27.78 27.78 3555.84 98781.2352
-57	20437 2154 1874 31780 2.11 14.81 128 -0.00219999 0.422348 2.43740704 0.843927480735
-56	22591 2248 1874 31780 2.11 14.81 128 -1 30.8143 127.57591 5958.8798565369
-58	24839 2062 1874 31780 2.11 14.81 128 4 4 512 2048
-64	26901 4977 2009 31915 2.15466326554 14.854663826542 128 0.099989231815 0.100002742798 12.799993845303 1.279998772396
-65	31878 3329 2009 31915 2.15466326554 14.854663826542 128 4 4 512 2048
-68	35207 158 3946 29851 3 14 12 0 0 0 0
-67	35365 231 3946 29851 3 14 12 0.023817 0.02481 0.296727 0.007338146589
-66	35596 158 3946 29851 3 14 12 4 4 48 192
+param **.traffic.nC

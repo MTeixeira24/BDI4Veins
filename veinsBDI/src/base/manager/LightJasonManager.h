@@ -17,22 +17,24 @@
 #include <omnetpp.h>
 #include <map>
 
-#include "../../app/veinsappl/AgentAppl.h"
+//#include "../../app/veinsappl/AgentAppl.h"
+#include "../../app/baseappl/BaseAgentAppl.h"
 #include "JasoNetProtocol.h"
 using namespace omnetpp;
-class AgentAppl;
+//class AgentAppl;
+class BaseAgentAppl;
 class LightJasonManager : public cSimpleModule{
 public:
     LightJasonManager();
     ~LightJasonManager();
-    uint8_t subscribeVehicle(AgentAppl* vehicle, uint32_t id);
+    uint8_t subscribeVehicle(/*AgentAppl*/BaseAgentAppl* vehicle, uint32_t id);
     uint8_t sendInformationToAgents(int id, std::string belief, std::string value);
     void notifyNodes(uint32_t id, std::string action, std::string data);
     virtual void initialize(int stage) override;
     void unsubscribeVehicle(int id);
 protected:
     int port;
-    std::map <int, AgentAppl*> vehicles;
+    std::map <int, /*AgentAppl*/BaseAgentAppl*> vehicles;
     simtime_t updateInterval;
     cModule *module;
     cMessage *notificationMsg;

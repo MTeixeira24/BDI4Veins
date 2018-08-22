@@ -40,7 +40,7 @@ public class AgentManager {
                         final FileInputStream l_stream = new FileInputStream( aslpath )
                 )
         {
-            final int l_agentNumber = 1;
+            final int l_agentNumber = 0;
             l_agents =
                     new NormalVehicleGenerator( l_stream, this )
                             .generatemultiple( l_agentNumber, 0 )

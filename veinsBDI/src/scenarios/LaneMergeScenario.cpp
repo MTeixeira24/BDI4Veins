@@ -61,11 +61,7 @@ void LaneMergeScenario::prepareCars(int platoonLane)
 
     case 1:
     case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 6:
-    case 7:{
+    case 3:{
         // these are the followers which are already in the platoon
         traciVehicle->setCruiseControlDesiredSpeed(130.0 / 3.6);
         traciVehicle->setActiveController(Plexe::CACC);
@@ -80,7 +76,7 @@ void LaneMergeScenario::prepareCars(int platoonLane)
         break;
     }
 
-    case 8: {
+    case 4: {
         // Arterial car
         traciVehicle->setCruiseControlDesiredSpeed(100 / 3.6);
         traciVehicle->setFixedLane(0);
