@@ -2,6 +2,7 @@
 *.oppbuildspec
 *.settings/*
 veinsBDI/src/Makefile
+veinsBDI/.settings/language.settings.xml
 # Simulation results
 */results/
 
