@@ -11,6 +11,12 @@
 
  void BaseAgentAppl::initialize(int stage){
      BaseApplLayer::initialize(stage); //TODO: Header subclasses BaseWave. Maybe change that?
+     if(stage == 0){
+         myId = getParentModule()->getId();
+         findHost()->subscribe(mobilityStateChangedSignal, this);
+         findHost()->subscribe(parkingStateChangedSignal, this);
+     }
+
 }
 
 void BaseAgentAppl::changeSpeed(double speed){

@@ -87,5 +87,5 @@ void BaseVeinsAgentAppl::changeSpeed(double speed){
 }
 
 void BaseVeinsAgentAppl::finish(){
-    manager->unsubscribeVehicle(myId);
+    BaseAgentAppl::finish();
 }
