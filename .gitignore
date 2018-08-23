@@ -1,3 +1,10 @@
+#Omnet files
+*.oppbuildspec
+*.settings/*
+veinsBDI/src/Makefile
+# Simulation results
+*/results/
+
 # Java compiled classes
 LightJason/target/*
 LightJason/out/*
