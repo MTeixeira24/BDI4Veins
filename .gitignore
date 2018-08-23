@@ -1,6 +1,6 @@
 #Omnet files
-veinsBDI/.oppbuildspec
-veinsBDI/.settings/
+*.oppbuildspec
+*.settings/*
 veinsBDI/src/Makefile
 # Simulation results
 */results/*
