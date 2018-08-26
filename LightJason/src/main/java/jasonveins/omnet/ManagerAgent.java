@@ -23,6 +23,7 @@
 
 package jasonveins.omnet;
 
+import jasonveins.omnet.decision.InstructionModel;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
@@ -68,8 +69,9 @@ public final class ManagerAgent extends IBaseAgent<ManagerAgent>
     @IAgentActionName( name = "transmit/self/slow" )
     private void transmitDecision()
     {
-        String msg = this.id() + "-setMaxSpeed-0.5-";
-        agentManager.addInstruction(msg);
+        InstructionModel iOb = new InstructionModel(this.id, 4);
+        iOb.pushDouble(0.5);
+        agentManager.addInstruction(iOb);
     }
 
 }

@@ -3,22 +3,26 @@ package jasonveins.omnet;
 import javax.annotation.Nonnull;
 import java.net.*;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class ConnectionManager extends Thread {
 
     private final int port = 4242;
-    private final String hostname = "localhost";
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private PrintWriter out;
     private AgentManager am;
 
-    private enum State{
-        DISCONNECTED, WAITINGFORAGENT, RUNNINGLOOP, FINISH
+    public boolean isDisconnected() {
+        return state == State.DISCONNECTED;
     }
 
-    private State state = State.DISCONNECTED;
+    private enum State{
+        DISCONNECTED, WAITINGFORAGENT, RUNNINGLOOP, FINISH, INIT
+    }
+
+    private State state = State.INIT;
 
     public ConnectionManager(){
         super("ConnectionManager");
@@ -38,12 +42,15 @@ public final class ConnectionManager extends Thread {
             clientSocket = serverSocket.accept();
             state = State.WAITINGFORAGENT;
             out = new PrintWriter(clientSocket.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(clientSocket.getInputStream()));
-            String inputLine;
+
+            OutputStream byteStream = clientSocket.getOutputStream();
+            byte b[] = new byte[255];
+            InputStream stream = clientSocket.getInputStream();
+
             while ( true ) {
-                if((inputLine = in.readLine()) != null){
-                    processInput(inputLine);
+
+                if( stream.read(b, 0, 255) != -1){
+                    byteStream.write(processInput(b));
                     if(state == State.FINISH) break;
                 }else{
                     System.out.println("Terminating connection");
@@ -52,6 +59,7 @@ public final class ConnectionManager extends Thread {
                     System.exit(0);
                     break;
                 }
+
             }
         } catch(SocketException e){
             System.err.println("Abrupt connection termination! Ending agent loop");
@@ -82,51 +90,56 @@ public final class ConnectionManager extends Thread {
         }
     }
 
-    private void processInput(@Nonnull String inputLine){
-        String [] action = inputLine.split("-");
-        String outputLine;
+    private byte[] processInput(@Nonnull byte[] b){
+        ByteBuffer buffer = ByteBuffer.wrap(b);
+        byte[] response;
+        int id;
+        short size = buffer.getShort();
         if(state == State.FINISH){
             out.println("EndConnection");
-            return;
+            return null;
         }
-        switch (action[0]) {
-            case "Add":
-                am.createNewAgent(Integer.parseInt(action[1]));
-                outputLine = "Agent Added";
+        switch (buffer.getShort()){
+            case Constants.CONNECTION_ACK:
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x01, 0x01};
+                break;
+            case Constants.AGENT_ADD:
+                id = buffer.getInt();
+                am.createNewAgent(id);
                 if(state == State.WAITINGFORAGENT){
                     am.toggleAgentLoop(false, true);
                     state = State.RUNNINGLOOP;
                 }
-                out.println(outputLine);
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x02, 0x01};
                 break;
-            case "BeliefUpdate":
-                am.updateBeliefs(Integer.parseInt(action[1]), action[2], action[3]);
-                outputLine = "Beliefs updated";
-                out.println(outputLine);
+            case Constants.AGENT_REMOVE:
+                id = buffer.getInt();
+                am.removeAgent(id);
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x03, 0x01};
                 break;
-            case "Query":
+            case Constants.UPDATE_SPEED:
+                id = buffer.getInt();
+                double speed = buffer.getDouble();
+                am.updateBeliefs(id, "speed", Double.toString(speed));
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
+                break;
+            case Constants.REQUEST_DECISIONS:
                 if (am.existsInstructions()) {
-                    outputLine = "";
-                    CopyOnWriteArrayList<String> inst = am.extractInstructions();
-                    for (String anInst : inst) {
-                        outputLine = outputLine.concat(anInst + ":");
-                    }
-                    out.println(outputLine);
+                    response = am.extractInstructions();
                 } else {
-                    outputLine = "Ok";
-                    out.println(outputLine);
+                    response = new byte[]{0x00, 0x00, 0x00, 0x00};
                 }
+
                 break;
-            case "Remove":
-                am.removeAgent(Integer.parseInt(action[1]));
-                outputLine = "Agent removed";
-                out.println(outputLine);
+            case Constants.CONNECTION_END:
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x7E, 0x01};
+                state = State.DISCONNECTED;
                 break;
             default:
-                outputLine = "Ok";
-                out.println(outputLine);
+                response = new byte[]{0x00};
                 break;
         }
+        return response;
     }
 
 }

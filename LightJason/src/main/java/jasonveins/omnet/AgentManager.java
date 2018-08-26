@@ -1,5 +1,7 @@
 package jasonveins.omnet;
 
+import jasonveins.omnet.decision.DecisionDataModel;
+import jasonveins.omnet.decision.InstructionModel;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
@@ -27,7 +29,8 @@ public class AgentManager {
     protected final Map<Integer, NormalVehicleAgent> agentMap = new ConcurrentHashMap<>();
     //Map agent Ids to their references.
     protected final ConnectionManager cmanager;
-    protected final CopyOnWriteArrayList<String> instructionsList = new CopyOnWriteArrayList<>();
+    //protected final CopyOnWriteArrayList<String> instructionsList = new CopyOnWriteArrayList<>();
+    protected final DecisionDataModel ddm = new DecisionDataModel();
 
     public AgentManager(String m_aslpath, ConnectionManager m_cm) {
         cmanager = m_cm;
@@ -89,24 +92,25 @@ public class AgentManager {
         vehicle.trigger(trigger);
     }
 
-    public void addInstruction(@Nonnull String data){
-        instructionsList.add(data);
+    public void addInstruction(@Nonnull InstructionModel data){
+        ddm.addInstruction(data);
     }
 
-    public CopyOnWriteArrayList<String> extractInstructions(){
-        @SuppressWarnings("unchecked")
-        CopyOnWriteArrayList<String> inst = ((CopyOnWriteArrayList<String>) instructionsList.clone());
-        instructionsList.removeAll(inst);
-        return inst;
+    public byte[] extractInstructions(){
+        return ddm.convertToMessage();
     }
 
     public boolean existsInstructions(){
-        return !instructionsList.isEmpty();
+        return !ddm.isEmpty();
     }
 
     public void loop(){
         System.out.println("Agent loop: Awaiting agent input");
-        while(!simulate.get()); //TODO: Add logic to break out of this waiting state in event of sudden disconnect
+        while(!simulate.get() && !cmanager.isDisconnected()); //TODO: Use sleep instead of a while
+        if(cmanager.isDisconnected()){
+            //Abrupt connection interruption
+            System.exit(1);
+        }
         System.out.println("Agent loop: Starting agent loop");
         while(true){
             if(execute.get()){
@@ -129,7 +133,6 @@ public class AgentManager {
             }
         }
         cmanager.finish();
-        return;
     }
 
     public Set<IAgent<?>> agents(){

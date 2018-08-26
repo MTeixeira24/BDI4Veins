@@ -15,67 +15,40 @@ JasoNetProtocol::~JasoNetProtocol(){
 
 }
 
-std::string JasoNetProtocol::buildSubscriptionRequest(uint32_t id){
-    std::string msg ("Add-");
-    msg.append(std::to_string(id));
-    msg.append("\n");
-    return msg;
+LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(int _id, std::string belief, double value){
+    uint16_t size = 16+32+64;
+    uint16_t action = SET_MAX_SPEED;
+    uint32_t id = _id;
+    double speed = value;
+    return LightJasonBuffer() << size << action << id << speed;
 }
 
-std::string JasoNetProtocol::buildRemoveRequest(int id){
-     std::string msg ("Remove-");
-     msg.append(std::to_string(id));
-     msg.append("\n");
-     return msg;
+LightJasonBuffer JasoNetProtocol::connectionRequest(){
+    uint16_t size = 16;
+    uint16_t action = CONNECTION_REQUEST;
+    return LightJasonBuffer() << size << action;
 }
 
-std::string JasoNetProtocol::buildConnectionRequest(){
-    std::string msg("Connect\n");
-    return msg;
+LightJasonBuffer JasoNetProtocol::subscriptionRequest(uint32_t id){
+    uint16_t size = 32;
+    uint16_t action = ADD_AGENT;
+    return LightJasonBuffer() << size << action << id;
 }
 
-std::string JasoNetProtocol::buildBeliefUpdateRequest(uint32_t id, std::string belief, std::string value){
-    std::string msg;
-    if(belief.compare("speed") == 0){
-            msg = "BeliefUpdate-";
-            msg.append(std::to_string(id));
-            msg.append("-speed-");
-            msg.append(value);
-            msg.append("\n");
-    }
-    return msg;
+LightJasonBuffer JasoNetProtocol::removeRequest(uint32_t id){
+    uint16_t size = 32;
+    uint16_t action = REMOVE_AGENT;
+    return LightJasonBuffer() << size << action << id;
 }
 
-std::string JasoNetProtocol::parseResponse(std::string response, uint32_t *id, std::string & action){
-    std::string data;
-    if(response.compare("EndConnection\n") == 0){
-        action = "EndConnection";
-        data ="";
-        return data;
-    }
-    if(response.compare("Ok\n") != 0){
-        size_t pos = 0, spos = 0;
-        std::string token, stoken;
-        while ((pos = response.find(":")) != std::string::npos) {
-            token = response.substr(0, pos);
-            /*while ((spos = token.find("-")) != std::string::npos) {
-                stoken = token.substr(0, spos);
-                std::cout << stoken << std::endl;
-                token.erase(0, spos + 1);
-            }*/
-            //TODO: Just to test commands from agents. Generalize into protocol
-            spos = token.find("-");
-            *id = std::stoi(token.substr(0, spos));
-            token.erase(0, spos + 1);
-            spos = token.find("-");
-            action = token.substr(0, spos);
-            token.erase(0, spos + 1);
-            //spos = token.find("-");
-            data = token;
-            response.erase(0, pos + 1);
-        }
-    }else{
-        action = "none";
-    }
-    return data;
+LightJasonBuffer JasoNetProtocol::terminateConnection(){
+    uint16_t size = 16;
+    uint16_t action = TERMINATE_CONNECTION;
+    return LightJasonBuffer() << size << action;
+}
+
+LightJasonBuffer JasoNetProtocol::query(){
+    uint16_t size = 16;
+    uint16_t action = QUERY;
+    return LightJasonBuffer() << size << action;
 }

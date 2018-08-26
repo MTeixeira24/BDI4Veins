@@ -65,7 +65,7 @@ Define_Module(AgentAppl);
 
  void AgentAppl::handlePositionUpdate(cObject* obj){
     BaseWaveApplLayer::handlePositionUpdate(obj);
-    manager->sendInformationToAgents(myId, "speed", std::to_string(mobility->getSpeed()));
+    manager->sendInformationToAgents(myId, "speed", mobility->getSpeed());
     //sends message every 5 seconds
     if(simTime() - lastSent >= 5){
         std::string message = std::to_string(mobility->getSpeed());

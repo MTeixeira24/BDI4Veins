@@ -17,24 +17,23 @@
 #include <omnetpp.h>
 #include <map>
 
-//#include "../../app/veinsappl/AgentAppl.h"
 #include "../../app/baseappl/BaseAgentAppl.h"
 #include "JasoNetProtocol.h"
+#include "LightJasonBuffer.h"
 using namespace omnetpp;
-//class AgentAppl;
 class BaseAgentAppl;
 class LightJasonManager : public cSimpleModule{
 public:
     LightJasonManager();
     ~LightJasonManager();
-    uint8_t subscribeVehicle(/*AgentAppl*/BaseAgentAppl* vehicle, uint32_t id);
-    uint8_t sendInformationToAgents(int id, std::string belief, std::string value);
+    uint8_t subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id);
+    uint8_t sendInformationToAgents(int id, std::string belief, double value);
     void notifyNodes(uint32_t id, std::string action, std::string data);
     virtual void initialize(int stage) override;
     void unsubscribeVehicle(int id);
 protected:
     int port;
-    std::map <int, /*AgentAppl*/BaseAgentAppl*> vehicles;
+    std::map <int, BaseAgentAppl*> vehicles;
     simtime_t updateInterval;
     cModule *module;
     cMessage *notificationMsg;
@@ -48,7 +47,9 @@ protected:
     SOCKET connSocket;
     JasoNetProtocol jp;
     virtual void handleMessage(cMessage *msg) override;
-    std::string writeToSocket(std::string data);
+    LightJasonBuffer writeToSocket(std::string data);
+    uint32_t getMessageLength();
+    LightJasonBuffer receiveMessage(uint32_t);
 
     //virtual void setupListener();
 };

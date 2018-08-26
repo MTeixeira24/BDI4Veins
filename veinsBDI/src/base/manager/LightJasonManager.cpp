@@ -19,21 +19,34 @@ void LightJasonManager::initialize(int stage){
     updateInterval = par("updateInterval");
     connSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (connSocket == INVALID_SOCKET)
-        throw cRuntimeError("cSocketRTScheduler: cannot create socket");
-    sockaddr_in sinInterface;
-    sinInterface.sin_family = AF_INET;
-    sinInterface.sin_addr.s_addr = inet_addr("127.0.0.1"); //TODO: Have this setting be determine by whether or not we are in a docker container https://forums.docker.com/t/localhost-and-docker-compose-networking-issue/23100
-    sinInterface.sin_port = htons(4242);
-    int n;
+            throw cRuntimeError("LightJasonManager: cannot create socket");
+    int n = -1;
+
+
+    struct addrinfo *address, hints;
+    hints.ai_family = AF_INET;
+    hints.ai_flags = AI_NUMERICSERV;
+    hints.ai_protocol = 0;
+    hints.ai_socktype = SOCK_STREAM;
+    n = getaddrinfo("localhost", "4242", &hints, &address); //TODO: Have this setting be determine by whether or not we are in a docker container https://forums.docker.com/t/localhost-and-docker-compose-networking-issue/23100
+    if (n != 0) {
+        if (n == EAI_SYSTEM) {
+            throw cRuntimeError("LightJasonManager: EAI_SYSTEM error");
+        } else {
+            throw cRuntimeError(gai_strerror(n));
+        }
+        exit(EXIT_FAILURE);
+    }
+
     for(int timeout = 0; timeout <= 10; timeout++){
-        n = connect(connSocket, (sockaddr *)&sinInterface, sizeof(sockaddr_in));
+        n = connect(connSocket, address->ai_addr, address->ai_addrlen);
         if (n >= 0) break;
         if(timeout == 10) throw cRuntimeError("LightJasonManager: socket connect() failed");
         sleep(1);
     }
-    std::string msg = jp.buildConnectionRequest();
-    std::string result = writeToSocket(msg);
-    EV << result << "\n";
+    LightJasonBuffer res = writeToSocket(jp.connectionRequest().getBuffer());
+    n = int((unsigned char)res.getBuffer()[0]);
+    EV << n << "\n"; //DEBUG
     queryMsg = new cMessage("query");
     scheduleAt(simTime() + updateInterval, queryMsg);
 }
@@ -41,17 +54,45 @@ void LightJasonManager::initialize(int stage){
 void LightJasonManager::handleMessage(cMessage* msg){
     if (msg == queryMsg){
         delete queryMsg;
-        std::string jasonQuery("Query-\n");
-        std:: string result = writeToSocket(jasonQuery);
-        EV << result;
-        uint32_t id;
-        std::string data;
-        std::string action;
-        data = jp.parseResponse(result, &id, action);
-        if(action.compare("EndConnection") == 0){
-            close(connSocket);
+        int n = write(connSocket,jp.query().getBuffer().c_str(),255);
+        if (n < 0){
+            throw new cRuntimeError("LightJasonManager: handleMessage write error");
+        }
+        uint32_t msgLength = getMessageLength();
+        if(msgLength > 0){
+            msgLength -= sizeof(uint32_t);
+            LightJasonBuffer rbf = receiveMessage(msgLength);
+            uint16_t commandId;
+            rbf >> commandId;
+            ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);
+            if(commandId == TERMINATE_CONNECTION){
+                close(connSocket);
+            }else{
+                while(!rbf.eof()){
+                    uint32_t agentMessageLength; //TODO: Organize this into structs
+                    rbf >> agentMessageLength;
+                    agentMessageLength -= sizeof(uint32_t);
+                    uint32_t agentId;
+                    rbf >> agentId;
+                    uint32_t agentAction;
+                    rbf >> agentAction;
+                    switch (agentAction){
+                    case SET_MAX_SPEED:
+                        uint16_t type;
+                        rbf >> type;
+                        ASSERT(type == VALUE_DOUBLE);
+                        double speed;
+                        rbf >> speed;
+                        vehicles[agentId]->changeSpeed(speed);
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                queryMsg = new cMessage("query");
+                scheduleAt(simTime() + updateInterval, queryMsg);
+            }
         }else{
-            notifyNodes(id, action, data);
             queryMsg = new cMessage("query");
             scheduleAt(simTime() + updateInterval, queryMsg);
         }
@@ -70,38 +111,56 @@ void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string
 
 uint8_t LightJasonManager::subscribeVehicle(/*AgentAppl*/BaseAgentAppl* vehicle, uint32_t id){
     vehicles[id] = vehicle;
-    std::string msg = jp.buildSubscriptionRequest(id);
-    std::string result = writeToSocket(msg);
-    EV << result;
+    LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id).getBuffer());
+    int n = int((unsigned char)result.getBuffer()[0]);
     return 0;
 }
 
 void LightJasonManager::unsubscribeVehicle(int id){
-    std::string msg = jp.buildRemoveRequest(id);
-    std:: string result = writeToSocket(msg);
+    /*std::string msg = jp.buildRemoveRequest(id);
+    std:: string result = writeToSocket(msg);*/
+    LightJasonBuffer result = writeToSocket(jp.removeRequest(id).getBuffer());
+    int n = int((unsigned char)result.getBuffer()[0]);
     vehicles.erase(id);
-    EV << result;
 }
 
-uint8_t LightJasonManager::sendInformationToAgents(int id, std::string belief, std::string value){
-    std::string msg = jp.buildBeliefUpdateRequest(id, belief, value);
-    std:: string result = writeToSocket(msg);
-    EV << result;
+uint8_t LightJasonManager::sendInformationToAgents(int id, std::string belief, double value){
+
+    LightJasonBuffer result = writeToSocket(jp.buildUpdateBeliefQuery(id, belief, value).getBuffer());
+    int n = int((unsigned char)result.getBuffer()[0]);
+    EV << n << "\n"; //DEBUG
     return 0;
 }
 
-std::string LightJasonManager::writeToSocket(std::string data){
-    int n = write(connSocket,data.c_str(),strlen(data.c_str()));
+LightJasonBuffer LightJasonManager::writeToSocket(std::string data){
+    int debug = data.length();
+    int n = write(connSocket,data.c_str(),data.length());
     if (n < 0){
-        throw cRuntimeError("cSocketRTScheduler: write failed");
+        throw cRuntimeError("LightJasonManager: write failed");
     }
-    char buffer[256];
-    bzero(buffer, 256);
-    n = read(connSocket,buffer,255);
+    uint32_t msgLength = getMessageLength();
+    msgLength -= sizeof(uint32_t);
+    return receiveMessage(msgLength);
+}
+
+uint32_t LightJasonManager::getMessageLength(){
+    uint32_t msgLength;
+    char lengthBuffer [sizeof(uint32_t)];
+    int n = recv(connSocket,lengthBuffer,sizeof(uint32_t),0);
     if (n < 0){
-        throw cRuntimeError("cSocketRTScheduler: read failed");
+        throw new cRuntimeError("LightJasonManager: handleMessage recv error");
     }
-    return std::string(buffer);
+    LightJasonBuffer(std::string(lengthBuffer, sizeof(uint32_t))) >> msgLength;
+    return msgLength;
+}
+
+LightJasonBuffer LightJasonManager::receiveMessage(uint32_t length){
+    char msgBuffer[length];
+    int n = recv(connSocket, msgBuffer, length,0);
+    if (n < 0){
+        throw new cRuntimeError("LightJasonManager: handleMessage recv error");
+    }
+    return LightJasonBuffer(std::string(msgBuffer, length));
 }
 
 
