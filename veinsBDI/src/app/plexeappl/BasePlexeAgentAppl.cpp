@@ -66,7 +66,8 @@ void BasePlexeAgentAppl::initialize(int stage){
         /*
          * Vehicle type must be specified
          */
-        manager->subscribeVehicle(this, myId, traciVehicle->getVType());
+        std::string aslFile = par("asl_file").stdstringValue();
+        manager->subscribeVehicle(this, myId, traciVehicle->getVType(), aslFile);
     }
 }
 

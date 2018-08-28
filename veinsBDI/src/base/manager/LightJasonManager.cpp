@@ -113,10 +113,10 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
     }
 }
 
-uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType){
+uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile){
     vehicles[id] = vehicle;
-    std::string debug = jp.subscriptionRequest(id, vType).getBuffer();
-    LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id, vType).getBuffer());
+    std::string debug = jp.subscriptionRequest(id, vType, aslFile).getBuffer();
+    LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id, vType, aslFile).getBuffer());
     return 0;
 }
 

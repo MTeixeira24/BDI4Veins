@@ -113,7 +113,11 @@ public final class ConnectionManager extends Thread {
                 byte[] utf8bytes = new byte[strlen];
                 buffer.get(utf8bytes, 0, strlen);
                 String vType = new String(utf8bytes, StandardCharsets.UTF_8);
-                am.createNewAgent(id, vType);
+                strlen = buffer.getInt();
+                utf8bytes = new byte[strlen];
+                buffer.get(utf8bytes, 0, strlen);
+                String aslFile = new String(utf8bytes, StandardCharsets.UTF_8);
+                am.createNewAgent(id, vType, aslFile);
                 if(state == State.WAITINGFORAGENT){
                     am.toggleAgentLoop(false, true);
                     state = State.RUNNINGLOOP;

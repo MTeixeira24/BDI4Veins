@@ -35,7 +35,7 @@ final class App
     public static void main( final String[] p_args )
     {
         ConnectionManager cm = new ConnectionManager();
-        AgentManager am = new AgentManager("manager.asl", cm);
+        AgentManager am = new AgentManager(/*"manager.asl"*/"laneMergeVehicle.asl", cm);
         cm.setAgentManager(am);
         cm.start();
         am.loop();

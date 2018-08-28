@@ -40,7 +40,7 @@ public class AgentManager {
         simulate = new AtomicBoolean(false);
         try
                 (
-                        final FileInputStream l_stream = new FileInputStream( aslpath )
+                        final FileInputStream l_stream = new FileInputStream( aslpath ) //TODO: Get rid of this
                 )
         {
             final int l_agentNumber = 0;
@@ -58,10 +58,10 @@ public class AgentManager {
         }
     }
 
-    public void createNewAgent(int id, String vType){
+    public void createNewAgent(int id, String vType, String aslFile){
         try
                 (
-                        final FileInputStream l_stream = new FileInputStream( aslpath )
+                        final FileInputStream l_stream = new FileInputStream( aslFile )
                 ){
             if(!execute.compareAndSet(true, false)){ //Halt execution of the agent loop
                 throw new RuntimeException();

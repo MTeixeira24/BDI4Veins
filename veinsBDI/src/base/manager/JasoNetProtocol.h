@@ -27,7 +27,7 @@ public:
     /*Build a request to verify successful connection*/
     LightJasonBuffer connectionRequest();
     /*Build a request to create a new agent and associate it*/
-    LightJasonBuffer subscriptionRequest(uint32_t, std::string);
+    LightJasonBuffer subscriptionRequest(uint32_t, std::string, std::string);
     /*Build a request to remove the specified agent*/
     LightJasonBuffer removeRequest(uint32_t);
     /*Build a request to terminate communications*/

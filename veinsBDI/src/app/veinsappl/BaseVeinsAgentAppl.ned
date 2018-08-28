@@ -19,5 +19,6 @@ package veinsbdi.app.veinsappl;
 import org.car2x.veins.modules.application.ieee80211p.BaseWaveApplLayer;
 
 simple BaseVeinsAgentAppl extends BaseWaveApplLayer{
- 	@class(BaseVeinsAgentAppl);   
+ 	@class(BaseVeinsAgentAppl);
+ 	string asl_file;   
 }

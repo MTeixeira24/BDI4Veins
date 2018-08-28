@@ -23,5 +23,5 @@ simple BasePlexeAgentAppl extends BaseAgentAppl
     parameters:
         @display("i=block/app2");
         @class(BasePlexeAgentAppl);
-        
+        string asl_file;
 }

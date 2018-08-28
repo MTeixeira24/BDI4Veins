@@ -24,7 +24,8 @@ Define_Module(BaseVeinsAgentAppl);
         if(manager == nullptr){
             throw new cRuntimeError("LightJason Application: No manager found");
         }
-        manager->subscribeVehicle(this, myId,traciVehicle->getVType());
+        std::string aslFile = par("asl_file").stdstringValue();
+        manager->subscribeVehicle(this, myId, traciVehicle->getVType(), aslFile);
         //Save pointer to LightJason Manager
         //Call registration service with node identifier
         //traciVehicle->setLaneChangeMode(0);
