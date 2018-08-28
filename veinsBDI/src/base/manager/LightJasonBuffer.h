@@ -10,6 +10,8 @@
 
 #include <string>
 #include <cstddef>
+#include <cstdint>
+namespace Jason{
 
 class LightJasonBuffer {
 private:
@@ -64,6 +66,13 @@ public:
     }
 
     template <typename T>
+    T read(T& out)
+    {
+        out = read<T>();
+        return out;
+    }
+
+    template <typename T>
     LightJasonBuffer& operator>>(T& out)
     {
         out = read<T>();
@@ -81,6 +90,12 @@ public:
         return buf;
     }
 
+
 };
+template <>
+void LightJasonBuffer::write(std::string inv);
+template <>
+std::string LightJasonBuffer::read();
+}
 
 #endif /* BASE_MANAGER_LIGHTJASONBUFFER_H_ */

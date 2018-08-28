@@ -29,10 +29,10 @@ LightJasonBuffer JasoNetProtocol::connectionRequest(){
     return LightJasonBuffer() << size << action;
 }
 
-LightJasonBuffer JasoNetProtocol::subscriptionRequest(uint32_t id){
+LightJasonBuffer JasoNetProtocol::subscriptionRequest(uint32_t id, std::string vType){
     uint16_t size = 32;
     uint16_t action = ADD_AGENT;
-    return LightJasonBuffer() << size << action << id;
+    return LightJasonBuffer() << size << action << id << vType;
 }
 
 LightJasonBuffer JasoNetProtocol::removeRequest(uint32_t id){

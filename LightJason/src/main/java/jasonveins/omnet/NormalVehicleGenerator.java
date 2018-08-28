@@ -38,7 +38,14 @@ public final class NormalVehicleGenerator extends IBaseAgentGenerator<NormalVehi
     @Override
     public final NormalVehicleAgent generatesingle( @Nullable final Object... p_data )
     {
-        final NormalVehicleAgent agent = new NormalVehicleAgent( m_configuration, agentManager,(int)p_data[0]);
-        return agent;
+        assert p_data != null;
+        if(p_data.length == 1){
+            final NormalVehicleAgent agent = new NormalVehicleAgent( m_configuration, agentManager,(int)p_data[0]);
+            return agent;
+        }else{
+            final NormalVehicleAgent agent = new NormalVehicleAgent( m_configuration, agentManager,(int)p_data[0], (String)p_data[0]);
+            return agent;
+        }
+
     }
 }

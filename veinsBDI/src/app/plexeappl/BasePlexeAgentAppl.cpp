@@ -63,7 +63,10 @@ void BasePlexeAgentAppl::initialize(int stage){
         if(manager == nullptr){
             throw new cRuntimeError("LightJason Application: No manager found");
         }
-        manager->subscribeVehicle(this, myId);
+        /*
+         * Vehicle type must be specified
+         */
+        manager->subscribeVehicle(this, myId, traciVehicle->getVType());
     }
 }
 

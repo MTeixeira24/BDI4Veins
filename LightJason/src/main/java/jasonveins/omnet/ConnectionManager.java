@@ -4,6 +4,8 @@ import javax.annotation.Nonnull;
 import java.net.*;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class ConnectionManager extends Thread {
@@ -105,7 +107,13 @@ public final class ConnectionManager extends Thread {
                 break;
             case Constants.AGENT_ADD:
                 id = buffer.getInt();
-                am.createNewAgent(id);
+                int strlen = buffer.getInt();
+                /*char[] cbuf = new char[strlen];
+                for(short i = 0; i < strlen; i++) cbuf[i] = buffer.getChar();*/
+                byte[] utf8bytes = new byte[strlen];
+                buffer.get(utf8bytes, 0, strlen);
+                String vType = new String(utf8bytes, StandardCharsets.UTF_8);
+                am.createNewAgent(id, vType);
                 if(state == State.WAITINGFORAGENT){
                     am.toggleAgentLoop(false, true);
                     state = State.RUNNINGLOOP;

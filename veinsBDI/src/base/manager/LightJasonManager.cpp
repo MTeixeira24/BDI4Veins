@@ -60,38 +60,7 @@ void LightJasonManager::handleMessage(cMessage* msg){
         }
         uint32_t msgLength = getMessageLength();
         if(msgLength > 0){
-            msgLength -= sizeof(uint32_t);
-            LightJasonBuffer rbf = receiveMessage(msgLength);
-            uint16_t commandId;
-            rbf >> commandId;
-            ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);
-            if(commandId == TERMINATE_CONNECTION){
-                close(connSocket);
-            }else{
-                while(!rbf.eof()){
-                    uint32_t agentMessageLength; //TODO: Organize this into structs
-                    rbf >> agentMessageLength;
-                    agentMessageLength -= sizeof(uint32_t);
-                    uint32_t agentId;
-                    rbf >> agentId;
-                    uint32_t agentAction;
-                    rbf >> agentAction;
-                    switch (agentAction){
-                    case SET_MAX_SPEED:
-                        uint16_t type;
-                        rbf >> type;
-                        ASSERT(type == VALUE_DOUBLE);
-                        double speed;
-                        rbf >> speed;
-                        vehicles[agentId]->changeSpeed(speed);
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                queryMsg = new cMessage("query");
-                scheduleAt(simTime() + updateInterval, queryMsg);
-            }
+            parseResponse(msgLength);
         }else{
             queryMsg = new cMessage("query");
             scheduleAt(simTime() + updateInterval, queryMsg);
@@ -109,23 +78,54 @@ void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string
     }
 }
 
-uint8_t LightJasonManager::subscribeVehicle(/*AgentAppl*/BaseAgentAppl* vehicle, uint32_t id){
+void LightJasonManager::parseResponse(uint32_t msgLength){
+    msgLength -= sizeof(uint32_t);
+    LightJasonBuffer rbf = receiveMessage(msgLength);
+    uint16_t commandId;
+    rbf >> commandId;
+    ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);
+    if(commandId == TERMINATE_CONNECTION){
+        close(connSocket);
+    }else{
+        while(!rbf.eof()){
+            uint32_t agentMessageLength; //TODO: Organize this into structs
+            rbf >> agentMessageLength;
+            agentMessageLength -= sizeof(uint32_t);
+            uint32_t agentId;
+            rbf >> agentId;
+            uint32_t agentAction;
+            rbf >> agentAction;
+            switch (agentAction){
+            case SET_MAX_SPEED:
+                uint16_t type;
+                rbf >> type;
+                ASSERT(type == VALUE_DOUBLE);
+                double speed;
+                rbf >> speed;
+                vehicles[agentId]->changeSpeed(speed);
+                break;
+            default:
+                break;
+            }
+        }
+        queryMsg = new cMessage("query");
+        scheduleAt(simTime() + updateInterval, queryMsg);
+    }
+}
+
+uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType){
     vehicles[id] = vehicle;
-    LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id).getBuffer());
-    int n = int((unsigned char)result.getBuffer()[0]);
+    std::string debug = jp.subscriptionRequest(id, vType).getBuffer();
+    LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id, vType).getBuffer());
     return 0;
 }
 
 void LightJasonManager::unsubscribeVehicle(int id){
-    /*std::string msg = jp.buildRemoveRequest(id);
-    std:: string result = writeToSocket(msg);*/
     LightJasonBuffer result = writeToSocket(jp.removeRequest(id).getBuffer());
-    int n = int((unsigned char)result.getBuffer()[0]);
     vehicles.erase(id);
 }
 
 uint8_t LightJasonManager::sendInformationToAgents(int id, std::string belief, double value){
-
     LightJasonBuffer result = writeToSocket(jp.buildUpdateBeliefQuery(id, belief, value).getBuffer());
     int n = int((unsigned char)result.getBuffer()[0]);
     EV << n << "\n"; //DEBUG
@@ -133,7 +133,6 @@ uint8_t LightJasonManager::sendInformationToAgents(int id, std::string belief, d
 }
 
 LightJasonBuffer LightJasonManager::writeToSocket(std::string data){
-    int debug = data.length();
     int n = write(connSocket,data.c_str(),data.length());
     if (n < 0){
         throw cRuntimeError("LightJasonManager: write failed");

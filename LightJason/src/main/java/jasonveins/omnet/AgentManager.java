@@ -58,7 +58,7 @@ public class AgentManager {
         }
     }
 
-    public void createNewAgent(int id){
+    public void createNewAgent(int id, String vType){
         try
                 (
                         final FileInputStream l_stream = new FileInputStream( aslpath )
@@ -67,7 +67,16 @@ public class AgentManager {
                 throw new RuntimeException();
             }
             while(!cycleEnd.get()); //Wait until current stream is over
-            NormalVehicleAgent m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id);
+            NormalVehicleAgent m_ag;
+            switch(vType){
+                case "merger":
+                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id);
+                    break;
+                default:
+                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id); //TODO: Make the generators global
+                    break;
+            }
+
             l_agents.add(m_ag);
             agentMap.putIfAbsent(id, m_ag);
             agentCount.incrementAndGet();

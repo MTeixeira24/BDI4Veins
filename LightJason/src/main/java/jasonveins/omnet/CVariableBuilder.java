@@ -21,7 +21,8 @@ final class CVariableBuilder implements IVariableBuilder
     public final Stream<IVariable<?>> apply( @Nonnull final IAgent<?> p_agent, @Nonnull final IInstantiable p_runningcontext )
     {
         return Stream.of(
-                new CConstant<>( "MyName", MessageFormat.format( "{0}", p_agent.<IVehicleAgent>raw().id() ) )
+                new CConstant<>( "MyName", MessageFormat.format( "{0}", p_agent.<IVehicleAgent>raw().id() ) ),
+                new CConstant<>("MyType",  p_agent.<IVehicleAgent>raw().vType() )
         );
 
 }

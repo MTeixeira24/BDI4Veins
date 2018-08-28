@@ -17,7 +17,10 @@ public class NormalVehicleAgent extends IVehicleAgent<NormalVehicleAgent> {
      * @param m_id
      */
     public NormalVehicleAgent(@Nonnull IAgentConfiguration<NormalVehicleAgent> p_configuration, @Nonnull AgentManager m_am, @Nonnull int m_id) {
-        super(p_configuration, m_am, m_id);
+        this(p_configuration, m_am, m_id, "none");
+    }
+    public NormalVehicleAgent(@Nonnull IAgentConfiguration<NormalVehicleAgent> p_configuration, @Nonnull AgentManager m_am, @Nonnull int m_id, @Nonnull String vType) {
+        super(p_configuration, m_am, m_id, vType);
     }
 
 

@@ -7,6 +7,8 @@
 
 #include "LightJasonBuffer.h"
 
+namespace Jason{
+
 LightJasonBuffer::LightJasonBuffer() : buf() {
     buf_index = 0;
 }
@@ -27,6 +29,27 @@ bool LightJasonBuffer::isBigEndian()
     return (p_a[0] == 0x01);
 }
 
-LightJasonBuffer::~LightJasonBuffer() {
+template <>
+void LightJasonBuffer::write(std::string inv)
+{
+    uint32_t length = inv.length();
+    write<uint32_t>(length);
+    for (size_t i = 0; i < length; ++i) write<char>(inv[i]);
 }
 
+template <>
+std::string LightJasonBuffer::read()
+{
+    uint32_t length = read<uint32_t>();
+    if (length == 0) return std::string();
+    char obuf[length + 1];
+
+    for (size_t i = 0; i < length; ++i) read<char>(obuf[i]);
+    obuf[length] = 0;
+
+    return std::string(obuf, length);
+}
+
+LightJasonBuffer::~LightJasonBuffer() {
+}
+}

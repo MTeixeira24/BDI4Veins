@@ -16,19 +16,23 @@ public abstract class IVehicleAgent<T extends IAgent<?>> extends IBaseAgent<T> {
 
     private static final long serialVersionUID = -9102517014010783118L;
     protected int id;
+    protected String vType;
     protected AgentManager agentManager;
     /**
      * ctor
      *
      * @param p_configuration agent configuration
      */
-    public IVehicleAgent(@Nonnull IAgentConfiguration<T> p_configuration, @Nonnull AgentManager m_am,@Nonnull final int m_id) {
+    public IVehicleAgent(@Nonnull IAgentConfiguration<T> p_configuration, @Nonnull AgentManager m_am,@Nonnull final int m_id, @Nonnull final String m_vType) {
         super(p_configuration);
         id = m_id;
         agentManager = m_am;
+        vType = m_vType;
     }
 
     public int id(){return this.id;}
+
+    public String vType(){return this.vType;}
 
     @IAgentActionFilter
     @IAgentActionName( name = "transmit/self/slow" )
