@@ -3,7 +3,7 @@ speed(0).
 !main.
 
 +!main <-
-  generic/print("Agent ", MyName, " started");
+  generic/print("Agent ", MyName, " of type ", MyType ," started");
   !wait.
 
 +!wait <-

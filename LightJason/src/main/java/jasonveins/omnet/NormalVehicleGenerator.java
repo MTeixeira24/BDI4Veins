@@ -43,7 +43,7 @@ public final class NormalVehicleGenerator extends IBaseAgentGenerator<NormalVehi
             final NormalVehicleAgent agent = new NormalVehicleAgent( m_configuration, agentManager,(int)p_data[0]);
             return agent;
         }else{
-            final NormalVehicleAgent agent = new NormalVehicleAgent( m_configuration, agentManager,(int)p_data[0], (String)p_data[0]);
+            final NormalVehicleAgent agent = new NormalVehicleAgent( m_configuration, agentManager,(int)p_data[0], (String)p_data[1]);
             return agent;
         }
 

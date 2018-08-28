@@ -18,10 +18,11 @@ public:
     }
     virtual ~LaneMergeTrafficManager();
 protected:
+    std::string mergerVtype;
     cMessage* insertArterialMessage;
-
+    struct Vehicle merger;
     void insertArterial();
 
-    virtual void handleSelfMsg(cMessage* msg);
+    virtual void handleSelfMsg(cMessage* msg) override;
 };
 #endif /* TRAFFIC_LANEMERGETRAFFICMANAGER_H_ */

@@ -69,11 +69,8 @@ public class AgentManager {
             while(!cycleEnd.get()); //Wait until current stream is over
             NormalVehicleAgent m_ag;
             switch(vType){
-                case "merger":
-                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id);
-                    break;
                 default:
-                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id); //TODO: Make the generators global
+                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id, vType); //TODO: Make the generators global
                     break;
             }
 

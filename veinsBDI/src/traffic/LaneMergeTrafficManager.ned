@@ -20,4 +20,5 @@ simple LaneMergeTrafficManager extends PlatoonsTrafficManager {
 
     parameters:
         @class(LaneMergeTrafficManager);
+        string mergerVType;
 }
