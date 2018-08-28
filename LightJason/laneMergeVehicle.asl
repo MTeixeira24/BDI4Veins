@@ -1,26 +1,17 @@
 speed(0).
+merging(true).
 
 !main.
 
 +!main <-
-  generic/print("Agent ", MyName, " of type ", MyType ," started");
+  generic/print("Agent ", MyName, " of type ", MyType ," started asdasd");
+  I = 39;
+  transmit/other/slow(I);
+  !wait.
+
++!main <-
+  generic/print("Agent ", MyName, " of type ", MyType ," started-----");
   !wait.
 
 +!wait <-
   !wait.
-
-+speed(X) <-
-  X < 1.0;
-  //generic/print(MyName, ": Received new speed value of", X).
-
-+speed(X) <-
-  X >= 1.0;
-  >>slowing(_);
-  //generic/print(MyName, ": Received new speed value of", X).
-
-+speed(X) <-
-  X >= 1.0;
-  ~>>slowing(_);
-  +slowing(1);
-  generic/print(MyName, ": Sending a request to omnet");
-  transmit/self/slow().

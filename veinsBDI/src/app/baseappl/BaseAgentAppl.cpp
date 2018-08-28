@@ -24,6 +24,10 @@ void BaseAgentAppl::changeSpeed(double speed){
     traciVehicle->setMaxSpeed(speed);
 }
 
+void BaseAgentAppl::sendMessage(uint8_t message_type, const void* args){
+    throw new cRuntimeError("Send message not implemented!");
+}
+
 void BaseAgentAppl::finish(){
     manager->unsubscribeVehicle(myId);
 }

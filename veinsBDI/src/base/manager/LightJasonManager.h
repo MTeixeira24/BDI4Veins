@@ -26,6 +26,15 @@
 #include "LightJasonBuffer.h"
 using namespace omnetpp;
 using namespace Jason;
+
+struct MessageParameters {
+    int platoonId;
+    int leaderId;
+    int targetId;
+    int messageRequest;
+};
+
+
 class BaseAgentAppl;
 class LightJasonManager : public cSimpleModule{
 public:

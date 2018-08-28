@@ -17,6 +17,7 @@
 #define APP_PLEXEAPPL_BASEPLEXEAGENTAPPL_H_
 
 #include "../baseappl/BaseAgentAppl.h"
+#include "../../messages/SimpleMergeMessage_m.h"
 
 #include "veins/base/modules/BaseApplLayer.h"
 #include "veins/modules/application/platooning/UnicastProtocol.h"
@@ -44,7 +45,7 @@ public:
      * @param msg message to be encapsulated into the unicast message
      * @param destination id of the destination
      */
-    void sendUnicast(cPacket* msg, int destination);
+    virtual void sendUnicast(cPacket* msg, int destination);
 
 protected:
     // id of this vehicle
@@ -91,6 +92,7 @@ protected:
     virtual void handleLowerMsg(cMessage* msg) override;
     virtual void handleSelfMsg(cMessage* msg) override;
     virtual void handleLowerControl(cMessage* msg) override;
+    virtual void sendMessage(uint8_t, const void*) override;
 
     /**
      * Handles PlatoonBeacons

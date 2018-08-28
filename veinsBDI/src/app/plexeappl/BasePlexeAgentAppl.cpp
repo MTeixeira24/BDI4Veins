@@ -48,7 +48,7 @@ void BasePlexeAgentAppl::initialize(int stage){
         traciVehicle = mobility->getVehicleCommandInterface();
         positionHelper = Veins::FindModule<BasePositionHelper*>::findSubModule(getParentModule());
         protocol = Veins::FindModule<BaseProtocol*>::findSubModule(getParentModule());
-        myId = positionHelper->getId();
+        //myId = positionHelper->getId(); This causes the id to be repeated if various vtypes are used
 
         // connect application to protocol
         protocol->registerApplication(BaseProtocol::BEACON_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
@@ -78,6 +78,16 @@ BasePlexeAgentAppl::~BasePlexeAgentAppl() {
     stopSimulation = nullptr;
 }
 
+void BasePlexeAgentAppl::sendMessage(uint8_t message_type, const void* args){
+    MessageParameters* mp = (MessageParameters*) args;
+    if(message_type == MESSAGE_UNICAST){
+        SimpleMergeMessage* msg = new SimpleMergeMessage("SimpleMergeMessage");
+        msg->setDestinationId(mp->targetId);
+        msg->setKind(5); //This is just for debugging
+        sendUnicast(msg, mp->targetId);
+    }
+}
+
 void BasePlexeAgentAppl::handleLowerMsg(cMessage* msg)
 {
     UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
@@ -87,6 +97,8 @@ void BasePlexeAgentAppl::handleLowerMsg(cMessage* msg)
 
     if (enc->getKind() == BaseProtocol::BEACON_TYPE) {
         onPlatoonBeacon(check_and_cast<PlatooningBeacon*>(enc));
+    } else if (enc->getKind() == 5){
+        EV << "Got it";
     }
     else {
         error("received unknown message type");
@@ -125,8 +137,14 @@ void BasePlexeAgentAppl::handleLowerControl(cMessage* msg)
 
 void BasePlexeAgentAppl::sendUnicast(cPacket* msg, int destination)
 {
-    UnicastMessage* unicast = new UnicastMessage();
+    Enter_Method_Silent();
+    take(msg);
+
+    UnicastMessage* unicast = new UnicastMessage("UnicastMessage", msg->getKind());
     unicast->setDestination(destination);
+
+    unicast->setChannel(Channels::CCH);
+
     unicast->encapsulate(msg);
     sendDown(unicast);
 }

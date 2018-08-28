@@ -20,9 +20,8 @@ class BaseAgentAppl : public Veins::BaseWaveApplLayer {
 public:
     virtual void initialize(int stage);
     virtual void finish();
-    virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){
-
-    }
+    virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){};
+    virtual void sendMessage(uint8_t message_type, const void* args);
 protected:
     TraCIMobility* mobility;
     TraCICommandInterface* traci;
@@ -38,6 +37,9 @@ protected:
     virtual void handleLowerMsg(cMessage* msg){}
     virtual void handleSelfMsg(cMessage* msg){}
     virtual void handleLowerControl(cMessage* msg){}
+
+    //virtual void startManeuver();
+
 public:
     virtual void changeSpeed(double speed);
 };

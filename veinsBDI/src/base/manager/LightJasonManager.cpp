@@ -81,6 +81,7 @@ void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string
 void LightJasonManager::parseResponse(uint32_t msgLength){
     msgLength -= sizeof(uint32_t);
     LightJasonBuffer rbf = receiveMessage(msgLength);
+    uint16_t type;
     uint16_t commandId;
     rbf >> commandId;
     ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);
@@ -97,12 +98,21 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
             rbf >> agentAction;
             switch (agentAction){
             case SET_MAX_SPEED:
-                uint16_t type;
                 rbf >> type;
                 ASSERT(type == VALUE_DOUBLE);
                 double speed;
                 rbf >> speed;
                 vehicles[agentId]->changeSpeed(speed);
+                break;
+            case REQUEST_SPEED_DOWN:
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                int id;
+                rbf >> id;
+                MessageParameters mp;
+                mp.messageRequest = REQUEST_SPEED_DOWN;
+                mp.targetId = id;
+                vehicles[agentId]->sendMessage(MESSAGE_UNICAST, &mp);
                 break;
             default:
                 break;

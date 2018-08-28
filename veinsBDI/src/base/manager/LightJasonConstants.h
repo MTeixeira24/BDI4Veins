@@ -22,6 +22,8 @@
 
 #define QUERY 0x05
 
+#define REQUEST_SPEED_DOWN 0x06
+
 #define TERMINATE_CONNECTION 0x7E
 
 /*
@@ -42,6 +44,16 @@
 #define VALUE_FLOAT 0x06
 
 #define VALUE_DOUBLE 0x07
+
+/*
+ * Constants to define message types in sendMessage() calls
+ */
+
+#define MESSAGE_UNICAST 0x01
+
+#define MESSAGE_BROADCAST 0x02
+
+#define MESSAGE_MULTICAST 0x03
 
 
 #endif /* BASE_MANAGER_LIGHTJASONCONSTANTS_H_ */
