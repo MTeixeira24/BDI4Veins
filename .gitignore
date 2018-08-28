@@ -6,7 +6,7 @@ veinsBDI/.settings/language.settings.xml
 # Simulation results
 *.vec
 *.vci
-
+*.sca
 # Java compiled classes
 LightJason/target/*
 LightJason/out/*
