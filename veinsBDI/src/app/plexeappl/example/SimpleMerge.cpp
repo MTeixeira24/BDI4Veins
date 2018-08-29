@@ -7,13 +7,13 @@
 
 #include "SimpleMerge.h"
 
+Define_Module(SimpleMerge)
+
 SimpleMerge::SimpleMerge() {
-    // TODO Auto-generated constructor stub
 
 }
 
 SimpleMerge::~SimpleMerge() {
-    // TODO Auto-generated destructor stub
 }
 
 void SimpleMerge::initialize(int stage)
