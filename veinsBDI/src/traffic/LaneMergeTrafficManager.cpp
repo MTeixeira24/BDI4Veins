@@ -35,6 +35,7 @@ void LaneMergeTrafficManager::insertArterial()
     //merger.id = findVehicleTypeIndex(mergerVtype);
     automated.lane = 0;
     automated.position = 8;
+    automated.speed = 36.5;
     //merger.speed = platoonInsertSpeed / 3.6;
     addVehicleToQueue(2, automated);
 }
