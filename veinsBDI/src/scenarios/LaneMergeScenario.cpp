@@ -58,13 +58,6 @@ void LaneMergeScenario::prepareCars(int platoonLane)
             setupFormation();
         }else{
             //this is the arterial vehicle
-            traciVehicle->setCruiseControlDesiredSpeed(100 / 3.6);
-            traciVehicle->setFixedLane(0);
-            traciVehicle->setActiveController(Plexe::ACC);
-
-            positionHelper->setPlatoonId(-1);
-            positionHelper->setIsLeader(false);
-            positionHelper->setPlatoonLane(-1);
         }
 
         break;
@@ -89,6 +82,14 @@ void LaneMergeScenario::prepareCars(int platoonLane)
 
     case 4: {
         // Arterial car
+
+        traciVehicle->setCruiseControlDesiredSpeed(100 / 3.6);
+        traciVehicle->setFixedLane(0);
+        traciVehicle->setActiveController(Plexe::ACC);
+
+        positionHelper->setPlatoonId(-1);
+        positionHelper->setIsLeader(false);
+        positionHelper->setPlatoonLane(-1);
         break;
     }
   }

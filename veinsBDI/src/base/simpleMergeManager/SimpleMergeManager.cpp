@@ -49,12 +49,12 @@ void SimpleMergeManager::parseResponse(uint32_t msgLength){
             case REQUEST_SPEED_DOWN:
                 rbf >> type;
                 ASSERT(type == VALUE_INT);
-                int id;
-                rbf >> id;
-                MessageParameters mp;
+                int targetid;
+                rbf >> targetid;
+                /*MessageParameters mp;
                 mp.messageRequest = REQUEST_SPEED_DOWN;
-                mp.targetId = id;
-                vehicles[agentId]->sendMessage(MESSAGE_UNICAST, &mp);
+                mp.targetId = id;*/
+                ((SimpleMerge*)(vehicles[agentId]))->startMerge(0,targetid,0);
                 break;
             default:
                 break;

@@ -20,6 +20,8 @@ void SimpleMerge::initialize(int stage)
 {
     BasePlexeAgentAppl::initialize(stage);
     if (stage == 1){
+        // connect maneuver application to protocol
+        protocol->registerApplication(MANEUVER_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         //In order to simplify the scenario, we know that agent with ID 4 is the arterial vehicle so we send that belief to the agent
         if(myId == 4){
             BeliefModel bm;
@@ -47,6 +49,12 @@ void SimpleMerge::startMerge(int platoonId, int destinationId, int position)
     /*ASSERT(getPlatoonRole() == PlatoonRole::NONE);
     ASSERT(!isInManeuver());
 
+    msg->setKind(MANEUVER_TYPE);
+    msg->setVehicleId(vehicleId);
+    msg->setExternalId(externalId.c_str());
+    msg->setPlatoonId(platoonId);
+    msg->setDestinationId(destinationId);
+
     JoinManeuverParameters params;
     params.platoonId = platoonId;
     params.leaderId = leaderId;
@@ -63,12 +71,13 @@ void SimpleMerge::startMerge(int platoonId, int destinationId, int position)
     app->sendUnicast(req, targetPlatoonData->platoonLeader);
 
     */
-    SimpleMergeMessage msg;
-    msg.setKind(MANEUVER_TYPE);
-    msg.setVehicleId(myId);
-    msg.setExternalId(positionHelper->getExternalId().c_str());
-    msg.setPlatoonId(platoonId);
-    msg.setDestinationId(destinationId);
+    SimpleMergeMessage* msg = new SimpleMergeMessage("SimpleMergeMessage");
+    msg->setKind(MANEUVER_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setPlatoonId(platoonId);
+    msg->setDestinationId(destinationId);
+    sendUnicast(msg, destinationId);
 }
 
 void SimpleMerge::sendUnicast(cPacket* msg, int destination)
@@ -93,6 +102,16 @@ void SimpleMerge::handleLowerMsg(cMessage* msg)
         ManeuverMessage* mm = check_and_cast<ManeuverMessage*>(unicast->decapsulate());
         if (SimpleMergeMessage* msg = dynamic_cast<SimpleMergeMessage*>(mm)) {
             //handleUpdatePlatoonFormation(msg);
+            if (msg->getDestinationId() == myId){
+                traciVehicle->setCACCConstantSpacing(15);
+                // we have no data so far, so for the moment just initialize
+                // with some fake data
+                //traciVehicle->setLeaderVehicleFakeData(0, 0, 100);
+                //traciVehicle->setFrontVehicleFakeData(0, 0, 100, 15);
+
+                traciVehicle->setCruiseControlDesiredSpeed(25);
+                traciVehicle->setActiveController(Plexe::ACC);
+            }
             delete msg;
         }
         else {

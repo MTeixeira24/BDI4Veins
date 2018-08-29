@@ -49,6 +49,6 @@ public abstract class IVehicleAgent<T extends IAgent<?>> extends IBaseAgent<T> {
     {
         InstructionModel iOb = new InstructionModel(this.id, Constants.REQUEST_SPEED_DOWN);
         iOb.pushInt(targetId.intValue());
-        //agentManager.addInstruction(iOb);
+        agentManager.addInstruction(iOb);
     }
 }
