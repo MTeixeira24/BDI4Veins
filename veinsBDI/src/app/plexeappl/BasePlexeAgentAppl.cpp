@@ -48,7 +48,7 @@ void BasePlexeAgentAppl::initialize(int stage){
         traciVehicle = mobility->getVehicleCommandInterface();
         positionHelper = Veins::FindModule<BasePositionHelper*>::findSubModule(getParentModule());
         protocol = Veins::FindModule<BaseProtocol*>::findSubModule(getParentModule());
-        //myId = positionHelper->getId(); This causes the id to be repeated if various vtypes are used
+        myId = positionHelper->getId(); //This causes the id to be repeated if various vtypes are used
 
         // connect application to protocol
         protocol->registerApplication(BaseProtocol::BEACON_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));

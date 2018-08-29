@@ -11,6 +11,7 @@
 #include "veins/modules/application/ieee80211p/BaseWaveApplLayer.h"
 #include "veins/modules/mobility/traci/TraCIMobility.h"
 #include "veins/modules/mobility/traci/TraCICommandInterface.h"
+#include "../../base/manager/BeliefModel.h"
 #include "../../base/manager/LightJasonManager.h"
 using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;

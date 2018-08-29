@@ -7,6 +7,7 @@ public class InstructionModel {
     private int size;
     private int agentId;
     private int agentAction;
+    private String agentBelief;
     private ArrayList<ByteData> values = new ArrayList<>();
 
     public InstructionModel(int _agentId, int _agentAction) {
@@ -56,6 +57,14 @@ public class InstructionModel {
         short type = 7;
         values.add(new ByteData(type, ByteBuffer.allocate(8).putDouble(_value).array()));
         size += 10;
+    }
+
+    public void pushRawBytes(short _type, byte[] _value){
+        values.add(new ByteData(_type, _value));
+    }
+
+    public void setBelief(String _belief){
+        agentBelief = _belief;
     }
 
     public byte[] toByteArray(){

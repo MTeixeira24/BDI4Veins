@@ -19,6 +19,16 @@ SimpleMerge::~SimpleMerge() {
 void SimpleMerge::initialize(int stage)
 {
     BasePlexeAgentAppl::initialize(stage);
+    if (stage == 1){
+        //In order to simplify the scenario, we know that agent with ID 4 is the arterial vehicle so we send that belief to the agent
+        if(myId == 4){
+            BeliefModel bm;
+            bm.setBelief("merge");
+            int value = 1;
+            bm.pushInt(&value);
+            manager->sendInformationToAgents(myId, &bm);
+        }
+    }
 
    /* if (stage == 1) {
         // connect maneuver application to protocol
@@ -32,7 +42,7 @@ void SimpleMerge::initialize(int stage)
     }*/
 }
 
-void SimpleMerge::startMerge(int platoonId, int leaderId, int position)
+void SimpleMerge::startMerge(int platoonId, int destinationId, int position)
 {
     /*ASSERT(getPlatoonRole() == PlatoonRole::NONE);
     ASSERT(!isInManeuver());
@@ -41,7 +51,24 @@ void SimpleMerge::startMerge(int platoonId, int leaderId, int position)
     params.platoonId = platoonId;
     params.leaderId = leaderId;
     params.position = position;
-    joinManeuver->startManeuver(&params);*/
+    joinManeuver->startManeuver(&params);
+
+     // collect information about target Platoon
+    targetPlatoonData.reset(new TargetPlatoonData());
+    targetPlatoonData->platoonId = pars->platoonId;
+    targetPlatoonData->platoonLeader = pars->leaderId;
+
+    // send join request to leader
+    JoinPlatoonRequest* req = createJoinPlatoonRequest(positionHelper->getId(), positionHelper->getExternalId(), targetPlatoonData->platoonId, targetPlatoonData->platoonLeader, traciVehicle->getLaneIndex(), mobility->getCurrentPosition().x, mobility->getCurrentPosition().y);
+    app->sendUnicast(req, targetPlatoonData->platoonLeader);
+
+    */
+    SimpleMergeMessage msg;
+    msg.setKind(MANEUVER_TYPE);
+    msg.setVehicleId(myId);
+    msg.setExternalId(positionHelper->getExternalId().c_str());
+    msg.setPlatoonId(platoonId);
+    msg.setDestinationId(destinationId);
 }
 
 void SimpleMerge::sendUnicast(cPacket* msg, int destination)
@@ -57,25 +84,25 @@ void SimpleMerge::sendUnicast(cPacket* msg, int destination)
 
 void SimpleMerge::handleLowerMsg(cMessage* msg)
 {
-    /*UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
+    UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
 
     cPacket* enc = unicast->getEncapsulatedPacket();
     ASSERT2(enc, "received a UnicastMessage with nothing inside");
 
     if (enc->getKind() == MANEUVER_TYPE) {
         ManeuverMessage* mm = check_and_cast<ManeuverMessage*>(unicast->decapsulate());
-        if (UpdatePlatoonFormation* msg = dynamic_cast<UpdatePlatoonFormation*>(mm)) {
-            handleUpdatePlatoonFormation(msg);
+        if (SimpleMergeMessage* msg = dynamic_cast<SimpleMergeMessage*>(mm)) {
+            //handleUpdatePlatoonFormation(msg);
             delete msg;
         }
         else {
-            onManeuverMessage(mm);
+            //onManeuverMessage(mm);
         }
         delete unicast;
     }
     else {
-        BaseApp::handleLowerMsg(msg);
-    }*/
+        BasePlexeAgentAppl::handleLowerMsg(msg);
+    }
 }
 
 void SimpleMerge::onPlatoonBeacon(const PlatooningBeacon* pb)

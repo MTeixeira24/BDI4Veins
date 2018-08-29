@@ -8,9 +8,13 @@
 #ifndef BASE_MANAGER_LIGHTJASONBUFFER_H_
 #define BASE_MANAGER_LIGHTJASONBUFFER_H_
 
-#include <string>
-#include <cstddef>
 #include <cstdint>
+
+#include <cstddef>
+#include <string>
+
+#include "veins/base/utils/MiXiMDefs.h"
+
 namespace Jason{
 
 class LightJasonBuffer {
@@ -33,13 +37,13 @@ public:
 
         if (isBigEndian()) {
             for (size_t i = 0; i < sizeof(buf_to_return); ++i) {
-                if (eof()) exit(1);//throw std::exception("Attempted to read past end of byte buffer"); TODO: Try and fix this
+                if (eof()) throw cRuntimeError("Attempted to read past end of byte buffer");
                 p_buf_to_return[i] = buf[buf_index++];
             }
         }
         else {
             for (size_t i = 0; i < sizeof(buf_to_return); ++i) {
-                if (eof()) exit(1);//throw std::exception("Attempted to read past end of byte buffer");
+                if (eof()) throw cRuntimeError("Attempted to read past end of byte buffer");;
                 p_buf_to_return[sizeof(buf_to_return) - 1 - i] = buf[buf_index++];
             }
         }

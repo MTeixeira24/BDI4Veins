@@ -9,6 +9,7 @@
 #define APP_PLEXEAPPL_EXAMPLE_SIMPLEMERGE_H_
 
 #include "../BasePlexeAgentAppl.h"
+#include "../../../messages/SimpleMergeMessage_m.h"
 
 class SimpleMerge: public BasePlexeAgentAppl {
 public:

@@ -5,13 +5,14 @@ import jasonveins.omnet.decision.InstructionModel;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
+import org.lightjason.agentspeak.language.ITerm;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
-import java.util.Map;
-import java.util.Set;
+import java.nio.ByteBuffer;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -93,6 +94,59 @@ public class AgentManager {
                         CRawTerm.from(Double.valueOf(value))
                 )//belief(<value>)
         );
+        NormalVehicleAgent vehicle = agentMap.get(id);
+        if(vehicle == null) throw new RuntimeException();
+        vehicle.trigger(trigger);
+    }
+
+    public void updateBeliefs(@Nonnull int id, @Nonnull String belief,@Nonnull ByteBuffer values){
+        ArrayList<CRawTerm<?>> terms = new ArrayList<>();
+        short data_type = values.getShort();
+        switch (data_type){
+            case Constants.VALUE_BOOL:
+                throw new RuntimeException("Bool value not defined!");
+            case Constants.VALUE_CHAR:
+                terms.add(CRawTerm.from(values.getChar()));
+                break;
+            case Constants.VALUE_SHORT:
+                terms.add(CRawTerm.from(values.getShort()));
+                break;
+            case Constants.VALUE_INT:
+                terms.add(CRawTerm.from(values.getInt()));
+                break;
+            case Constants.VALUE_LONG:
+                terms.add(CRawTerm.from(values.getLong()));
+                break;
+            case Constants.VALUE_FLOAT:
+                terms.add(CRawTerm.from(values.getFloat()));
+                break;
+            case Constants.VALUE_DOUBLE:
+                terms.add(CRawTerm.from(values.getDouble()));
+                break;
+            default:
+                throw new RuntimeException("Unknown value!");
+        }
+
+        /*final ITrigger trigger = CTrigger.from(
+                ITrigger.EType.ADDBELIEF,
+                CLiteral.from(belief,
+                        Arrays.stream( (ITerm[])terms.toArray() ).collect( Collectors.toList() )
+                )
+        );*/
+        ITrigger trigger = null;
+        //java.lang.ClassCastException: java.base/[Ljava.lang.Object; cannot be cast to [Lorg.lightjason.agentspeak.language.ITerm;
+        try{
+            ITerm[] arrayTerms = new ITerm[terms.size()];
+            arrayTerms = terms.toArray(arrayTerms);
+            trigger = CTrigger.from(
+                    ITrigger.EType.ADDBELIEF,
+                    CLiteral.from(belief,
+                            Arrays.stream( arrayTerms ).collect( Collectors.toList() )
+                    )
+            );
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         NormalVehicleAgent vehicle = agentMap.get(id);
         if(vehicle == null) throw new RuntimeException();
         vehicle.trigger(trigger);

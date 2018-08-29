@@ -69,6 +69,10 @@ void LightJasonManager::handleMessage(cMessage* msg){
     }
 }
 
+BaseAgentAppl* LightJasonManager::getVehicle(int id){
+    return vehicles[id];
+}
+
 void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string data){
     if(action.compare("none") != 0){
         if(action.compare("setMaxSpeed") == 0){
@@ -97,7 +101,7 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
             uint32_t agentAction;
             rbf >> agentAction;
             switch (agentAction){
-            case SET_MAX_SPEED:
+            case 0x04: //TODO: Make a specific code for this
                 rbf >> type;
                 ASSERT(type == VALUE_DOUBLE);
                 double speed;
@@ -135,8 +139,8 @@ void LightJasonManager::unsubscribeVehicle(int id){
     vehicles.erase(id);
 }
 
-uint8_t LightJasonManager::sendInformationToAgents(int id, std::string belief, double value){
-    LightJasonBuffer result = writeToSocket(jp.buildUpdateBeliefQuery(id, belief, value).getBuffer());
+uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){//(int id, std::string belief, double value){
+    LightJasonBuffer result = writeToSocket(jp.buildUpdateBeliefQuery(id, beliefModel).getBuffer());
     int n = int((unsigned char)result.getBuffer()[0]);
     EV << n << "\n"; //DEBUG
     return 0;

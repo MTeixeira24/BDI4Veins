@@ -16,7 +16,7 @@
 package veinsbdi.simulations.simpleLaneMerge;
 
 import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.manager.LightJasonManager;
+import veinsbdi.base.simpleMergeManager.simpleMergeManager;
 import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
 
 network LaneMergeScenarioLJ extends Scenario
@@ -24,7 +24,7 @@ network LaneMergeScenarioLJ extends Scenario
     parameters:
         string traffic_type;
     submodules:
-        ljmanager: LightJasonManager;
+        ljmanager: simpleMergeManager;
         traffic: <traffic_type> like TraCIBaseTrafficManager {
             parameters:
                 @display("p=200,200");

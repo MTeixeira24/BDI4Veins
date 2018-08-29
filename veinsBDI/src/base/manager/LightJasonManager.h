@@ -43,18 +43,22 @@ public:
     /*Subscribe the vehicle to the manager and send a request to LightJason to create an agent*/
     uint8_t subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile);
     /*Update belief base of the associated agent*/
-    uint8_t sendInformationToAgents(int id, std::string belief, double value);
+    uint8_t sendInformationToAgents(int, const void*);//(int id, std::string belief, double value);
     /*DEPRECATED: delegate decisions to agents*/
     void notifyNodes(uint32_t id, std::string action, std::string data);
     /*Perform initialization and establish connection with LightJason server*/
     virtual void initialize(int stage) override;
     /*Remove vehicle from subscription and request agent deletion on server*/
     void unsubscribeVehicle(int id);
+    /**/
+    BaseAgentAppl* getVehicle(int id);
 protected:
     /*Port number for Server */
     int port;
     /*Map of all subscribed vehicle IDs and respective pointers*/
     std::map <int, BaseAgentAppl*> vehicles;
+
+
     /*Time interval in which to request decisions from server*/
     simtime_t updateInterval;
     //cModule *module;
@@ -80,7 +84,7 @@ protected:
     /*Returns buffer of size N containing message from socket*/
     LightJasonBuffer receiveMessage(uint32_t);
     /*Parse response received from lightjason server*/
-    void parseResponse(uint32_t msgLength);
+    virtual void parseResponse(uint32_t msgLength);
 
     //virtual void setupListener();
 };

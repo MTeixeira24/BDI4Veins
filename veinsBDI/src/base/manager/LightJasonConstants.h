@@ -18,7 +18,7 @@
 
 #define REMOVE_AGENT 0x03
 
-#define SET_MAX_SPEED 0x04
+#define SET_BELIEF 0x04
 
 #define QUERY 0x05
 

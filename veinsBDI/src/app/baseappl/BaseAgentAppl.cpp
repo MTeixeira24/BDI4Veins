@@ -8,7 +8,6 @@
 #include "BaseAgentAppl.h"
 
 
-
  void BaseAgentAppl::initialize(int stage){
      BaseApplLayer::initialize(stage); //TODO: Header subclasses BaseWave. Maybe change that?
      if(stage == 0){

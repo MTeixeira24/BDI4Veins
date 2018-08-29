@@ -46,12 +46,13 @@ public final class ConnectionManager extends Thread {
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
             OutputStream byteStream = clientSocket.getOutputStream();
-            byte b[] = new byte[255];
+            byte b[] = new byte[1024];
             InputStream stream = clientSocket.getInputStream();
 
             while ( true ) {
 
-                if( stream.read(b, 0, 255) != -1){
+                if( stream.read(b, 0, 1024) != -1){
+                    //int size = ByteBuffer.wrap(b).getInt();
                     byteStream.write(processInput(b));
                     if(state == State.FINISH) break;
                 }else{
@@ -94,9 +95,9 @@ public final class ConnectionManager extends Thread {
 
     private byte[] processInput(@Nonnull byte[] b){
         ByteBuffer buffer = ByteBuffer.wrap(b);
+        int size = buffer.getInt();
         byte[] response;
         int id;
-        short size = buffer.getShort();
         if(state == State.FINISH){
             out.println("EndConnection");
             return null;
@@ -107,16 +108,8 @@ public final class ConnectionManager extends Thread {
                 break;
             case Constants.AGENT_ADD:
                 id = buffer.getInt();
-                int strlen = buffer.getInt();
-                /*char[] cbuf = new char[strlen];
-                for(short i = 0; i < strlen; i++) cbuf[i] = buffer.getChar();*/
-                byte[] utf8bytes = new byte[strlen];
-                buffer.get(utf8bytes, 0, strlen);
-                String vType = new String(utf8bytes, StandardCharsets.UTF_8);
-                strlen = buffer.getInt();
-                utf8bytes = new byte[strlen];
-                buffer.get(utf8bytes, 0, strlen);
-                String aslFile = new String(utf8bytes, StandardCharsets.UTF_8);
+                String vType = extractString(buffer);
+                String aslFile = extractString(buffer);
                 am.createNewAgent(id, vType, aslFile);
                 if(state == State.WAITINGFORAGENT){
                     am.toggleAgentLoop(false, true);
@@ -129,12 +122,21 @@ public final class ConnectionManager extends Thread {
                 am.removeAgent(id);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x03, 0x01};
                 break;
-            case Constants.UPDATE_SPEED:
+            case Constants.SET_BELIEF:
+
+                id = buffer.getInt();
+                String belief = extractString(buffer);
+                am.updateBeliefs(id, belief ,buffer.slice());
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
+                break;
+
+                /***************************************
                 id = buffer.getInt();
                 double speed = buffer.getDouble();
                 am.updateBeliefs(id, "speed", Double.toString(speed));
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
                 break;
+                /****************************************/
             case Constants.REQUEST_DECISIONS:
                 if (am.existsInstructions()) {
                     response = am.extractInstructions();
@@ -152,6 +154,13 @@ public final class ConnectionManager extends Thread {
                 break;
         }
         return response;
+    }
+
+    private String extractString(ByteBuffer buffer){
+        int strlen = buffer.getInt();
+        byte[] utf8bytes = new byte[strlen];
+        buffer.get(utf8bytes, 0, strlen);
+        return new String(utf8bytes, StandardCharsets.UTF_8);
     }
 
 }

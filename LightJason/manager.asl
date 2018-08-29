@@ -11,12 +11,12 @@ speed(0).
 
 +speed(X) <-
   X < 1.0;
-  //generic/print(MyName, ": Received new speed value of", X).
+  generic/print(MyName, ": Received new speed value of", X).
 
 +speed(X) <-
   X >= 1.0;
   >>slowing(_);
-  //generic/print(MyName, ": Received new speed value of", X).
+  generic/print(MyName, ": Received new speed value of", X).
 
 +speed(X) <-
   X >= 1.0;

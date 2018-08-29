@@ -32,11 +32,11 @@ void LaneMergeTrafficManager::handleSelfMsg(cMessage* msg)
 
 void LaneMergeTrafficManager::insertArterial()
 {
-    merger.id = findVehicleTypeIndex(mergerVtype);
-    merger.lane = 0;
-    merger.position = 8;
-    merger.speed = platoonInsertSpeed / 3.6;
-    addVehicleToQueue(2, merger);
+    //merger.id = findVehicleTypeIndex(mergerVtype);
+    automated.lane = 0;
+    automated.position = 8;
+    //merger.speed = platoonInsertSpeed / 3.6;
+    addVehicleToQueue(2, automated);
 }
 LaneMergeTrafficManager::~LaneMergeTrafficManager()
 {
