@@ -1,5 +1,6 @@
-package jasonveins.omnet;
+package jasonveins.omnet.agent;
 
+import jasonveins.omnet.managers.AgentManager;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
 

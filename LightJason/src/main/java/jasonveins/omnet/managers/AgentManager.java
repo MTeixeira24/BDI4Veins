@@ -1,5 +1,7 @@
-package jasonveins.omnet;
+package jasonveins.omnet.managers;
 
+import jasonveins.omnet.agent.NormalVehicleAgent;
+import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.decision.DecisionDataModel;
 import jasonveins.omnet.decision.InstructionModel;
 import org.lightjason.agentspeak.agent.IAgent;
@@ -14,12 +16,15 @@ import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * Manages the runtime environment of the agents and proxies calls between the agents and the omnet nodes
+ */
 public class AgentManager {
     protected Set<IAgent<?>> l_agents;
     protected String aslpath;
@@ -32,7 +37,15 @@ public class AgentManager {
     protected final ConnectionManager cmanager;
     //protected final CopyOnWriteArrayList<String> instructionsList = new CopyOnWriteArrayList<>();
     protected final DecisionDataModel ddm = new DecisionDataModel();
+    //Used to wait for initial agent creation. Connection manager holds a reference to this and decrements when the first
+    //agent is created
+    private CountDownLatch latch = new CountDownLatch(1);
 
+    /**
+     * Class constructor
+     * @param m_aslpath Path to asl files
+     * @param m_cm Reference to the connection manager
+     */
     public AgentManager(String m_aslpath, ConnectionManager m_cm) {
         cmanager = m_cm;
         aslpath = m_aslpath;
@@ -59,6 +72,12 @@ public class AgentManager {
         }
     }
 
+    /**
+     * Create a new agent and insert it into the runtime. The agent loop is safely paused before insertion
+     * @param id Identifier to be assigned to the agent. This value is determined in the omnet side and should be equal to its corresponding OMNET node
+     * @param vType Vehicle type as specified in a SUMO routes configuration file
+     * @param aslFile The asl file to be used by the agent
+     */
     public void createNewAgent(int id, String vType, String aslFile){
         try
                 (
@@ -86,20 +105,13 @@ public class AgentManager {
         }
     }
 
-    public void updateBeliefs(@Nonnull Integer id, @Nonnull String belief, @Nonnull String value){
-        final ITrigger trigger = CTrigger.from(
-                ITrigger.EType.ADDBELIEF,
-                CLiteral.from(
-                        belief,
-                        CRawTerm.from(Double.valueOf(value))
-                )//belief(<value>)
-        );
-        NormalVehicleAgent vehicle = agentMap.get(id);
-        if(vehicle == null) throw new RuntimeException();
-        vehicle.trigger(trigger);
-    }
-
-    public void updateBeliefs(@Nonnull int id, @Nonnull String belief,@Nonnull ByteBuffer values){
+    /**
+     * Value agnostic belief update method. Does not support nested belief values.
+     * @param id Identifier of the agent
+     * @param belief Belief to add to the agent
+     * @param values Byte sequence of the values within the belief as received from the connection manager
+     */
+    public void updateBeliefs(int id, @Nonnull String belief,@Nonnull ByteBuffer values){
         ArrayList<CRawTerm<?>> terms = new ArrayList<>();
         short data_type = values.getShort();
         switch (data_type){
@@ -127,14 +139,7 @@ public class AgentManager {
                 throw new RuntimeException("Unknown value!");
         }
 
-        /*final ITrigger trigger = CTrigger.from(
-                ITrigger.EType.ADDBELIEF,
-                CLiteral.from(belief,
-                        Arrays.stream( (ITerm[])terms.toArray() ).collect( Collectors.toList() )
-                )
-        );*/
         ITrigger trigger = null;
-        //java.lang.ClassCastException: java.base/[Ljava.lang.Object; cannot be cast to [Lorg.lightjason.agentspeak.language.ITerm;
         try{
             ITerm[] arrayTerms = new ITerm[terms.size()];
             arrayTerms = terms.toArray(arrayTerms);
@@ -152,21 +157,43 @@ public class AgentManager {
         vehicle.trigger(trigger);
     }
 
+    /**
+     * Pushes unto the decision data model the decisions an agent wished to transmit to its OMNET nodes.
+     * @param data The data to be sent as an Instruction Model object
+     */
     public void addInstruction(@Nonnull InstructionModel data){
         ddm.addInstruction(data);
     }
 
+    /**
+     * Request the Decision Data Model to send all the agent decisions its holding in byte sequence form. WARNING: All currently held data at time of method call will be deleted
+     * @return Byte sequence of all decisions made by agent ready to be sent over to OMNET
+     */
     public byte[] extractInstructions(){
         return ddm.convertToMessage();
     }
 
+    /**
+     * Checks if any instructions are available in the Decision Data Model
+     * @return True if the number of instructions is greater than zero, false otherwise
+     */
     public boolean existsInstructions(){
         return !ddm.isEmpty();
     }
 
     public void loop(){
         System.out.println("Agent loop: Awaiting agent input");
-        while(!simulate.get() && !cmanager.isDisconnected()); //TODO: Use sleep instead of a while
+
+        try {
+            latch.await();  // wait until latch counted down to 0
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+         }
+         toggleAgentLoop(false, true);
+
+
+        System.out.println("Resume");
+
         if(cmanager.isDisconnected()){
             //Abrupt connection interruption
             System.exit(1);
@@ -224,4 +251,6 @@ public class AgentManager {
     public void toggleAgentLoop(boolean expectedValue, boolean newValue) {
         if( !simulate.compareAndSet(expectedValue, newValue)) throw new RuntimeException();
     }
+
+    public CountDownLatch getLatch() { return this.latch; }
 }

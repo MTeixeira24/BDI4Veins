@@ -1,5 +1,7 @@
-package jasonveins.omnet;
+package jasonveins.omnet.agent;
 
+import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.constants.CVariableBuilder;
 import org.lightjason.agentspeak.common.CCommon;
 import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
 

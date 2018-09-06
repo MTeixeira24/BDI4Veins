@@ -1,5 +1,9 @@
-package jasonveins.omnet;
+package jasonveins.omnet.managers;
 
+
+/**
+ * Two-byte length constants that must be agreed upon between the c++ and java side to enable communication
+ */
 public class Constants {
     public static final short CONNECTION_ACK = 1;
     public static final short AGENT_ADD = 2;

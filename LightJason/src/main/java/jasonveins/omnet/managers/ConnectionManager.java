@@ -1,12 +1,11 @@
-package jasonveins.omnet;
+package jasonveins.omnet.managers;
 
 import javax.annotation.Nonnull;
 import java.net.*;
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 
 public final class ConnectionManager extends Thread {
 
@@ -15,6 +14,7 @@ public final class ConnectionManager extends Thread {
     private Socket clientSocket;
     private PrintWriter out;
     private AgentManager am;
+    private CountDownLatch am_latch;
 
     public boolean isDisconnected() {
         return state == State.DISCONNECTED;
@@ -36,6 +36,7 @@ public final class ConnectionManager extends Thread {
 
     public void setAgentManager(AgentManager m_am){
         am = m_am;
+        am_latch = am.getLatch();
     }
 
     private void startServer() throws IOException {
@@ -93,6 +94,7 @@ public final class ConnectionManager extends Thread {
         }
     }
 
+
     private byte[] processInput(@Nonnull byte[] b){
         ByteBuffer buffer = ByteBuffer.wrap(b);
         int size = buffer.getInt();
@@ -112,8 +114,9 @@ public final class ConnectionManager extends Thread {
                 String aslFile = extractString(buffer);
                 am.createNewAgent(id, vType, aslFile);
                 if(state == State.WAITINGFORAGENT){
-                    am.toggleAgentLoop(false, true);
+                    //am.toggleAgentLoop(false, true);
                     state = State.RUNNINGLOOP;
+                    am_latch.countDown();
                 }
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x02, 0x01};
                 break;
@@ -129,14 +132,6 @@ public final class ConnectionManager extends Thread {
                 am.updateBeliefs(id, belief ,buffer.slice());
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
                 break;
-
-                /***************************************
-                id = buffer.getInt();
-                double speed = buffer.getDouble();
-                am.updateBeliefs(id, "speed", Double.toString(speed));
-                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
-                break;
-                /****************************************/
             case Constants.REQUEST_DECISIONS:
                 if (am.existsInstructions()) {
                     response = am.extractInstructions();

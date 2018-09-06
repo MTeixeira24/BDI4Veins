@@ -1,7 +1,7 @@
 package jasonveins;
 
-import jasonveins.omnet.AgentManager;
-import jasonveins.omnet.ConnectionManager;
+import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.managers.ConnectionManager;
 
 
 import java.util.logging.LogManager;

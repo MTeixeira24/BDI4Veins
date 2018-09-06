@@ -1,5 +1,6 @@
-package jasonveins.omnet;
+package jasonveins.omnet.constants;
 
+import jasonveins.omnet.agent.IVehicleAgent;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.execution.IVariableBuilder;
 import org.lightjason.agentspeak.language.instantiable.IInstantiable;
@@ -14,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * variable build for setting a name
  */
-final class CVariableBuilder implements IVariableBuilder
+public final class CVariableBuilder implements IVariableBuilder
 {
     @Nonnull
     @Override

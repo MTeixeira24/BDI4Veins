@@ -21,57 +21,52 @@
  * @endcond
  */
 
-package jasonveins.omnet;
+package jasonveins.omnet.agent;
 
-import jasonveins.omnet.decision.InstructionModel;
-import org.lightjason.agentspeak.action.binding.IAgentAction;
-import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
-import org.lightjason.agentspeak.action.binding.IAgentActionName;
-import org.lightjason.agentspeak.agent.IBaseAgent;
-import org.lightjason.agentspeak.configuration.IAgentConfiguration;
+import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.constants.CVariableBuilder;
+import org.lightjason.agentspeak.common.CCommon;
+import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.InputStream;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
-/**
- * agent class with annotation to mark the class that actions are inside
- */
-@IAgentAction
-public final class ManagerAgent extends IBaseAgent<ManagerAgent>
+/* agent generator to create agents */
+public final class ManagerGenerator extends IBaseAgentGenerator<ManagerAgent>
 {
-    private int id;
     private AgentManager agentManager;
-
     /**
-     * serial id
+     * @param p_stream ASL code as any stream e.g. FileInputStream
      */
-    private static final long serialVersionUID = -2111893876806742109L;
-
-
-    /**
-     * constructor of the agent
-     *
-     * @param p_configuration agent configuration of the agent generator
-     */
-
-    ManagerAgent(@Nonnull final IAgentConfiguration<ManagerAgent> p_configuration, @Nonnull AgentManager m_am,@Nonnull final int m_id)
+    public ManagerGenerator( @Nonnull final InputStream p_stream, AgentManager m_am) throws Exception
     {
-        super( p_configuration );
-        id = m_id;
+        super(
+                // input ASL stream
+                p_stream,
+                Stream.concat(
+                        CCommon.actionsFromPackage(),
+                        CCommon.actionsFromAgentClass( ManagerAgent.class )
+                ).collect(Collectors.toSet()),
+                new CVariableBuilder()
+        );
         agentManager = m_am;
     }
 
-    public int id(){
-        return this.id;
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "transmit/self/slow" )
-    private void transmitDecision()
+    /**
+     * generator method of the agent
+     *
+     * @param p_data any data which can be put from outside to the generator method
+     * @return returns an agent
+     */
+    @Nullable
+    @Override
+    public final ManagerAgent generatesingle( @Nullable final Object... p_data )
     {
-        InstructionModel iOb = new InstructionModel(this.id, 4);
-        iOb.pushDouble(0.5);
-        agentManager.addInstruction(iOb);
+        final ManagerAgent agent = new ManagerAgent( m_configuration, agentManager,(int)p_data[0]);
+        return agent;
     }
-
 }

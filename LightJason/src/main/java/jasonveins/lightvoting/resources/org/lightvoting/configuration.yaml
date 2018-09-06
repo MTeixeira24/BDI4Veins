@@ -1,0 +1,8 @@
+# LightVoting Default Config
+
+variables:
+  grouping: RANDOM
+  protocol: BASIC
+  altnum: '6'
+
+# TODO set other parameters here -> capacity, diss threshold, join threshold, (number of) alternatives
