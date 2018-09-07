@@ -4,6 +4,7 @@
 veinsBDI/src/Makefile
 veinsBDI/.settings/language.settings.xml
 *.qtenvrc
+veinsBDI/.settings/*
 # Simulation results
 *.vec
 *.vci
