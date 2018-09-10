@@ -85,7 +85,7 @@ void JoinBDITrafficManager::scenarioLoaded()
     }
     /*Insert the joiner vehicle*/
     if (joinerLane >= 0){
-        automated.speed = platoonInsertSpeed->doubleValue() / 3.6;
+        automated.speed = (platoonInsertSpeed->doubleValue() / 3.6) + 20;
         automated.lane = joinerLane;
         automated.position = 10;
         addVehicleToQueue(0, automated);
