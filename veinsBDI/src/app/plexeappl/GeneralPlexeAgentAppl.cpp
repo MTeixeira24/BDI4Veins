@@ -21,6 +21,13 @@ void GeneralPlexeAgentAppl::initialize(int stage)
             joinManeuver = new JoinAtN(this);
         else
             throw new cRuntimeError("Invalid join maneuver implementation chosen");
+        if(DynamicPositionManager::getInstance().vehToPlatoons.count(positionHelper->getId()) == 0){
+            setPlatoonRole(PlatoonRole::NONE);
+        }else if(positionHelper->isLeader()){
+            setPlatoonRole(PlatoonRole::LEADER);
+        }else{
+            setPlatoonRole(PlatoonRole::FOLLOWER);
+        }
     }
 }
 
@@ -34,11 +41,11 @@ void GeneralPlexeAgentAppl::startJoinManeuver(int platoonId, int leaderId, int p
     ASSERT(getPlatoonRole() == PlatoonRole::NONE);
     ASSERT(!isInManeuver());
 
-    //JoinManeuverParameters params;
-    //params.platoonId = platoonId;
-    //params.leaderId = leaderId;
-    //params.position = position;
-    //joinManeuver->startManeuver(&params);
+    JoinManeuverParameters params;
+    params.platoonId = platoonId;
+    params.leaderId = leaderId;
+    params.position = position;
+    joinManeuver->startManeuver(&params);
 }
 
 void GeneralPlexeAgentAppl::sendUnicast(cPacket* msg, int destination)

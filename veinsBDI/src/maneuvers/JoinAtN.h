@@ -12,10 +12,15 @@
 #include <algorithm>
 
 #include "BaseJoin.h"
-#include "veins/modules/application/platooning/utilities/BasePositionHelper.h"
+#include "veins/modules/application/platooning/utilities/DynamicPositionHelper.h"
 
 #include "veins/modules/mobility/traci/TraCIConstants.h"
 #include "veins/base/utils/Coord.h"
+
+#include "../messages/MoveToPositionN_m.h"
+#include "../messages/CreateGap_m.h"
+#include "../messages/CreateGapAck_m.h"
+#include "../messages/CloseGap_m.h"
 
 using namespace Veins;
 
@@ -90,7 +95,19 @@ public:
      */
     virtual void handleJoinFormationAck(const JoinFormationAck* msg) override;
 
+    virtual void onManeuverMessage(const ManeuverMessage* mm) override;
+
+    virtual void handleCreateGapRequest(const CreateGap* msg);
+
+    virtual void handleCreateGapAck(const CreateGapAck* msg);
+
+    virtual void handleCloseGap(const CloseGap* msg);
+
 protected:
+    CreateGap* createCreateGap(int vehicleId, std::string externalId, int platoonId, int destinationId, int joinerId);
+    CreateGapAck* createCreateGapAck(int vehicleId, std::string externalId, int platoonId, int destinationId);
+    CloseGap* createCloseGap(int vehicleId, std::string externalId, int platoonId, int destinationId);
+    MoveToPositionN* createMoveToPositionN(int vehicleId, std::string externalId, int platoonId, int destinationId, double platoonSpeed, int platoonLane, const std::vector<int>& newPlatoonFormation, int position, int frontId, int backId);
     /** Possible states a vehicle can be in during a join maneuver */
     enum class JoinManeuverState {
         IDLE, ///< The maneuver did not start
@@ -102,17 +119,19 @@ protected:
         // Leader
         L_WAIT_JOINER_IN_POSITION, ///< The leader waits for the joiner to be in position, the followers made space already
         L_WAIT_JOINER_TO_JOIN, ///< The leader waits for the joiner to join
+        B_CREATING_GAP, //The Follower is increasing its intervehicular distance
+        B_HOLD_GAP //The Follower is maintaining its increased intervehicular distance
     };
 
     /** data that a joiner stores about a Platoon it wants to join */
     struct TargetPlatoonData {
         int platoonId; ///< the id of the platoon to join
-        int platoonLeader; ///< the if ot the leader of the platoon
+        int platoonLeader; ///< the id of the leader of the platoon
         int platoonLane; ///< the lane the platoon is driving on
         double platoonSpeed; ///< the speed of the platoon
-        int joinIndex; ///< position in the new platoon formation, 0 based !
+        unsigned int joinIndex; ///< position in the new platoon formation, 0 based !
         std::vector<int> newFormation; ///< the new formation of the platoon
-        Coord lastFrontPos; ///< the last kwown position of the front vehicle
+        Coord lastFrontPos; ///< the last known position of the front vehicle
 
         /** c'tor for TargetPlatoonData */
         TargetPlatoonData()
@@ -194,6 +213,15 @@ protected:
 
     /** the data about the current joiner */
     std::unique_ptr<JoinerData> joinerData;
+
+    /** determine if the follower vehicle has increased its distance */
+    bool gapCreated;
+
+    /** determine if the joiner is in position */
+    bool joinerInPosition;
+
+    /** save the id of the vehicle creating the gap*/
+    int gapCreatorId;
 };
 
 #endif /* MANEUVERS_JOINATN_H_ */

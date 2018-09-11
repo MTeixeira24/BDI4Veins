@@ -24,6 +24,8 @@ void JoinBDITrafficManager::initialize(int stage)
     platoonLeaderHeadway = par("platoonLeaderHeadway").doubleValue();
     platooningVType = par("platooningVType").stdstringValue();
     joinerLane = par("joinerLane").intValue();
+    addJoiner = new cMessage();
+    scheduleAt(simTime() + 1, addJoiner);
 }
 
 void JoinBDITrafficManager::scenarioLoaded()
@@ -83,11 +85,20 @@ void JoinBDITrafficManager::scenarioLoaded()
             injectedPlatoons++;
         }
     }
-    /*Insert the joiner vehicle*/
-    if (joinerLane >= 0){
-        automated.speed = (platoonInsertSpeed->doubleValue() / 3.6) + 20;
-        automated.lane = joinerLane;
-        automated.position = 10;
-        addVehicleToQueue(0, automated);
+}
+
+void JoinBDITrafficManager::handleSelfMsg(cMessage* msg){
+    TraCIBaseTrafficManager::handleSelfMsg(msg);
+    if(msg == addJoiner){
+        struct Vehicle automated;
+        automated.id = findVehicleTypeIndex("vtypeauto");
+        /*Insert the joiner vehicle*/
+        if (joinerLane >= 0){
+            automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);
+            automated.lane = joinerLane;
+            automated.position = 10;
+            addVehicleToQueue(0, automated);
+        }
+        delete addJoiner;
     }
 }

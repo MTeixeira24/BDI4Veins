@@ -47,6 +47,7 @@ protected:
     std::string platooningVType;
     cPar* platoonInsertSpeed;
     int joinerLane;
+    cMessage* addJoiner;
 
     typedef struct {
         int size;
@@ -54,6 +55,8 @@ protected:
         double length;
         double distanceToFront;
     } Platoon;
+
+    virtual void handleSelfMsg(cMessage* msg) override;
 };
 
 #endif /* TRAFFIC_JOINBDITRAFFICMANAGER_H_ */

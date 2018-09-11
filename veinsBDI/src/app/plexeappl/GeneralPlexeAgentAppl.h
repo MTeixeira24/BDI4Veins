@@ -24,6 +24,7 @@
 #include "BasePlexeAgentAppl.h"
 #include "../../maneuvers/BaseJoin.h"
 #include "../../maneuvers/JoinAtN.h"
+#include "veins/modules/application/platooning/utilities/DynamicPositionManager.h"
 
 /** possible roles of this vehicle */
 enum class PlatoonRole : size_t {

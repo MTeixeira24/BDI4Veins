@@ -22,11 +22,10 @@ void JoinScenarioNoAI::initialize(int stage)
 
     BaseScenario::initialize(stage);
 
-    if (stage == 0){}
+    if (stage == 0){
         // get pointer to application
-        /*The joiner will be marked accordingly in its app: e.g. app.startsLone == true*/
-        //app = FindModule<GeneralPlatooningApp*>::findSubModule(getParentModule());
-        //appl = FindModule<BaseApp*>::findSubModule(getParentModule());
+        app = FindModule<GeneralPlexeAgentAppl*>::findSubModule(getParentModule());
+    }
 
     if (stage == 1) {
 
@@ -36,14 +35,18 @@ void JoinScenarioNoAI::initialize(int stage)
         if(aux == 0) {
             traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), false);
             traciVehicle->setActiveController(Plexe::ACC);
+            //traciVehicle->setSpeed(mobility->getSpeed());
             traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed());
             positionHelper->setPlatoonId(-1);
             positionHelper->setIsLeader(false);
             positionHelper->setPlatoonLane(-1);
+
+            startManeuver = new cMessage();
+            scheduleAt(simTime() + SimTime(0.5), startManeuver);
        }else{
            double speedModifier[] =  {1, 0.6, 1.5};
            int platoonId = positionHelper->getPlatoonId();
-           traciVehicle->setSpeed(mobility->getSpeed() * speedModifier[platoonId]);
+           //traciVehicle->setSpeed(mobility->getSpeed() * speedModifier[platoonId]);
 
            platooningVType = par("platooningVType").stdstringValue();
 
@@ -58,15 +61,30 @@ void JoinScenarioNoAI::initialize(int stage)
 
                traciVehicle->enableAutoLaneChanging(false);
                traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), true);
-               traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed());
+               traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed() * speedModifier[platoonId]);
            }
            else {
                std::stringstream ssl, ss;
                ssl << platooningVType << "." << positionHelper->getLeaderId();
                ss << platooningVType << "." << positionHelper->getFrontId();
-               //traciVehicle->enableAutoFeed(true, ssl.str(), ss.str());
+               //traciVehicle->enableAutoFeed(false, ssl.str(), ss.str());
                traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed() + 10);
            }
        }
+    }
+}
+
+void JoinScenarioNoAI::handleSelfMsg(cMessage* msg)
+{
+
+    // this takes care of feeding data into CACC and reschedule the self message
+    BaseScenario::handleSelfMsg(msg);
+
+    if (msg == startManeuver) app->startJoinManeuver(0, 0, -1);
+    if (msg == test){
+        delete test;
+        traciVehicle->setCruiseControlDesiredSpeed(traciVehicle->getCruiseControlDesiredSpeed() - 10);
+        test = new cMessage();
+        scheduleAt(simTime() + SimTime(0.5), test);
     }
 }
