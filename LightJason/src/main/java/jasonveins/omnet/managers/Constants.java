@@ -11,6 +11,7 @@ public class Constants {
     public static final short SET_BELIEF = 4;
     public static final short REQUEST_DECISIONS = 5;
     public static final short REQUEST_SPEED_DOWN = 6;
+    public static final short SEND_JOIN_REQUEST = 7;
     public static final short CONNECTION_END = 126;
 
     public static final short VALUE_BOOL = 1;

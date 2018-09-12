@@ -63,8 +63,10 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "transmit/other/sendjoinplatoonRequest" )
     private void sendJoinPlatoonRequest(@Nonnull final Number platoonId, @Nonnull final Number leaderId, @Nonnull final Number speed)
     {
-            /*InstructionModel iOb = new InstructionModel(this.id, Constants.REQUEST_SPEED_DOWN);
-            iOb.pushInt(targetId.intValue());
-            agentManager.addInstruction(iOb);*/
+            InstructionModel iOb = new InstructionModel(this.id, Constants.SEND_JOIN_REQUEST);
+            iOb.pushInt(platoonId.intValue());
+            iOb.pushInt(leaderId.intValue());
+            iOb.pushDouble(speed.doubleValue());
+            agentManager.addInstruction(iOb);
     }
 }

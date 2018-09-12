@@ -7,18 +7,18 @@
 //travelroute([_l1, .., _ln]).
 //ischair.
 minimumUtility(200).
+preferedspeed(80).
 
 //Initial Goal
 !main.
 
 //Agent Belief Set up
 +!main <-
-    generic/print("Agent ", MyName, " of type ", MyType ," started");
     FuelConsumptionPreference = utility/generatefuelpreference();
     TravelTimePreference = utility/generatetraveltimepreference(FuelConsumptionPreference);
     +fuelpreference(FuelConsumptionPreference);
     +traveltimepreference(TravelTimePreference);
-    generic/print("Agent ", MyName, ": has preference for fuel: ", FuelConsumptionPreference ," and TravelTimePreference: ", TravelTimePreference).
+    generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for fuel: ", FuelConsumptionPreference ," and TravelTimePreference: ", TravelTimePreference).
 
 +ballotopen() <-
     generic/print("Agent ", MyName, " got notification of a new ballot starting").
@@ -29,14 +29,17 @@ minimumUtility(200).
 
 +foundplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " found a potential platoon: ", PID);
-    !attemptjoin(ID, LID).
+    !attemptjoin(PID, LID).
 
-+!attemptjoin(ID, LID) <-
-    +targetplatoonjoin(ID);
++requestjoin(JID, JSPEED) <-
+    !handlejoinrequest(JID, JSPEED).
+
++!attemptjoin(PID, LID) <-
+    +targetplatoonjoin(PID);
     +leaderid(LID);
-    generic/print("Agent ", MyName, " sending a request to join").
-    //>>preferedspeed(SPEED).
-    //transmit/other/sendjoinplatoonrequest(ID, LID, SPEED).
+    generic/print("Agent ", MyName, " sending a request to join");
+    >>preferedspeed(SPEED);
+    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED).
 
 +!handlejoinrequest(JID, JSPEED) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID).

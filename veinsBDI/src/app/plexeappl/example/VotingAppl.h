@@ -21,6 +21,12 @@ public:
     virtual void initialize(int stage) override;
     //TODO: Add this function to base agent
     virtual void sendToAgent(const BeliefModel* bm);
+    /**
+     * Send a request to a platoon leader to join the platoon
+     *
+     * @param targetPlatoonId Id of the platoon leader
+     */
+    void sendRequestToJoin(int targetPlatoonId, int destinationId, double preferedSpeed);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
@@ -34,18 +40,11 @@ protected:
     virtual void onPlatoonBeacon(const PlatooningBeacon* pb) override;
 
     /**
-     * Send a request to a platoon leader to join the platoon
-     *
-     * @param targetPlatoonId Id of the platoon leader
-     */
-    void sendRequestToJoin(int targetPlatoonId, int destinationId);
-
-    /**
      * Handles requests received from a potential joiner vehicle by directing it to the agent to prepare negotiations
      *
      * @param msg The message received from the potential joiner
      */
-    void handleRequestToJoinNegotiation(const NegotiationMessage* msg);
+    void handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg);
 
     enum class InitialState {
             NONE,

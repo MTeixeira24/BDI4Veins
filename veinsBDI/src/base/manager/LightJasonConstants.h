@@ -24,6 +24,8 @@
 
 #define REQUEST_SPEED_DOWN 0x06
 
+#define SEND_JOIN_REQUEST 0x07
+
 #define TERMINATE_CONNECTION 0x7E
 
 /*

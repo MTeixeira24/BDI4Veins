@@ -41,22 +41,20 @@ void VoteManager::parseResponse(uint32_t msgLength){
             uint32_t agentAction;
             rbf >> agentAction;
             switch (agentAction){
-            /*case SET_MAX_SPEED:
-                rbf >> type;
-                ASSERT(type == VALUE_DOUBLE);
-                double speed;
-                rbf >> speed;
-                vehicles[agentId]->changeSpeed(speed);
-                break;*/
-            case REQUEST_SPEED_DOWN:
+            case SEND_JOIN_REQUEST:
                 rbf >> type;
                 ASSERT(type == VALUE_INT);
-                int targetid;
-                rbf >> targetid;
-                /*MessageParameters mp;
-                mp.messageRequest = REQUEST_SPEED_DOWN;
-                mp.targetId = id;*/
-                //((SimpleMerge*)(vehicles[agentId]))->startMerge(0,targetid,0);
+                int platoonid;
+                int leaderid;
+                double preferedspeed;
+                rbf >> platoonid;
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                rbf >> leaderid;
+                rbf >> type;
+                ASSERT(type == VALUE_DOUBLE);
+                rbf >> preferedspeed;
+                ((VotingAppl*)(vehicles[agentId]))->sendRequestToJoin(platoonid, leaderid, preferedspeed);
                 break;
             default:
                 break;
