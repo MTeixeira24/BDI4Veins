@@ -1,6 +1,7 @@
 package jasonveins;
 
 import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.ConnectionManager;
 
 
@@ -35,9 +36,12 @@ final class App
     public static void main( final String[] p_args )
     {
         ConnectionManager cm = new ConnectionManager();
-        AgentManager am = new AgentManager(/*"manager.asl"*/"laneMergeVehicle.asl", cm);
-        cm.setAgentManager(am);
+        //AgentManager am = new AgentManager(/*"manager.asl"*/"laneMergeVehicle.asl", cm);
+        CVoterAgentManager cam = new CVoterAgentManager("voter.asl", cm);
+        //cm.setAgentManager(am);
+        cm.setAgentManager(cam);
         cm.start();
-        am.loop();
+        //am.loop();
+        cam.loop();
     }
 }

@@ -16,12 +16,12 @@ public:
     JoinScenarioNoAI();
     virtual ~JoinScenarioNoAI();
     virtual void initialize(int stage) override;
-private:
+protected:
+    void handleSelfMsg(cMessage* msg);
     std::string platooningVType;
     GeneralPlexeAgentAppl* app;
     cMessage* startManeuver;
     cMessage* test;
-    void handleSelfMsg(cMessage* msg);
 };
 
 #endif /* SCENARIOS_JOINSCENARIONOAI_H_ */

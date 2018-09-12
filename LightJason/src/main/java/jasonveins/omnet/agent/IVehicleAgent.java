@@ -36,6 +36,11 @@ public abstract class IVehicleAgent<T extends IAgent<?>> extends IBaseAgent<T> {
 
     public String vType(){return this.vType;}
 
+    /************************************
+     * NEVER DEFINE AN ACTION NAME WITH UPPERCASE LETTERS
+     * THEY WONT BE PARSED.
+     *************************************/
+
     @IAgentActionFilter
     @IAgentActionName( name = "transmit/self/slow" )
     private void setControllerMaxSpeed()

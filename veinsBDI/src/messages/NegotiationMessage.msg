@@ -11,23 +11,20 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-package veinsbdi.simulations.joinCaseStudy;
+cplusplus {{
+    /** message type for maneuver messages */
+    static const int NEGOTIATION_TYPE = 22347;
+}}
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.voteManager.voteManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
-
-network JoinNetworkAI extends Scenario
-{
-    parameters:
-        string traffic_type;
-    submodules:
-        ljmanager: voteManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+// General message to initiate negotiation procedures.
+// Only children of this message should be initialized.
+packet NegotiationMessage {
+    // id of the originator of this message
+    int vehicleId;
+    // id of the destination of this message
+    int destinationId;
+    // sumo external id of the sender
+    string externalId;
 }

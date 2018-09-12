@@ -13,21 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.joinCaseStudy;
+cplusplus {{
+#include "NegotiationMessage_m.h"
+}}
+packet NegotiationMessage;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.voteManager.voteManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
-
-network JoinNetworkAI extends Scenario
-{
-    parameters:
-        string traffic_type;
-    submodules:
-        ljmanager: voteManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+//
+// TODO generated message class
+//
+packet RequestJoinPlatoonMessage extends NegotiationMessage {
+    //The id of the platoon the vehicle wishes to join
+    int platoonId;
+    //Relevant information about vehicle preferences
+    double preferedSpeed;
 }

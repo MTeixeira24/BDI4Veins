@@ -104,6 +104,7 @@ public final class ConnectionManager extends Thread {
             out.println("EndConnection");
             return null;
         }
+        size -= 2;
         switch (buffer.getShort()){
             case Constants.CONNECTION_ACK:
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x01, 0x01};
@@ -126,10 +127,11 @@ public final class ConnectionManager extends Thread {
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x03, 0x01};
                 break;
             case Constants.SET_BELIEF:
-
                 id = buffer.getInt();
+                size -= 4;
                 String belief = extractString(buffer);
-                am.updateBeliefs(id, belief ,buffer.slice());
+                size -= belief.length();
+                am.updateBeliefs(id, belief ,buffer.slice(), size);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
                 break;
             case Constants.REQUEST_DECISIONS:

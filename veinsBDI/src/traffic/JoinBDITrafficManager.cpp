@@ -31,7 +31,7 @@ void JoinBDITrafficManager::initialize(int stage)
 void JoinBDITrafficManager::scenarioLoaded()
 {
 
-    int vehTypeId = findVehicleTypeIndex("vtypeauto");
+    int vehTypeId = findVehicleTypeIndex(platooningVType);
     struct Vehicle automated;
 
     // map from lane index to a vector with all platoon sizes
@@ -91,7 +91,7 @@ void JoinBDITrafficManager::handleSelfMsg(cMessage* msg){
     TraCIBaseTrafficManager::handleSelfMsg(msg);
     if(msg == addJoiner){
         struct Vehicle automated;
-        automated.id = findVehicleTypeIndex("vtypeauto");
+        automated.id = findVehicleTypeIndex(platooningVType);
         /*Insert the joiner vehicle*/
         if (joinerLane >= 0){
             automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);

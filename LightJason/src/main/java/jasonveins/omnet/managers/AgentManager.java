@@ -1,5 +1,6 @@
 package jasonveins.omnet.managers;
 
+import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  */
 
 public class AgentManager {
-    private static final String resourceFolder = "src/main/resources/asl/";
+    protected static final String resourceFolder = "src/main/resources/asl/";
     protected Set<IAgent<?>> l_agents;
     protected String aslpath;
     protected AtomicInteger agentCount = new AtomicInteger(0);
@@ -55,14 +56,15 @@ public class AgentManager {
         execute = new AtomicBoolean(true);
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
+        String l_aslpath = resourceFolder+aslpath;
         try
                 (
-                        final FileInputStream l_stream = new FileInputStream( aslpath ) //TODO: Get rid of this
+                        final FileInputStream l_stream = new FileInputStream( l_aslpath ) //TODO: Get rid of this
                 )
         {
             final int l_agentNumber = 0;
             l_agents =
-                    new NormalVehicleGenerator( l_stream, this )
+                    new CVoterAgentGenerator( l_stream, this )
                             .generatemultiple( l_agentNumber, 0 )
                             .collect( Collectors.toSet()
 
@@ -146,33 +148,43 @@ public class AgentManager {
      * @param id Identifier of the agent
      * @param belief Belief to add to the agent
      * @param values Byte sequence of the values within the belief as received from the connection manager
+     * @param p_size Size in bytes of the message
      */
-    public void updateBeliefs(int id, @Nonnull String belief,@Nonnull ByteBuffer values){
+    public void updateBeliefs(int id, @Nonnull String belief,@Nonnull ByteBuffer values, int p_size){
         ArrayList<CRawTerm<?>> terms = new ArrayList<>();
-        short data_type = values.getShort();
-        switch (data_type){
-            case Constants.VALUE_BOOL:
-                throw new RuntimeException("Bool value not defined!");
-            case Constants.VALUE_CHAR:
-                terms.add(CRawTerm.from(values.getChar()));
-                break;
-            case Constants.VALUE_SHORT:
-                terms.add(CRawTerm.from(values.getShort()));
-                break;
-            case Constants.VALUE_INT:
-                terms.add(CRawTerm.from(values.getInt()));
-                break;
-            case Constants.VALUE_LONG:
-                terms.add(CRawTerm.from(values.getLong()));
-                break;
-            case Constants.VALUE_FLOAT:
-                terms.add(CRawTerm.from(values.getFloat()));
-                break;
-            case Constants.VALUE_DOUBLE:
-                terms.add(CRawTerm.from(values.getDouble()));
-                break;
-            default:
-                throw new RuntimeException("Unknown value!");
+        int size = p_size;
+        while(size > 0){
+            short data_type = values.getShort();
+            switch (data_type){
+                case Constants.VALUE_BOOL:
+                    throw new RuntimeException("Bool value not defined!");
+                case Constants.VALUE_CHAR:
+                    terms.add(CRawTerm.from(values.getChar()));
+                    size -= 1;
+                    break;
+                case Constants.VALUE_SHORT:
+                    terms.add(CRawTerm.from(values.getShort()));
+                    size -= 2;
+                    break;
+                case Constants.VALUE_INT:
+                    terms.add(CRawTerm.from(values.getInt()));
+                    size -= 4;
+                    break;
+                case Constants.VALUE_LONG:
+                    terms.add(CRawTerm.from(values.getLong()));
+                    size -= 8;
+                    break;
+                case Constants.VALUE_FLOAT:
+                    terms.add(CRawTerm.from(values.getFloat()));
+                    size -= 4;
+                    break;
+                case Constants.VALUE_DOUBLE:
+                    terms.add(CRawTerm.from(values.getDouble()));
+                    size -= 8;
+                    break;
+                default:
+                    throw new RuntimeException("Unknown value!");
+            }
         }
 
         ITrigger trigger = null;
