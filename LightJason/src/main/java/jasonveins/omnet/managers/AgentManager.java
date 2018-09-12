@@ -1,5 +1,6 @@
 package jasonveins.omnet.managers;
 
+import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.decision.DecisionDataModel;
@@ -25,14 +26,16 @@ import java.util.stream.Collectors;
 /**
  * Manages the runtime environment of the agents and proxies calls between the agents and the omnet nodes
  */
+
 public class AgentManager {
+    private static final String resourceFolder = "src/main/resources/asl/";
     protected Set<IAgent<?>> l_agents;
     protected String aslpath;
     protected AtomicInteger agentCount = new AtomicInteger(0);
     protected AtomicBoolean execute, cycleEnd, simulate; //Flags to control the agent cycle. //
     // execute flag determines if new cycles should be made.
     // cycleEnd confirms if a cycle has properly finished in order to allow mutations to the agentSet
-    protected final Map<Integer, NormalVehicleAgent> agentMap = new ConcurrentHashMap<>();
+    protected final Map<Integer, IVehicleAgent<?>> agentMap = new ConcurrentHashMap<>();
     //Map agent Ids to their references.
     protected final ConnectionManager cmanager;
     //protected final CopyOnWriteArrayList<String> instructionsList = new CopyOnWriteArrayList<>();
@@ -76,23 +79,26 @@ public class AgentManager {
      * Create a new agent and insert it into the runtime. The agent loop is safely paused before insertion
      * @param id Identifier to be assigned to the agent. This value is determined in the omnet side and should be equal to its corresponding OMNET node
      * @param vType Vehicle type as specified in a SUMO routes configuration file
-     * @param aslFile The asl file to be used by the agent
+     * @param p_aslFile The asl file to be used by the agent
      */
-    public void createNewAgent(int id, String vType, String aslFile){
+    public void createNewAgent(int id, String vType, String p_aslFile){
+        String l_aslFile = resourceFolder + p_aslFile;
         try
                 (
-                        final FileInputStream l_stream = new FileInputStream( aslFile )
+                        final FileInputStream l_stream = new FileInputStream( l_aslFile )
                 ){
             if(!execute.compareAndSet(true, false)){ //Halt execution of the agent loop
                 throw new RuntimeException();
             }
             while(!cycleEnd.get()); //Wait until current stream is over
-            NormalVehicleAgent m_ag;
+            /*NormalVehicleAgent m_ag;
             switch(vType){
                 default:
-                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id, vType); //TODO: Make the generators global
+                    m_ag = new NormalVehicleGenerator(l_stream, this).generatesingle(id, vType);
                     break;
-            }
+            }*/
+
+            IVehicleAgent<?> m_ag = buildAgent(id, l_stream, l_aslFile, vType);
 
             l_agents.add(m_ag);
             agentMap.putIfAbsent(id, m_ag);
@@ -103,6 +109,36 @@ public class AgentManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Method called by createNewAgent to build an agent to add to the runtime. It is recommended to override this
+     * method if new vehicle to behaviour associations are to be made.
+     * @param p_id Id of the agent. Generated in OMNET and is equal to its corresponding control application
+     * @param p_stream Input stream for the asl file
+     * @param p_aslFile Name of the asl file. Must exist in folder: jasonveins.resources.asl
+     * @param vType The vehicle type identifier as defined in SUMO
+     * @return A vehicle agent object that subclasses IVehicleAgent
+     */
+    public IVehicleAgent<?> buildAgent(int p_id, @Nonnull FileInputStream p_stream, @Nonnull String p_aslFile, @Nonnull String vType){
+        NormalVehicleAgent l_ag = null;
+        try {
+            switch(vType){
+                case "vVoter":
+                    if(p_aslFile.equals("FuelVoter.asl") || p_aslFile.equals("SpeedVoter.asl")){
+
+                    }else{
+                        throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected FuelVoter.asl or SpeedVoter.asl");
+                    }
+                    break;
+                default:
+                    l_ag = new NormalVehicleGenerator(p_stream, this).generatesingle(p_id, vType); //TODO: Make the generators global
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return l_ag;
     }
 
     /**
@@ -152,7 +188,7 @@ public class AgentManager {
         }catch (Exception e){
             e.printStackTrace();
         }
-        NormalVehicleAgent vehicle = agentMap.get(id);
+        IVehicleAgent<?> vehicle = agentMap.get(id);
         if(vehicle == null) throw new RuntimeException();
         vehicle.trigger(trigger);
     }
