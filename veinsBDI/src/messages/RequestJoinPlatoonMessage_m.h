@@ -34,6 +34,7 @@
  *     int platoonId;
  *     //Relevant information about vehicle preferences
  *     double preferedSpeed;
+ *     double tolerance;
  * }
  * </pre>
  */
@@ -42,6 +43,7 @@ class RequestJoinPlatoonMessage : public ::NegotiationMessage
   protected:
     int platoonId;
     double preferedSpeed;
+    double tolerance;
 
   private:
     void copy(const RequestJoinPlatoonMessage& other);
@@ -64,6 +66,8 @@ class RequestJoinPlatoonMessage : public ::NegotiationMessage
     virtual void setPlatoonId(int platoonId);
     virtual double getPreferedSpeed() const;
     virtual void setPreferedSpeed(double preferedSpeed);
+    virtual double getTolerance() const;
+    virtual void setTolerance(double tolerance);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const RequestJoinPlatoonMessage& obj) {obj.parsimPack(b);}

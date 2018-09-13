@@ -47,6 +47,7 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 int platoonid;
                 int leaderid;
                 double preferedspeed;
+                double tolerance;
                 rbf >> platoonid;
                 rbf >> type;
                 ASSERT(type == VALUE_INT);
@@ -54,7 +55,10 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> type;
                 ASSERT(type == VALUE_DOUBLE);
                 rbf >> preferedspeed;
-                ((VotingAppl*)(vehicles[agentId]))->sendRequestToJoin(platoonid, leaderid, preferedspeed);
+                rbf >> type;
+                ASSERT(type == VALUE_DOUBLE);
+                rbf >> tolerance;
+                ((VotingAppl*)(vehicles[agentId]))->sendRequestToJoin(platoonid, leaderid, preferedspeed, tolerance);
                 break;
             default:
                 break;

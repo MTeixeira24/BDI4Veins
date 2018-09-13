@@ -6,19 +6,18 @@
 //targetplatoonkoin(_id).
 //travelroute([_l1, .., _ln]).
 //ischair.
-minimumUtility(200).
-preferedspeed(80).
+minimumUtility(0.8).
 
 //Initial Goal
 !main.
 
 //Agent Belief Set up
 +!main <-
-    FuelConsumptionPreference = utility/generatefuelpreference();
-    TravelTimePreference = utility/generatetraveltimepreference(FuelConsumptionPreference);
-    +fuelpreference(FuelConsumptionPreference);
-    +traveltimepreference(TravelTimePreference);
-    generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for fuel: ", FuelConsumptionPreference ," and TravelTimePreference: ", TravelTimePreference).
+    Tolerance = utility/generatetolerance();
+    SpeedPreference = utility/generatespeedpreference();
+    +tolerance(Tolerance);
+    +preferedspeed(SpeedPreference);
+    generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SpeedPreference ," and tolerance of: ", Tolerance).
 
 +ballotopen() <-
     generic/print("Agent ", MyName, " got notification of a new ballot starting").
@@ -31,18 +30,19 @@ preferedspeed(80).
     generic/print("Agent ", MyName, " found a potential platoon: ", PID);
     !attemptjoin(PID, LID).
 
-+requestjoin(JID, JSPEED) <-
-    !handlejoinrequest(JID, JSPEED).
++requestjoin(JID, JSPEED, JPREFERENCE) <-
+    !handlejoinrequest(JID, JSPEED, JPREFERENCE).
 
 +!attemptjoin(PID, LID) <-
     +targetplatoonjoin(PID);
     +leaderid(LID);
     generic/print("Agent ", MyName, " sending a request to join");
     >>preferedspeed(SPEED);
-    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED).
+    >>tolerance(TOLERANCE);
+    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
 
-+!handlejoinrequest(JID, JSPEED) <-
-    generic/print("Agent ", MyName, " received a request to join the platoon from ", JID).
++!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
+    generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE).
 
 +inplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).

@@ -26,4 +26,5 @@ packet RequestJoinPlatoonMessage extends NegotiationMessage {
     int platoonId;
     //Relevant information about vehicle preferences
     double preferedSpeed;
+    double tolerance;
 }

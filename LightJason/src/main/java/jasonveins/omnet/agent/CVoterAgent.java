@@ -14,6 +14,7 @@ import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -36,18 +37,20 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
 
     @IAgentActionFilter
-    @IAgentActionName( name = "utility/generatefuelpreference" )
-    private double generatePreferenceFuel()
+    @IAgentActionName( name = "utility/generatetolerance" )
+    private double generateTolerance()
     {
-        return 0.5;
+        Random r = new Random();
+        return 0.3 + (r.nextInt(4) * 0.1);
     }
 
     @Nonnull
     @IAgentActionFilter
-    @IAgentActionName( name = "utility/generatetraveltimepreference" )
-    private double generateTravelTimePreference(@Nonnull final Number fuelPreference)
+    @IAgentActionName( name = "utility/generatespeedpreference" )
+    private double generatespeedpreference()
     {
-        return 1 - fuelPreference.doubleValue();
+        Random r = new Random();
+        return 80 + r.nextInt(4)*10;
     }
 
     @IAgentActionFilter
@@ -60,13 +63,14 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
-    @IAgentActionName( name = "transmit/other/sendjoinplatoonRequest" )
-    private void sendJoinPlatoonRequest(@Nonnull final Number platoonId, @Nonnull final Number leaderId, @Nonnull final Number speed)
+    @IAgentActionName( name = "transmit/other/sendjoinplatoonrequest" )
+    private void sendJoinPlatoonRequest(@Nonnull final Number platoonId, @Nonnull final Number leaderId, @Nonnull final Number speed,  @Nonnull final Number tolerance)
     {
             InstructionModel iOb = new InstructionModel(this.id, Constants.SEND_JOIN_REQUEST);
             iOb.pushInt(platoonId.intValue());
             iOb.pushInt(leaderId.intValue());
             iOb.pushDouble(speed.doubleValue());
+            iOb.pushDouble(tolerance.doubleValue());
             agentManager.addInstruction(iOb);
     }
 }

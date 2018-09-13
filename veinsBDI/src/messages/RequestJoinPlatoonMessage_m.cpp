@@ -183,6 +183,7 @@ RequestJoinPlatoonMessage::RequestJoinPlatoonMessage(const char *name, short kin
 {
     this->platoonId = 0;
     this->preferedSpeed = 0;
+    this->tolerance = 0;
 }
 
 RequestJoinPlatoonMessage::RequestJoinPlatoonMessage(const RequestJoinPlatoonMessage& other) : ::NegotiationMessage(other)
@@ -206,6 +207,7 @@ void RequestJoinPlatoonMessage::copy(const RequestJoinPlatoonMessage& other)
 {
     this->platoonId = other.platoonId;
     this->preferedSpeed = other.preferedSpeed;
+    this->tolerance = other.tolerance;
 }
 
 void RequestJoinPlatoonMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -213,6 +215,7 @@ void RequestJoinPlatoonMessage::parsimPack(omnetpp::cCommBuffer *b) const
     ::NegotiationMessage::parsimPack(b);
     doParsimPacking(b,this->platoonId);
     doParsimPacking(b,this->preferedSpeed);
+    doParsimPacking(b,this->tolerance);
 }
 
 void RequestJoinPlatoonMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -220,6 +223,7 @@ void RequestJoinPlatoonMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     ::NegotiationMessage::parsimUnpack(b);
     doParsimUnpacking(b,this->platoonId);
     doParsimUnpacking(b,this->preferedSpeed);
+    doParsimUnpacking(b,this->tolerance);
 }
 
 int RequestJoinPlatoonMessage::getPlatoonId() const
@@ -240,6 +244,16 @@ double RequestJoinPlatoonMessage::getPreferedSpeed() const
 void RequestJoinPlatoonMessage::setPreferedSpeed(double preferedSpeed)
 {
     this->preferedSpeed = preferedSpeed;
+}
+
+double RequestJoinPlatoonMessage::getTolerance() const
+{
+    return this->tolerance;
+}
+
+void RequestJoinPlatoonMessage::setTolerance(double tolerance)
+{
+    this->tolerance = tolerance;
 }
 
 class RequestJoinPlatoonMessageDescriptor : public omnetpp::cClassDescriptor
@@ -307,7 +321,7 @@ const char *RequestJoinPlatoonMessageDescriptor::getProperty(const char *propert
 int RequestJoinPlatoonMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount() : 2;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
 unsigned int RequestJoinPlatoonMessageDescriptor::getFieldTypeFlags(int field) const
@@ -321,8 +335,9 @@ unsigned int RequestJoinPlatoonMessageDescriptor::getFieldTypeFlags(int field) c
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RequestJoinPlatoonMessageDescriptor::getFieldName(int field) const
@@ -336,8 +351,9 @@ const char *RequestJoinPlatoonMessageDescriptor::getFieldName(int field) const
     static const char *fieldNames[] = {
         "platoonId",
         "preferedSpeed",
+        "tolerance",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
 }
 
 int RequestJoinPlatoonMessageDescriptor::findField(const char *fieldName) const
@@ -346,6 +362,7 @@ int RequestJoinPlatoonMessageDescriptor::findField(const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+0;
     if (fieldName[0]=='p' && strcmp(fieldName, "preferedSpeed")==0) return base+1;
+    if (fieldName[0]=='t' && strcmp(fieldName, "tolerance")==0) return base+2;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -360,8 +377,9 @@ const char *RequestJoinPlatoonMessageDescriptor::getFieldTypeString(int field) c
     static const char *fieldTypeStrings[] = {
         "int",
         "double",
+        "double",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **RequestJoinPlatoonMessageDescriptor::getFieldPropertyNames(int field) const
@@ -430,6 +448,7 @@ std::string RequestJoinPlatoonMessageDescriptor::getFieldValueAsString(void *obj
     switch (field) {
         case 0: return long2string(pp->getPlatoonId());
         case 1: return double2string(pp->getPreferedSpeed());
+        case 2: return double2string(pp->getTolerance());
         default: return "";
     }
 }
@@ -446,6 +465,7 @@ bool RequestJoinPlatoonMessageDescriptor::setFieldValueAsString(void *object, in
     switch (field) {
         case 0: pp->setPlatoonId(string2long(value)); return true;
         case 1: pp->setPreferedSpeed(string2double(value)); return true;
+        case 2: pp->setTolerance(string2double(value)); return true;
         default: return false;
     }
 }

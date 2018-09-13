@@ -60,7 +60,7 @@ void VotingAppl::initialize(int stage){
     }
 }
 
-void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double preferedSpeed){
+void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double preferedSpeed, double tolerance){
     RequestJoinPlatoonMessage* msg = new RequestJoinPlatoonMessage("RequestJoinPlatoonMessage");
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(myId);
@@ -68,6 +68,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     msg->setPlatoonId(targetPlatooId);
     msg->setDestinationId(destinationId);
     msg->setPreferedSpeed(preferedSpeed);
+    msg->setTolerance(tolerance);
     sendUnicast(msg, destinationId);
 }
 
@@ -99,10 +100,12 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
     //Push the knowledge of a potential joiner to the agent
     int joinerId = msg->getVehicleId();
     double joinerSpeed = msg->getPreferedSpeed();
+    double joinerPreference = msg->getTolerance();
     BeliefModel jbelief;
     jbelief.setBelief("requestjoin");
     jbelief.pushInt(&joinerId);
     jbelief.pushDouble(&joinerSpeed);
+    jbelief.pushDouble(&joinerPreference);
     manager->sendInformationToAgents(myId, &jbelief);
 }
 

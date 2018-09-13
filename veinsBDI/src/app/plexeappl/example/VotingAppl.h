@@ -26,7 +26,7 @@ public:
      *
      * @param targetPlatoonId Id of the platoon leader
      */
-    void sendRequestToJoin(int targetPlatoonId, int destinationId, double preferedSpeed);
+    void sendRequestToJoin(int targetPlatoonId, int destinationId, double preferedSpeed, double tolerance);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
