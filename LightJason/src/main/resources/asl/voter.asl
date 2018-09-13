@@ -42,7 +42,13 @@ minimumUtility(0.8).
     transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
 
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
-    generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE).
+    generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
+    transmit/other/vote/join(JSPEED, JPREFERENCE).
+    //start a list of votes;
+    //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
+
++openvotetojoin(JSPEED, JPREFERENCE) <-
+     generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE).
 
 +inplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).

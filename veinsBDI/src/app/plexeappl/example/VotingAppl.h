@@ -11,6 +11,7 @@
 #include "../GeneralPlexeAgentAppl.h"
 #include "../../../messages/NegotiationMessage_m.h"
 #include "../../../messages/RequestJoinPlatoonMessage_m.h"
+#include "../../../messages/NotificationOfJoinVote_m.h"
 
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:
@@ -27,6 +28,13 @@ public:
      * @param targetPlatoonId Id of the platoon leader
      */
     void sendRequestToJoin(int targetPlatoonId, int destinationId, double preferedSpeed, double tolerance);
+    /**
+     * Send a notification to platoon members that an election to decide entry of a new vehicle is about to start
+     *
+     * @param preferedspeed The joiner vehicles prefered speed
+     * @param tolerance The joiner vehicles tolerance to deviations from its prefered speed
+     */
+    void sendNotificationOfJoinVote(double preferedspeed, double tolerance);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
@@ -45,6 +53,12 @@ protected:
      * @param msg The message received from the potential joiner
      */
     void handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg);
+    /**
+     * Handles notifications that alerts agents that an election to decide the entry of a new vehicle is about to start
+     *
+     * @param msg The message received from the leader.
+     */
+    void handleNotificationOfJoinVote(const NotificationOfJoinVote* msg);
 
     enum class InitialState {
             NONE,

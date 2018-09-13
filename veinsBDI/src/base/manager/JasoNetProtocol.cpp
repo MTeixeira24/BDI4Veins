@@ -26,7 +26,6 @@ LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(uint32_t id, const void
     uint16_t action = SET_BELIEF;
     //First segment of query, size of message, action to perform(set belief), agentId,  and the belief string
     buffer << size <<  action << id << bm->getBelief();
-    double test2;
     //Remainder segments: data type + data
     for(uint32_t i = 0; i < bm->getValues().size(); i++){
         BeliefObject bo = bm->getValues()[i];
@@ -51,7 +50,6 @@ LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(uint32_t id, const void
             throw cRuntimeError("Float not implemented");
             break;
         case VALUE_DOUBLE:
-            test2 = *((double*)bo.getData());
             buffer << *((double*)bo.getData());
             break;
         default:

@@ -40,14 +40,14 @@ void VoteManager::parseResponse(uint32_t msgLength){
             rbf >> agentId;
             uint32_t agentAction;
             rbf >> agentAction;
+            int platoonid;
+            int leaderid;
+            double preferedspeed;
+            double tolerance;
             switch (agentAction){
             case SEND_JOIN_REQUEST:
                 rbf >> type;
                 ASSERT(type == VALUE_INT);
-                int platoonid;
-                int leaderid;
-                double preferedspeed;
-                double tolerance;
                 rbf >> platoonid;
                 rbf >> type;
                 ASSERT(type == VALUE_INT);
@@ -60,6 +60,14 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> tolerance;
                 ((VotingAppl*)(vehicles[agentId]))->sendRequestToJoin(platoonid, leaderid, preferedspeed, tolerance);
                 break;
+            case NOTIFY_START_VOTE_JOIN:
+                rbf >> type;
+                ASSERT(type == VALUE_DOUBLE);
+                rbf >> preferedspeed;
+                rbf >> type;
+                ASSERT(type == VALUE_DOUBLE);
+                rbf >> tolerance;
+                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfJoinVote(preferedspeed, tolerance);
             default:
                 break;
             }

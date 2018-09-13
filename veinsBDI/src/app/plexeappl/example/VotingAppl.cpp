@@ -72,6 +72,17 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     sendUnicast(msg, destinationId);
 }
 
+void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
+    NotificationOfJoinVote* msg = new NotificationOfJoinVote("NotificationOfJoinVote");
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(-1);
+    msg->setPreferedSpeed(preferedspeed);
+    msg->setTolerance(tolerance);
+    sendUnicast(msg, -1);
+}
+
 void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
     //TODO: If this is a beacon for voting handle it
     GeneralPlexeAgentAppl::onPlatoonBeacon(pb);
@@ -87,6 +98,9 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
         NegotiationMessage* nm = check_and_cast<NegotiationMessage*>(unicast->decapsulate());
         if (RequestJoinPlatoonMessage* msg = dynamic_cast<RequestJoinPlatoonMessage*>(nm)) {
             handleRequestToJoinNegotiation(msg);
+            delete msg;
+        }else if (NotificationOfJoinVote* msg = dynamic_cast<NotificationOfJoinVote*>(nm)) {
+            handleNotificationOfJoinVote(msg);
             delete msg;
         }
         delete unicast;
@@ -107,6 +121,18 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
     jbelief.pushDouble(&joinerSpeed);
     jbelief.pushDouble(&joinerPreference);
     manager->sendInformationToAgents(myId, &jbelief);
+}
+
+void VotingAppl::handleNotificationOfJoinVote(const NotificationOfJoinVote* msg){
+    if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
+        double joinerSpeed = msg->getPreferedSpeed();
+        double joinerPreference = msg->getTolerance();
+        BeliefModel jbelief;
+        jbelief.setBelief("openvotetojoin");
+        jbelief.pushDouble(&joinerSpeed);
+        jbelief.pushDouble(&joinerPreference);
+        manager->sendInformationToAgents(myId, &jbelief);
+    }
 }
 
 void VotingAppl::sendToAgent(const BeliefModel* bm){

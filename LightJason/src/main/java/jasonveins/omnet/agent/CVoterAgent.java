@@ -73,4 +73,14 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             iOb.pushDouble(tolerance.doubleValue());
             agentManager.addInstruction(iOb);
     }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "transmit/other/vote/join" )
+    private void notifyMembersOfJoinVote(@Nonnull final Number speed,  @Nonnull final Number tolerance)
+    {
+        InstructionModel iOb = new InstructionModel(this.id, Constants.NOTIFY_START_VOTE_JOIN);
+        iOb.pushDouble(speed.doubleValue());
+        iOb.pushDouble(tolerance.doubleValue());
+        agentManager.addInstruction(iOb);
+    }
 }
