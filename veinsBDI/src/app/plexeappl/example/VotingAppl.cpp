@@ -45,6 +45,19 @@ void VotingAppl::initialize(int stage){
                 pbelief.pushInt(&platoonId);
                 pbelief.pushInt(&leaderId);
                 manager->sendInformationToAgents(myId, &pbelief);
+                BeliefModel platoonSpeedBelief;
+                platoonSpeedBelief.setBelief("platoonspeed");
+                double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+                platoonSpeedBelief.pushDouble(&platoonSpeed);
+                manager->sendInformationToAgents(myId, &platoonSpeedBelief);
+                std::vector<int> members = positionHelper->getPlatoonFormation();
+                for (uint32_t i = 0; i < members.size(); i++){
+                    BeliefModel mbelief;
+                    mbelief.setBelief("addmember");
+                    int member = members[i];
+                    mbelief.pushInt(&member);
+                    manager->sendInformationToAgents(myId, &mbelief);
+                }
             }
             else if (getPlatoonRole() == PlatoonRole::FOLLOWER){
                 //This is a member, push beliefs
@@ -80,6 +93,15 @@ void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double toleran
     msg->setDestinationId(-1);
     msg->setPreferedSpeed(preferedspeed);
     msg->setTolerance(tolerance);
+    double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+    double joinerSpeed = preferedspeed;
+    double joinerPreference = tolerance;
+    BeliefModel jbelief;
+    jbelief.setBelief("openvotetojoin");
+    jbelief.pushDouble(&joinerSpeed);
+    jbelief.pushDouble(&joinerPreference);
+    jbelief.pushDouble(&platoonSpeed);
+    manager->sendInformationToAgents(myId, &jbelief);
     sendUnicast(msg, -1);
 }
 
@@ -127,10 +149,12 @@ void VotingAppl::handleNotificationOfJoinVote(const NotificationOfJoinVote* msg)
     if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
         double joinerSpeed = msg->getPreferedSpeed();
         double joinerPreference = msg->getTolerance();
+        double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
         BeliefModel jbelief;
         jbelief.setBelief("openvotetojoin");
         jbelief.pushDouble(&joinerSpeed);
         jbelief.pushDouble(&joinerPreference);
+        jbelief.pushDouble(&platoonSpeed);
         manager->sendInformationToAgents(myId, &jbelief);
     }
 }

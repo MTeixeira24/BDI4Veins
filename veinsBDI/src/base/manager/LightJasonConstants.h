@@ -28,6 +28,8 @@
 
 #define NOTIFY_START_VOTE_JOIN 0x08
 
+#define SUBMIT_VOTE 0x09
+
 #define TERMINATE_CONNECTION 0x7E
 
 /*

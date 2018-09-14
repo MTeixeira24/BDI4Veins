@@ -13,6 +13,7 @@ public class Constants {
     public static final short REQUEST_SPEED_DOWN = 6;
     public static final short SEND_JOIN_REQUEST = 7;
     public static final short NOTIFY_START_VOTE_JOIN = 8;
+    public static final short SUBMIT_VOTE = 9;
     public static final short CONNECTION_END = 126;
 
     public static final short VALUE_BOOL = 1;

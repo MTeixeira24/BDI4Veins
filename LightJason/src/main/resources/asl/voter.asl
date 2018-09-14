@@ -6,10 +6,15 @@
 //targetplatoonkoin(_id).
 //travelroute([_l1, .., _ln]).
 //ischair.
+//platoonMembers([L, M1, ..., Mn]).
 minimumUtility(0.8).
 
 //Initial Goal
 !main.
+
+generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
+    :-  >>tolerance(Tolerance); >>preferedspeed(SpeedPreference); generic/print("TEST1",JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED);
+        PredictedUtility = utility/predictplatoonspeed(JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED).
 
 //Agent Belief Set up
 +!main <-
@@ -18,6 +23,11 @@ minimumUtility(0.8).
     +tolerance(Tolerance);
     +preferedspeed(SpeedPreference);
     generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SpeedPreference ," and tolerance of: ", Tolerance).
+
++addmember(L) <-
+    utility/storemember(L);
+    generic/print("Added member: ", L).
+        
 
 +ballotopen() <-
     generic/print("Agent ", MyName, " got notification of a new ballot starting").
@@ -43,12 +53,34 @@ minimumUtility(0.8).
 
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
+    S = utility/platoonsize();
+    generic/print("The size of the platoon is", S);
     transmit/other/vote/join(JSPEED, JPREFERENCE).
     //start a list of votes;
     //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
 
 +openvotetojoin(JSPEED, JPREFERENCE) <-
-     generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE).
+    >>platoonspeed(PSPEED);
+    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
+
++openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
+    +platoonspeed(PSPEED);
+    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
+    //save the sent vote
+
++!handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
+    generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE); 
+    $generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility);
+    generic/print("Agent ", MyName, "utility is:", PredictedUtility);
+    !castvote(PredictedUtility).
+
++!castvote(PredictedUtility)
+    : >>(minimumUtility(MinUtil), MinUtil < PredictedUtility ) <-
+        generic/print("Agent ", MyName, "Casting positive vote:", PredictedUtility, ">", MinUtil);
+        transmit/other/vote/cast(1)
+    : >>(minimumUtility(MinUtil), MinUtil >= PredictedUtility) <-
+        generic/print("Agent ", MyName, "Casting negative vote:", PredictedUtility, "<", MinUtil);
+        transmit/other/vote/cast(0).
 
 +inplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).

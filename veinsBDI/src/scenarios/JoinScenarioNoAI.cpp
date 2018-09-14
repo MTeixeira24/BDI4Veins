@@ -47,6 +47,7 @@ void JoinScenarioNoAI::initialize(int stage)
            double speedModifier[] =  {1, 0.6, 1.5};
            int platoonId = positionHelper->getPlatoonId();
            //traciVehicle->setSpeed(mobility->getSpeed() * speedModifier[platoonId]);
+           double modSpeed = mobility->getSpeed() * speedModifier[platoonId];
 
            platooningVType = par("platooningVType").stdstringValue();
 
@@ -58,10 +59,9 @@ void JoinScenarioNoAI::initialize(int stage)
                    ss << platooningVType << "." << positionHelper->getMemberId(i);
                    traciVehicle->addPlatoonMember(ss.str(), i);
                }
-
                traciVehicle->enableAutoLaneChanging(false);
                traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), true);
-               traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed() * speedModifier[platoonId]);
+               traciVehicle->setCruiseControlDesiredSpeed(modSpeed);
            }
            else {
                std::stringstream ssl, ss;
@@ -70,6 +70,7 @@ void JoinScenarioNoAI::initialize(int stage)
                //traciVehicle->enableAutoFeed(false, ssl.str(), ss.str());
                traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed() + 10);
            }
+           positionHelper->setPlatoonSpeed(modSpeed);
        }
     }
 }
