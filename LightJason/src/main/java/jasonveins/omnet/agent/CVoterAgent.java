@@ -1,24 +1,25 @@
 package jasonveins.omnet.agent;
 
-import jasonveins.omnet.constants.CVariableBuilder;
+import cern.colt.bitvector.BitVector;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.Constants;
+import jasonveins.omnet.voting.rule.CBorda;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
-import org.lightjason.agentspeak.common.CCommon;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
-import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
+import org.lightjason.agentspeak.language.CLiteral;
+import org.lightjason.agentspeak.language.CRawTerm;
+import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
+import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.io.InputStream;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.atomic.AtomicIntegerArray;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @IAgentAction
 public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
@@ -26,6 +27,9 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private static final long serialVersionUID = 3455114282889790324L;
 
     private CopyOnWriteArrayList<Integer> members;
+    private List<BitVector> m_bitVotes;
+    private List<Integer> m_candidates;
+    private int m_committeeSize;
 
     /**
      * ctor
@@ -120,8 +124,67 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "transmit/other/vote/cast" )
     private void sendVote(@Nonnull final Number vote)
     {
-        /*InstructionModel iOb = new InstructionModel(this.id, Constants.SUBMIT_VOTE);
+        InstructionModel iOb = new InstructionModel(this.id, Constants.SUBMIT_VOTE);
         iOb.pushInt(vote.intValue());
-        agentManager.addInstruction(iOb);*/
+        agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/openballot" )
+    private void openBallot(@Nonnull final String type, @Nonnull final Number candidate, @Nonnull final Number committeeSize)
+    {
+        switch (type){
+            case "allowJoin":
+                m_candidates = Collections.synchronizedList( new LinkedList<>() );
+                m_candidates.add(-1);
+                m_candidates.add(candidate.intValue());
+                break;
+        }
+        m_bitVotes = Collections.synchronizedList( new LinkedList<>() );
+        m_committeeSize = committeeSize.intValue();
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/store" )
+    private void storeVote(@Nonnull final Number voter, @Nonnull final Number vote)
+    {
+        if(members.contains(voter.intValue())){
+            BitVector bv = new BitVector(2);
+            if(vote.intValue() == 1){
+                bv.put(0, false);
+                bv.put(1, true);
+            }else{
+                bv.put(0, true);
+                bv.put(1, false);
+            }
+            m_bitVotes.add(bv);
+        }
+        if (m_bitVotes.size() == m_committeeSize){
+            CBorda br = new CBorda(m_candidates, m_bitVotes);
+            int winner = br.getResult();
+            String functor;
+            if(winner == 1){
+                functor = "notify/joiner/win";
+            }else{
+                functor = "notify/joiner/lose";
+            }
+            final ITrigger l_trigger = CTrigger.from(
+                ITrigger.EType.ADDGOAL,
+                CLiteral.from(
+                        functor,
+                        CRawTerm.from( m_candidates.get(1) )
+                )
+
+            );
+            this.trigger( l_trigger );
+        }
+    }
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/send/results" )
+    private void sendVoteResults(@Nonnull final Number id, @Nonnull final Number result){
+        InstructionModel iOb = new InstructionModel(this.id, Constants.SEND_VOTE_RESULTS);
+        iOb.pushInt(id.intValue());
+        iOb.pushInt(result.intValue());
+        agentManager.addInstruction(iOb);
     }
 }

@@ -68,6 +68,24 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 ASSERT(type == VALUE_DOUBLE);
                 rbf >> tolerance;
                 ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfJoinVote(preferedspeed, tolerance);
+                break;
+            case SUBMIT_VOTE:
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                int vote;
+                rbf >> vote;
+                ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(vote);
+                break;
+            case SEND_VOTE_RESULTS:
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                int joinerId;
+                rbf >>joinerId;
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                int result;
+                rbf >>result;
+                break;
             default:
                 break;
             }

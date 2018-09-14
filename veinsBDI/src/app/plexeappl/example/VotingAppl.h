@@ -12,6 +12,8 @@
 #include "../../../messages/NegotiationMessage_m.h"
 #include "../../../messages/RequestJoinPlatoonMessage_m.h"
 #include "../../../messages/NotificationOfJoinVote_m.h"
+#include "../../../messages/SubmitVote_m.h"
+#include "../../../messages/NotifyResults_m.h"
 
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:
@@ -35,6 +37,16 @@ public:
      * @param tolerance The joiner vehicles tolerance to deviations from its prefered speed
      */
     void sendNotificationOfJoinVote(double preferedspeed, double tolerance);
+
+    /**
+     *
+     */
+    void sendVoteSubmition(int vote);
+
+    /**
+     *
+     */
+    void sendVoteResults(int joinerId, int results);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
@@ -60,6 +72,14 @@ protected:
      */
     void handleNotificationOfJoinVote(const NotificationOfJoinVote* msg);
 
+    /**
+     *
+     */
+    void handleSubmitVote(const SubmitVote* msg);
+    /**
+     *
+     */
+    void handleNotificationOfResults(const NotifyResults* msg);
     enum class InitialState {
             NONE,
             JOINER,

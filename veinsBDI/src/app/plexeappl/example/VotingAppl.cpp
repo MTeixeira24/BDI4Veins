@@ -85,6 +85,18 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     sendUnicast(msg, destinationId);
 }
 
+void VotingAppl::sendVoteSubmition(int vote){
+    SubmitVote* msg = new SubmitVote("SubmitVote");
+    int leaderId = positionHelper->getLeaderId();
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setPlatoonId(positionHelper->getPlatoonId());
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(leaderId);
+    msg->setVote(vote);
+    sendUnicast(msg, -1);
+}
+
 void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
     NotificationOfJoinVote* msg = new NotificationOfJoinVote("NotificationOfJoinVote");
     msg->setKind(NEGOTIATION_TYPE);
@@ -105,6 +117,20 @@ void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double toleran
     sendUnicast(msg, -1);
 }
 
+void VotingAppl::sendVoteResults(int joinerId, int results){
+    NotifyResults* msg = new NotifyResults("NotifyResults");
+    int platoonId = positionHelper->getPlatoonId();
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(-1);
+    msg->setResult(results);
+    msg->setJoinerId(joinerId);
+    msg->setPlatoonId(platoonId);
+    sendUnicast(msg, -1);
+
+}
+
 void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
     //TODO: If this is a beacon for voting handle it
     GeneralPlexeAgentAppl::onPlatoonBeacon(pb);
@@ -123,6 +149,12 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
             delete msg;
         }else if (NotificationOfJoinVote* msg = dynamic_cast<NotificationOfJoinVote*>(nm)) {
             handleNotificationOfJoinVote(msg);
+            delete msg;
+        }else if (SubmitVote* msg = dynamic_cast<SubmitVote*>(nm)) {
+            handleSubmitVote(msg);
+            delete msg;
+        }else if (NotifyResults* msg = dynamic_cast<NotifyResults*>(nm)) {
+            handleNotificationOfResults(msg);
             delete msg;
         }
         delete unicast;
@@ -145,6 +177,25 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
     manager->sendInformationToAgents(myId, &jbelief);
 }
 
+void VotingAppl::handleSubmitVote(const SubmitVote* msg){
+    int msgPid = msg->getPlatoonId();
+    int myPid = positionHelper->getPlatoonId();
+    bool r1 = msgPid == myPid;
+    int mid = myId;
+    int lid = positionHelper->getLeaderId();
+    bool r2 = mid == lid;
+
+    if( r1 && r2 ){
+        int vote = msg->getVote();
+        int voter = msg->getVehicleId();
+        BeliefModel submitVote;
+        submitVote.setBelief("submitvote");
+        submitVote.pushInt(&voter);
+        submitVote.pushInt(&vote);
+        manager->sendInformationToAgents(myId, &submitVote);
+    }
+}
+
 void VotingAppl::handleNotificationOfJoinVote(const NotificationOfJoinVote* msg){
     if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
         double joinerSpeed = msg->getPreferedSpeed();
@@ -156,6 +207,14 @@ void VotingAppl::handleNotificationOfJoinVote(const NotificationOfJoinVote* msg)
         jbelief.pushDouble(&joinerPreference);
         jbelief.pushDouble(&platoonSpeed);
         manager->sendInformationToAgents(myId, &jbelief);
+    }
+}
+
+void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
+    if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
+        //TODO: Handle insertion of beliefs
+    }else if (myId == msg->getJoinerId()){
+        startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
     }
 }
 

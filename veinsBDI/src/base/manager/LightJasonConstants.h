@@ -30,6 +30,8 @@
 
 #define SUBMIT_VOTE 0x09
 
+#define SEND_VOTE_RESULTS 0x0A
+
 #define TERMINATE_CONNECTION 0x7E
 
 /*

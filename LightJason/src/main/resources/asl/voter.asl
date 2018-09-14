@@ -13,7 +13,7 @@ minimumUtility(0.8).
 !main.
 
 generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
-    :-  >>tolerance(Tolerance); >>preferedspeed(SpeedPreference); generic/print("TEST1",JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED);
+    :-  >>tolerance(Tolerance); >>preferedspeed(SpeedPreference);
         PredictedUtility = utility/predictplatoonspeed(JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED).
 
 //Agent Belief Set up
@@ -26,7 +26,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +addmember(L) <-
     utility/storemember(L);
-    generic/print("Added member: ", L).
+    -addmember(L).
         
 
 +ballotopen() <-
@@ -54,7 +54,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
     S = utility/platoonsize();
-    generic/print("The size of the platoon is", S);
+    vote/openballot("allowJoin", JID, S);
     transmit/other/vote/join(JSPEED, JPREFERENCE).
     //start a list of votes;
     //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
@@ -67,6 +67,14 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     +platoonspeed(PSPEED);
     !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
     //save the sent vote
+
++submitvote(VOTER, VOTE) <-
+    !handlesubmitvote(VOTER, VOTE);
+    -submitvote(VOTER, VOTE).
+
++!handlesubmitvote(VOTER, VOTE) <-
+    generic/print("Got vote from", VOTER);
+    vote/store(VOTER,VOTE).
 
 +!handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
     generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE); 
@@ -87,3 +95,11 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +ischair(PID) <-
     generic/print("Agent ", MyName, " is chair of platoon ", PID).
+
++!notify/joiner/win(JID) <-
+    generic/print("APROVED!");
+    vote/send/results(JID, 1).
+
++!notify/joiner/lose(JID) <-
+    generic/print("REJECTED!");
+    vote/send/results(JID, 0).

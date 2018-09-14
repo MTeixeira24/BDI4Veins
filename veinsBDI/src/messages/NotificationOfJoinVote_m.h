@@ -23,11 +23,8 @@
 // }}
 
 /**
- * Class generated from <tt>messages/NotificationOfJoinVote.msg:24</tt> by nedtool.
+ * Class generated from <tt>messages/NotificationOfJoinVote.msg:21</tt> by nedtool.
  * <pre>
- * //
- * // TODO generated message class
- * //
  * packet NotificationOfJoinVote extends NegotiationMessage
  * {
  *     //Relevant information about joiner vehicle preferences
