@@ -85,6 +85,7 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 ASSERT(type == VALUE_INT);
                 int result;
                 rbf >>result;
+                ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(joinerId, result);
                 break;
             default:
                 break;

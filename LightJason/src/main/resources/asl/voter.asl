@@ -69,31 +69,43 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     //save the sent vote
 
 +submitvote(VOTER, VOTE) <-
-    !handlesubmitvote(VOTER, VOTE);
-    -submitvote(VOTER, VOTE).
+    generic/print("GOT VOTE");
+    !handlesubmitvote(VOTER, VOTE).
 
-+!handlesubmitvote(VOTER, VOTE) <-
-    generic/print("Got vote from", VOTER);
-    vote/store(VOTER,VOTE).
++!handlesubmitvote(VOTER, VOTE)
+    : MyName == VOTER <-
+        generic/print("Got my own vote");
+        vote/store(VOTER, VOTE)
+    : MyName != VOTER <-
+        generic/print("Got vote from", VOTER);
+        vote/store(VOTER,VOTE).
 
 +!handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
     generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE); 
     $generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility);
     generic/print("Agent ", MyName, "utility is:", PredictedUtility);
-    !castvote(PredictedUtility).
+    !choosevote(PredictedUtility).
 
-+!castvote(PredictedUtility)
++!choosevote(PredictedUtility)
     : >>(minimumUtility(MinUtil), MinUtil < PredictedUtility ) <-
         generic/print("Agent ", MyName, "Casting positive vote:", PredictedUtility, ">", MinUtil);
-        transmit/other/vote/cast(1)
+        !sendvote(1)
     : >>(minimumUtility(MinUtil), MinUtil >= PredictedUtility) <-
         generic/print("Agent ", MyName, "Casting negative vote:", PredictedUtility, "<", MinUtil);
-        transmit/other/vote/cast(0).
+        !sendvote(0).
 
++!sendvote(VOTE)
+    : >>isChair(_) <-
+        generic/print("Agent", MyName, "Im the chair so no need to pass through omnet");
+        vote/chairstore(VOTE)
+    : ~>>isChair(_) <- 
+        generic/print("Agent", MyName, "Sending the vote down omnet");
+       transmit/other/vote/cast(VOTE). 
 +inplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).
 
 +ischair(PID) <-
+    +isChair(PID);
     generic/print("Agent ", MyName, " is chair of platoon ", PID).
 
 +!notify/joiner/win(JID) <-

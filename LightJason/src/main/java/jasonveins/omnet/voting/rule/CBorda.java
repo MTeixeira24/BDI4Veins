@@ -24,8 +24,8 @@ public class CBorda {
         int highestScore = -1;
         for(int i = 0; i < m_candidates.size(); i++){
             int score = 0;
-            for(int j = 0; j < m_bitVotes.get(i).size(); i++){
-                score += m_bitVotes.get(i).get(j) ? 1 : 0;
+            for(int j = 0; j < m_bitVotes.size(); j++){
+                score += m_bitVotes.get(j).get(i) ? 1 : 0;
             }
             if(score > highestScore){
                 highestScore = score;

@@ -86,6 +86,10 @@ protected:
             FOLLOWER,
             LEADER
      };
+    /**
+     *
+     */
+    void handleSelfMsg(cMessage* msg) override;
 private:
     /**
      * Set to true if agent has instructed the controller to search for open platoons

@@ -55,7 +55,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private double generateTolerance()
     {
         Random r = new Random();
-        return 0.3 + (r.nextInt(4) * 0.1);
+        return 0.4 + (r.nextInt(4) * 0.1);
     }
 
     @Nonnull
@@ -64,7 +64,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private double generatespeedpreference()
     {
         Random r = new Random();
-        return 80 + r.nextInt(4)*10;
+        return 70 + r.nextInt(3)*10;
     }
 
     @IAgentActionFilter
@@ -142,6 +142,12 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }
         m_bitVotes = Collections.synchronizedList( new LinkedList<>() );
         m_committeeSize = committeeSize.intValue();
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/chairstore" )
+    private void storeChairVote(@Nonnull final Number vote){
+        storeVote(this.id, vote);
     }
 
     @IAgentActionFilter

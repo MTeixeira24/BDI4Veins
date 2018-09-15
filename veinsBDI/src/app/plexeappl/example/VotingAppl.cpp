@@ -86,6 +86,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
 }
 
 void VotingAppl::sendVoteSubmition(int vote){
+    Enter_Method_Silent();
     SubmitVote* msg = new SubmitVote("SubmitVote");
     int leaderId = positionHelper->getLeaderId();
     msg->setKind(NEGOTIATION_TYPE);
@@ -94,7 +95,10 @@ void VotingAppl::sendVoteSubmition(int vote){
     msg->setExternalId(positionHelper->getExternalId().c_str());
     msg->setDestinationId(leaderId);
     msg->setVote(vote);
-    sendUnicast(msg, -1);
+    int position = positionHelper->getPosition();
+    scheduleAt(simTime() + 0.1*position, msg);
+    //if(myId == 1 || myId == 2 || myId == 3)
+    //    sendUnicast(msg, leaderId);
 }
 
 void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
@@ -214,8 +218,22 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
         //TODO: Handle insertion of beliefs
     }else if (myId == msg->getJoinerId()){
-        startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
+        if(msg->getResult() == 1)
+            startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
+        else{
+            //TODO: Handle rejection
+        }
     }
+}
+
+void VotingAppl::handleSelfMsg(cMessage* msg){
+    if (SubmitVote* sv = dynamic_cast<SubmitVote*>(msg)){
+        sendUnicast(sv, sv->getDestinationId());
+        //delete msg;
+    }else {
+        GeneralPlexeAgentAppl::handleSelfMsg(msg);
+    }
+
 }
 
 void VotingAppl::sendToAgent(const BeliefModel* bm){
