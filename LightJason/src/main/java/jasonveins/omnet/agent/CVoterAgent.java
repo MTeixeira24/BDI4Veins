@@ -31,6 +31,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private List<Integer> m_candidates;
     private int m_committeeSize;
 
+    //Object voting group
+    //Object voting context
+    //Object myvote
+    //Object winner determination
+
     /**
      * ctor
      *
@@ -192,5 +197,12 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         iOb.pushInt(id.intValue());
         iOb.pushInt(result.intValue());
         agentManager.addInstruction(iOb);
+    }
+
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/next/platoon" )
+    private int getNextPlatoon(){
+        return -1;
     }
 }

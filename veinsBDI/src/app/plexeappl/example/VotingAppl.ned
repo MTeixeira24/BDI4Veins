@@ -19,5 +19,6 @@ import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
 
 simple VotingAppl extends GeneralPlexeAgentAppl{
     parameters:
+        int targetPlatoon = default(-1);
         @class(VotingAppl);
 }

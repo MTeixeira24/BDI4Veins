@@ -130,3 +130,20 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!requestjoin(JID, JSPEED, JPREFERENCE) <-
     !handlejoinrequest(JID, JSPEED, JPREFERENCE).
+
+//Joiner specific plans
+
++!handlerejection(PID) <-
+    generic/print("Agent ", MyName, " was rejected from platoon ", PID, "trying the next one");
+    NPID = utility/next/platoon();
+    >>platoons(NPID, LID);
+    !attemptjoin(NPID, PID).
+
++!pushplatoon(PID, PSPEED, LID) <-
+    +platoons(PID, LID);
+    utility/store/platoon(PID, PSPEED, LID).
+
++!startrequests() <- //TODO: Handle end of platoon list
+    PID = utility/next/platoon();
+    >>platoons(PID, LID);
+    !attemptjoin(NPID, PID).

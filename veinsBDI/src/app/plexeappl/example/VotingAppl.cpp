@@ -9,10 +9,9 @@
 
 Define_Module(VotingAppl);
 
-VotingAppl::VotingAppl() {
-}
 
 VotingAppl::~VotingAppl() {
+    delete searchTimer;
 }
 
 void VotingAppl::initialize(int stage){
@@ -24,12 +23,22 @@ void VotingAppl::initialize(int stage){
         if(getPlatoonRole() == PlatoonRole::NONE) {
             //This is the joiner vehicle. Call the connection manager to add belief to join platoon to agent
             BeliefModel bm;
-            bm.setBelief("foundplatoon");
-            int platoonId = 0;
-            int leaderId = 0;
-            bm.pushInt(&platoonId);
-            bm.pushInt(&leaderId);
-            manager->sendInformationToAgents(myId,&bm);
+            int targetPlatoon = par("targetPlatoon").intValue();
+            if(targetPlatoon >= 0){
+                bm.setBelief("foundplatoon");
+                int platoonId = targetPlatoon;
+                int leaderId = 0;
+                bm.pushInt(&platoonId);
+                bm.pushInt(&leaderId);
+                manager->sendInformationToAgents(myId,&bm);
+            }else{
+                bm.setBelief("lookforplatoon");
+                manager->sendInformationToAgents(myId,&bm);
+                searchingForPlatoon = true;
+                searchTimer = new cMessage();
+                //Search for platoons for half a second
+                scheduleAt(simTime() + SimTime(0.5), searchTimer);
+            }
         }else{
             //This a vehicle belonging to a platoon
             if (getPlatoonRole() == PlatoonRole::LEADER) {
@@ -162,6 +171,21 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
             delete msg;
         }
         delete unicast;
+    }else if (searchingForPlatoon){
+        if(enc->getKind() == BaseProtocol::BEACON_TYPE){
+            PlatooningBeacon* pb = check_and_cast<PlatooningBeacon*>(enc);
+            int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(pb->getVehicleId());
+            if( platoonId >= 0 ){
+                BeliefModel platoonBelief;
+                platoonBelief.setBelief("pushplatoon");
+                platoonBelief.pushInt(&platoonId);
+                double platoonSpeed = pb->getSpeed();
+                platoonBelief.pushDouble(&platoonSpeed);
+                int leaderId = pb->getVehicleId();
+                platoonBelief.pushInt(&leaderId);
+                manager->sendInformationToAgents(myId, &platoonBelief);
+            }
+        }
     }
     else {
         GeneralPlexeAgentAppl::handleLowerMsg(msg);
@@ -218,10 +242,14 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
         //TODO: Handle insertion of beliefs
     }else if (myId == msg->getJoinerId()){
+        BeliefModel result;
         if(msg->getResult() == 1)
             startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
         else{
-            //TODO: Handle rejection
+            result.setBelief("handlerejection");
+            int platoonId = msg->getPlatoonId();
+            result.pushInt(&platoonId);
+            manager->sendInformationToAgents(myId, &result);
         }
     }
 }
@@ -230,6 +258,11 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
     if (SubmitVote* sv = dynamic_cast<SubmitVote*>(msg)){
         sendUnicast(sv, sv->getDestinationId());
         //delete msg;
+    }else if(msg == searchTimer){
+        BeliefModel sendRequests;
+        sendRequests.setBelief("startrequests");
+        manager->sendInformationToAgents(myId, &sendRequests);
+        delete msg;
     }else {
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }

@@ -8,6 +8,8 @@
 #ifndef APP_PLEXEAPPL_EXAMPLE_VOTINGAPPL_H_
 #define APP_PLEXEAPPL_EXAMPLE_VOTINGAPPL_H_
 
+#include "veins/modules/application/platooning/utilities/DynamicPositionHelper.h"
+
 #include "../GeneralPlexeAgentAppl.h"
 #include "../../../messages/NegotiationMessage_m.h"
 #include "../../../messages/voting/RequestJoinPlatoonMessage_m.h"
@@ -15,9 +17,11 @@
 #include "../../../messages/voting/SubmitVote_m.h"
 #include "../../../messages/voting/NotifyResults_m.h"
 
+#include "../../../utilities/LeaderPositionHelper.h"
+
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:
-    VotingAppl();
+    VotingAppl() : searchingForPlatoon(false){};
     virtual ~VotingAppl();
 
     /** override from GeneralPlexeAgentAppl */
@@ -95,6 +99,8 @@ private:
      * Set to true if agent has instructed the controller to search for open platoons
      */
     bool searchingForPlatoon;
+
+    cMessage* searchTimer;
 
 };
 

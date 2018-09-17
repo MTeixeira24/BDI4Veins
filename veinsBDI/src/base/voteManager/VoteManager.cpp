@@ -9,6 +9,7 @@
 
 Define_Module(VoteManager);
 
+
 VoteManager::VoteManager() {
 
 }

@@ -97,8 +97,6 @@ void BasePlexeAgentAppl::handleLowerMsg(cMessage* msg)
 
     if (enc->getKind() == BaseProtocol::BEACON_TYPE) {
         onPlatoonBeacon(check_and_cast<PlatooningBeacon*>(enc));
-    } else if (enc->getKind() == 5){
-        EV << "Got it";
     }
     else {
         error("received unknown message type");
