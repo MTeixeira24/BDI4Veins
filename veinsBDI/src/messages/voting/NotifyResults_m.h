@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.4 from messages/NotifyResults.msg.
+// Generated file, do not edit! Created by nedtool 5.4 from messages/voting/NotifyResults.msg.
 //
 
 #if defined(__clang__)
@@ -19,11 +19,11 @@
 
 
 // cplusplus {{
-#include "NegotiationMessage_m.h"
+#include "../NegotiationMessage_m.h"
 // }}
 
 /**
- * Class generated from <tt>messages/NotifyResults.msg:20</tt> by nedtool.
+ * Class generated from <tt>messages/voting/NotifyResults.msg:20</tt> by nedtool.
  * <pre>
  * packet NotifyResults extends NegotiationMessage
  * {

@@ -41,8 +41,8 @@ void JoinScenarioNoAI::initialize(int stage)
             positionHelper->setIsLeader(false);
             positionHelper->setPlatoonLane(-1);
 
-            startManeuver = new cMessage();
-            scheduleAt(simTime() + SimTime(0.5), startManeuver);
+            //startManeuver = new cMessage();
+            //scheduleAt(simTime() + SimTime(0.5), startManeuver);
        }else{
            double speedModifier[] =  {1, 0.6, 1.5};
            int platoonId = positionHelper->getPlatoonId();

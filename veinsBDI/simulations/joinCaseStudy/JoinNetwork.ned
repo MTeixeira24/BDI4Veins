@@ -22,6 +22,7 @@ network JoinNetwork extends Scenario
 {
     parameters:
         string traffic_type;
+        int numPcapRecorders;
     submodules:
         traffic: <traffic_type> like TraCIBaseTrafficManager {
             parameters:

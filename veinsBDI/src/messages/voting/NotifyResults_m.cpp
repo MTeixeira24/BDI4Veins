@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.4 from messages/NotificationOfJoinVote.msg.
+// Generated file, do not edit! Created by nedtool 5.4 from messages/voting/NotifyResults.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "NotificationOfJoinVote_m.h"
+#include "NotifyResults_m.h"
 
 namespace omnetpp {
 
@@ -177,24 +177,25 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
     return out;
 }
 
-Register_Class(NotificationOfJoinVote)
+Register_Class(NotifyResults)
 
-NotificationOfJoinVote::NotificationOfJoinVote(const char *name, short kind) : ::NegotiationMessage(name,kind)
+NotifyResults::NotifyResults(const char *name, short kind) : ::NegotiationMessage(name,kind)
 {
-    this->preferedSpeed = 0;
-    this->tolerance = 0;
+    this->result = 0;
+    this->joinerId = 0;
+    this->platoonId = 0;
 }
 
-NotificationOfJoinVote::NotificationOfJoinVote(const NotificationOfJoinVote& other) : ::NegotiationMessage(other)
+NotifyResults::NotifyResults(const NotifyResults& other) : ::NegotiationMessage(other)
 {
     copy(other);
 }
 
-NotificationOfJoinVote::~NotificationOfJoinVote()
+NotifyResults::~NotifyResults()
 {
 }
 
-NotificationOfJoinVote& NotificationOfJoinVote::operator=(const NotificationOfJoinVote& other)
+NotifyResults& NotifyResults::operator=(const NotifyResults& other)
 {
     if (this==&other) return *this;
     ::NegotiationMessage::operator=(other);
@@ -202,53 +203,66 @@ NotificationOfJoinVote& NotificationOfJoinVote::operator=(const NotificationOfJo
     return *this;
 }
 
-void NotificationOfJoinVote::copy(const NotificationOfJoinVote& other)
+void NotifyResults::copy(const NotifyResults& other)
 {
-    this->preferedSpeed = other.preferedSpeed;
-    this->tolerance = other.tolerance;
+    this->result = other.result;
+    this->joinerId = other.joinerId;
+    this->platoonId = other.platoonId;
 }
 
-void NotificationOfJoinVote::parsimPack(omnetpp::cCommBuffer *b) const
+void NotifyResults::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::NegotiationMessage::parsimPack(b);
-    doParsimPacking(b,this->preferedSpeed);
-    doParsimPacking(b,this->tolerance);
+    doParsimPacking(b,this->result);
+    doParsimPacking(b,this->joinerId);
+    doParsimPacking(b,this->platoonId);
 }
 
-void NotificationOfJoinVote::parsimUnpack(omnetpp::cCommBuffer *b)
+void NotifyResults::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::NegotiationMessage::parsimUnpack(b);
-    doParsimUnpacking(b,this->preferedSpeed);
-    doParsimUnpacking(b,this->tolerance);
+    doParsimUnpacking(b,this->result);
+    doParsimUnpacking(b,this->joinerId);
+    doParsimUnpacking(b,this->platoonId);
 }
 
-double NotificationOfJoinVote::getPreferedSpeed() const
+int NotifyResults::getResult() const
 {
-    return this->preferedSpeed;
+    return this->result;
 }
 
-void NotificationOfJoinVote::setPreferedSpeed(double preferedSpeed)
+void NotifyResults::setResult(int result)
 {
-    this->preferedSpeed = preferedSpeed;
+    this->result = result;
 }
 
-double NotificationOfJoinVote::getTolerance() const
+int NotifyResults::getJoinerId() const
 {
-    return this->tolerance;
+    return this->joinerId;
 }
 
-void NotificationOfJoinVote::setTolerance(double tolerance)
+void NotifyResults::setJoinerId(int joinerId)
 {
-    this->tolerance = tolerance;
+    this->joinerId = joinerId;
 }
 
-class NotificationOfJoinVoteDescriptor : public omnetpp::cClassDescriptor
+int NotifyResults::getPlatoonId() const
+{
+    return this->platoonId;
+}
+
+void NotifyResults::setPlatoonId(int platoonId)
+{
+    this->platoonId = platoonId;
+}
+
+class NotifyResultsDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
   public:
-    NotificationOfJoinVoteDescriptor();
-    virtual ~NotificationOfJoinVoteDescriptor();
+    NotifyResultsDescriptor();
+    virtual ~NotifyResultsDescriptor();
 
     virtual bool doesSupport(omnetpp::cObject *obj) const override;
     virtual const char **getPropertyNames() const override;
@@ -270,24 +284,24 @@ class NotificationOfJoinVoteDescriptor : public omnetpp::cClassDescriptor
     virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
 };
 
-Register_ClassDescriptor(NotificationOfJoinVoteDescriptor)
+Register_ClassDescriptor(NotifyResultsDescriptor)
 
-NotificationOfJoinVoteDescriptor::NotificationOfJoinVoteDescriptor() : omnetpp::cClassDescriptor("NotificationOfJoinVote", "NegotiationMessage")
+NotifyResultsDescriptor::NotifyResultsDescriptor() : omnetpp::cClassDescriptor("NotifyResults", "NegotiationMessage")
 {
     propertynames = nullptr;
 }
 
-NotificationOfJoinVoteDescriptor::~NotificationOfJoinVoteDescriptor()
+NotifyResultsDescriptor::~NotifyResultsDescriptor()
 {
     delete[] propertynames;
 }
 
-bool NotificationOfJoinVoteDescriptor::doesSupport(omnetpp::cObject *obj) const
+bool NotifyResultsDescriptor::doesSupport(omnetpp::cObject *obj) const
 {
-    return dynamic_cast<NotificationOfJoinVote *>(obj)!=nullptr;
+    return dynamic_cast<NotifyResults *>(obj)!=nullptr;
 }
 
-const char **NotificationOfJoinVoteDescriptor::getPropertyNames() const
+const char **NotifyResultsDescriptor::getPropertyNames() const
 {
     if (!propertynames) {
         static const char *names[] = {  nullptr };
@@ -298,19 +312,19 @@ const char **NotificationOfJoinVoteDescriptor::getPropertyNames() const
     return propertynames;
 }
 
-const char *NotificationOfJoinVoteDescriptor::getProperty(const char *propertyname) const
+const char *NotifyResultsDescriptor::getProperty(const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : nullptr;
 }
 
-int NotificationOfJoinVoteDescriptor::getFieldCount() const
+int NotifyResultsDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount() : 2;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
-unsigned int NotificationOfJoinVoteDescriptor::getFieldTypeFlags(int field) const
+unsigned int NotifyResultsDescriptor::getFieldTypeFlags(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -321,11 +335,12 @@ unsigned int NotificationOfJoinVoteDescriptor::getFieldTypeFlags(int field) cons
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
-const char *NotificationOfJoinVoteDescriptor::getFieldName(int field) const
+const char *NotifyResultsDescriptor::getFieldName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -334,22 +349,24 @@ const char *NotificationOfJoinVoteDescriptor::getFieldName(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldNames[] = {
-        "preferedSpeed",
-        "tolerance",
+        "result",
+        "joinerId",
+        "platoonId",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
 }
 
-int NotificationOfJoinVoteDescriptor::findField(const char *fieldName) const
+int NotifyResultsDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
-    if (fieldName[0]=='p' && strcmp(fieldName, "preferedSpeed")==0) return base+0;
-    if (fieldName[0]=='t' && strcmp(fieldName, "tolerance")==0) return base+1;
+    if (fieldName[0]=='r' && strcmp(fieldName, "result")==0) return base+0;
+    if (fieldName[0]=='j' && strcmp(fieldName, "joinerId")==0) return base+1;
+    if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+2;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
-const char *NotificationOfJoinVoteDescriptor::getFieldTypeString(int field) const
+const char *NotifyResultsDescriptor::getFieldTypeString(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -358,13 +375,14 @@ const char *NotificationOfJoinVoteDescriptor::getFieldTypeString(int field) cons
         field -= basedesc->getFieldCount();
     }
     static const char *fieldTypeStrings[] = {
-        "double",
-        "double",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
 }
 
-const char **NotificationOfJoinVoteDescriptor::getFieldPropertyNames(int field) const
+const char **NotifyResultsDescriptor::getFieldPropertyNames(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -377,7 +395,7 @@ const char **NotificationOfJoinVoteDescriptor::getFieldPropertyNames(int field) 
     }
 }
 
-const char *NotificationOfJoinVoteDescriptor::getFieldProperty(int field, const char *propertyname) const
+const char *NotifyResultsDescriptor::getFieldProperty(int field, const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -390,7 +408,7 @@ const char *NotificationOfJoinVoteDescriptor::getFieldProperty(int field, const 
     }
 }
 
-int NotificationOfJoinVoteDescriptor::getFieldArraySize(void *object, int field) const
+int NotifyResultsDescriptor::getFieldArraySize(void *object, int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -398,13 +416,13 @@ int NotificationOfJoinVoteDescriptor::getFieldArraySize(void *object, int field)
             return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount();
     }
-    NotificationOfJoinVote *pp = (NotificationOfJoinVote *)object; (void)pp;
+    NotifyResults *pp = (NotifyResults *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-const char *NotificationOfJoinVoteDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+const char *NotifyResultsDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -412,13 +430,13 @@ const char *NotificationOfJoinVoteDescriptor::getFieldDynamicTypeString(void *ob
             return basedesc->getFieldDynamicTypeString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    NotificationOfJoinVote *pp = (NotificationOfJoinVote *)object; (void)pp;
+    NotifyResults *pp = (NotifyResults *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }
 }
 
-std::string NotificationOfJoinVoteDescriptor::getFieldValueAsString(void *object, int field, int i) const
+std::string NotifyResultsDescriptor::getFieldValueAsString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -426,15 +444,16 @@ std::string NotificationOfJoinVoteDescriptor::getFieldValueAsString(void *object
             return basedesc->getFieldValueAsString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    NotificationOfJoinVote *pp = (NotificationOfJoinVote *)object; (void)pp;
+    NotifyResults *pp = (NotifyResults *)object; (void)pp;
     switch (field) {
-        case 0: return double2string(pp->getPreferedSpeed());
-        case 1: return double2string(pp->getTolerance());
+        case 0: return long2string(pp->getResult());
+        case 1: return long2string(pp->getJoinerId());
+        case 2: return long2string(pp->getPlatoonId());
         default: return "";
     }
 }
 
-bool NotificationOfJoinVoteDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+bool NotifyResultsDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -442,15 +461,16 @@ bool NotificationOfJoinVoteDescriptor::setFieldValueAsString(void *object, int f
             return basedesc->setFieldValueAsString(object,field,i,value);
         field -= basedesc->getFieldCount();
     }
-    NotificationOfJoinVote *pp = (NotificationOfJoinVote *)object; (void)pp;
+    NotifyResults *pp = (NotifyResults *)object; (void)pp;
     switch (field) {
-        case 0: pp->setPreferedSpeed(string2double(value)); return true;
-        case 1: pp->setTolerance(string2double(value)); return true;
+        case 0: pp->setResult(string2long(value)); return true;
+        case 1: pp->setJoinerId(string2long(value)); return true;
+        case 2: pp->setPlatoonId(string2long(value)); return true;
         default: return false;
     }
 }
 
-const char *NotificationOfJoinVoteDescriptor::getFieldStructName(int field) const
+const char *NotifyResultsDescriptor::getFieldStructName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -463,7 +483,7 @@ const char *NotificationOfJoinVoteDescriptor::getFieldStructName(int field) cons
     };
 }
 
-void *NotificationOfJoinVoteDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+void *NotifyResultsDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -471,7 +491,7 @@ void *NotificationOfJoinVoteDescriptor::getFieldStructValuePointer(void *object,
             return basedesc->getFieldStructValuePointer(object, field, i);
         field -= basedesc->getFieldCount();
     }
-    NotificationOfJoinVote *pp = (NotificationOfJoinVote *)object; (void)pp;
+    NotifyResults *pp = (NotifyResults *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }

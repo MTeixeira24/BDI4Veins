@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.4 from messages/NotificationOfJoinVote.msg.
+// Generated file, do not edit! Created by nedtool 5.4 from messages/voting/NotificationOfJoinVote.msg.
 //
 
 #if defined(__clang__)
@@ -19,11 +19,11 @@
 
 
 // cplusplus {{
-#include "NegotiationMessage_m.h"
+#include "../NegotiationMessage_m.h"
 // }}
 
 /**
- * Class generated from <tt>messages/NotificationOfJoinVote.msg:21</tt> by nedtool.
+ * Class generated from <tt>messages/voting/NotificationOfJoinVote.msg:21</tt> by nedtool.
  * <pre>
  * packet NotificationOfJoinVote extends NegotiationMessage
  * {

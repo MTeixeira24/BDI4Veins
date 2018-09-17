@@ -140,7 +140,7 @@ void LightJasonManager::unsubscribeVehicle(int id){
 }
 
 uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){//(int id, std::string belief, double value){
-    LightJasonBuffer result = writeToSocket(jp.buildUpdateBeliefQuery(id, beliefModel).getBuffer());
+    LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
     int n = int((unsigned char)result.getBuffer()[0]);
     EV << n << "\n"; //DEBUG
     return 0;

@@ -12,13 +12,14 @@
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
+
 cplusplus {{
-#include "NegotiationMessage_m.h"
+#include "../NegotiationMessage_m.h"
 }}
 packet NegotiationMessage;
 
-packet SubmitVote extends NegotiationMessage {
+packet NotificationOfJoinVote extends NegotiationMessage {
     //Relevant information about joiner vehicle preferences
-    int vote;
-    int platoonId;
+    double preferedSpeed;
+    double tolerance;
 }

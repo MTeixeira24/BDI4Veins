@@ -17,7 +17,7 @@ JasoNetProtocol::~JasoNetProtocol(){
 
 }
 
-LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(uint32_t id, const void* beliefModel){//(int _id, std::string belief, double value){
+LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* beliefModel){//(int _id, std::string belief, double value){
     BeliefModel* bm = (BeliefModel*) beliefModel;
     LightJasonBuffer buffer;
     uint32_t size = 6; //Minimum size is 2 bytes to represent the type of query and 4 bytes for agentID

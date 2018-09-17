@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.4 from messages/RequestJoinPlatoonMessage.msg.
+// Generated file, do not edit! Created by nedtool 5.4 from messages/voting/RequestJoinPlatoonMessage.msg.
 //
 
 #if defined(__clang__)
@@ -19,11 +19,11 @@
 
 
 // cplusplus {{
-#include "NegotiationMessage_m.h"
+#include "../NegotiationMessage_m.h"
 // }}
 
 /**
- * Class generated from <tt>messages/RequestJoinPlatoonMessage.msg:24</tt> by nedtool.
+ * Class generated from <tt>messages/voting/RequestJoinPlatoonMessage.msg:24</tt> by nedtool.
  * <pre>
  * //
  * // TODO generated message class

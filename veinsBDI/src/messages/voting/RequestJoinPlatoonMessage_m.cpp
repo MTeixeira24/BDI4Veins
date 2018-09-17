@@ -1,5 +1,5 @@
 //
-// Generated file, do not edit! Created by nedtool 5.4 from messages/SubmitVote.msg.
+// Generated file, do not edit! Created by nedtool 5.4 from messages/voting/RequestJoinPlatoonMessage.msg.
 //
 
 // Disable warnings about unused variables, empty switch stmts, etc:
@@ -26,7 +26,7 @@
 
 #include <iostream>
 #include <sstream>
-#include "SubmitVote_m.h"
+#include "RequestJoinPlatoonMessage_m.h"
 
 namespace omnetpp {
 
@@ -177,24 +177,25 @@ inline std::ostream& operator<<(std::ostream& out, const std::vector<T,A>& vec)
     return out;
 }
 
-Register_Class(SubmitVote)
+Register_Class(RequestJoinPlatoonMessage)
 
-SubmitVote::SubmitVote(const char *name, short kind) : ::NegotiationMessage(name,kind)
+RequestJoinPlatoonMessage::RequestJoinPlatoonMessage(const char *name, short kind) : ::NegotiationMessage(name,kind)
 {
-    this->vote = 0;
     this->platoonId = 0;
+    this->preferedSpeed = 0;
+    this->tolerance = 0;
 }
 
-SubmitVote::SubmitVote(const SubmitVote& other) : ::NegotiationMessage(other)
+RequestJoinPlatoonMessage::RequestJoinPlatoonMessage(const RequestJoinPlatoonMessage& other) : ::NegotiationMessage(other)
 {
     copy(other);
 }
 
-SubmitVote::~SubmitVote()
+RequestJoinPlatoonMessage::~RequestJoinPlatoonMessage()
 {
 }
 
-SubmitVote& SubmitVote::operator=(const SubmitVote& other)
+RequestJoinPlatoonMessage& RequestJoinPlatoonMessage::operator=(const RequestJoinPlatoonMessage& other)
 {
     if (this==&other) return *this;
     ::NegotiationMessage::operator=(other);
@@ -202,53 +203,66 @@ SubmitVote& SubmitVote::operator=(const SubmitVote& other)
     return *this;
 }
 
-void SubmitVote::copy(const SubmitVote& other)
+void RequestJoinPlatoonMessage::copy(const RequestJoinPlatoonMessage& other)
 {
-    this->vote = other.vote;
     this->platoonId = other.platoonId;
+    this->preferedSpeed = other.preferedSpeed;
+    this->tolerance = other.tolerance;
 }
 
-void SubmitVote::parsimPack(omnetpp::cCommBuffer *b) const
+void RequestJoinPlatoonMessage::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::NegotiationMessage::parsimPack(b);
-    doParsimPacking(b,this->vote);
     doParsimPacking(b,this->platoonId);
+    doParsimPacking(b,this->preferedSpeed);
+    doParsimPacking(b,this->tolerance);
 }
 
-void SubmitVote::parsimUnpack(omnetpp::cCommBuffer *b)
+void RequestJoinPlatoonMessage::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::NegotiationMessage::parsimUnpack(b);
-    doParsimUnpacking(b,this->vote);
     doParsimUnpacking(b,this->platoonId);
+    doParsimUnpacking(b,this->preferedSpeed);
+    doParsimUnpacking(b,this->tolerance);
 }
 
-int SubmitVote::getVote() const
-{
-    return this->vote;
-}
-
-void SubmitVote::setVote(int vote)
-{
-    this->vote = vote;
-}
-
-int SubmitVote::getPlatoonId() const
+int RequestJoinPlatoonMessage::getPlatoonId() const
 {
     return this->platoonId;
 }
 
-void SubmitVote::setPlatoonId(int platoonId)
+void RequestJoinPlatoonMessage::setPlatoonId(int platoonId)
 {
     this->platoonId = platoonId;
 }
 
-class SubmitVoteDescriptor : public omnetpp::cClassDescriptor
+double RequestJoinPlatoonMessage::getPreferedSpeed() const
+{
+    return this->preferedSpeed;
+}
+
+void RequestJoinPlatoonMessage::setPreferedSpeed(double preferedSpeed)
+{
+    this->preferedSpeed = preferedSpeed;
+}
+
+double RequestJoinPlatoonMessage::getTolerance() const
+{
+    return this->tolerance;
+}
+
+void RequestJoinPlatoonMessage::setTolerance(double tolerance)
+{
+    this->tolerance = tolerance;
+}
+
+class RequestJoinPlatoonMessageDescriptor : public omnetpp::cClassDescriptor
 {
   private:
     mutable const char **propertynames;
   public:
-    SubmitVoteDescriptor();
-    virtual ~SubmitVoteDescriptor();
+    RequestJoinPlatoonMessageDescriptor();
+    virtual ~RequestJoinPlatoonMessageDescriptor();
 
     virtual bool doesSupport(omnetpp::cObject *obj) const override;
     virtual const char **getPropertyNames() const override;
@@ -270,24 +284,24 @@ class SubmitVoteDescriptor : public omnetpp::cClassDescriptor
     virtual void *getFieldStructValuePointer(void *object, int field, int i) const override;
 };
 
-Register_ClassDescriptor(SubmitVoteDescriptor)
+Register_ClassDescriptor(RequestJoinPlatoonMessageDescriptor)
 
-SubmitVoteDescriptor::SubmitVoteDescriptor() : omnetpp::cClassDescriptor("SubmitVote", "NegotiationMessage")
+RequestJoinPlatoonMessageDescriptor::RequestJoinPlatoonMessageDescriptor() : omnetpp::cClassDescriptor("RequestJoinPlatoonMessage", "NegotiationMessage")
 {
     propertynames = nullptr;
 }
 
-SubmitVoteDescriptor::~SubmitVoteDescriptor()
+RequestJoinPlatoonMessageDescriptor::~RequestJoinPlatoonMessageDescriptor()
 {
     delete[] propertynames;
 }
 
-bool SubmitVoteDescriptor::doesSupport(omnetpp::cObject *obj) const
+bool RequestJoinPlatoonMessageDescriptor::doesSupport(omnetpp::cObject *obj) const
 {
-    return dynamic_cast<SubmitVote *>(obj)!=nullptr;
+    return dynamic_cast<RequestJoinPlatoonMessage *>(obj)!=nullptr;
 }
 
-const char **SubmitVoteDescriptor::getPropertyNames() const
+const char **RequestJoinPlatoonMessageDescriptor::getPropertyNames() const
 {
     if (!propertynames) {
         static const char *names[] = {  nullptr };
@@ -298,19 +312,19 @@ const char **SubmitVoteDescriptor::getPropertyNames() const
     return propertynames;
 }
 
-const char *SubmitVoteDescriptor::getProperty(const char *propertyname) const
+const char *RequestJoinPlatoonMessageDescriptor::getProperty(const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     return basedesc ? basedesc->getProperty(propertyname) : nullptr;
 }
 
-int SubmitVoteDescriptor::getFieldCount() const
+int RequestJoinPlatoonMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount() : 2;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
-unsigned int SubmitVoteDescriptor::getFieldTypeFlags(int field) const
+unsigned int RequestJoinPlatoonMessageDescriptor::getFieldTypeFlags(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -321,11 +335,12 @@ unsigned int SubmitVoteDescriptor::getFieldTypeFlags(int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
-const char *SubmitVoteDescriptor::getFieldName(int field) const
+const char *RequestJoinPlatoonMessageDescriptor::getFieldName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -334,22 +349,24 @@ const char *SubmitVoteDescriptor::getFieldName(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldNames[] = {
-        "vote",
         "platoonId",
+        "preferedSpeed",
+        "tolerance",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
 }
 
-int SubmitVoteDescriptor::findField(const char *fieldName) const
+int RequestJoinPlatoonMessageDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
-    if (fieldName[0]=='v' && strcmp(fieldName, "vote")==0) return base+0;
-    if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+1;
+    if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+0;
+    if (fieldName[0]=='p' && strcmp(fieldName, "preferedSpeed")==0) return base+1;
+    if (fieldName[0]=='t' && strcmp(fieldName, "tolerance")==0) return base+2;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
-const char *SubmitVoteDescriptor::getFieldTypeString(int field) const
+const char *RequestJoinPlatoonMessageDescriptor::getFieldTypeString(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -359,12 +376,13 @@ const char *SubmitVoteDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "int",
+        "double",
+        "double",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
 }
 
-const char **SubmitVoteDescriptor::getFieldPropertyNames(int field) const
+const char **RequestJoinPlatoonMessageDescriptor::getFieldPropertyNames(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -377,7 +395,7 @@ const char **SubmitVoteDescriptor::getFieldPropertyNames(int field) const
     }
 }
 
-const char *SubmitVoteDescriptor::getFieldProperty(int field, const char *propertyname) const
+const char *RequestJoinPlatoonMessageDescriptor::getFieldProperty(int field, const char *propertyname) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -390,7 +408,7 @@ const char *SubmitVoteDescriptor::getFieldProperty(int field, const char *proper
     }
 }
 
-int SubmitVoteDescriptor::getFieldArraySize(void *object, int field) const
+int RequestJoinPlatoonMessageDescriptor::getFieldArraySize(void *object, int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -398,13 +416,13 @@ int SubmitVoteDescriptor::getFieldArraySize(void *object, int field) const
             return basedesc->getFieldArraySize(object, field);
         field -= basedesc->getFieldCount();
     }
-    SubmitVote *pp = (SubmitVote *)object; (void)pp;
+    RequestJoinPlatoonMessage *pp = (RequestJoinPlatoonMessage *)object; (void)pp;
     switch (field) {
         default: return 0;
     }
 }
 
-const char *SubmitVoteDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
+const char *RequestJoinPlatoonMessageDescriptor::getFieldDynamicTypeString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -412,13 +430,13 @@ const char *SubmitVoteDescriptor::getFieldDynamicTypeString(void *object, int fi
             return basedesc->getFieldDynamicTypeString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    SubmitVote *pp = (SubmitVote *)object; (void)pp;
+    RequestJoinPlatoonMessage *pp = (RequestJoinPlatoonMessage *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }
 }
 
-std::string SubmitVoteDescriptor::getFieldValueAsString(void *object, int field, int i) const
+std::string RequestJoinPlatoonMessageDescriptor::getFieldValueAsString(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -426,15 +444,16 @@ std::string SubmitVoteDescriptor::getFieldValueAsString(void *object, int field,
             return basedesc->getFieldValueAsString(object,field,i);
         field -= basedesc->getFieldCount();
     }
-    SubmitVote *pp = (SubmitVote *)object; (void)pp;
+    RequestJoinPlatoonMessage *pp = (RequestJoinPlatoonMessage *)object; (void)pp;
     switch (field) {
-        case 0: return long2string(pp->getVote());
-        case 1: return long2string(pp->getPlatoonId());
+        case 0: return long2string(pp->getPlatoonId());
+        case 1: return double2string(pp->getPreferedSpeed());
+        case 2: return double2string(pp->getTolerance());
         default: return "";
     }
 }
 
-bool SubmitVoteDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
+bool RequestJoinPlatoonMessageDescriptor::setFieldValueAsString(void *object, int field, int i, const char *value) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -442,15 +461,16 @@ bool SubmitVoteDescriptor::setFieldValueAsString(void *object, int field, int i,
             return basedesc->setFieldValueAsString(object,field,i,value);
         field -= basedesc->getFieldCount();
     }
-    SubmitVote *pp = (SubmitVote *)object; (void)pp;
+    RequestJoinPlatoonMessage *pp = (RequestJoinPlatoonMessage *)object; (void)pp;
     switch (field) {
-        case 0: pp->setVote(string2long(value)); return true;
-        case 1: pp->setPlatoonId(string2long(value)); return true;
+        case 0: pp->setPlatoonId(string2long(value)); return true;
+        case 1: pp->setPreferedSpeed(string2double(value)); return true;
+        case 2: pp->setTolerance(string2double(value)); return true;
         default: return false;
     }
 }
 
-const char *SubmitVoteDescriptor::getFieldStructName(int field) const
+const char *RequestJoinPlatoonMessageDescriptor::getFieldStructName(int field) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -463,7 +483,7 @@ const char *SubmitVoteDescriptor::getFieldStructName(int field) const
     };
 }
 
-void *SubmitVoteDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
+void *RequestJoinPlatoonMessageDescriptor::getFieldStructValuePointer(void *object, int field, int i) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     if (basedesc) {
@@ -471,7 +491,7 @@ void *SubmitVoteDescriptor::getFieldStructValuePointer(void *object, int field, 
             return basedesc->getFieldStructValuePointer(object, field, i);
         field -= basedesc->getFieldCount();
     }
-    SubmitVote *pp = (SubmitVote *)object; (void)pp;
+    RequestJoinPlatoonMessage *pp = (RequestJoinPlatoonMessage *)object; (void)pp;
     switch (field) {
         default: return nullptr;
     }

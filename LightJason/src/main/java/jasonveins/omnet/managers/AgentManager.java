@@ -144,13 +144,13 @@ public class AgentManager {
     }
 
     /**
-     * Value agnostic belief update method. Does not support nested belief values.
+     * Value agnostic goal insertion method. Does not support nested predicates values.
      * @param id Identifier of the agent
      * @param belief Belief to add to the agent
      * @param values Byte sequence of the values within the belief as received from the connection manager
      * @param p_size Size in bytes of the message
      */
-    public void updateBeliefs(int id, @Nonnull String belief,@Nonnull ByteBuffer values, int p_size){
+    public void updateGoals(int id, @Nonnull String belief,@Nonnull ByteBuffer values, int p_size){
         ArrayList<CRawTerm<?>> terms = new ArrayList<>();
         int size = p_size;
         while(size > 0){
@@ -192,7 +192,7 @@ public class AgentManager {
             ITerm[] arrayTerms = new ITerm[terms.size()];
             arrayTerms = terms.toArray(arrayTerms);
             trigger = CTrigger.from(
-                    ITrigger.EType.ADDBELIEF,
+                    ITrigger.EType.ADDGOAL,
                     CLiteral.from(belief,
                             Arrays.stream( arrayTerms ).collect( Collectors.toList() )
                     )

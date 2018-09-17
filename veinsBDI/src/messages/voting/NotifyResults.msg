@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 cplusplus {{
-#include "NegotiationMessage_m.h"
+#include "../NegotiationMessage_m.h"
 }}
 packet NegotiationMessage;
 

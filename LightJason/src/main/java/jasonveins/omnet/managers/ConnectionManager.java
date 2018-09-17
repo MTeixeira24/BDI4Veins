@@ -131,7 +131,7 @@ public final class ConnectionManager extends Thread {
                 size -= 4;
                 String belief = extractString(buffer);
                 size -= belief.length();
-                am.updateBeliefs(id, belief ,buffer.slice(), size);
+                am.updateGoals(id, belief ,buffer.slice(), size);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
                 break;
             case Constants.REQUEST_DECISIONS:

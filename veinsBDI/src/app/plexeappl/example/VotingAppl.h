@@ -10,10 +10,10 @@
 
 #include "../GeneralPlexeAgentAppl.h"
 #include "../../../messages/NegotiationMessage_m.h"
-#include "../../../messages/RequestJoinPlatoonMessage_m.h"
-#include "../../../messages/NotificationOfJoinVote_m.h"
-#include "../../../messages/SubmitVote_m.h"
-#include "../../../messages/NotifyResults_m.h"
+#include "../../../messages/voting/RequestJoinPlatoonMessage_m.h"
+#include "../../../messages/voting/NotificationOfJoinVote_m.h"
+#include "../../../messages/voting/SubmitVote_m.h"
+#include "../../../messages/voting/NotifyResults_m.h"
 
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:

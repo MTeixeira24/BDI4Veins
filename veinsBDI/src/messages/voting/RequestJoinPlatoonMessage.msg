@@ -11,15 +11,20 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-//
+// 
 
 cplusplus {{
-#include "NegotiationMessage_m.h"
+#include "../NegotiationMessage_m.h"
 }}
 packet NegotiationMessage;
 
-packet NotificationOfJoinVote extends NegotiationMessage {
-    //Relevant information about joiner vehicle preferences
+//
+// TODO generated message class
+//
+packet RequestJoinPlatoonMessage extends NegotiationMessage {
+    //The id of the platoon the vehicle wishes to join
+    int platoonId;
+    //Relevant information about vehicle preferences
     double preferedSpeed;
     double tolerance;
 }
