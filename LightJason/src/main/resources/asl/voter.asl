@@ -33,16 +33,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("Agent ", MyName, " have intention of searching for platoon").
     //transmit/self/searchForPlatoon(). //Set controller layer to send to agent all platoons that are open for joining
 
-+!attemptjoin(PID, LID) <-
-    +targetplatoonjoin(PID);
-    +leaderid(LID);
-    generic/print("Agent ", MyName, " sending a request to join");
-    >>preferedspeed(SPEED);
-    >>tolerance(TOLERANCE);
-    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
-
-
-
 +!choosevote(PredictedUtility)
     : >>(minimumUtility(MinUtil), MinUtil < PredictedUtility ) <-
         generic/print("Agent ", MyName, "Casting positive vote:", PredictedUtility, ">", MinUtil);
@@ -136,14 +126,33 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!handlerejection(PID) <-
     generic/print("Agent ", MyName, " was rejected from platoon ", PID, "trying the next one");
     NPID = utility/next/platoon();
-    >>platoons(NPID, LID);
-    !attemptjoin(NPID, PID).
+    !startjoin(NPID).
+
++!startjoin(PID) 
+    : PID >= 0 <-
+        generic/print("DEBUG2");
+        >>platoons(NPID, LID);
+        generic/print("Agent ", MyName, "next platoon is", NPID, "whos leader is:", LID);
+        !attemptjoin(NPID, PID)
+    : PID < 0 <-
+        generic/print("DEBUG3");
+        generic/print("Agent ", MyName, "rejected by all. Aborting negotiations").
 
 +!pushplatoon(PID, PSPEED, LID) <-
     +platoons(PID, LID);
-    utility/store/platoon(PID, PSPEED, LID).
+    >>tolerance(Tolerance);
+    >>preferedspeed(Speed);
+    utility/store/platoon(PID, PSPEED, Tolerance, Speed).
 
-+!startrequests() <- //TODO: Handle end of platoon list
++!startrequests() <- 
     PID = utility/next/platoon();
-    >>platoons(PID, LID);
-    !attemptjoin(NPID, PID).
+    generic/print("DEBUG1", PID);
+    !startjoin(PID).
+
++!attemptjoin(PID, LID) <-
+    +targetplatoonjoin(PID);
+    +leaderid(LID);
+    generic/print("Agent ", MyName, " sending a request to join");
+    >>preferedspeed(SPEED);
+    >>tolerance(TOLERANCE);
+    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).

@@ -15,10 +15,7 @@ import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
 import javax.annotation.Nonnull;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 @IAgentAction
@@ -30,6 +27,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private List<BitVector> m_bitVotes;
     private List<Integer> m_candidates;
     private int m_committeeSize;
+    /**
+     * Stores an ordered linked list containing platoon Ids and their utilities
+     */
+    private final List<PlatoonUtilities> targetPlatoons;
+    private int targetPlatoonIndex = 0;
 
     //Object voting group
     //Object voting context
@@ -47,6 +49,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id, @Nonnull String m_vType) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
+        targetPlatoons = Collections.synchronizedList(new LinkedList<>());
     }
 
     private double calculateUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
@@ -199,10 +202,58 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         agentManager.addInstruction(iOb);
     }
 
-
+    /**
+     * Used by joiner agents to get the platoonId of the next viable platoon to join
+     * @return Id of the next platoon to attempt negotiations. -1 if end of list has been reached
+     */
     @IAgentActionFilter
     @IAgentActionName( name = "utility/next/platoon" )
     private int getNextPlatoon(){
-        return -1;
+        if(targetPlatoonIndex < targetPlatoons.size())
+            return targetPlatoons.get(++targetPlatoonIndex).platoonId();
+        else
+            return -1;
+    }
+
+    /**
+     * Used by joiner agents to store information about potential platoons to join
+     * insertion is ordered for greatest to utility to lowest
+     * @param p_platoonId The id of the platoon
+     * @param p_platoonSpeed The broadcasted platoon speed to use in utility calculation
+     * @param tolerance The tolerance this agent has for preference deviations
+     * @param p_preferredSpeed The preferred speed
+     */
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/store/platoon")
+    private void storeTargetPlatoon(@Nonnull Number p_platoonId, @Nonnull Number p_platoonSpeed, @Nonnull Number tolerance, @Nonnull Number p_preferredSpeed){
+        double util = calculateUtility(1, p_platoonSpeed.doubleValue() * 3.2, tolerance.doubleValue(), p_preferredSpeed.doubleValue());
+        PlatoonUtilities pu = new PlatoonUtilities(p_platoonId.intValue(), util);
+        synchronized (targetPlatoons){
+            Iterator<PlatoonUtilities> I = targetPlatoons.iterator();
+            int counter = 0;
+            while(I.hasNext()){
+                if( I.next().utility() < util ){
+                    targetPlatoons.add(counter, pu);
+                    return;
+                }
+                counter++;
+            }
+            targetPlatoons.add(pu);
+        }
+        return;
+    }
+
+    private class PlatoonUtilities{
+        private int m_platoonId;
+        private double m_utility;
+
+        public PlatoonUtilities(int p_platoonid, double p_utility){
+            m_platoonId = p_platoonid;
+            m_utility = p_utility;
+        }
+
+        public int platoonId(){return m_platoonId;}
+
+        public double utility(){return m_utility;}
     }
 }
