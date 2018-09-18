@@ -32,6 +32,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      */
     private final List<PlatoonUtilities> targetPlatoons;
     private int targetPlatoonIndex = 0;
+    private final CopyOnWriteArrayList<Integer> targetPlatoonIds;
 
     //Object voting group
     //Object voting context
@@ -50,6 +51,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
+        targetPlatoonIds = new CopyOnWriteArrayList<>();
     }
 
     private double calculateUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
@@ -210,7 +212,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/next/platoon" )
     private int getNextPlatoon(){
         if(targetPlatoonIndex < targetPlatoons.size())
-            return targetPlatoons.get(++targetPlatoonIndex).platoonId();
+            return targetPlatoons.get(targetPlatoonIndex++).platoonId();
         else
             return -1;
     }
@@ -225,35 +227,53 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      */
     @IAgentActionFilter
     @IAgentActionName( name = "utility/store/platoon")
-    private void storeTargetPlatoon(@Nonnull Number p_platoonId, @Nonnull Number p_platoonSpeed, @Nonnull Number tolerance, @Nonnull Number p_preferredSpeed){
+    private void storeTargetPlatoon(@Nonnull Number p_platoonId, @Nonnull Number p_platoonSpeed, @Nonnull Number p_leaderId,@Nonnull Number tolerance, @Nonnull Number p_preferredSpeed){
         double util = calculateUtility(1, p_platoonSpeed.doubleValue() * 3.2, tolerance.doubleValue(), p_preferredSpeed.doubleValue());
-        PlatoonUtilities pu = new PlatoonUtilities(p_platoonId.intValue(), util);
+        PlatoonUtilities pu = new PlatoonUtilities(p_platoonId.intValue(), util, p_leaderId.intValue());
         synchronized (targetPlatoons){
-            Iterator<PlatoonUtilities> I = targetPlatoons.iterator();
-            int counter = 0;
-            while(I.hasNext()){
-                if( I.next().utility() < util ){
-                    targetPlatoons.add(counter, pu);
-                    return;
+            if(!targetPlatoonIds.contains(p_platoonId.intValue())){
+                Iterator<PlatoonUtilities> I = targetPlatoons.iterator();
+                int counter = 0;
+                while(I.hasNext()){
+                    if( I.next().utility() < util ){
+                        targetPlatoons.add(counter, pu);
+                        targetPlatoonIds.add(p_platoonId.intValue());
+                        return;
+                    }
+                    counter++;
                 }
-                counter++;
+                targetPlatoons.add(pu);
+                targetPlatoonIds.add(p_platoonId.intValue());
             }
-            targetPlatoons.add(pu);
         }
-        return;
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/get/leader")
+    private int getLeaderOfPlatoon(@Nonnull Number p_platoonId){
+        for (PlatoonUtilities targetPlatoon : targetPlatoons) {
+            if (targetPlatoon.platoonId() == p_platoonId.intValue()) {
+                return targetPlatoon.leaderId();
+            }
+        }
+        return -1;
     }
 
     private class PlatoonUtilities{
         private int m_platoonId;
         private double m_utility;
+        private int m_leaderId;
 
-        public PlatoonUtilities(int p_platoonid, double p_utility){
+        PlatoonUtilities(int p_platoonid, double p_utility, int p_leaderId){
             m_platoonId = p_platoonid;
             m_utility = p_utility;
+            m_leaderId = p_leaderId;
         }
 
-        public int platoonId(){return m_platoonId;}
+        int platoonId(){return m_platoonId;}
 
-        public double utility(){return m_utility;}
+        double utility(){return m_utility;}
+
+        int leaderId(){return m_leaderId;}
     }
 }

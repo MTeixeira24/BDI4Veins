@@ -126,23 +126,23 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!handlerejection(PID) <-
     generic/print("Agent ", MyName, " was rejected from platoon ", PID, "trying the next one");
     NPID = utility/next/platoon();
+    generic/print("Next is", NPID);
     !startjoin(NPID).
 
 +!startjoin(PID) 
     : PID >= 0 <-
-        generic/print("DEBUG2");
-        >>platoons(NPID, LID);
-        generic/print("Agent ", MyName, "next platoon is", NPID, "whos leader is:", LID);
-        !attemptjoin(NPID, PID)
+        generic/print("DEBUG2", PID);
+        LID = utility/get/leader(PID);
+        generic/print("Agent ", MyName, "next platoon is", PID, "whos leader is:", LID);
+        !attemptjoin(PID, LID)
     : PID < 0 <-
         generic/print("DEBUG3");
         generic/print("Agent ", MyName, "rejected by all. Aborting negotiations").
 
 +!pushplatoon(PID, PSPEED, LID) <-
-    +platoons(PID, LID);
     >>tolerance(Tolerance);
     >>preferedspeed(Speed);
-    utility/store/platoon(PID, PSPEED, Tolerance, Speed).
+    utility/store/platoon(PID, PSPEED, LID, Tolerance, Speed).
 
 +!startrequests() <- 
     PID = utility/next/platoon();

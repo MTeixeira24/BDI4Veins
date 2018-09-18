@@ -29,7 +29,6 @@ void VoteManager::parseResponse(uint32_t msgLength){
     uint16_t commandId;
     rbf >> commandId;
     ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);
-    //SimpleMerge* test = (SimpleMerge*)vehicles[0];
     if(commandId == TERMINATE_CONNECTION){
         close(connSocket);
     }else{

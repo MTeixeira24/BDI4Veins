@@ -113,7 +113,6 @@ void JoinAtN::handleJoinPlatoonRequest(const JoinPlatoonRequest* msg)
 
     if (app->getPlatoonRole() != PlatoonRole::LEADER && app->getPlatoonRole() != PlatoonRole::NONE) return;
 
-    //TODO: At this stage voting will occur to determine if joining is allowed
     bool permission = app->isJoinAllowed();
 
     // send response to the joiner
@@ -234,9 +233,9 @@ void JoinAtN::handleMoveToPosition(const MoveToPosition* msg)
     int currentLane = traciVehicle->getLaneIndex();
     //If joiner is not joining at the back, stay in adjacent lane in order to overtake the other members
     if(targetPlatoonData->joinIndex < (targetPlatoonData->newFormation.size() - 1)){
-        traciVehicle->setFixedLane(targetPlatoonData->platoonLane + 1);
+        traciVehicle->setFixedLane(targetPlatoonData->platoonLane + 1, true);
     }else if (currentLane != targetPlatoonData->platoonLane) { //Otherwise move to platoon lane
-        traciVehicle->setFixedLane(targetPlatoonData->platoonLane);
+        traciVehicle->setFixedLane(targetPlatoonData->platoonLane, true);
     }
 
     // approaching the platoon
