@@ -261,6 +261,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
     }else if(msg == searchTimer){
         BeliefModel sendRequests;
         sendRequests.setBelief("startrequests");
+        searchingForPlatoon = false;
         manager->sendInformationToAgents(myId, &sendRequests);
         delete msg;
     }else {
