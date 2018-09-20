@@ -346,6 +346,7 @@ void JoinAtN::handleJoinFormationAck(const JoinFormationAck* msg)
 
     joinManeuverState = JoinManeuverState::IDLE;
     app->setInManeuver(false);
+    app->finalizeManeuver(joinerData->joinerId);
     gapCreated = false;
     joinerInPosition = false;
 }

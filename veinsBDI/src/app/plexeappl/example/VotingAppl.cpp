@@ -79,11 +79,20 @@ void VotingAppl::initialize(int stage){
                 manager->sendInformationToAgents(myId, &pbelief);
             }
         }
-        std::string test1 = getParentModule()->getFullName();
+        /*std::string test1 = getParentModule()->getFullName();
         int test3 = getParentModule()->getId();
         int test2 = myId;
-        int buf = myId;
+        int buf = myId;*/
     }
+}
+
+void VotingAppl::sendNotificationOfSpeedVote(std::vector<int>& candidates){
+    NotifyVote* msg = new NotifyVote("NotifyVote");
+    msg->setCandidatesArraySize(candidates.size());
+    for(uint32_t i = 0; i < candidates.size(); i++){
+        msg->setCandidates(i, candidates[i]);
+    }
+    sendUnicast(msg, -1);
 }
 
 void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double preferedSpeed, double tolerance){
@@ -172,6 +181,9 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
             delete msg;
         }else if (NotifyResults* msg = dynamic_cast<NotifyResults*>(nm)) {
             handleNotificationOfResults(msg);
+            delete msg;
+        }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
+            handleNotifyVote(msg);
             delete msg;
         }
         delete unicast;
@@ -271,6 +283,10 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
     }else {
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
+
+}
+
+void VotingAppl::handleNotifyVote(const NotifyVote* msg){
 
 }
 

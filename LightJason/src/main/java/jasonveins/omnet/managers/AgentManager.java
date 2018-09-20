@@ -182,6 +182,15 @@ public class AgentManager {
                     terms.add(CRawTerm.from(values.getDouble()));
                     size -= 8;
                     break;
+                case Constants.VALUE_ARRAY:
+                    values.getShort(); //advance past the type specifier
+                    int arraySize = values.getInt();
+                    ArrayList<Integer> elements = new ArrayList<>(arraySize);
+                    for(int i = 0; i < arraySize; i++){
+                        elements.add(values.getInt());
+                    }
+                    terms.add(CRawTerm.from(elements));
+                    break;
                 default:
                     throw new RuntimeException("Unknown value!");
             }

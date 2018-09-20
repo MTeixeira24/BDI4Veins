@@ -87,6 +87,24 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >>result;
                 ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(joinerId, result);
                 break;
+            case NOTIFY_START_VOTE_SPEED:
+            {
+                rbf >> type;
+                ASSERT(type == VALUE_ARRAY);
+                short arrayType;
+                rbf >> arrayType;
+                ASSERT(arrayType == VALUE_INT);
+                uint32_t size;
+                rbf >> size;
+                std::vector<int> candidates(size);
+                int buffer;
+                for(uint32_t i = 0; i < size; i++){
+                    rbf >> buffer;
+                    candidates.push_back(buffer);
+                }
+                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfSpeedVote(candidates);
+                break;
+            }
             default:
                 break;
             }

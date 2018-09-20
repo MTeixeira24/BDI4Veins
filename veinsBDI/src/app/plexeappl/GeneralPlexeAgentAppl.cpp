@@ -136,6 +136,12 @@ UpdatePlatoonFormation* GeneralPlexeAgentAppl::createUpdatePlatoonFormation(int 
     return msg;
 }
 
+void GeneralPlexeAgentAppl::finalizeManeuver(int joinerId){
+    BeliefModel mnv("maneuver/complete");
+    mnv.pushInt(&joinerId);
+    manager->sendInformationToAgents(myId, &mnv);
+}
+
 GeneralPlexeAgentAppl::~GeneralPlexeAgentAppl()
 {
     delete joinManeuver;

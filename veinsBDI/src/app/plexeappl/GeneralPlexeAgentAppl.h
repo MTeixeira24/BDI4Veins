@@ -163,6 +163,10 @@ public:
 
     bool isJoinAllowed() const;
 
+    /**
+     *
+     */
+    void finalizeManeuver(int joinerId);
 protected:
     /** override this method of BaseApp. we want to handle it ourself */
     virtual void handleLowerMsg(cMessage* msg) override;

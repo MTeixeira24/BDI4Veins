@@ -4,6 +4,7 @@ import cern.colt.bitvector.BitVector;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.Constants;
+import jasonveins.omnet.voting.CContext;
 import jasonveins.omnet.voting.rule.CBorda;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
@@ -35,7 +36,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private final CopyOnWriteArrayList<Integer> targetPlatoonIds;
 
     //Object voting group
-    //Object voting context
+    CContext m_context;
     //Object myvote
     //Object winner determination
 
@@ -152,6 +153,20 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }
         m_bitVotes = Collections.synchronizedList( new LinkedList<>() );
         m_committeeSize = committeeSize.intValue();
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/open/ballot/speed" )
+    private void openSpeedVote()
+    {
+        ArrayList<Integer> l_candidates = new ArrayList<>();
+        for(int i = 80; i <= 120; i += 10){
+            l_candidates.add(i);
+        }
+        m_context = new CContext(l_candidates, "speed");
+        InstructionModel iOb = new InstructionModel(this.id, Constants.NOTIFY_START_VOTE_SPEED);
+        iOb.pushIntArray(l_candidates);
+        agentManager.addInstruction(iOb);
     }
 
     @IAgentActionFilter

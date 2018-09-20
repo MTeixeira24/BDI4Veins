@@ -63,7 +63,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!addmember(L) <-
     utility/storemember(L).
-
         
 
 +!ballotopen() <-
@@ -104,7 +103,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("REJECTED!");
     vote/send/results(JID, 0).
 
-//Belief triggered plans for chair agents
 +!openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
     +platoonspeed(PSPEED);
     !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
@@ -120,6 +118,11 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!requestjoin(JID, JSPEED, JPREFERENCE) <-
     !handlejoinrequest(JID, JSPEED, JPREFERENCE).
+
++!maneuver/complete(L) <-
+    generic/print("Agent ", MyName, " maneuver complete starting a vote to set speed");
+    utility/storemember(L);
+    vote/open/ballot/speed().
 
 //Joiner specific plans
 

@@ -16,6 +16,7 @@
 #include "../../../messages/voting/NotificationOfJoinVote_m.h"
 #include "../../../messages/voting/SubmitVote_m.h"
 #include "../../../messages/voting/NotifyResults_m.h"
+#include "../../../messages/voting/NotifyVote_m.h"
 
 #include "../../../utilities/LeaderPositionHelper.h"
 
@@ -51,6 +52,10 @@ public:
      *
      */
     void sendVoteResults(int joinerId, int results);
+    /**
+     *
+     */
+    void sendNotificationOfSpeedVote(std::vector<int>& candidates);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
@@ -84,6 +89,10 @@ protected:
      *
      */
     void handleNotificationOfResults(const NotifyResults* msg);
+    /**
+     *
+     */
+    void handleNotifyVote(const NotifyVote* msg);
     enum class InitialState {
             NONE,
             JOINER,

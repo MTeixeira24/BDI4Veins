@@ -17,6 +17,7 @@
 class BeliefModel {
 public:
     BeliefModel();
+    BeliefModel(std::string belief);
     virtual ~BeliefModel();
     void setBelief(std::string);
     std::string getBelief(){return belief;}
@@ -28,6 +29,8 @@ public:
     void pushLong(long*);
     void pushFloat(float*);
     void pushDouble(double*);
+
+    void pushIntArray(std::vector<int>&);
 
     std::vector<BeliefObject> getValues(){return values;}
 protected:
