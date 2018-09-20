@@ -31,5 +31,7 @@ public class Constants {
 
     public static final short VALUE_DOUBLE = 7;
 
+    public static final short VALUE_ARRAY = 8;
+
     
 }

@@ -62,8 +62,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     !attemptjoin(PID, LID).
 
 +!addmember(L) <-
-    utility/storemember(L);
-    -addmember(L).
+    utility/storemember(L).
+
         
 
 +!ballotopen() <-
