@@ -79,6 +79,10 @@ void VotingAppl::initialize(int stage){
                 manager->sendInformationToAgents(myId, &pbelief);
             }
         }
+        std::string test1 = getParentModule()->getFullName();
+        int test3 = getParentModule()->getId();
+        int test2 = myId;
+        int buf = myId;
     }
 }
 

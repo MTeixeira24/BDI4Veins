@@ -280,7 +280,7 @@ public class AgentManager {
                 throw new RuntimeException();
             }
             while(!cycleEnd.get()); //Wait until current stream is over
-            Predicate<IAgent<?>> removePredicate = a -> ((NormalVehicleAgent)a).id() == agentId;
+            Predicate<IAgent<?>> removePredicate = a -> ((IVehicleAgent)a).id() == agentId;
             l_agents.removeIf(removePredicate);
             agentMap.remove(agentId);
             if(agentMap.size() == 0){

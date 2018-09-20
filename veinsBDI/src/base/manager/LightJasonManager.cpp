@@ -6,12 +6,15 @@
  */
 
 #include "LightJasonManager.h"
-Define_Module(LightJasonManager)
-LightJasonManager::LightJasonManager(){
 
+Define_Module(LightJasonManager)
+
+LightJasonManager::LightJasonManager(){
 }
 
 LightJasonManager::~LightJasonManager(){
+    delete queryMsg;
+    close(connSocket);
 }
 
 void LightJasonManager::initialize(int stage){
@@ -65,7 +68,6 @@ void LightJasonManager::handleMessage(cMessage* msg){
             queryMsg = new cMessage("query");
             scheduleAt(simTime() + updateInterval, queryMsg);
         }
-
     }
 }
 

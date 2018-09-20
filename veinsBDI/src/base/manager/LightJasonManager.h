@@ -22,6 +22,7 @@
 #include <map>
 
 #include "../../app/baseappl/BaseAgentAppl.h"
+#include "../../utilities/Timer.h"
 #include "JasoNetProtocol.h"
 #include "LightJasonBuffer.h"
 using namespace omnetpp;
@@ -87,6 +88,8 @@ protected:
     virtual void parseResponse(uint32_t msgLength);
 
     //virtual void setupListener();
+private:
+    //Timer timer;
 };
 
 

@@ -67,9 +67,6 @@ void GeneralPlexeAgentAppl::handleLowerMsg(cMessage* msg)
     ASSERT2(enc, "received a UnicastMessage with nothing inside");
 
     if (enc->getKind() == MANEUVER_TYPE) {
-        if(myId == 12){
-            int holdup = 12;
-        }
         ManeuverMessage* mm = check_and_cast<ManeuverMessage*>(unicast->decapsulate());
         if (UpdatePlatoonFormation* msg = dynamic_cast<UpdatePlatoonFormation*>(mm)) {
             handleUpdatePlatoonFormation(msg);
