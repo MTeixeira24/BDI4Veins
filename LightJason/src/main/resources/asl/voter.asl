@@ -124,6 +124,9 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     utility/storemember(L);
     vote/open/ballot/speed().
 
++!handle/speed/vote/notification(CANDIDATES) <-
+    generic/print("Agent", MyName, " got notification to vote on platoon speed: ", CANDIDATES).
+
 //Joiner specific plans
 
 +!handlerejection(PID) <-

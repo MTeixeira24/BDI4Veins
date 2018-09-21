@@ -52,6 +52,17 @@ LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* bel
         case VALUE_DOUBLE:
             buffer << *((double*)bo.getData());
             break;
+        case VALUE_ARRAY:
+        {
+            int* ptr = (int*)bo.getData();
+            buffer << *(ptr); //get type of data
+            uint32_t size = *(ptr + 1);
+            buffer << size; //size of array
+            for(uint32_t i = 0; i < size; i++){
+                buffer << *(ptr + i + 2);
+            }
+            break;
+        }
         default:
             throw cRuntimeError("Invalid data type!");
             break;

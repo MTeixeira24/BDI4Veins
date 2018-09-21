@@ -28,6 +28,7 @@
  * packet NotifyVote extends NegotiationMessage
  * {
  *     int candidates[];
+ *     string context;
  * }
  * </pre>
  */
@@ -36,6 +37,7 @@ class NotifyVote : public ::NegotiationMessage
   protected:
     int *candidates; // array ptr
     unsigned int candidates_arraysize;
+    ::omnetpp::opp_string context;
 
   private:
     void copy(const NotifyVote& other);
@@ -58,6 +60,8 @@ class NotifyVote : public ::NegotiationMessage
     virtual unsigned int getCandidatesArraySize() const;
     virtual int getCandidates(unsigned int k) const;
     virtual void setCandidates(unsigned int k, int candidates);
+    virtual const char * getContext() const;
+    virtual void setContext(const char * context);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const NotifyVote& obj) {obj.parsimPack(b);}

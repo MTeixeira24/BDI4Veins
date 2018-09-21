@@ -100,7 +100,7 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 int buffer;
                 for(uint32_t i = 0; i < size; i++){
                     rbf >> buffer;
-                    candidates.push_back(buffer);
+                    candidates[i] = buffer;
                 }
                 ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfSpeedVote(candidates);
                 break;

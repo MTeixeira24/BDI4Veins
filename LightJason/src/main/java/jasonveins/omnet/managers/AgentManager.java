@@ -183,13 +183,14 @@ public class AgentManager {
                     size -= 8;
                     break;
                 case Constants.VALUE_ARRAY:
-                    values.getShort(); //advance past the type specifier
+                    values.getInt(); //advance past the type specifier
                     int arraySize = values.getInt();
                     ArrayList<Integer> elements = new ArrayList<>(arraySize);
                     for(int i = 0; i < arraySize; i++){
                         elements.add(values.getInt());
                     }
                     terms.add(CRawTerm.from(elements));
+                    size -= 4*(arraySize + 2);
                     break;
                 default:
                     throw new RuntimeException("Unknown value!");

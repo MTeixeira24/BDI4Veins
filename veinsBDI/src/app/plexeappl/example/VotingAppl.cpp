@@ -11,7 +11,8 @@ Define_Module(VotingAppl);
 
 
 VotingAppl::~VotingAppl() {
-    delete searchTimer;
+    if(searchTimer != nullptr)
+        delete searchTimer;
 }
 
 void VotingAppl::initialize(int stage){
@@ -89,6 +90,8 @@ void VotingAppl::initialize(int stage){
 void VotingAppl::sendNotificationOfSpeedVote(std::vector<int>& candidates){
     NotifyVote* msg = new NotifyVote("NotifyVote");
     msg->setCandidatesArraySize(candidates.size());
+    msg->setContext("handle/speed/vote/notification");
+    msg->setKind(NEGOTIATION_TYPE);
     for(uint32_t i = 0; i < candidates.size(); i++){
         msg->setCandidates(i, candidates[i]);
     }
@@ -287,7 +290,14 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
 }
 
 void VotingAppl::handleNotifyVote(const NotifyVote* msg){
-
+    uint32_t size = msg->getCandidatesArraySize();
+    std::vector<int> candidates(size);
+    for(uint32_t i = 0; i < size; i++){
+        candidates[i] = msg->getCandidates(i);
+    }
+    BeliefModel voteNotify(msg->getContext());
+    voteNotify.pushIntArray(candidates);
+    manager->sendInformationToAgents(myId, &voteNotify);
 }
 
 void VotingAppl::sendToAgent(const BeliefModel* bm){

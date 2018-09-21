@@ -212,6 +212,7 @@ void NotifyVote::copy(const NotifyVote& other)
     candidates_arraysize = other.candidates_arraysize;
     for (unsigned int i=0; i<candidates_arraysize; i++)
         this->candidates[i] = other.candidates[i];
+    this->context = other.context;
 }
 
 void NotifyVote::parsimPack(omnetpp::cCommBuffer *b) const
@@ -219,6 +220,7 @@ void NotifyVote::parsimPack(omnetpp::cCommBuffer *b) const
     ::NegotiationMessage::parsimPack(b);
     b->pack(candidates_arraysize);
     doParsimArrayPacking(b,this->candidates,candidates_arraysize);
+    doParsimPacking(b,this->context);
 }
 
 void NotifyVote::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -232,6 +234,7 @@ void NotifyVote::parsimUnpack(omnetpp::cCommBuffer *b)
         this->candidates = new int[candidates_arraysize];
         doParsimArrayUnpacking(b,this->candidates,candidates_arraysize);
     }
+    doParsimUnpacking(b,this->context);
 }
 
 void NotifyVote::setCandidatesArraySize(unsigned int size)
@@ -262,6 +265,16 @@ void NotifyVote::setCandidates(unsigned int k, int candidates)
 {
     if (k>=candidates_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", candidates_arraysize, k);
     this->candidates[k] = candidates;
+}
+
+const char * NotifyVote::getContext() const
+{
+    return this->context.c_str();
+}
+
+void NotifyVote::setContext(const char * context)
+{
+    this->context = context;
 }
 
 class NotifyVoteDescriptor : public omnetpp::cClassDescriptor
@@ -329,7 +342,7 @@ const char *NotifyVoteDescriptor::getProperty(const char *propertyname) const
 int NotifyVoteDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount() : 1;
+    return basedesc ? 2+basedesc->getFieldCount() : 2;
 }
 
 unsigned int NotifyVoteDescriptor::getFieldTypeFlags(int field) const
@@ -342,8 +355,9 @@ unsigned int NotifyVoteDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISARRAY | FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
 const char *NotifyVoteDescriptor::getFieldName(int field) const
@@ -356,8 +370,9 @@ const char *NotifyVoteDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "candidates",
+        "context",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
 }
 
 int NotifyVoteDescriptor::findField(const char *fieldName) const
@@ -365,6 +380,7 @@ int NotifyVoteDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='c' && strcmp(fieldName, "candidates")==0) return base+0;
+    if (fieldName[0]=='c' && strcmp(fieldName, "context")==0) return base+1;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -378,8 +394,9 @@ const char *NotifyVoteDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
+        "string",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **NotifyVoteDescriptor::getFieldPropertyNames(int field) const
@@ -448,6 +465,7 @@ std::string NotifyVoteDescriptor::getFieldValueAsString(void *object, int field,
     NotifyVote *pp = (NotifyVote *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getCandidates(i));
+        case 1: return oppstring2string(pp->getContext());
         default: return "";
     }
 }
@@ -463,6 +481,7 @@ bool NotifyVoteDescriptor::setFieldValueAsString(void *object, int field, int i,
     NotifyVote *pp = (NotifyVote *)object; (void)pp;
     switch (field) {
         case 0: pp->setCandidates(i,string2long(value)); return true;
+        case 1: pp->setContext((value)); return true;
         default: return false;
     }
 }

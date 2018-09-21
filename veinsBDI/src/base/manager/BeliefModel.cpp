@@ -39,13 +39,27 @@ void BeliefModel::pushDouble(double* value){
 
 void BeliefModel::pushIntArray(std::vector<int>& elements){
     BeliefObject bo;
-    size_t size = sizeof(int)*elements.size();
-    short* array = (short*)malloc(sizeof(short)+size); //2 bytes for type specifier, 4 byte sequence for int
-    *(array + sizeof(short)) = VALUE_INT; //Put a 2 byte-sized type specifier in the message;
+    size_t size = sizeof(int) * (elements.size()+2);
+    int array[elements.size()+2]; //allocate size() bytes for content and 2 extra for type and size.
+    array[0] = VALUE_INT; //Put the value type at beginning;
+    array[1] = elements.size(); //store the size;
     for(uint32_t i = 0; i < elements.size(); i++){
-        *( (array + sizeof(short)) + sizeof(int)*i ) = elements[i];
+        array[i + 2] = elements[i];
     }
     bo.setData(VALUE_ARRAY, array, size);
+    values.push_back(bo);
     totalSize += size;
+}
+
+void BeliefModel::pushIntArray(int* array, uint32_t size){
+    BeliefObject bo;
+    size_t byte_size = sizeof(int) * (size + 2);
+    int d_array[size + 2];
+    d_array[0] = VALUE_INT;
+    d_array[1] = size;
+    std::memcpy( &d_array[2], array, sizeof(int)*size );
+    bo.setData(VALUE_ARRAY, d_array, byte_size);
+    values.push_back(bo);
+    totalSize += byte_size;
 }
 

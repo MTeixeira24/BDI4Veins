@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <cstring>
 #include "LightJasonConstants.h"
 #include "BeliefObject.h"
 
@@ -31,6 +32,7 @@ public:
     void pushDouble(double*);
 
     void pushIntArray(std::vector<int>&);
+    void pushIntArray(int* array, uint32_t size);
 
     std::vector<BeliefObject> getValues(){return values;}
 protected:
