@@ -178,5 +178,19 @@ LightJasonBuffer LightJasonManager::receiveMessage(uint32_t length){
     return LightJasonBuffer(std::string(msgBuffer, length));
 }
 
+std::vector<int> LightJasonManager::parseArrayMessage(LightJasonBuffer& buffer){
+    short arrayType;
+    buffer >> arrayType;
+    ASSERT(arrayType == VALUE_INT);
+    uint32_t size;
+    buffer >> size;
+    std::vector<int> contents(size);
+    int element;
+    for(uint32_t i = 0; i < size; i++){
+        buffer >> element;
+        contents[i] = element;
+    }
+    return contents;
+}
 
 

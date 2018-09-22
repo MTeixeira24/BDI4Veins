@@ -1,14 +1,19 @@
 package jasonveins.omnet.voting;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class CContext {
     private ArrayList<Integer> m_candidates;
     private String m_voteType;
+    private ArrayList<List<Integer>> m_votes;
+    private int m_voterCount;
 
-    public CContext(ArrayList<Integer> p_candidates, String p_voteType){
+    public CContext(ArrayList<Integer> p_candidates, String p_voteType, int p_voterCount){
         m_candidates = p_candidates;
         m_voteType = p_voteType;
+        m_votes = new ArrayList<>();
+        m_voterCount = p_voterCount;
     }
 
 
@@ -26,5 +31,22 @@ public class CContext {
 
     public void setVoteType(String m_voteType) {
         this.m_voteType = m_voteType;
+    }
+
+    public ArrayList<List<Integer>> getVotes() {
+        return m_votes;
+    }
+
+    public void pushVotes(List<Integer> p_votes){
+        m_votes.add(p_votes);
+    }
+
+    public boolean allVotesSubmitted(){
+        if(this.m_voterCount == m_votes.size()) return true;
+        return false;
+    }
+
+    public void increaseVoterCount(){
+        m_voterCount++;
     }
 }

@@ -120,10 +120,29 @@ void VotingAppl::sendVoteSubmition(int vote){
     msg->setExternalId(positionHelper->getExternalId().c_str());
     msg->setDestinationId(leaderId);
     msg->setVote(vote);
+    msg->setArray(false);
     int position = positionHelper->getPosition();
     scheduleAt(simTime() + 0.1*position, msg);
     //if(myId == 1 || myId == 2 || myId == 3)
     //    sendUnicast(msg, leaderId);
+}
+
+void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
+    Enter_Method_Silent();
+    SubmitVote* msg = new SubmitVote("SubmitVote");
+    int leaderId = positionHelper->getLeaderId();
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setPlatoonId(positionHelper->getPlatoonId());
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(leaderId);
+    msg->setArray(true);
+    msg->setVotesArraySize(votes.size());
+    for(uint32_t i = 0; i < votes.size(); i++){
+        msg->setVotes(i, votes[i]);
+    }
+    int position = positionHelper->getPosition();
+    scheduleAt(simTime() + 0.1*position, msg);
 }
 
 void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
@@ -158,6 +177,18 @@ void VotingAppl::sendVoteResults(int joinerId, int results){
     msg->setPlatoonId(platoonId);
     sendUnicast(msg, -1);
 
+}
+void VotingAppl::sendVoteResults(int winnerValue){
+    NotifyResults* msg = new NotifyResults("NotifyResults");
+    int platoonId = positionHelper->getPlatoonId();
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(-1);
+    msg->setResult(winnerValue);
+    msg->setJoinerId(-1);
+    msg->setPlatoonId(platoonId);
+    sendUnicast(msg, -1);
 }
 
 void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
@@ -225,14 +256,10 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
 }
 
 void VotingAppl::handleSubmitVote(const SubmitVote* msg){
-    int msgPid = msg->getPlatoonId();
-    int myPid = positionHelper->getPlatoonId();
-    bool r1 = msgPid == myPid;
-    int mid = myId;
-    int lid = positionHelper->getLeaderId();
-    bool r2 = mid == lid;
+    if(msg->getPlatoonId() != positionHelper->getPlatoonId()) return;
+    if(myId != positionHelper->getLeaderId()) return;
 
-    if( r1 && r2 ){
+    if( !msg->getArray() ){
         int vote = msg->getVote();
         int voter = msg->getVehicleId();
         BeliefModel submitVote;
@@ -240,6 +267,15 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
         submitVote.pushInt(&voter);
         submitVote.pushInt(&vote);
         manager->sendInformationToAgents(myId, &submitVote);
+    }else{
+        uint32_t size = msg->getVotesArraySize();
+        std::vector<int> votes(size);
+        for(uint32_t i = 0; i < size; i++){
+            votes[i] = msg->getVotes(i);
+        }
+        BeliefModel voteSubmission("handle/submit/vote");
+        voteSubmission.pushIntArray(votes);
+        manager->sendInformationToAgents(myId, &voteSubmission);
     }
 }
 
@@ -258,18 +294,26 @@ void VotingAppl::handleNotificationOfJoinVote(const NotificationOfJoinVote* msg)
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
-    if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
-        //TODO: Handle insertion of beliefs
-    }else if (myId == msg->getJoinerId()){
-        BeliefModel result;
-        if(msg->getResult() == 1)
-            startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
-        else{
-            result.setBelief("handlerejection");
-            int platoonId = msg->getPlatoonId();
-            result.pushInt(&platoonId);
-            manager->sendInformationToAgents(myId, &result);
+    if(msg->getJoinerId() != -1){
+        if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
+            //TODO: Handle insertion of beliefs
+        }else if (myId == msg->getJoinerId()){
+            BeliefModel result;
+            if(msg->getResult() == 1)
+                startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
+            else{
+                result.setBelief("handlerejection");
+                int platoonId = msg->getPlatoonId();
+                result.pushInt(&platoonId);
+                manager->sendInformationToAgents(myId, &result);
+            }
         }
+    }else{
+        BeliefModel result;
+        result.setBelief("handle/results");
+        int speed = msg->getResult();
+        result.pushInt(&speed);
+        manager->sendInformationToAgents(myId, &result);
     }
 }
 

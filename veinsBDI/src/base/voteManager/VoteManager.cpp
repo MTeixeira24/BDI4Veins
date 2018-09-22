@@ -71,21 +71,37 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 break;
             case SUBMIT_VOTE:
                 rbf >> type;
-                ASSERT(type == VALUE_INT);
-                int vote;
-                rbf >> vote;
-                ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(vote);
+                ASSERT((type == VALUE_INT) || (type == VALUE_ARRAY));
+                if(type == VALUE_INT){
+                    int vote;
+                    rbf >> vote;
+                    ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(vote);
+                } else {
+                    std::vector<int> votes = parseArrayMessage(rbf);
+                    ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(votes);
+                }
                 break;
             case SEND_VOTE_RESULTS:
+                int placeholder;
                 rbf >> type;
-                ASSERT(type == VALUE_INT);
-                int joinerId;
-                rbf >>joinerId;
-                rbf >> type;
-                ASSERT(type == VALUE_INT);
-                int result;
-                rbf >>result;
-                ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(joinerId, result);
+                rbf >> placeholder;
+                if(placeholder == 0){
+                    rbf >> type;
+                    ASSERT(type == VALUE_INT);
+                    int joinerId;
+                    rbf >>joinerId;
+                    rbf >> type;
+                    ASSERT(type == VALUE_INT);
+                    int result;
+                    rbf >>result;
+                    ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(joinerId, result);
+                }else{
+                    rbf >> type;
+                    ASSERT(type == VALUE_INT);
+                    int winnerValue;
+                    rbf >> winnerValue;
+                    ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(winnerValue);
+                }
                 break;
             case NOTIFY_START_VOTE_SPEED:
             {

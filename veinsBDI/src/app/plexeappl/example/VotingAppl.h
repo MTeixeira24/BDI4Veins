@@ -47,11 +47,18 @@ public:
      *
      */
     void sendVoteSubmition(int vote);
-
+    /**
+     *
+     */
+    void sendVoteSubmition(std::vector<int>& votes);
     /**
      *
      */
     void sendVoteResults(int joinerId, int results);
+    /**
+     *
+     */
+    void sendVoteResults(int winnerValue);
     /**
      *
      */

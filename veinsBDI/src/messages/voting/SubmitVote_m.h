@@ -30,6 +30,8 @@
  *     //Relevant information about joiner vehicle preferences
  *     int vote;
  *     int platoonId;
+ *     int votes[];
+ *     bool array;
  * }
  * </pre>
  */
@@ -38,6 +40,9 @@ class SubmitVote : public ::NegotiationMessage
   protected:
     int vote;
     int platoonId;
+    int *votes; // array ptr
+    unsigned int votes_arraysize;
+    bool array;
 
   private:
     void copy(const SubmitVote& other);
@@ -60,6 +65,12 @@ class SubmitVote : public ::NegotiationMessage
     virtual void setVote(int vote);
     virtual int getPlatoonId() const;
     virtual void setPlatoonId(int platoonId);
+    virtual void setVotesArraySize(unsigned int size);
+    virtual unsigned int getVotesArraySize() const;
+    virtual int getVotes(unsigned int k) const;
+    virtual void setVotes(unsigned int k, int votes);
+    virtual bool getArray() const;
+    virtual void setArray(bool array);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const SubmitVote& obj) {obj.parsimPack(b);}

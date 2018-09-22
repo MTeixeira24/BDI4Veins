@@ -88,6 +88,11 @@ protected:
     virtual void parseResponse(uint32_t msgLength);
 
     //virtual void setupListener();
+
+    /**
+     * Extracts the array from a buffer to a vector
+     */
+    virtual std::vector<int> parseArrayMessage(LightJasonBuffer& buffer);
 private:
     //Timer timer;
 };

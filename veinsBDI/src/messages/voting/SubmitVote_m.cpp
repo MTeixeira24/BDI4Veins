@@ -183,15 +183,21 @@ SubmitVote::SubmitVote(const char *name, short kind) : ::NegotiationMessage(name
 {
     this->vote = 0;
     this->platoonId = 0;
+    votes_arraysize = 0;
+    this->votes = 0;
+    this->array = false;
 }
 
 SubmitVote::SubmitVote(const SubmitVote& other) : ::NegotiationMessage(other)
 {
+    votes_arraysize = 0;
+    this->votes = 0;
     copy(other);
 }
 
 SubmitVote::~SubmitVote()
 {
+    delete [] this->votes;
 }
 
 SubmitVote& SubmitVote::operator=(const SubmitVote& other)
@@ -206,6 +212,12 @@ void SubmitVote::copy(const SubmitVote& other)
 {
     this->vote = other.vote;
     this->platoonId = other.platoonId;
+    delete [] this->votes;
+    this->votes = (other.votes_arraysize==0) ? nullptr : new int[other.votes_arraysize];
+    votes_arraysize = other.votes_arraysize;
+    for (unsigned int i=0; i<votes_arraysize; i++)
+        this->votes[i] = other.votes[i];
+    this->array = other.array;
 }
 
 void SubmitVote::parsimPack(omnetpp::cCommBuffer *b) const
@@ -213,6 +225,9 @@ void SubmitVote::parsimPack(omnetpp::cCommBuffer *b) const
     ::NegotiationMessage::parsimPack(b);
     doParsimPacking(b,this->vote);
     doParsimPacking(b,this->platoonId);
+    b->pack(votes_arraysize);
+    doParsimArrayPacking(b,this->votes,votes_arraysize);
+    doParsimPacking(b,this->array);
 }
 
 void SubmitVote::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -220,6 +235,15 @@ void SubmitVote::parsimUnpack(omnetpp::cCommBuffer *b)
     ::NegotiationMessage::parsimUnpack(b);
     doParsimUnpacking(b,this->vote);
     doParsimUnpacking(b,this->platoonId);
+    delete [] this->votes;
+    b->unpack(votes_arraysize);
+    if (votes_arraysize==0) {
+        this->votes = 0;
+    } else {
+        this->votes = new int[votes_arraysize];
+        doParsimArrayUnpacking(b,this->votes,votes_arraysize);
+    }
+    doParsimUnpacking(b,this->array);
 }
 
 int SubmitVote::getVote() const
@@ -240,6 +264,46 @@ int SubmitVote::getPlatoonId() const
 void SubmitVote::setPlatoonId(int platoonId)
 {
     this->platoonId = platoonId;
+}
+
+void SubmitVote::setVotesArraySize(unsigned int size)
+{
+    int *votes2 = (size==0) ? nullptr : new int[size];
+    unsigned int sz = votes_arraysize < size ? votes_arraysize : size;
+    for (unsigned int i=0; i<sz; i++)
+        votes2[i] = this->votes[i];
+    for (unsigned int i=sz; i<size; i++)
+        votes2[i] = 0;
+    votes_arraysize = size;
+    delete [] this->votes;
+    this->votes = votes2;
+}
+
+unsigned int SubmitVote::getVotesArraySize() const
+{
+    return votes_arraysize;
+}
+
+int SubmitVote::getVotes(unsigned int k) const
+{
+    if (k>=votes_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", votes_arraysize, k);
+    return this->votes[k];
+}
+
+void SubmitVote::setVotes(unsigned int k, int votes)
+{
+    if (k>=votes_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", votes_arraysize, k);
+    this->votes[k] = votes;
+}
+
+bool SubmitVote::getArray() const
+{
+    return this->array;
+}
+
+void SubmitVote::setArray(bool array)
+{
+    this->array = array;
 }
 
 class SubmitVoteDescriptor : public omnetpp::cClassDescriptor
@@ -307,7 +371,7 @@ const char *SubmitVoteDescriptor::getProperty(const char *propertyname) const
 int SubmitVoteDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 2+basedesc->getFieldCount() : 2;
+    return basedesc ? 4+basedesc->getFieldCount() : 4;
 }
 
 unsigned int SubmitVoteDescriptor::getFieldTypeFlags(int field) const
@@ -321,8 +385,10 @@ unsigned int SubmitVoteDescriptor::getFieldTypeFlags(int field) const
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISARRAY | FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
 }
 
 const char *SubmitVoteDescriptor::getFieldName(int field) const
@@ -336,8 +402,10 @@ const char *SubmitVoteDescriptor::getFieldName(int field) const
     static const char *fieldNames[] = {
         "vote",
         "platoonId",
+        "votes",
+        "array",
     };
-    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
 }
 
 int SubmitVoteDescriptor::findField(const char *fieldName) const
@@ -346,6 +414,8 @@ int SubmitVoteDescriptor::findField(const char *fieldName) const
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='v' && strcmp(fieldName, "vote")==0) return base+0;
     if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+1;
+    if (fieldName[0]=='v' && strcmp(fieldName, "votes")==0) return base+2;
+    if (fieldName[0]=='a' && strcmp(fieldName, "array")==0) return base+3;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -360,8 +430,10 @@ const char *SubmitVoteDescriptor::getFieldTypeString(int field) const
     static const char *fieldTypeStrings[] = {
         "int",
         "int",
+        "int",
+        "bool",
     };
-    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **SubmitVoteDescriptor::getFieldPropertyNames(int field) const
@@ -400,6 +472,7 @@ int SubmitVoteDescriptor::getFieldArraySize(void *object, int field) const
     }
     SubmitVote *pp = (SubmitVote *)object; (void)pp;
     switch (field) {
+        case 2: return pp->getVotesArraySize();
         default: return 0;
     }
 }
@@ -430,6 +503,8 @@ std::string SubmitVoteDescriptor::getFieldValueAsString(void *object, int field,
     switch (field) {
         case 0: return long2string(pp->getVote());
         case 1: return long2string(pp->getPlatoonId());
+        case 2: return long2string(pp->getVotes(i));
+        case 3: return bool2string(pp->getArray());
         default: return "";
     }
 }
@@ -446,6 +521,8 @@ bool SubmitVoteDescriptor::setFieldValueAsString(void *object, int field, int i,
     switch (field) {
         case 0: pp->setVote(string2long(value)); return true;
         case 1: pp->setPlatoonId(string2long(value)); return true;
+        case 2: pp->setVotes(i,string2long(value)); return true;
+        case 3: pp->setArray(string2bool(value)); return true;
         default: return false;
     }
 }

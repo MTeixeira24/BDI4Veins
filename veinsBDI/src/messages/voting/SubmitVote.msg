@@ -21,4 +21,6 @@ packet SubmitVote extends NegotiationMessage {
     //Relevant information about joiner vehicle preferences
     int vote;
     int platoonId;
+    int votes[];
+    bool array;
 }

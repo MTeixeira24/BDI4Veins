@@ -5,7 +5,9 @@ import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.Constants;
 import jasonveins.omnet.voting.CContext;
+import jasonveins.omnet.voting.CUtilityPair;
 import jasonveins.omnet.voting.rule.CBorda;
+import jasonveins.omnet.voting.rule.IRule;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
@@ -38,7 +40,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     //Object voting group
     CContext m_context;
     //Object myvote
-    //Object winner determination
+    IRule votingRule;
 
     /**
      * ctor
@@ -53,6 +55,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         members = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
+        votingRule = new CBorda();
     }
 
     @IAgentActionFilter
@@ -62,17 +65,26 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         return utility > 1 ? 1 : utility;
     }
 
+    /**
+     * Generates a vote vector according to the selected voting rule
+     * @param p_candidates A vector containing the possible candidates to vote on
+     * @param p_tolerance This agents tolerance to preference deviations
+     * @param p_speed This agents preferred speed
+     * @param p_welfare Utility bonus for performing eco-driving
+     * @return A vote vector, where vote casted occupies the same index as the candidate in the candidates vector
+     */
     @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/vote/vector" )
-    private ArrayList<Double> generateUtilityVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_welfare){
-        ArrayList<Double> utils = new ArrayList<>(p_candidates.size());
+    private List<Integer> generateVoteVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_welfare){
+
+        List<CUtilityPair> utils = new ArrayList<>(p_candidates.size());
         for(int i = 0; i < p_candidates.size(); i++) {
-            utils.add(calculateUtility(p_welfare.doubleValue(), p_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue()));
+            double util = calculateUtility(p_welfare.doubleValue(), p_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue());
+            utils.add(new CUtilityPair(i, util));
         }
-        /**
-         * TODO: Apply voting rule now
-         */
-        return utils;
+        Collections.sort(utils);
+        List<Integer> votes = votingRule.getVote(utils);
+        return votes;
     }
 
     @IAgentActionFilter
@@ -155,6 +167,15 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
+    @IAgentActionName( name = "transmit/other/vote/list" )
+    private void sendVote(@Nonnull final List<Integer> vote)
+    {
+        InstructionModel iOb = new InstructionModel(this.id, Constants.SUBMIT_VOTE);
+        iOb.pushIntArray(new ArrayList<>(vote));
+        agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
     @IAgentActionName( name = "vote/openballot" )
     private void openBallot(@Nonnull final String type, @Nonnull final Number candidate, @Nonnull final Number committeeSize)
     {
@@ -177,7 +198,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         for(int i = 80; i <= 120; i += 10){
             l_candidates.add(i);
         }
-        m_context = new CContext(l_candidates, "speed");
+        m_context = new CContext(l_candidates, "speed", members.size() - 1);
         InstructionModel iOb = new InstructionModel(this.id, Constants.NOTIFY_START_VOTE_SPEED);
         iOb.pushIntArray(l_candidates);
         agentManager.addInstruction(iOb);
@@ -190,7 +211,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
-    @IAgentActionName( name = "vote/store" )
+    @IAgentActionName( name = "vote/store/dep" )
     private void storeVote(@Nonnull final Number voter, @Nonnull final Number vote)
     {
         if(members.contains(voter.intValue())){
@@ -225,9 +246,37 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }
     }
     @IAgentActionFilter
+    @IAgentActionName( name = "vote/store" )
+    private void storeVote(@Nonnull final List votes)
+    {
+        m_context.pushVotes(votes);
+        if(m_context.allVotesSubmitted()){
+            int winnerIndex = votingRule.getResult(m_context.getVotes());
+            if(winnerIndex == -1){
+                m_context.increaseVoterCount();
+                final ITrigger l_trigger = CTrigger.from(
+                        ITrigger.EType.ADDGOAL,
+                        CLiteral.from(
+                                "handle/tie",
+                                CRawTerm.from(m_context.getCandidates())
+                        )
+
+                );
+                this.trigger( l_trigger );
+                return;
+            }
+            int winner = m_context.getCandidates().get(winnerIndex);
+            InstructionModel iOb = new InstructionModel(this.id, Constants.SEND_VOTE_RESULTS);
+            iOb.pushInt(1);
+            iOb.pushInt(winner);
+            agentManager.addInstruction(iOb);
+        }
+    }
+    @IAgentActionFilter
     @IAgentActionName( name = "vote/send/results" )
     private void sendVoteResults(@Nonnull final Number id, @Nonnull final Number result){
         InstructionModel iOb = new InstructionModel(this.id, Constants.SEND_VOTE_RESULTS);
+        iOb.pushInt(0);
         iOb.pushInt(id.intValue());
         iOb.pushInt(result.intValue());
         agentManager.addInstruction(iOb);
