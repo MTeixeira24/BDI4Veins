@@ -55,11 +55,25 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         targetPlatoonIds = new CopyOnWriteArrayList<>();
     }
 
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/generate/utility" )
     private double calculateUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
         double utility = welfareBonus / ( 1 + Math.pow(Math.abs( ( (speed - preferedSpeed)/(30*tolerance) ) ), 4) );
         return utility > 1 ? 1 : utility;
     }
 
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/generate/vote/vector" )
+    private ArrayList<Double> generateUtilityVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_welfare){
+        ArrayList<Double> utils = new ArrayList<>(p_candidates.size());
+        for(int i = 0; i < p_candidates.size(); i++) {
+            utils.add(calculateUtility(p_welfare.doubleValue(), p_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue()));
+        }
+        /**
+         * TODO: Apply voting rule now
+         */
+        return utils;
+    }
 
     @IAgentActionFilter
     @IAgentActionName( name = "utility/generatetolerance" )

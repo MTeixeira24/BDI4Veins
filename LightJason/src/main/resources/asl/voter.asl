@@ -18,7 +18,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     :-  >>tolerance(Tolerance); >>preferedspeed(SpeedPreference);
         PredictedUtility = utility/predictplatoonspeed(JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED).
 
-
 //Plan definition
 //Agent Belief Set up
 +!main <-
@@ -125,7 +124,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     vote/open/ballot/speed().
 
 +!handle/speed/vote/notification(CANDIDATES) <-
-    generic/print("Agent", MyName, " got notification to vote on platoon speed: ", CANDIDATES).
+    generic/print("Agent", MyName, " got notification to vote on platoon speed: ", CANDIDATES);
+    >>tolerance(Tolerance); >>preferedspeed(Speed);
+    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1);
+    generic/print(ULVECTOR).
 
 //Joiner specific plans
 
