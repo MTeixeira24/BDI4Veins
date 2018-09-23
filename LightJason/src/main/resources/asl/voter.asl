@@ -32,6 +32,18 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("Agent ", MyName, " have intention of searching for platoon").
     //transmit/self/searchForPlatoon(). //Set controller layer to send to agent all platoons that are open for joining
 
++!requestjoin(JID, JSPEED, JPREFERENCE) <-
+    generic/print("AAAAAAAAAAAAAAAAAAAAAAAA");
+    !handlejoinrequest(JID, JSPEED, JPREFERENCE).
+
++!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
+    generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
+    S = utility/platoonsize();
+    vote/openballot("allowJoin", JID, S);
+    transmit/other/vote/join(JSPEED, JPREFERENCE).
+    //start a list of votes;
+    //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
+
 +!choosevote(PredictedUtility)
     : >>(minimumUtility(MinUtil), MinUtil < PredictedUtility ) <-
         generic/print("Agent ", MyName, "Casting positive vote:", PredictedUtility, ">", MinUtil);
@@ -55,11 +67,52 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("Agent ", MyName, "utility is:", PredictedUtility);
     !choosevote(PredictedUtility).
 
++!handlesubmitvote(VOTER, VOTE)
+    : MyName == VOTER <-
+        generic/print("Got my own vote");
+        vote/store/dep(VOTER, VOTE)
+    : MyName != VOTER <-
+        generic/print("Got vote from", VOTER);
+        vote/store/dep(VOTER,VOTE).
+
++!ischair(PID) <-
+    +isChair(PID);
+    generic/print("Agent ", MyName, " is chair of platoon ", PID).
+
++!submitvote(VOTER, VOTE) <-
+    generic/print("GOT VOTE");
+    !handlesubmitvote(VOTER, VOTE).
+
 //Belief triggered plans for all voting agents
 +!foundplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " found a potential platoon: ", PID);
-    generic/print("AAAAAAAAAAAAAAAAAAAAAAAAA");
-    !attemptjoin(PID, LID).
+    !attemptjoindep(PID, LID).
+
++!attemptjoindep(PID, LID) <-
+    +targetplatoonjoin(PID);
+    +leaderid(LID);
+    generic/print("Agent ", MyName, " sending a request to join");
+    >>preferedspeed(SPEED);
+    >>tolerance(TOLERANCE);
+    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
+
++!notify/joiner/win(JID) <-
+    generic/print("APROVED!");
+    vote/send/results(JID, 1).
+
++!notify/joiner/lose(JID) <-
+    generic/print("REJECTED!");
+    vote/send/results(JID, 0).
+
++!maneuver/complete(L) <-
+    generic/print("Agent ", MyName, " maneuver complete starting a vote to set speed");
+    utility/storemember(L);
+    vote/open/ballot/speed().
+
++!handle/results(VALUE) <-
+    >>preferedspeed(Speed); >>tolerance(Tolerance);
+    Util = utility/generate/utility(1.1, VALUE, Tolerance, Speed);
+    !decide/stay(Util).
 
 +!addmember(L) <-
     utility/storemember(L).
@@ -71,6 +124,11 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!openvotetojoin(JSPEED, JPREFERENCE) <-
     >>platoonspeed(PSPEED);
     !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
+
++!openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
+    +platoonspeed(PSPEED);
+    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
+    //save the sent vote
 
 
 +!inplatoon(PID, LID) <-
@@ -95,63 +153,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1);
     vote/store(VVECTOR).
 
-+!handle/results(VALUE) <-
-    >>preferedspeed(Speed); >>tolerance(Tolerance);
-    Util = utility/generate/utility(1.1, VALUE, Tolerance, Speed);
-    !decide/stay(Util).
-    generic/print("Agent", MyName, "is", Result).
-
-+!decide/stay(UTIL)
-    <- minimumUtility(MUTIL); UTIL > MUTIL; generic/print("Agent", MyName, "stays")
-    <- minimumUtility(MUTIL); UTIL <= MUTIL; generic/print("Agent", MyName, "leaves"). 
-//Goal triggered plans for chair agents
-
-+!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
-    generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
-    S = utility/platoonsize();
-    vote/openballot("allowJoin", JID, S);
-    transmit/other/vote/join(JSPEED, JPREFERENCE).
-    //start a list of votes;
-    //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
-
-+!handlesubmitvote(VOTER, VOTE)
-    : MyName == VOTER <-
-        generic/print("Got my own vote");
-        vote/store/dep(VOTER, VOTE)
-    : MyName != VOTER <-
-        generic/print("Got vote from", VOTER);
-        vote/store/dep(VOTER,VOTE).
-
-+!notify/joiner/win(JID) <-
-    generic/print("APROVED!");
-    vote/send/results(JID, 1).
-
-+!notify/joiner/lose(JID) <-
-    generic/print("REJECTED!");
-    vote/send/results(JID, 0).
-
-+!openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
-    +platoonspeed(PSPEED);
-    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
-    //save the sent vote
-
-+!ischair(PID) <-
-    +isChair(PID);
-    generic/print("Agent ", MyName, " is chair of platoon ", PID).
-
-+!submitvote(VOTER, VOTE) <-
-    generic/print("GOT VOTE");
-    !handlesubmitvote(VOTER, VOTE).
-
-+!requestjoin(JID, JSPEED, JPREFERENCE) <-
-    !handlejoinrequest(JID, JSPEED, JPREFERENCE).
-
-+!maneuver/complete(L) <-
-    generic/print("Agent ", MyName, " maneuver complete starting a vote to set speed");
-    utility/storemember(L);
-    vote/open/ballot/speed().
-
-//Joiner specific plans
 
 +!handlerejection(PID) <-
     generic/print("Agent ", MyName, " was rejected from platoon ", PID, "trying the next one");
@@ -179,11 +180,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("DEBUG1", PID);
     !startjoin(PID).
 
-+!attemptjoin(PID, LID) <-
-    generic/print("AAAAAAAAAAAAAAAAAAAAAAAAA");
-    +targetplatoonjoin(PID);
-    +leaderid(LID);
-    generic/print("Agent ", MyName, " sending a request to join");
-    >>preferedspeed(SPEED);
-    >>tolerance(TOLERANCE);
-    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
++!decide/stay(UTIL)
+    <- >>minimumUtility(MUTIL); UTIL > MUTIL; generic/print("Agent", MyName, "stays")
+    <- >>minimumUtility(MUTIL); UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").
