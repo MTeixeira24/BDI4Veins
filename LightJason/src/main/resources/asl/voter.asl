@@ -32,15 +32,20 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("Agent ", MyName, " have intention of searching for platoon").
     //transmit/self/searchForPlatoon(). //Set controller layer to send to agent all platoons that are open for joining
 
++!set/speed(SPEED) <-
+    generic/print("Agent ",MyName, " the speed of my platoon is", SPEED);
+    +platoonspeed(SPEED).
+
 +!requestjoin(JID, JSPEED, JPREFERENCE) <-
-    generic/print("AAAAAAAAAAAAAAAAAAAAAAAA");
     !handlejoinrequest(JID, JSPEED, JPREFERENCE).
 
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
     S = utility/platoonsize();
     vote/openballot("allowJoin", JID, S);
-    transmit/other/vote/join(JSPEED, JPREFERENCE).
+    L1 = collection/list/create(JSPEED, JPREFERENCE);
+    open/vote("join", L1).
+    //transmit/other/vote/join(JSPEED, JPREFERENCE).
     //start a list of votes;
     //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
 
@@ -60,12 +65,28 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         generic/print("Agent", MyName, "Sending the vote down omnet");
        transmit/other/vote/cast(VOTE). 
 
++!openvotetojoin(JSPEED, JPREFERENCE) <-
+    >>platoonspeed(PSPEED);
+    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
+
++!openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
+    +platoonspeed(PSPEED);
+    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
+    //save the sent vote
 
 +!handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
     generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE); 
     $generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility);
     generic/print("Agent ", MyName, "utility is:", PredictedUtility);
     !choosevote(PredictedUtility).
+
++!handle/speed/vote/notification(CANDIDATES) <-
+    generic/print("Agent", MyName, " got notification to vote on platoon speed: ", CANDIDATES);
+    >>tolerance(Tolerance); >>preferedspeed(Speed);
+    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1);
+    generic/print(VVECTOR);
+    //!sendvote(VOTE).
+    transmit/other/vote/list(VVECTOR).
 
 +!handlesubmitvote(VOTER, VOTE)
     : MyName == VOTER <-
@@ -107,7 +128,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!maneuver/complete(L) <-
     generic/print("Agent ", MyName, " maneuver complete starting a vote to set speed");
     utility/storemember(L);
-    vote/open/ballot/speed().
+    open/vote("speed", [0]).
+    //vote/open/ballot/speed().
 
 +!handle/results(VALUE) <-
     >>preferedspeed(Speed); >>tolerance(Tolerance);
@@ -121,27 +143,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!ballotopen() <-
     generic/print("Agent ", MyName, " got notification of a new ballot starting").
 
-+!openvotetojoin(JSPEED, JPREFERENCE) <-
-    >>platoonspeed(PSPEED);
-    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
-
-+!openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
-    +platoonspeed(PSPEED);
-    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
-    //save the sent vote
-
 
 +!inplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).
 
-
-+!handle/speed/vote/notification(CANDIDATES) <-
-    generic/print("Agent", MyName, " got notification to vote on platoon speed: ", CANDIDATES);
-    >>tolerance(Tolerance); >>preferedspeed(Speed);
-    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1);
-    generic/print(VVECTOR);
-    //!sendvote(VOTE).
-    transmit/other/vote/list(VVECTOR).
 
 +!handle/submit/vote(VOTE) <-
     generic/print("Got vote", VOTE);
@@ -162,7 +167,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!startjoin(PID) 
     : PID >= 0 <-
-        generic/print("DEBUG2", PID);
         LID = utility/get/leader(PID);
         generic/print("Agent ", MyName, "next platoon is", PID, "whos leader is:", LID);
         !attemptjoin(PID, LID)
@@ -177,7 +181,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!startrequests() <- 
     PID = utility/next/platoon();
-    generic/print("DEBUG1", PID);
     !startjoin(PID).
 
 +!decide/stay(UTIL)

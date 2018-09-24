@@ -29,6 +29,8 @@
  * {
  *     int candidates[];
  *     string context;
+ *     double contextArguments[];
+ *     int contextId;
  * }
  * </pre>
  */
@@ -38,6 +40,9 @@ class NotifyVote : public ::NegotiationMessage
     int *candidates; // array ptr
     unsigned int candidates_arraysize;
     ::omnetpp::opp_string context;
+    double *contextArguments; // array ptr
+    unsigned int contextArguments_arraysize;
+    int contextId;
 
   private:
     void copy(const NotifyVote& other);
@@ -62,6 +67,12 @@ class NotifyVote : public ::NegotiationMessage
     virtual void setCandidates(unsigned int k, int candidates);
     virtual const char * getContext() const;
     virtual void setContext(const char * context);
+    virtual void setContextArgumentsArraySize(unsigned int size);
+    virtual unsigned int getContextArgumentsArraySize() const;
+    virtual double getContextArguments(unsigned int k) const;
+    virtual void setContextArguments(unsigned int k, double contextArguments);
+    virtual int getContextId() const;
+    virtual void setContextId(int contextId);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const NotifyVote& obj) {obj.parsimPack(b);}

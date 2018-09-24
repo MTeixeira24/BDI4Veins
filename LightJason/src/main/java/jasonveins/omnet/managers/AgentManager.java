@@ -183,14 +183,31 @@ public class AgentManager {
                     size -= 8;
                     break;
                 case Constants.VALUE_ARRAY:
-                    values.getInt(); //advance past the type specifier
-                    int arraySize = values.getInt();
-                    ArrayList<Integer> elements = new ArrayList<>(arraySize);
-                    for(int i = 0; i < arraySize; i++){
-                        elements.add(values.getInt());
+                    int arraySize;
+                    switch (values.getInt()){ //advance past the type specifier
+                        case Constants.VALUE_INT:{
+                            arraySize = values.getInt();
+                            ArrayList<Integer> elements = new ArrayList<>(arraySize);
+                            for(int i = 0; i < arraySize; i++){
+                                elements.add(values.getInt());
+                            }
+                            terms.add(CRawTerm.from(elements));
+                            size -= 4*(arraySize + 2);
+                            break;
+                        }
+                        case Constants.VALUE_DOUBLE:{
+                            arraySize = values.getInt();
+                            ArrayList<Double> elements = new ArrayList<>(arraySize);
+                            for(int i = 0; i < arraySize; i++){
+                                elements.add(values.getDouble());
+                            }
+                            terms.add(CRawTerm.from(elements));
+                            size -= 8*(arraySize + 1);
+                            break;
+                        }
+                        default:
+                            throw new RuntimeException("AgentManager: Unknown array value!");
                     }
-                    terms.add(CRawTerm.from(elements));
-                    size -= 4*(arraySize + 2);
                     break;
                 default:
                     throw new RuntimeException("Unknown value!");

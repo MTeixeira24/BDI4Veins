@@ -40,7 +40,8 @@ void BeliefModel::pushDouble(double* value){
 void BeliefModel::pushIntArray(std::vector<int>& elements){
     BeliefObject bo;
     size_t size = sizeof(int) * (elements.size()+2);
-    int array[elements.size()+2]; //allocate size() bytes for content and 2 extra for type and size.
+    int *array = new int[elements.size()+2];
+    //int array[elements.size()+2]; //allocate size() bytes for content and 2 extra for type and size.
     array[0] = VALUE_INT; //Put the value type at beginning;
     array[1] = elements.size(); //store the size;
     for(uint32_t i = 0; i < elements.size(); i++){
@@ -63,3 +64,17 @@ void BeliefModel::pushIntArray(int* array, uint32_t size){
     totalSize += byte_size;
 }
 
+void BeliefModel::pushDoubleArray(std::vector<double>& elements){
+    BeliefObject bo;
+    size_t size = sizeof(double) * (elements.size()+1);
+    double *array = new double[elements.size()+1];
+    //double array[elements.size()+1]; //allocate size() bytes for content and 2 extra for type and size.
+    *( (int*)array ) = VALUE_DOUBLE;
+    *( (int*)array + 1 ) = elements.size(); //store the size;
+    for(uint32_t i = 0; i < elements.size(); i++){
+        array[i + 1] = elements[i];
+    }
+    bo.setData(VALUE_ARRAY, array, size);
+    values.push_back(bo);
+    totalSize += size;
+}

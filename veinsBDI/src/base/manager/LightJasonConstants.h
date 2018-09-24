@@ -34,6 +34,8 @@
 
 #define NOTIFY_START_VOTE_SPEED 0x0B
 
+#define NOTIFY_START_VOTE 0x0C
+
 #define TERMINATE_CONNECTION 0x7E
 
 /*
@@ -56,6 +58,8 @@
 #define VALUE_DOUBLE 0x07
 
 #define VALUE_ARRAY 0x08
+
+#define VALUE_NULL 0x09
 
 /*
  * Constants to define message types in sendMessage() calls

@@ -193,4 +193,19 @@ std::vector<int> LightJasonManager::parseArrayMessage(LightJasonBuffer& buffer){
     return contents;
 }
 
+std::vector<double> LightJasonManager::parseDoubleArrayMessage(LightJasonBuffer& buffer){
+    short arrayType;
+    buffer >> arrayType;
+    ASSERT(arrayType == VALUE_DOUBLE);
+    uint32_t size;
+    buffer >> size;
+    std::vector<double> contents(size);
+    double element;
+    for(uint32_t i = 0; i < size; i++){
+        buffer >> element;
+        contents[i] = element;
+    }
+    return contents;
+}
+
 

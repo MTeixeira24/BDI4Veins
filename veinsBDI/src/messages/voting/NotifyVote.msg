@@ -20,4 +20,6 @@ packet NegotiationMessage;
 packet NotifyVote extends NegotiationMessage {
     int candidates[];
     string context;
+    double contextArguments[];
+    int contextId;
 }

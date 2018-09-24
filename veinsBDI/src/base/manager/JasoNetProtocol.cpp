@@ -56,11 +56,30 @@ LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* bel
         {
             int* ptr = (int*)bo.getData();
             buffer << *(ptr); //get type of data
+            int dataType = *(ptr);
             uint32_t size = *(ptr + 1);
             buffer << size; //size of array
-            for(uint32_t i = 0; i < size; i++){
-                buffer << *(ptr + i + 2);
+            switch (dataType){
+            case VALUE_INT:
+            {
+                for(uint32_t i = 0; i < size; i++){
+                    buffer << *(ptr + i + 2);
+                }
+                break;
             }
+            case VALUE_DOUBLE:
+            {
+                double* dptr = (double*)(ptr + 2); //The double values start at the second address
+                for(uint32_t i = 0; i < size; i++){
+                    buffer << *(dptr + i);
+                }
+                break;
+            }
+            default:
+                throw cRuntimeError("JasoNetProtocol: Unknown array type!");
+                break;
+            }
+            delete[] ptr;
             break;
         }
         default:

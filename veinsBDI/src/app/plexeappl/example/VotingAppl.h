@@ -19,6 +19,8 @@
 #include "../../../messages/voting/NotifyVote_m.h"
 
 #include "../../../utilities/LeaderPositionHelper.h"
+#include "../../../base/manager/constants/VoteConstants.h"
+
 
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:
@@ -42,7 +44,10 @@ public:
      * @param tolerance The joiner vehicles tolerance to deviations from its prefered speed
      */
     void sendNotificationOfJoinVote(double preferedspeed, double tolerance);
-
+    /**
+     *
+     */
+    void sendNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
     /**
      *
      */

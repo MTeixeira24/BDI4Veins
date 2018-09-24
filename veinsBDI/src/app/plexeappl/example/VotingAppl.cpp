@@ -55,8 +55,7 @@ void VotingAppl::initialize(int stage){
                 pbelief.pushInt(&platoonId);
                 pbelief.pushInt(&leaderId);
                 manager->sendInformationToAgents(myId, &pbelief);
-                BeliefModel platoonSpeedBelief;
-                platoonSpeedBelief.setBelief("platoonspeed");
+                BeliefModel platoonSpeedBelief("set/speed");
                 double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
                 platoonSpeedBelief.pushDouble(&platoonSpeed);
                 manager->sendInformationToAgents(myId, &platoonSpeedBelief);
@@ -78,6 +77,10 @@ void VotingAppl::initialize(int stage){
                 pbelief.pushInt(&platoonId);
                 pbelief.pushInt(&leaderId);
                 manager->sendInformationToAgents(myId, &pbelief);
+                BeliefModel platoonSpeedBelief("set/speed");
+                double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+                platoonSpeedBelief.pushDouble(&platoonSpeed);
+                manager->sendInformationToAgents(myId, &platoonSpeedBelief);
             }
         }
         /*std::string test1 = getParentModule()->getFullName();
@@ -95,6 +98,49 @@ void VotingAppl::sendNotificationOfSpeedVote(std::vector<int>& candidates){
     for(uint32_t i = 0; i < candidates.size(); i++){
         msg->setCandidates(i, candidates[i]);
     }
+    sendUnicast(msg, -1);
+}
+
+void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
+    NotifyVote* msg = new NotifyVote("NotifyVote");
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(-1);
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setContextId(contextId);
+    msg->setCandidatesArraySize(candidates.size());
+    for(uint32_t i = 0; i < candidates.size(); i++){
+        msg->setCandidates(i, candidates[i]);
+    }
+    if(contextArgs.empty()){
+        msg->setContextArgumentsArraySize(0);
+    }else{
+        msg->setContextArgumentsArraySize(contextArgs.size());
+        for(uint32_t i = 0; i < contextArgs.size(); i++){
+            msg->setContextArguments(i, contextArgs[i]);
+        }
+
+    }
+    sendUnicast(msg, -1);
+}
+
+void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
+    NotificationOfJoinVote* msg = new NotificationOfJoinVote("NotificationOfJoinVote");
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(-1);
+    msg->setPreferedSpeed(preferedspeed);
+    msg->setTolerance(tolerance);
+    double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+    double joinerSpeed = preferedspeed;
+    double joinerPreference = tolerance;
+    BeliefModel jbelief;
+    jbelief.setBelief("openvotetojoin");
+    jbelief.pushDouble(&joinerSpeed);
+    jbelief.pushDouble(&joinerPreference);
+    jbelief.pushDouble(&platoonSpeed);
+    manager->sendInformationToAgents(myId, &jbelief);
     sendUnicast(msg, -1);
 }
 
@@ -143,26 +189,6 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     }
     int position = positionHelper->getPosition();
     scheduleAt(simTime() + 0.1*position, msg);
-}
-
-void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
-    NotificationOfJoinVote* msg = new NotificationOfJoinVote("NotificationOfJoinVote");
-    msg->setKind(NEGOTIATION_TYPE);
-    msg->setVehicleId(myId);
-    msg->setExternalId(positionHelper->getExternalId().c_str());
-    msg->setDestinationId(-1);
-    msg->setPreferedSpeed(preferedspeed);
-    msg->setTolerance(tolerance);
-    double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-    double joinerSpeed = preferedspeed;
-    double joinerPreference = tolerance;
-    BeliefModel jbelief;
-    jbelief.setBelief("openvotetojoin");
-    jbelief.pushDouble(&joinerSpeed);
-    jbelief.pushDouble(&joinerPreference);
-    jbelief.pushDouble(&platoonSpeed);
-    manager->sendInformationToAgents(myId, &jbelief);
-    sendUnicast(msg, -1);
 }
 
 void VotingAppl::sendVoteResults(int joinerId, int results){
@@ -334,14 +360,37 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
 }
 
 void VotingAppl::handleNotifyVote(const NotifyVote* msg){
-    uint32_t size = msg->getCandidatesArraySize();
-    std::vector<int> candidates(size);
-    for(uint32_t i = 0; i < size; i++){
-        candidates[i] = msg->getCandidates(i);
+    if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
+        uint32_t size = msg->getCandidatesArraySize();
+        BeliefModel voteNotify;
+        std::vector<int> candidates(size);
+        for(uint32_t i = 0; i < size; i++){
+            candidates[i] = msg->getCandidates(i);
+        }
+        voteNotify.pushIntArray(candidates);
+        switch(msg->getContextId()){
+        case CONTEXT_SPEED:
+        {
+            voteNotify.setBelief("handle/speed/vote/notification");
+            break;
+        }
+        case CONTEXT_JOIN:
+        {
+            voteNotify.setBelief("handle/join/vote/notification");
+            size = msg->getContextArgumentsArraySize();
+            std::vector<double> contextArgs(size);
+            for(uint32_t i = 0; i < size; i++){
+                contextArgs[i] = msg->getContextArguments(i);
+            }
+            voteNotify.pushDoubleArray(contextArgs);
+            break;
+        }
+        default:
+            throw cRuntimeError("VotingAppl: Invalid context identifier!");
+            break;
+        }
+        manager->sendInformationToAgents(myId, &voteNotify);
     }
-    BeliefModel voteNotify(msg->getContext());
-    voteNotify.pushIntArray(candidates);
-    manager->sendInformationToAgents(myId, &voteNotify);
 }
 
 void VotingAppl::sendToAgent(const BeliefModel* bm){

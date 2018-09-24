@@ -34,6 +34,8 @@ public:
     void pushIntArray(std::vector<int>&);
     void pushIntArray(int* array, uint32_t size);
 
+    void pushDoubleArray(std::vector<double>&);
+
     std::vector<BeliefObject> getValues(){return values;}
 protected:
     std::string belief;

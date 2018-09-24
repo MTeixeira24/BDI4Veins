@@ -16,6 +16,7 @@ public class Constants {
     public static final short SUBMIT_VOTE = 9;
     public static final short SEND_VOTE_RESULTS = 10;
     public static final short NOTIFY_START_VOTE_SPEED = 11;
+    public static final short NOTIFY_START_VOTE = 12;
     public static final short CONNECTION_END = 126;
 
     public static final short VALUE_BOOL = 1;
@@ -33,6 +34,8 @@ public class Constants {
     public static final short VALUE_DOUBLE = 7;
 
     public static final short VALUE_ARRAY = 8;
+
+    public static final short VALUE_NULL = 9;
 
     
 }

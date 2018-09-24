@@ -21,6 +21,8 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import jasonveins.omnet.managers.VoteConstants;
+
 @IAgentAction
 public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
@@ -136,6 +138,50 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
+    @IAgentActionName( name = "vote/open/ballot/speed" )
+    private void openSpeedVote()
+    {
+        ArrayList<Integer> l_candidates = new ArrayList<>();
+        for(int i = 80; i <= 120; i += 10){
+            l_candidates.add(i);
+        }
+        m_context = new CContext(l_candidates, "speed", members.size() - 1);
+        InstructionModel iOb = new InstructionModel(this.id, Constants.NOTIFY_START_VOTE_SPEED);
+        iOb.pushIntArray(l_candidates);
+        agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "open/vote" )
+    private void openNewVote(@Nonnull final String context, @Nonnull final List<Double> contextArgs){
+
+        InstructionModel iOb = new InstructionModel(this.id, Constants.NOTIFY_START_VOTE);
+        ArrayList<Integer> l_candidates = new ArrayList<>();
+        switch (context){
+            case "join":
+                iOb.pushInt(VoteConstants.CONTEXT_JOIN);
+                iOb.pushDoubleArray(new ArrayList<>(contextArgs));
+                l_candidates.add(0);
+                l_candidates.add(1);
+                m_context = new CContext(l_candidates, "join", members.size());
+                break;
+            case "speed":
+                iOb.pushInt(VoteConstants.CONTEXT_SPEED);
+                iOb.pushInt(Constants.VALUE_NULL);
+
+                for(int i = 80; i <= 120; i += 10){
+                    l_candidates.add(i);
+                }
+                m_context = new CContext(l_candidates, "speed", members.size() - 1);
+                break;
+        }
+        iOb.pushIntArray(l_candidates);
+        agentManager.addInstruction(iOb);
+    }
+
+
+
+    @IAgentActionFilter
     @IAgentActionName( name = "utility/predictplatoonspeed" )
     private double predictPlatoonSpeed(@Nonnull final Number jspeed,  @Nonnull final Number jtolerance, @Nonnull final Number speed,  @Nonnull final Number tolerance, @Nonnull final Number pspeed)
     {
@@ -188,20 +234,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }
         m_bitVotes = Collections.synchronizedList( new LinkedList<>() );
         m_committeeSize = committeeSize.intValue();
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "vote/open/ballot/speed" )
-    private void openSpeedVote()
-    {
-        ArrayList<Integer> l_candidates = new ArrayList<>();
-        for(int i = 80; i <= 120; i += 10){
-            l_candidates.add(i);
-        }
-        m_context = new CContext(l_candidates, "speed", members.size() - 1);
-        InstructionModel iOb = new InstructionModel(this.id, Constants.NOTIFY_START_VOTE_SPEED);
-        iOb.pushIntArray(l_candidates);
-        agentManager.addInstruction(iOb);
     }
 
     @IAgentActionFilter

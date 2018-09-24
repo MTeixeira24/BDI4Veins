@@ -121,6 +121,26 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfSpeedVote(candidates);
                 break;
             }
+            case NOTIFY_START_VOTE:
+            {
+                /*get the context identifier*/
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                int contextId;
+                rbf >> contextId;
+                /*get the context arguments*/
+                rbf >> type;
+                ASSERT((type == VALUE_NULL) || (type == VALUE_ARRAY));
+                std::vector<double> contextArgs;
+                if(type == VALUE_ARRAY){
+                    contextArgs = parseDoubleArrayMessage(rbf);
+                }
+                /*get the candidates array*/
+                rbf >> type;
+                ASSERT(type == VALUE_ARRAY);
+                std::vector<int> candidates = parseArrayMessage(rbf);
+                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfVote(contextId, contextArgs, candidates);
+            }
             default:
                 break;
             }

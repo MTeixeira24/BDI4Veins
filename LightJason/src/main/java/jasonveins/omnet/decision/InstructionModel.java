@@ -76,6 +76,20 @@ public class InstructionModel {
         size += 8 + (4*p_list.size()); //2 bytes for array identifier, 2 bytes for array data type, 4 bytes for array length, remainder is data
         values.add(arrayData);
     }
+    public void pushDoubleArray(ArrayList<Double> p_list){
+        ByteBuffer bb = ByteBuffer.allocate(6 + 8*p_list.size());
+        //Type of elements in array
+        bb.putShort(VALUE_DOUBLE);
+        //Content size
+        bb.putInt(p_list.size());
+        //Contents
+        for(double e : p_list){
+            bb.putDouble(e);
+        }
+        ByteData arrayData = new ByteData(VALUE_ARRAY, bb.array());
+        size += 8 + (8*p_list.size()); //2 bytes for array identifier, 2 bytes for array data type, 4 bytes for array length, remainder is data
+        values.add(arrayData);
+    }
 
     /*public void pushRawBytes(short _type, byte[] _value){
         values.add(new ByteData(_type, _value));
