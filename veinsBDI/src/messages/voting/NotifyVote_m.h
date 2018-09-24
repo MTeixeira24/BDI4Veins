@@ -28,7 +28,6 @@
  * packet NotifyVote extends NegotiationMessage
  * {
  *     int candidates[];
- *     string context;
  *     double contextArguments[];
  *     int contextId;
  * }
@@ -39,7 +38,6 @@ class NotifyVote : public ::NegotiationMessage
   protected:
     int *candidates; // array ptr
     unsigned int candidates_arraysize;
-    ::omnetpp::opp_string context;
     double *contextArguments; // array ptr
     unsigned int contextArguments_arraysize;
     int contextId;
@@ -65,8 +63,6 @@ class NotifyVote : public ::NegotiationMessage
     virtual unsigned int getCandidatesArraySize() const;
     virtual int getCandidates(unsigned int k) const;
     virtual void setCandidates(unsigned int k, int candidates);
-    virtual const char * getContext() const;
-    virtual void setContext(const char * context);
     virtual void setContextArgumentsArraySize(unsigned int size);
     virtual unsigned int getContextArgumentsArraySize() const;
     virtual double getContextArguments(unsigned int k) const;

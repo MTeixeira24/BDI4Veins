@@ -218,7 +218,6 @@ void NotifyVote::copy(const NotifyVote& other)
     candidates_arraysize = other.candidates_arraysize;
     for (unsigned int i=0; i<candidates_arraysize; i++)
         this->candidates[i] = other.candidates[i];
-    this->context = other.context;
     delete [] this->contextArguments;
     this->contextArguments = (other.contextArguments_arraysize==0) ? nullptr : new double[other.contextArguments_arraysize];
     contextArguments_arraysize = other.contextArguments_arraysize;
@@ -232,7 +231,6 @@ void NotifyVote::parsimPack(omnetpp::cCommBuffer *b) const
     ::NegotiationMessage::parsimPack(b);
     b->pack(candidates_arraysize);
     doParsimArrayPacking(b,this->candidates,candidates_arraysize);
-    doParsimPacking(b,this->context);
     b->pack(contextArguments_arraysize);
     doParsimArrayPacking(b,this->contextArguments,contextArguments_arraysize);
     doParsimPacking(b,this->contextId);
@@ -249,7 +247,6 @@ void NotifyVote::parsimUnpack(omnetpp::cCommBuffer *b)
         this->candidates = new int[candidates_arraysize];
         doParsimArrayUnpacking(b,this->candidates,candidates_arraysize);
     }
-    doParsimUnpacking(b,this->context);
     delete [] this->contextArguments;
     b->unpack(contextArguments_arraysize);
     if (contextArguments_arraysize==0) {
@@ -289,16 +286,6 @@ void NotifyVote::setCandidates(unsigned int k, int candidates)
 {
     if (k>=candidates_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", candidates_arraysize, k);
     this->candidates[k] = candidates;
-}
-
-const char * NotifyVote::getContext() const
-{
-    return this->context.c_str();
-}
-
-void NotifyVote::setContext(const char * context)
-{
-    this->context = context;
 }
 
 void NotifyVote::setContextArgumentsArraySize(unsigned int size)
@@ -406,7 +393,7 @@ const char *NotifyVoteDescriptor::getProperty(const char *propertyname) const
 int NotifyVoteDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 3+basedesc->getFieldCount() : 3;
 }
 
 unsigned int NotifyVoteDescriptor::getFieldTypeFlags(int field) const
@@ -419,11 +406,10 @@ unsigned int NotifyVoteDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISARRAY | FD_ISEDITABLE,
-        FD_ISEDITABLE,
         FD_ISARRAY | FD_ISEDITABLE,
         FD_ISEDITABLE,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
 }
 
 const char *NotifyVoteDescriptor::getFieldName(int field) const
@@ -436,11 +422,10 @@ const char *NotifyVoteDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "candidates",
-        "context",
         "contextArguments",
         "contextId",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
 }
 
 int NotifyVoteDescriptor::findField(const char *fieldName) const
@@ -448,9 +433,8 @@ int NotifyVoteDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='c' && strcmp(fieldName, "candidates")==0) return base+0;
-    if (fieldName[0]=='c' && strcmp(fieldName, "context")==0) return base+1;
-    if (fieldName[0]=='c' && strcmp(fieldName, "contextArguments")==0) return base+2;
-    if (fieldName[0]=='c' && strcmp(fieldName, "contextId")==0) return base+3;
+    if (fieldName[0]=='c' && strcmp(fieldName, "contextArguments")==0) return base+1;
+    if (fieldName[0]=='c' && strcmp(fieldName, "contextId")==0) return base+2;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -464,11 +448,10 @@ const char *NotifyVoteDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "int",
-        "string",
         "double",
         "int",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **NotifyVoteDescriptor::getFieldPropertyNames(int field) const
@@ -508,7 +491,7 @@ int NotifyVoteDescriptor::getFieldArraySize(void *object, int field) const
     NotifyVote *pp = (NotifyVote *)object; (void)pp;
     switch (field) {
         case 0: return pp->getCandidatesArraySize();
-        case 2: return pp->getContextArgumentsArraySize();
+        case 1: return pp->getContextArgumentsArraySize();
         default: return 0;
     }
 }
@@ -538,9 +521,8 @@ std::string NotifyVoteDescriptor::getFieldValueAsString(void *object, int field,
     NotifyVote *pp = (NotifyVote *)object; (void)pp;
     switch (field) {
         case 0: return long2string(pp->getCandidates(i));
-        case 1: return oppstring2string(pp->getContext());
-        case 2: return double2string(pp->getContextArguments(i));
-        case 3: return long2string(pp->getContextId());
+        case 1: return double2string(pp->getContextArguments(i));
+        case 2: return long2string(pp->getContextId());
         default: return "";
     }
 }
@@ -556,9 +538,8 @@ bool NotifyVoteDescriptor::setFieldValueAsString(void *object, int field, int i,
     NotifyVote *pp = (NotifyVote *)object; (void)pp;
     switch (field) {
         case 0: pp->setCandidates(i,string2long(value)); return true;
-        case 1: pp->setContext((value)); return true;
-        case 2: pp->setContextArguments(i,string2double(value)); return true;
-        case 3: pp->setContextId(string2long(value)); return true;
+        case 1: pp->setContextArguments(i,string2double(value)); return true;
+        case 2: pp->setContextId(string2long(value)); return true;
         default: return false;
     }
 }

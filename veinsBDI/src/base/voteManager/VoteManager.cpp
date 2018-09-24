@@ -46,6 +46,7 @@ void VoteManager::parseResponse(uint32_t msgLength){
             double tolerance;
             switch (agentAction){
             case SEND_JOIN_REQUEST:
+            {
                 rbf >> type;
                 ASSERT(type == VALUE_INT);
                 rbf >> platoonid;
@@ -60,32 +61,21 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> tolerance;
                 ((VotingAppl*)(vehicles[agentId]))->sendRequestToJoin(platoonid, leaderid, preferedspeed, tolerance);
                 break;
-            case NOTIFY_START_VOTE_JOIN:
-                rbf >> type;
-                ASSERT(type == VALUE_DOUBLE);
-                rbf >> preferedspeed;
-                rbf >> type;
-                ASSERT(type == VALUE_DOUBLE);
-                rbf >> tolerance;
-                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfJoinVote(preferedspeed, tolerance);
-                break;
+            }
             case SUBMIT_VOTE:
+            {
                 rbf >> type;
-                ASSERT((type == VALUE_INT) || (type == VALUE_ARRAY));
-                if(type == VALUE_INT){
-                    int vote;
-                    rbf >> vote;
-                    ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(vote);
-                } else {
-                    std::vector<int> votes = parseArrayMessage(rbf);
-                    ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(votes);
-                }
+                ASSERT(type == VALUE_ARRAY);
+                std::vector<int> votes = parseArrayMessage(rbf);
+                ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(votes);
                 break;
+            }
             case SEND_VOTE_RESULTS:
-                int placeholder;
+            {
+                int externalId; //If the negotiation involves external participants.
                 rbf >> type;
-                rbf >> placeholder;
-                if(placeholder == 0){
+                rbf >> externalId;
+                if(externalId == -1){
                     rbf >> type;
                     ASSERT(type == VALUE_INT);
                     int joinerId;
@@ -102,23 +92,6 @@ void VoteManager::parseResponse(uint32_t msgLength){
                     rbf >> winnerValue;
                     ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(winnerValue);
                 }
-                break;
-            case NOTIFY_START_VOTE_SPEED:
-            {
-                rbf >> type;
-                ASSERT(type == VALUE_ARRAY);
-                short arrayType;
-                rbf >> arrayType;
-                ASSERT(arrayType == VALUE_INT);
-                uint32_t size;
-                rbf >> size;
-                std::vector<int> candidates(size);
-                int buffer;
-                for(uint32_t i = 0; i < size; i++){
-                    rbf >> buffer;
-                    candidates[i] = buffer;
-                }
-                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfSpeedVote(candidates);
                 break;
             }
             case NOTIFY_START_VOTE:
@@ -140,6 +113,7 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 ASSERT(type == VALUE_ARRAY);
                 std::vector<int> candidates = parseArrayMessage(rbf);
                 ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfVote(contextId, contextArgs, candidates);
+                break;
             }
             default:
                 break;

@@ -1,19 +1,24 @@
 package jasonveins.omnet.voting;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CContext {
     private ArrayList<Integer> m_candidates;
     private String m_voteType;
-    private ArrayList<List<Integer>> m_votes;
+    private CopyOnWriteArrayList<List<Integer>> m_votes;
     private int m_voterCount;
+    private Map<String, Number> m_contextArguments;
 
     public CContext(ArrayList<Integer> p_candidates, String p_voteType, int p_voterCount){
         m_candidates = p_candidates;
         m_voteType = p_voteType;
-        m_votes = new ArrayList<>();
+        m_votes = new CopyOnWriteArrayList<>();
         m_voterCount = p_voterCount;
+        m_contextArguments = new HashMap<>();
     }
 
 
@@ -33,7 +38,7 @@ public class CContext {
         this.m_voteType = m_voteType;
     }
 
-    public ArrayList<List<Integer>> getVotes() {
+    public CopyOnWriteArrayList<List<Integer>> getVotes() {
         return m_votes;
     }
 
@@ -48,5 +53,13 @@ public class CContext {
 
     public void increaseVoterCount(){
         m_voterCount++;
+    }
+
+    public void addContextArgument(String key, Number value){
+        m_contextArguments.put(key, value);
+    }
+
+    public Number getContextArgument(String key){
+        return m_contextArguments.get(key);
     }
 }

@@ -83,22 +83,7 @@ void VotingAppl::initialize(int stage){
                 manager->sendInformationToAgents(myId, &platoonSpeedBelief);
             }
         }
-        /*std::string test1 = getParentModule()->getFullName();
-        int test3 = getParentModule()->getId();
-        int test2 = myId;
-        int buf = myId;*/
     }
-}
-
-void VotingAppl::sendNotificationOfSpeedVote(std::vector<int>& candidates){
-    NotifyVote* msg = new NotifyVote("NotifyVote");
-    msg->setCandidatesArraySize(candidates.size());
-    msg->setContext("handle/speed/vote/notification");
-    msg->setKind(NEGOTIATION_TYPE);
-    for(uint32_t i = 0; i < candidates.size(); i++){
-        msg->setCandidates(i, candidates[i]);
-    }
-    sendUnicast(msg, -1);
 }
 
 void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
@@ -124,26 +109,6 @@ void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& cont
     sendUnicast(msg, -1);
 }
 
-void VotingAppl::sendNotificationOfJoinVote(double preferedspeed, double tolerance){
-    NotificationOfJoinVote* msg = new NotificationOfJoinVote("NotificationOfJoinVote");
-    msg->setKind(NEGOTIATION_TYPE);
-    msg->setVehicleId(myId);
-    msg->setExternalId(positionHelper->getExternalId().c_str());
-    msg->setDestinationId(-1);
-    msg->setPreferedSpeed(preferedspeed);
-    msg->setTolerance(tolerance);
-    double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-    double joinerSpeed = preferedspeed;
-    double joinerPreference = tolerance;
-    BeliefModel jbelief;
-    jbelief.setBelief("openvotetojoin");
-    jbelief.pushDouble(&joinerSpeed);
-    jbelief.pushDouble(&joinerPreference);
-    jbelief.pushDouble(&platoonSpeed);
-    manager->sendInformationToAgents(myId, &jbelief);
-    sendUnicast(msg, -1);
-}
-
 void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double preferedSpeed, double tolerance){
     RequestJoinPlatoonMessage* msg = new RequestJoinPlatoonMessage("RequestJoinPlatoonMessage");
     msg->setKind(NEGOTIATION_TYPE);
@@ -156,23 +121,6 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     sendUnicast(msg, destinationId);
 }
 
-void VotingAppl::sendVoteSubmition(int vote){
-    Enter_Method_Silent();
-    SubmitVote* msg = new SubmitVote("SubmitVote");
-    int leaderId = positionHelper->getLeaderId();
-    msg->setKind(NEGOTIATION_TYPE);
-    msg->setPlatoonId(positionHelper->getPlatoonId());
-    msg->setVehicleId(myId);
-    msg->setExternalId(positionHelper->getExternalId().c_str());
-    msg->setDestinationId(leaderId);
-    msg->setVote(vote);
-    msg->setArray(false);
-    int position = positionHelper->getPosition();
-    scheduleAt(simTime() + 0.1*position, msg);
-    //if(myId == 1 || myId == 2 || myId == 3)
-    //    sendUnicast(msg, leaderId);
-}
-
 void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     Enter_Method_Silent();
     SubmitVote* msg = new SubmitVote("SubmitVote");
@@ -182,7 +130,6 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     msg->setVehicleId(myId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
     msg->setDestinationId(leaderId);
-    msg->setArray(true);
     msg->setVotesArraySize(votes.size());
     for(uint32_t i = 0; i < votes.size(); i++){
         msg->setVotes(i, votes[i]);
@@ -233,9 +180,6 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
         if (RequestJoinPlatoonMessage* msg = dynamic_cast<RequestJoinPlatoonMessage*>(nm)) {
             handleRequestToJoinNegotiation(msg);
             delete msg;
-        }else if (NotificationOfJoinVote* msg = dynamic_cast<NotificationOfJoinVote*>(nm)) {
-            handleNotificationOfJoinVote(msg);
-            delete msg;
         }else if (SubmitVote* msg = dynamic_cast<SubmitVote*>(nm)) {
             handleSubmitVote(msg);
             delete msg;
@@ -284,39 +228,14 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
 void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     if(msg->getPlatoonId() != positionHelper->getPlatoonId()) return;
     if(myId != positionHelper->getLeaderId()) return;
-
-    if( !msg->getArray() ){
-        int vote = msg->getVote();
-        int voter = msg->getVehicleId();
-        BeliefModel submitVote;
-        submitVote.setBelief("submitvote");
-        submitVote.pushInt(&voter);
-        submitVote.pushInt(&vote);
-        manager->sendInformationToAgents(myId, &submitVote);
-    }else{
-        uint32_t size = msg->getVotesArraySize();
-        std::vector<int> votes(size);
-        for(uint32_t i = 0; i < size; i++){
-            votes[i] = msg->getVotes(i);
-        }
-        BeliefModel voteSubmission("handle/submit/vote");
-        voteSubmission.pushIntArray(votes);
-        manager->sendInformationToAgents(myId, &voteSubmission);
+    uint32_t size = msg->getVotesArraySize();
+    std::vector<int> votes(size);
+    for(uint32_t i = 0; i < size; i++){
+        votes[i] = msg->getVotes(i);
     }
-}
-
-void VotingAppl::handleNotificationOfJoinVote(const NotificationOfJoinVote* msg){
-    if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
-        double joinerSpeed = msg->getPreferedSpeed();
-        double joinerPreference = msg->getTolerance();
-        double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-        BeliefModel jbelief;
-        jbelief.setBelief("openvotetojoin");
-        jbelief.pushDouble(&joinerSpeed);
-        jbelief.pushDouble(&joinerPreference);
-        jbelief.pushDouble(&platoonSpeed);
-        manager->sendInformationToAgents(myId, &jbelief);
-    }
+    BeliefModel voteSubmission("handle/submit/vote");
+    voteSubmission.pushIntArray(votes);
+    manager->sendInformationToAgents(myId, &voteSubmission);
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
@@ -361,8 +280,9 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
 
 void VotingAppl::handleNotifyVote(const NotifyVote* msg){
     if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
+        BeliefModel voteNotify("handle/vote/notification");
+        std::vector<double> contextArgs(msg->getContextArgumentsArraySize() + 1);
         uint32_t size = msg->getCandidatesArraySize();
-        BeliefModel voteNotify;
         std::vector<int> candidates(size);
         for(uint32_t i = 0; i < size; i++){
             candidates[i] = msg->getCandidates(i);
@@ -371,24 +291,23 @@ void VotingAppl::handleNotifyVote(const NotifyVote* msg){
         switch(msg->getContextId()){
         case CONTEXT_SPEED:
         {
-            voteNotify.setBelief("handle/speed/vote/notification");
+            contextArgs[0] = CONTEXT_SPEED;
             break;
         }
         case CONTEXT_JOIN:
         {
-            voteNotify.setBelief("handle/join/vote/notification");
-            size = msg->getContextArgumentsArraySize();
-            std::vector<double> contextArgs(size);
-            for(uint32_t i = 0; i < size; i++){
-                contextArgs[i] = msg->getContextArguments(i);
+            size = contextArgs.capacity();
+            contextArgs[0] = CONTEXT_JOIN;
+            for(uint32_t i = 1; i < size; i++){
+                contextArgs[i] = msg->getContextArguments(i - 1);
             }
-            voteNotify.pushDoubleArray(contextArgs);
             break;
         }
         default:
             throw cRuntimeError("VotingAppl: Invalid context identifier!");
             break;
         }
+        voteNotify.pushDoubleArray(contextArgs);
         manager->sendInformationToAgents(myId, &voteNotify);
     }
 }

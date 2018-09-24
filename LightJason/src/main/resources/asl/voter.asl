@@ -34,6 +34,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!set/speed(SPEED) <-
     generic/print("Agent ",MyName, " the speed of my platoon is", SPEED);
+    utility/set/platoon/speed(SPEED);
     +platoonspeed(SPEED).
 
 +!requestjoin(JID, JSPEED, JPREFERENCE) <-
@@ -41,52 +42,36 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
-    S = utility/platoonsize();
-    vote/openballot("allowJoin", JID, S);
     L1 = collection/list/create(JSPEED, JPREFERENCE);
     open/vote("join", L1).
     //transmit/other/vote/join(JSPEED, JPREFERENCE).
     //start a list of votes;
     //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
 
-+!choosevote(PredictedUtility)
-    : >>(minimumUtility(MinUtil), MinUtil < PredictedUtility ) <-
-        generic/print("Agent ", MyName, "Casting positive vote:", PredictedUtility, ">", MinUtil);
-        !sendvote(1)
-    : >>(minimumUtility(MinUtil), MinUtil >= PredictedUtility) <-
-        generic/print("Agent ", MyName, "Casting negative vote:", PredictedUtility, "<", MinUtil);
-        !sendvote(0).
++!handle/vote/notification(CANDIDATES, CONTEXT) <-
+    generic/print("Agent", MyName, " got notification to vote on a join: ", CANDIDATES);
+    >>tolerance(Tolerance); >>preferedspeed(Speed);
+    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT);
+    generic/print(VVECTOR);
+    !sendvote(VVECTOR).
 
-+!sendvote(VOTE)
++!sendvote(VVECTOR)
     : >>isChair(_) <-
         generic/print("Agent", MyName, "Im the chair so no need to pass through omnet");
-        vote/chairstore(VOTE)
+        !handle/submit/vote(VVECTOR)
     : ~>>isChair(_) <- 
         generic/print("Agent", MyName, "Sending the vote down omnet");
-       transmit/other/vote/cast(VOTE). 
+       transmit/other/vote/list(VVECTOR). 
 
-+!openvotetojoin(JSPEED, JPREFERENCE) <-
-    >>platoonspeed(PSPEED);
-    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
++!handle/submit/vote(VOTE) <-
+    generic/print("Got vote", VOTE);
+    vote/store(VOTE).
 
-+!openvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
-    +platoonspeed(PSPEED);
-    !handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED).
-    //save the sent vote
-
-+!handleopenvotetojoin(JSPEED, JPREFERENCE, PSPEED) <-
-    generic/print("Agent ", MyName, "got notified of a join vote for a vehicle who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE); 
-    $generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility);
-    generic/print("Agent ", MyName, "utility is:", PredictedUtility);
-    !choosevote(PredictedUtility).
-
-+!handle/speed/vote/notification(CANDIDATES) <-
-    generic/print("Agent", MyName, " got notification to vote on platoon speed: ", CANDIDATES);
++!handle/tie(CANDIDATES, CONTEXT) <-
+    generic/print("There has been a tie. Submitting my vote to tie brake");
     >>tolerance(Tolerance); >>preferedspeed(Speed);
-    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1);
-    generic/print(VVECTOR);
-    //!sendvote(VOTE).
-    transmit/other/vote/list(VVECTOR).
+    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT);
+    vote/store(VVECTOR).
 
 +!handlesubmitvote(VOTER, VOTE)
     : MyName == VOTER <-
@@ -146,17 +131,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!inplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).
-
-
-+!handle/submit/vote(VOTE) <-
-    generic/print("Got vote", VOTE);
-    vote/store(VOTE).
-
-+!handle/tie(CANDIDATES) <-
-    generic/print("There has been a tie. Submitting my vote to tie brake");
-    >>tolerance(Tolerance); >>preferedspeed(Speed);
-    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1);
-    vote/store(VVECTOR).
 
 
 +!handlerejection(PID) <-
