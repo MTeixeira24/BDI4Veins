@@ -75,23 +75,11 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 int externalId; //If the negotiation involves external participants.
                 rbf >> type;
                 rbf >> externalId;
-                if(externalId == -1){
-                    rbf >> type;
-                    ASSERT(type == VALUE_INT);
-                    int joinerId;
-                    rbf >>joinerId;
-                    rbf >> type;
-                    ASSERT(type == VALUE_INT);
-                    int result;
-                    rbf >>result;
-                    ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(joinerId, result);
-                }else{
-                    rbf >> type;
-                    ASSERT(type == VALUE_INT);
-                    int winnerValue;
-                    rbf >> winnerValue;
-                    ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(winnerValue);
-                }
+                rbf >> type;
+                ASSERT(type == VALUE_INT);
+                int winnerValue;
+                rbf >> winnerValue;
+                ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(winnerValue, externalId);
                 break;
             }
             case NOTIFY_START_VOTE:
@@ -103,7 +91,14 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> contextId;
                 /*get the context arguments*/
                 rbf >> type;
-                ASSERT((type == VALUE_NULL) || (type == VALUE_ARRAY));
+                /*Is it a type specifier? If so check the following short to assert that it saying that no context is present*/
+                if(type == VALUE_SHORT){
+                    rbf >> type;
+                    ASSERT(type == VALUE_NULL);
+                }else{
+                    /*Otherwise assert that we have a received a context array*/
+                    ASSERT(type == VALUE_ARRAY);
+                }
                 std::vector<double> contextArgs;
                 if(type == VALUE_ARRAY){
                     contextArgs = parseDoubleArrayMessage(rbf);

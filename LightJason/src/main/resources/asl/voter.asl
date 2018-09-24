@@ -42,7 +42,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
-    L1 = collection/list/create(JSPEED, JPREFERENCE);
+    L1 = collection/list/create(JSPEED, JPREFERENCE, JID);
     open/vote("join", L1).
     //transmit/other/vote/join(JSPEED, JPREFERENCE).
     //start a list of votes;
@@ -73,21 +73,9 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT);
     vote/store(VVECTOR).
 
-+!handlesubmitvote(VOTER, VOTE)
-    : MyName == VOTER <-
-        generic/print("Got my own vote");
-        vote/store/dep(VOTER, VOTE)
-    : MyName != VOTER <-
-        generic/print("Got vote from", VOTER);
-        vote/store/dep(VOTER,VOTE).
-
 +!ischair(PID) <-
     +isChair(PID);
     generic/print("Agent ", MyName, " is chair of platoon ", PID).
-
-+!submitvote(VOTER, VOTE) <-
-    generic/print("GOT VOTE");
-    !handlesubmitvote(VOTER, VOTE).
 
 //Belief triggered plans for all voting agents
 +!foundplatoon(PID, LID) <-
@@ -101,14 +89,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     >>preferedspeed(SPEED);
     >>tolerance(TOLERANCE);
     transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
-
-+!notify/joiner/win(JID) <-
-    generic/print("APROVED!");
-    vote/send/results(JID, 1).
-
-+!notify/joiner/lose(JID) <-
-    generic/print("REJECTED!");
-    vote/send/results(JID, 0).
 
 +!maneuver/complete(L) <-
     generic/print("Agent ", MyName, " maneuver complete starting a vote to set speed");

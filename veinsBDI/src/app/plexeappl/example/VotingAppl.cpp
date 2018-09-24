@@ -138,20 +138,7 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     scheduleAt(simTime() + 0.1*position, msg);
 }
 
-void VotingAppl::sendVoteResults(int joinerId, int results){
-    NotifyResults* msg = new NotifyResults("NotifyResults");
-    int platoonId = positionHelper->getPlatoonId();
-    msg->setKind(NEGOTIATION_TYPE);
-    msg->setVehicleId(myId);
-    msg->setExternalId(positionHelper->getExternalId().c_str());
-    msg->setDestinationId(-1);
-    msg->setResult(results);
-    msg->setJoinerId(joinerId);
-    msg->setPlatoonId(platoonId);
-    sendUnicast(msg, -1);
-
-}
-void VotingAppl::sendVoteResults(int winnerValue){
+void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
     NotifyResults* msg = new NotifyResults("NotifyResults");
     int platoonId = positionHelper->getPlatoonId();
     msg->setKind(NEGOTIATION_TYPE);
@@ -159,7 +146,7 @@ void VotingAppl::sendVoteResults(int winnerValue){
     msg->setExternalId(positionHelper->getExternalId().c_str());
     msg->setDestinationId(-1);
     msg->setResult(winnerValue);
-    msg->setJoinerId(-1);
+    msg->setJoinerId(joinerId);
     msg->setPlatoonId(platoonId);
     sendUnicast(msg, -1);
 }

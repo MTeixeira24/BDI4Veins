@@ -115,26 +115,36 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         InstructionModel iOb = new InstructionModel(this.id, VoteConstants.NOTIFY_START_VOTE);
         ArrayList<Integer> l_candidates = new ArrayList<>();
         ArrayList<Double> l_context = new ArrayList<>();
+        ArrayList<Double> l_context_chair = new ArrayList<>();
         switch (context){
             case "join":
+                /*Add the necessary information for the vote*/
                 iOb.pushInt(VoteConstants.CONTEXT_JOIN);
-                l_context.add((double)VoteConstants.CONTEXT_JOIN);
-                iOb.pushDoubleArray(new ArrayList<>(contextArgs));
-                l_context.addAll(contextArgs);
+                l_context.add(contextArgs.get(0));
+                l_context.add(contextArgs.get(1));
+                iOb.pushDoubleArray(l_context);
+                /*Vote is a simple yes, no. Push those values*/
                 l_candidates.add(0);
                 l_candidates.add(1);
+                /*Define the context for future reference*/
                 m_context = new CContext(l_candidates, "join", members.size());
                 m_context.addContextArgument("joinerSpeed", contextArgs.get(0));
                 m_context.addContextArgument("joinerPreference", contextArgs.get(1));
+                m_context.addContextArgument("joinerId", contextArgs.get(2));
+                /*Set up a data structure for the chair to cast its vote*/
+                l_context_chair.add((double)VoteConstants.CONTEXT_JOIN);
+                l_context_chair.addAll(l_context);
                 break;
             case "speed":
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
-                iOb.pushInt(Constants.VALUE_NULL);
-
+                /*No context is needed*/
+                iOb.pushShort(Constants.VALUE_NULL);
+                /*Prepare a simple list of possible candidates*/
                 for(int i = 80; i <= 120; i += 10){
                     l_candidates.add(i);
                 }
-                m_context = new CContext(l_candidates, "speed", members.size() - 1);
+                m_context = new CContext(l_candidates, "speed", members.size());
+                l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
         }
         iOb.pushIntArray(l_candidates);
@@ -144,7 +154,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 CLiteral.from(
                         "handle/vote/notification",
                         CRawTerm.from(l_candidates),
-                        CRawTerm.from(l_context)
+                        CRawTerm.from(l_context_chair)
                 )
 
         );
@@ -210,13 +220,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
-    @IAgentActionName( name = "utility/platoonsize" )
-    private int platoonSize()
-    {
-        return members.size();
-    }
-
-    @IAgentActionFilter
     @IAgentActionName( name = "transmit/other/vote/list" )
     private void sendVote(@Nonnull final List<Integer> vote)
     {
@@ -225,41 +228,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         agentManager.addInstruction(iOb);
     }
 
-    @IAgentActionFilter
-    @IAgentActionName( name = "vote/store/dep" )
-    private void storeVote(@Nonnull final Number voter, @Nonnull final Number vote)
-    {
-        if(members.contains(voter.intValue())){
-            BitVector bv = new BitVector(2);
-            if(vote.intValue() == 1){
-                bv.put(0, false);
-                bv.put(1, true);
-            }else{
-                bv.put(0, true);
-                bv.put(1, false);
-            }
-            m_bitVotes.add(bv);
-        }
-        if (m_bitVotes.size() == m_committeeSize){
-            CBorda br = new CBorda(m_candidates, m_bitVotes);
-            int winner = br.getResult();
-            String functor;
-            if(winner == 1){
-                functor = "notify/joiner/win";
-            }else{
-                functor = "notify/joiner/lose";
-            }
-            final ITrigger l_trigger = CTrigger.from(
-                ITrigger.EType.ADDGOAL,
-                CLiteral.from(
-                        functor,
-                        CRawTerm.from( m_candidates.get(1) )
-                )
-
-            );
-            this.trigger( l_trigger );
-        }
-    }
     @IAgentActionFilter
     @IAgentActionName( name = "vote/store" )
     private void storeVote(@Nonnull final List<Integer> votes)
@@ -283,19 +251,21 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             int winner = m_context.getCandidates().get(winnerIndex);
             System.out.println("Index that won is: " + winner);
             InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
-            iOb.pushInt(1);
+            switch (m_context.getVoteType()){
+                case "join":{
+                    iOb.pushInt(m_context.getContextArgument("joinerId").intValue());
+                    break;
+                }
+                case "speed":{
+                    iOb.pushInt(-1);
+                    break;
+                }
+                default:
+                    break;
+            }
             iOb.pushInt(winner);
             agentManager.addInstruction(iOb);
         }
-    }
-    @IAgentActionFilter
-    @IAgentActionName( name = "vote/send/results" )
-    private void sendVoteResults(@Nonnull final Number id, @Nonnull final Number result){
-        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
-        iOb.pushInt(0);
-        iOb.pushInt(id.intValue());
-        iOb.pushInt(result.intValue());
-        agentManager.addInstruction(iOb);
     }
 
     /**

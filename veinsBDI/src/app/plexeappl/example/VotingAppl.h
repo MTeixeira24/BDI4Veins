@@ -51,11 +51,7 @@ public:
     /**
      *
      */
-    void sendVoteResults(int joinerId, int results);
-    /**
-     *
-     */
-    void sendVoteResults(int winnerValue);
+    void sendVoteResults(int winnerValue, int joinerId);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
