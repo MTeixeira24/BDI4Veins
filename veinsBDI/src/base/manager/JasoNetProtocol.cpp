@@ -17,7 +17,7 @@ JasoNetProtocol::~JasoNetProtocol(){
 
 }
 
-LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(uint32_t id, const void* beliefModel){//(int _id, std::string belief, double value){
+LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* beliefModel){//(int _id, std::string belief, double value){
     BeliefModel* bm = (BeliefModel*) beliefModel;
     LightJasonBuffer buffer;
     uint32_t size = 6; //Minimum size is 2 bytes to represent the type of query and 4 bytes for agentID
@@ -26,7 +26,6 @@ LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(uint32_t id, const void
     uint16_t action = SET_BELIEF;
     //First segment of query, size of message, action to perform(set belief), agentId,  and the belief string
     buffer << size <<  action << id << bm->getBelief();
-    double test2;
     //Remainder segments: data type + data
     for(uint32_t i = 0; i < bm->getValues().size(); i++){
         BeliefObject bo = bm->getValues()[i];
@@ -51,9 +50,38 @@ LightJasonBuffer JasoNetProtocol::buildUpdateBeliefQuery(uint32_t id, const void
             throw cRuntimeError("Float not implemented");
             break;
         case VALUE_DOUBLE:
-            test2 = *((double*)bo.getData());
             buffer << *((double*)bo.getData());
             break;
+        case VALUE_ARRAY:
+        {
+            int* ptr = (int*)bo.getData();
+            buffer << *(ptr); //get type of data
+            int dataType = *(ptr);
+            uint32_t size = *(ptr + 1);
+            buffer << size; //size of array
+            switch (dataType){
+            case VALUE_INT:
+            {
+                for(uint32_t i = 0; i < size; i++){
+                    buffer << *(ptr + i + 2);
+                }
+                break;
+            }
+            case VALUE_DOUBLE:
+            {
+                double* dptr = (double*)(ptr + 2); //The double values start at the second address
+                for(uint32_t i = 0; i < size; i++){
+                    buffer << *(dptr + i);
+                }
+                break;
+            }
+            default:
+                throw cRuntimeError("JasoNetProtocol: Unknown array type!");
+                break;
+            }
+            delete[] ptr;
+            break;
+        }
         default:
             throw cRuntimeError("Invalid data type!");
             break;

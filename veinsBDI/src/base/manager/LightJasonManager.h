@@ -22,6 +22,7 @@
 #include <map>
 
 #include "../../app/baseappl/BaseAgentAppl.h"
+#include "../../utilities/Timer.h"
 #include "JasoNetProtocol.h"
 #include "LightJasonBuffer.h"
 using namespace omnetpp;
@@ -87,6 +88,17 @@ protected:
     virtual void parseResponse(uint32_t msgLength);
 
     //virtual void setupListener();
+
+    /**
+     * Extracts the array from a buffer to a vector
+     */
+    virtual std::vector<int> parseArrayMessage(LightJasonBuffer& buffer);
+    /**
+     * Extract an array with double values from a buffer to a vector
+     */
+    virtual std::vector<double> parseDoubleArrayMessage(LightJasonBuffer& buffer);
+private:
+    //Timer timer;
 };
 
 

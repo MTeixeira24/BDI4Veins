@@ -3,6 +3,7 @@
 	<name>veinsBDI</name>
 	<comment></comment>
 	<projects>
+		<project>inet</project>
 		<project>plexe-veins</project>
 	</projects>
 	<buildSpec>

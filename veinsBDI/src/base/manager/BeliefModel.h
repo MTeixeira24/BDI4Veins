@@ -11,12 +11,14 @@
 #include <string>
 #include <vector>
 #include <cstdint>
+#include <cstring>
 #include "LightJasonConstants.h"
 #include "BeliefObject.h"
 
 class BeliefModel {
 public:
     BeliefModel();
+    BeliefModel(std::string belief);
     virtual ~BeliefModel();
     void setBelief(std::string);
     std::string getBelief(){return belief;}
@@ -28,6 +30,11 @@ public:
     void pushLong(long*);
     void pushFloat(float*);
     void pushDouble(double*);
+
+    void pushIntArray(std::vector<int>&);
+    void pushIntArray(int* array, uint32_t size);
+
+    void pushDoubleArray(std::vector<double>&);
 
     std::vector<BeliefObject> getValues(){return values;}
 protected:

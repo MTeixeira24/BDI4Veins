@@ -24,6 +24,8 @@
 
 #define REQUEST_SPEED_DOWN 0x06
 
+#define SEND_JOIN_REQUEST 0x07
+
 #define TERMINATE_CONNECTION 0x7E
 
 /*
@@ -44,6 +46,10 @@
 #define VALUE_FLOAT 0x06
 
 #define VALUE_DOUBLE 0x07
+
+#define VALUE_ARRAY 0x08
+
+#define VALUE_NULL 0x09
 
 /*
  * Constants to define message types in sendMessage() calls

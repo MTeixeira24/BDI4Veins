@@ -6,12 +6,15 @@
  */
 
 #include "LightJasonManager.h"
-Define_Module(LightJasonManager)
-LightJasonManager::LightJasonManager(){
 
+Define_Module(LightJasonManager)
+
+LightJasonManager::LightJasonManager(){
 }
 
 LightJasonManager::~LightJasonManager(){
+    delete queryMsg;
+    close(connSocket);
 }
 
 void LightJasonManager::initialize(int stage){
@@ -65,7 +68,6 @@ void LightJasonManager::handleMessage(cMessage* msg){
             queryMsg = new cMessage("query");
             scheduleAt(simTime() + updateInterval, queryMsg);
         }
-
     }
 }
 
@@ -140,7 +142,7 @@ void LightJasonManager::unsubscribeVehicle(int id){
 }
 
 uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){//(int id, std::string belief, double value){
-    LightJasonBuffer result = writeToSocket(jp.buildUpdateBeliefQuery(id, beliefModel).getBuffer());
+    LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
     int n = int((unsigned char)result.getBuffer()[0]);
     EV << n << "\n"; //DEBUG
     return 0;
@@ -176,5 +178,34 @@ LightJasonBuffer LightJasonManager::receiveMessage(uint32_t length){
     return LightJasonBuffer(std::string(msgBuffer, length));
 }
 
+std::vector<int> LightJasonManager::parseArrayMessage(LightJasonBuffer& buffer){
+    short arrayType;
+    buffer >> arrayType;
+    ASSERT(arrayType == VALUE_INT);
+    uint32_t size;
+    buffer >> size;
+    std::vector<int> contents(size);
+    int element;
+    for(uint32_t i = 0; i < size; i++){
+        buffer >> element;
+        contents[i] = element;
+    }
+    return contents;
+}
+
+std::vector<double> LightJasonManager::parseDoubleArrayMessage(LightJasonBuffer& buffer){
+    short arrayType;
+    buffer >> arrayType;
+    ASSERT(arrayType == VALUE_DOUBLE);
+    uint32_t size;
+    buffer >> size;
+    std::vector<double> contents(size);
+    double element;
+    for(uint32_t i = 0; i < size; i++){
+        buffer >> element;
+        contents[i] = element;
+    }
+    return contents;
+}
 
 
