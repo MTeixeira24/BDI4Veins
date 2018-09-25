@@ -12,6 +12,7 @@
 
 #include "../GeneralPlexeAgentAppl.h"
 #include "../../../messages/NegotiationMessage_m.h"
+#include "../../../messages/Ack_m.h"
 #include "../../../messages/voting/RequestJoinPlatoonMessage_m.h"
 #include "../../../messages/voting/SubmitVote_m.h"
 #include "../../../messages/voting/NotifyResults_m.h"

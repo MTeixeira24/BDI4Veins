@@ -1,5 +1,7 @@
 package jasonveins.omnet.voting;
 
+import javafx.util.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,12 +10,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CContext {
     private ArrayList<Integer> m_candidates;
-    private String m_voteType;
+    private int m_voteType;
     private CopyOnWriteArrayList<List<Integer>> m_votes;
     private int m_voterCount;
     private Map<String, Number> m_contextArguments;
 
-    public CContext(ArrayList<Integer> p_candidates, String p_voteType, int p_voterCount){
+    public CContext(ArrayList<Integer> p_candidates, int p_voteType, int p_voterCount){
         m_candidates = p_candidates;
         m_voteType = p_voteType;
         m_votes = new CopyOnWriteArrayList<>();
@@ -30,11 +32,11 @@ public class CContext {
         this.m_candidates = m_candidates;
     }
 
-    public String getVoteType() {
+    public int getVoteType() {
         return m_voteType;
     }
 
-    public void setVoteType(String m_voteType) {
+    public void setVoteType(int m_voteType) {
         this.m_voteType = m_voteType;
     }
 
@@ -61,5 +63,14 @@ public class CContext {
 
     public Number getContextArgument(String key){
         return m_contextArguments.get(key);
+    }
+
+    public ArrayList<Double> getContextSequence(){
+        ArrayList<Double> context = new ArrayList<>();
+        context.add((double) this.m_voteType);
+        for(Map.Entry<String, Number> c : m_contextArguments.entrySet()){
+            context.add(c.getValue().doubleValue());
+        }
+        return context;
     }
 }

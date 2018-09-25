@@ -35,9 +35,15 @@ final class App
      */
     public static void main( final String[] p_args )
     {
+        /*Run variables, TODO: move this to a config file*/
+        int maxSpeedDeviation = 110;
+        int minSpeedDeviation = 90;
+        String voteRule = "Copeland";//Borda//Approval//Plurality//Copeland
+
+
         ConnectionManager cm = new ConnectionManager();
         //AgentManager am = new AgentManager(/*"manager.asl"*/"laneMergeVehicle.asl", cm);
-        CVoterAgentManager cam = new CVoterAgentManager("voter.asl", cm);
+        CVoterAgentManager cam = new CVoterAgentManager("voter.asl", cm, minSpeedDeviation, maxSpeedDeviation, voteRule);
         //cm.setAgentManager(am);
         cm.setAgentManager(cam);
         cm.start();

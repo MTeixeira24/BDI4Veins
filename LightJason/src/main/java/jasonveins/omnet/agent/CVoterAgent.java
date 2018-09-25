@@ -6,8 +6,7 @@ import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.Constants;
 import jasonveins.omnet.voting.CContext;
 import jasonveins.omnet.voting.CUtilityPair;
-import jasonveins.omnet.voting.rule.CBorda;
-import jasonveins.omnet.voting.rule.IRule;
+import jasonveins.omnet.voting.rule.*;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
@@ -20,6 +19,7 @@ import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 import jasonveins.omnet.managers.VoteConstants;
 
@@ -45,6 +45,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     //Object myvote
     IRule votingRule;
 
+    private int m_minSpeedDeviation;
+    private int m_maxSpeedDeviation;
+
+    private ThreadLocalRandom numberGenerator;
+
     /**
      * ctor
      *
@@ -53,19 +58,45 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      * @param m_id Id to be assigned to the new agent
      * @param m_vType Vehicle type Id
      */
-    public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id, @Nonnull String m_vType) {
+    public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id,
+                       @Nonnull String m_vType, int p_minSpeedDeviation, int p_maxSpeedDeviation, String voteRule) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
-        votingRule = new CBorda();
+        m_minSpeedDeviation = p_minSpeedDeviation;
+        m_maxSpeedDeviation = p_maxSpeedDeviation;
+        numberGenerator = ThreadLocalRandom.current();
+        switch (voteRule){
+            case "Borda":{
+                votingRule = new CBorda();
+                break;
+            }
+            case "Approval":{
+                votingRule = new CApproval();
+                break;
+            }
+            case "Plurality":{
+                votingRule = new CPlurality();
+                break;
+            }
+            case "Copeland":{
+                votingRule = new CCopeland();
+                break;
+            }
+            default:{
+                throw new RuntimeException("CVoterAgent: Unknown voteRule!");
+            }
+        }
     }
 
     @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/utility" )
     private double calculateUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
         double utility = welfareBonus / ( 1 + Math.pow(Math.abs( ( (speed - preferedSpeed)/(30*tolerance) ) ), 4) );
-        return utility > 1 ? 1 : utility;
+        /*Make the distinction later on data processing. Returning one will cause abnormal voting:
+        i.e. 110 -> 1.1 120 -> 1.05 leads to voting as [4, 5] due to how sort() and the getVote() method works in Borda*/
+        return utility ;//> 1 ? 1 : utility;
     }
 
 
@@ -74,8 +105,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/generatetolerance" )
     private double generateTolerance()
     {
-        Random r = new Random();
-        return 0.4 + (r.nextInt(4) * 0.1);
+        return 0.7;//0.4 + (numberGenerator.nextInt(4) * 0.1);
     }
 
     @Nonnull
@@ -83,8 +113,8 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/generatespeedpreference" )
     private double generatespeedpreference()
     {
-        Random r = new Random();
-        return 70 + r.nextInt(3)*10;
+        int steps = (m_maxSpeedDeviation - m_minSpeedDeviation)/5;
+        return m_minSpeedDeviation + numberGenerator.nextInt(steps + 1)*5;
     }
 
     @IAgentActionFilter
@@ -127,7 +157,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_candidates.add(0);
                 l_candidates.add(1);
                 /*Define the context for future reference*/
-                m_context = new CContext(l_candidates, "join", members.size());
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_JOIN, members.size());
                 m_context.addContextArgument("joinerSpeed", contextArgs.get(0));
                 m_context.addContextArgument("joinerPreference", contextArgs.get(1));
                 m_context.addContextArgument("joinerId", contextArgs.get(2));
@@ -143,7 +173,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 for(int i = 80; i <= 120; i += 10){
                     l_candidates.add(i);
                 }
-                m_context = new CContext(l_candidates, "speed", members.size());
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size());
                 l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
         }
@@ -190,8 +220,32 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             double util = calculateUtility(p_welfare.doubleValue(), l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue());
             utils.add(new CUtilityPair(i, util));
         }
-        Collections.sort(utils);
         List<Integer> votes = votingRule.getVote(utils);
+        return votes;
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/break/tie/vote" )
+    private List<Integer> generateTieBreakerVote(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_welfare, List<Double> p_context, List<Integer> p_ties){
+        ArrayList<Integer> l_candidates = new ArrayList<>(p_candidates.size());
+        short l_context = (short)p_context.get(0).doubleValue();
+        switch (l_context ){
+            case VoteConstants.CONTEXT_JOIN: {
+                l_candidates.add((int)platoonSpeed);
+                l_candidates.add((int)predictPlatoonSpeed(p_context.get(1), p_context.get(2), platoonSpeed));
+                break;
+            }
+            default:{
+                l_candidates.addAll(p_candidates);
+                break;
+            }
+        }
+        List<CUtilityPair> utils = new ArrayList<>(l_candidates.size());
+        for(int i = 0; i < l_candidates.size(); i++) {
+            double util = calculateUtility(p_welfare.doubleValue(), l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue());
+            utils.add(new CUtilityPair(i, util));
+        }
+        List<Integer> votes = votingRule.getTieBreakerVote(utils, p_ties);
         return votes;
     }
 
@@ -234,14 +288,16 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     {
         m_context.pushVotes(votes);
         if(m_context.allVotesSubmitted()){
-            int winnerIndex = votingRule.getResult(m_context.getVotes());
+            int winnerIndex = votingRule.getResult(m_context.getVotes(), m_context.getCandidates());
             if(winnerIndex == -1){
                 m_context.increaseVoterCount();
                 final ITrigger l_trigger = CTrigger.from(
                         ITrigger.EType.ADDGOAL,
                         CLiteral.from(
                                 "handle/tie",
-                                CRawTerm.from(m_context.getCandidates())
+                                CRawTerm.from(m_context.getCandidates()),
+                                CRawTerm.from(m_context.getContextSequence()),
+                                CRawTerm.from(votingRule.getTiedIndexes())
                         )
 
                 );
@@ -252,11 +308,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             System.out.println("Index that won is: " + winner);
             InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
             switch (m_context.getVoteType()){
-                case "join":{
+                case VoteConstants.CONTEXT_JOIN:{
                     iOb.pushInt(m_context.getContextArgument("joinerId").intValue());
                     break;
                 }
-                case "speed":{
+                case VoteConstants.CONTEXT_SPEED:{
                     iOb.pushInt(-1);
                     break;
                 }

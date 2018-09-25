@@ -56,8 +56,8 @@ void VotingAppl::initialize(int stage){
                 pbelief.pushInt(&leaderId);
                 manager->sendInformationToAgents(myId, &pbelief);
                 BeliefModel platoonSpeedBelief("set/speed");
-                double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-                platoonSpeedBelief.pushDouble(&platoonSpeed);
+                int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+                platoonSpeedBelief.pushInt(&platoonSpeed);
                 manager->sendInformationToAgents(myId, &platoonSpeedBelief);
                 std::vector<int> members = positionHelper->getPlatoonFormation();
                 for (uint32_t i = 0; i < members.size(); i++){
@@ -78,8 +78,8 @@ void VotingAppl::initialize(int stage){
                 pbelief.pushInt(&leaderId);
                 manager->sendInformationToAgents(myId, &pbelief);
                 BeliefModel platoonSpeedBelief("set/speed");
-                double platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-                platoonSpeedBelief.pushDouble(&platoonSpeed);
+                int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+                platoonSpeedBelief.pushInt(&platoonSpeed);
                 manager->sendInformationToAgents(myId, &platoonSpeedBelief);
             }
         }
@@ -221,6 +221,7 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
         votes[i] = msg->getVotes(i);
     }
     BeliefModel voteSubmission("handle/submit/vote");
+    std::string test = msg->getName();
     voteSubmission.pushIntArray(votes);
     manager->sendInformationToAgents(myId, &voteSubmission);
 }

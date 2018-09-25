@@ -67,10 +67,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("Got vote", VOTE);
     vote/store(VOTE).
 
-+!handle/tie(CANDIDATES, CONTEXT) <-
++!handle/tie(CANDIDATES, CONTEXT, TIES) <-
     generic/print("There has been a tie. Submitting my vote to tie brake");
     >>tolerance(Tolerance); >>preferedspeed(Speed);
-    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT);
+    VVECTOR = utility/break/tie/vote(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT, TIES);
     vote/store(VVECTOR).
 
 +!ischair(PID) <-

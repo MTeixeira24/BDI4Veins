@@ -12,6 +12,17 @@ import java.io.FileInputStream;
  * Agent Manager to handle the creation of voting agents
  */
 public class CVoterAgentManager extends AgentManager {
+
+    private int minSpeedDeviation;
+    private int maxSpeedDeviation;
+    private String voteRule;
+
+    public CVoterAgentManager(String m_aslpath, ConnectionManager m_cm, int p_minDeviation, int p_maxDeviation, String p_voteRule){
+        super(m_aslpath, m_cm);
+        minSpeedDeviation = p_minDeviation;
+        maxSpeedDeviation = p_maxDeviation;
+        voteRule = p_voteRule;
+    }
     /**
      * Class constructor
      *
@@ -29,7 +40,7 @@ public class CVoterAgentManager extends AgentManager {
             switch(vType){
                 case "vVoter":
                     if(p_aslFile.equals(resourceFolder+"fuelVoter.asl") || p_aslFile.equals(resourceFolder+"speedVoter.asl") || p_aslFile.equals(resourceFolder+"voter.asl")){
-                        l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType);
+                        l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, minSpeedDeviation, maxSpeedDeviation, voteRule);
                     }else{
                         throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected FuelVoter.asl, SpeedVoter.asl or voter.asl");
                     }

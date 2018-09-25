@@ -6,19 +6,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class CBorda implements IRule {
+public class CPlurality implements IRule{
 
-
-
-    public CBorda() {
-    }
-
-    /**
-     * Sums all votes and returns the index of the winner.
-     * @param votes List of all vote vectors that have been submitted
-     * @return Index of the candidate with majority votes. -1 if a tie occurs.
-     */
-    public int getResult(List<List<Integer>> votes, List<Integer> candidates){
+    @Override
+    public int getResult(List<List<Integer>> votes, List<Integer> candidates) {
         boolean ties = false;
         int winnerIndex = -1;
         int highestScore = -1;
@@ -42,18 +33,11 @@ public class CBorda implements IRule {
         return winnerIndex;
     }
 
-    /**
-     * Generates a vote vector based on the received utilities
-     * @param p_utilities A list containing mapping of the index to its utility, ordered bottom to top
-     * @return An integer list with the votes according to the voting rule
-     */
-    public List<Integer> getVote(List<CUtilityPair> p_utilities){
+    @Override
+    public List<Integer> getVote(List<CUtilityPair> p_utilities) {
         Collections.sort(p_utilities);
         ArrayList<Integer> votes = new ArrayList<>(Collections.nCopies(p_utilities.size(), 0));
-        int preferences = 0;
-        for (CUtilityPair up : p_utilities) {
-            votes.set(up.getIndex(), preferences++);
-        }
+        votes.set(p_utilities.get(p_utilities.size() - 1).getIndex(), 1);
         return votes;
     }
 
@@ -65,11 +49,23 @@ public class CBorda implements IRule {
      */
     @Override
     public List<Integer> getTieBreakerVote(List<CUtilityPair> p_utilities, List<Integer> p_ties) {
-        return getVote(p_utilities);
+        Collections.sort(p_utilities);
+        ArrayList<Integer> votes = new ArrayList<>(Collections.nCopies(p_utilities.size(), 0));
+        int highestIndex = -1;
+        double highestUtility = -1;
+        for(int t : p_ties){
+            if(p_utilities.get(t).getUtility() > highestUtility){
+                highestIndex = t;
+                highestUtility = p_utilities.get(t).getUtility();
+            }
+        }
+        votes.set(highestIndex, 1);
+        return votes;
     }
 
     @Override
     public List<Integer> getTiedIndexes(){
         return m_tiedIndexes;
     }
+
 }
