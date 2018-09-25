@@ -6,6 +6,7 @@ import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.decision.DecisionDataModel;
 import jasonveins.omnet.decision.InstructionModel;
+import jasonveins.omnet.voting.CStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
@@ -44,6 +45,9 @@ public class AgentManager {
     //Used to wait for initial agent creation. Connection manager holds a reference to this and decrements when the first
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
+
+
+    protected CStatistics stats;
 
     /**
      * Class constructor
@@ -328,4 +332,8 @@ public class AgentManager {
     }
 
     public CountDownLatch getLatch() { return this.latch; }
+
+    public void dump(){
+        stats.dump();
+    }
 }

@@ -4,6 +4,7 @@ import jasonveins.omnet.agent.CVoterAgent;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
+import jasonveins.omnet.voting.CStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
@@ -17,11 +18,14 @@ public class CVoterAgentManager extends AgentManager {
     private int maxSpeedDeviation;
     private String voteRule;
 
+
+
     public CVoterAgentManager(String m_aslpath, ConnectionManager m_cm, int p_minDeviation, int p_maxDeviation, String p_voteRule){
         super(m_aslpath, m_cm);
         minSpeedDeviation = p_minDeviation;
         maxSpeedDeviation = p_maxDeviation;
         voteRule = p_voteRule;
+        stats = new CStatistics();
     }
     /**
      * Class constructor
@@ -54,4 +58,7 @@ public class CVoterAgentManager extends AgentManager {
         }
         return l_ag;
     }
+
+    public CStatistics getStats(){return stats;}
+
 }

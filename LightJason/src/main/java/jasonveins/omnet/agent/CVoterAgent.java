@@ -3,8 +3,10 @@ package jasonveins.omnet.agent;
 import cern.colt.bitvector.BitVector;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.Constants;
 import jasonveins.omnet.voting.CContext;
+import jasonveins.omnet.voting.CStatistics;
 import jasonveins.omnet.voting.CUtilityPair;
 import jasonveins.omnet.voting.rule.*;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
@@ -91,6 +93,16 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
+    @IAgentActionName( name = "utility/save")
+    private void saveUtils(@Nonnull Number w, @Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil){
+        double oldUtil = calculateUtility(w.doubleValue(), platoonSpeed, t.doubleValue(), s.doubleValue());
+        ArrayList<Double> utils = new ArrayList<>();
+        utils.add(oldUtil);
+        utils.add(p_newUtil.doubleValue());
+        ((CVoterAgentManager)agentManager).getStats().initial_final_utilities.put(this.id, utils);
+    }
+
+    @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/utility" )
     private double calculateUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
         double utility = welfareBonus / ( 1 + Math.pow(Math.abs( ( (speed - preferedSpeed)/(30*tolerance) ) ), 4) );
@@ -166,6 +178,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.addAll(l_context);
                 break;
             case "speed":
+                ((CVoterAgentManager)agentManager).getStats().initPlatoonSpeed = (int)platoonSpeed;
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
                 /*No context is needed*/
                 iOb.pushShort(Constants.VALUE_NULL);
@@ -313,6 +326,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     break;
                 }
                 case VoteConstants.CONTEXT_SPEED:{
+                    ((CVoterAgentManager)agentManager).getStats().finalPlatoonSpeed = m_context.getCandidates().get(winner);
                     iOb.pushInt(-1);
                     break;
                 }
@@ -333,8 +347,8 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private int getNextPlatoon(){
         if(targetPlatoonIndex < targetPlatoons.size())
             return targetPlatoons.get(targetPlatoonIndex++).platoonId();
-        else
-            return -1;
+        ((CVoterAgentManager)agentManager).getStats().rejected = true;
+        return -1;
     }
 
     /**
