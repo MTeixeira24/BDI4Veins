@@ -46,9 +46,6 @@ public class AgentManager {
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
 
-
-    protected CStatistics stats;
-
     /**
      * Class constructor
      * @param m_aslpath Path to asl files
@@ -332,8 +329,4 @@ public class AgentManager {
     }
 
     public CountDownLatch getLatch() { return this.latch; }
-
-    public void dump(){
-        stats.dump();
-    }
 }

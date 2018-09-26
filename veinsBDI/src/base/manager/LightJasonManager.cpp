@@ -13,7 +13,7 @@ LightJasonManager::LightJasonManager(){
 }
 
 LightJasonManager::~LightJasonManager(){
-    delete queryMsg;
+    cancelAndDelete(queryMsg);
     close(connSocket);
 }
 

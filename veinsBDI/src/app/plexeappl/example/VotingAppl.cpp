@@ -11,7 +11,7 @@ Define_Module(VotingAppl);
 
 
 VotingAppl::~VotingAppl() {
-    if(searchTimer != nullptr)
+    if(searchTimer != NULL)
         delete searchTimer;
 }
 
@@ -21,6 +21,7 @@ void VotingAppl::initialize(int stage){
         // connect negotiation application to protocol
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs;
+        searchTimer = NULL;
         if(getPlatoonRole() == PlatoonRole::NONE) {
             //This is the joiner vehicle. Call the connection manager to add belief to join platoon to agent
             BeliefModel bm;
@@ -193,6 +194,7 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
                 manager->sendInformationToAgents(myId, &platoonBelief);
             }
         }
+        delete unicast;
     }
     else {
         GeneralPlexeAgentAppl::handleLowerMsg(msg);

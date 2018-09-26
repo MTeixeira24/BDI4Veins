@@ -96,10 +96,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/save")
     private void saveUtils(@Nonnull Number w, @Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil){
         double oldUtil = calculateUtility(w.doubleValue(), platoonSpeed, t.doubleValue(), s.doubleValue());
-        ArrayList<Double> utils = new ArrayList<>();
-        utils.add(oldUtil);
-        utils.add(p_newUtil.doubleValue());
-        ((CVoterAgentManager)agentManager).getStats().initial_final_utilities.put(this.id, utils);
     }
 
     @IAgentActionFilter
@@ -178,7 +174,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.addAll(l_context);
                 break;
             case "speed":
-                ((CVoterAgentManager)agentManager).getStats().initPlatoonSpeed = (int)platoonSpeed;
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
                 /*No context is needed*/
                 iOb.pushShort(Constants.VALUE_NULL);
@@ -326,7 +321,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     break;
                 }
                 case VoteConstants.CONTEXT_SPEED:{
-                    ((CVoterAgentManager)agentManager).getStats().finalPlatoonSpeed = m_context.getCandidates().get(winner);
                     iOb.pushInt(-1);
                     break;
                 }
@@ -347,7 +341,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private int getNextPlatoon(){
         if(targetPlatoonIndex < targetPlatoons.size())
             return targetPlatoons.get(targetPlatoonIndex++).platoonId();
-        ((CVoterAgentManager)agentManager).getStats().rejected = true;
         return -1;
     }
 

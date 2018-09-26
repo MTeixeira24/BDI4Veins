@@ -25,7 +25,6 @@ public class CVoterAgentManager extends AgentManager {
         minSpeedDeviation = p_minDeviation;
         maxSpeedDeviation = p_maxDeviation;
         voteRule = p_voteRule;
-        stats = new CStatistics();
     }
     /**
      * Class constructor
@@ -58,7 +57,5 @@ public class CVoterAgentManager extends AgentManager {
         }
         return l_ag;
     }
-
-    public CStatistics getStats(){return stats;}
 
 }

@@ -17,13 +17,14 @@ using Veins::TraCIMobility;
 using Veins::TraCICommandInterface;
 
 class LightJasonManager;
-class BaseAgentAppl : public Veins::BaseWaveApplLayer {
+class BaseAgentAppl : public Veins::BaseApplLayer/*BaseWaveApplLayer*/ {
 public:
-    virtual void initialize(int stage);
+    virtual void initialize(int stage) override;
     virtual void finish();
     virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){};
     virtual void sendMessage(uint8_t message_type, const void* args);
 protected:
+    int myId;
     TraCIMobility* mobility;
     TraCICommandInterface* traci;
     TraCICommandInterface::Vehicle* traciVehicle;
@@ -32,9 +33,9 @@ protected:
     virtual void onWSM(Veins::WaveShortMessage* wsm){
 
     }
-    virtual void handlePositionUpdate(cObject* obj){
-        BaseWaveApplLayer::handlePositionUpdate(obj);
-    }
+    /*virtual void handlePositionUpdate(cObject* obj){
+        BaseApplLayer::handlePositionUpdate(obj);
+    }*/
     virtual void handleLowerMsg(cMessage* msg){}
     virtual void handleSelfMsg(cMessage* msg){}
     virtual void handleLowerControl(cMessage* msg){}

@@ -32,7 +32,6 @@ public final class ConnectionManager extends Thread {
 
     public void finish() {
         state = State.FINISH;
-        am.dump();
     }
 
     public void setAgentManager(AgentManager m_am){

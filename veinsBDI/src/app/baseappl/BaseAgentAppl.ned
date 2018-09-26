@@ -21,6 +21,7 @@ simple BaseAgentAppl like BaseApp{
     parameters:
     int headerLength @unit("bit") = default(0 bit);
     @display("i=block/app2");
+    @class(BaseAgentAppl);
 
 gates:
     input lowerLayerIn;
