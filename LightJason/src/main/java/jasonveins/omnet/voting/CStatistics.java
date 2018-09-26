@@ -23,7 +23,7 @@ public class CStatistics {
 
     public void dump(){
         try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("StableApproval5.txt", true));
+            BufferedWriter bw = new BufferedWriter(new FileWriter("StableCopeland8.txt", true));
             bw.write("Initial platoon speed: " + initPlatoonSpeed + " Final platoon speed: " + finalPlatoonSpeed + "\n");
 
             if(rejected)

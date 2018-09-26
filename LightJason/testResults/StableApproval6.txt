@@ -1,0 +1,39 @@
+Initial platoon speed: 100 Final platoon speed: 115
+The joiner was not rejected
+0 old util: 1.0999943439495687 new util: 0.9185567010309279
+1 old util: 1.0865853658536586 new util: 1.0773105646676102
+2 old util: 1.0865853658536586 new util: 1.0773105646676102
+3 old util: 1.0641015310233684 new util: 1.0927182457592057
+4 old util: 1.0865853658536586 new util: 1.0773105646676102
+5 old util: 1.0641015310233684 new util: 1.0927182457592057
+6 old util: 0.0016919125016330592 new util: 1.0641015310233684
+#######################################################################
+Initial platoon speed: 100 Final platoon speed: 0
+The joiner was not rejected
+#######################################################################
+Initial platoon speed: 0 Final platoon speed: 0
+The joiner was not rejected
+#######################################################################
+Initial platoon speed: 0 Final platoon speed: 0
+The joiner was not rejected
+#######################################################################
+Initial platoon speed: 100 Final platoon speed: 110
+The joiner was not rejected
+0 old util: 1.0999095101723935 new util: 0.9940158073014679
+1 old util: 1.0999943439495687 new util: 1.0229870601849638
+2 old util: 1.0927182457592057 new util: 1.0985539471184214
+3 old util: 1.0773105646676102 new util: 1.0999095101723935
+4 old util: 1.0985539471184214 new util: 1.0927182457592057
+5 old util: 1.0999943439495687 new util: 1.0229870601849638
+6 old util: 0.001629636991100803 new util: 1.099542048293089
+#######################################################################
+Initial platoon speed: 100 Final platoon speed: 100
+The joiner was not rejected
+0 old util: 1.0462052709053653 new util: 1.0462052709053653
+1 old util: 1.0865853658536586 new util: 1.0865853658536586
+2 old util: 1.0964762744354353 new util: 1.0964762744354353
+3 old util: 1.0999095101723935 new util: 1.0999095101723935
+4 old util: 1.0641015310233684 new util: 1.0641015310233684
+5 old util: 1.0999095101723935 new util: 1.0999095101723935
+6 old util: 0.0019728296147787064 new util: 1.0999095101723935
+#######################################################################

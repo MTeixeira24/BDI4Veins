@@ -46,7 +46,7 @@ public final class ConnectionManager extends Thread {
 
     private void startServer() throws IOException {
         //***************************************/
-        String voteRule = "Approval";//Borda//Approval//Plurality//Copeland
+        String voteRule = "Copeland";//Borda//Approval//Plurality//Copeland
         while(true){
             am = new CVoterAgentManager("voter.asl", this, voteRule);
             am_latch = am.getLatch();
@@ -72,7 +72,7 @@ public final class ConnectionManager extends Thread {
                         state = State.DISCONNECTED;
                         if(am.getAgentLoopStatus())
                             am.toggleAgentLoop(true, false);
-                        System.exit(0);
+                        //System.exit(0);
                         break;
                     }
 

@@ -1,0 +1,55 @@
+Initial platoon speed: 100 Final platoon speed: 110
+The joiner was not rejected
+0 old util: 1.0865853658536586 new util: 1.099542048293089
+1 old util: 1.0773105646676102 new util: 1.0999095101723935
+2 old util: 1.0985539471184214 new util: 0.9185567010309279
+3 old util: 1.0927182457592057 new util: 0.822750435548445
+4 old util: 0.0016919125016330592 new util: 1.0985539471184214
+#######################################################################
+Initial platoon speed: 0 Final platoon speed: 0
+The joiner was rejected
+#######################################################################
+Initial platoon speed: 100 Final platoon speed: 110
+The joiner was not rejected
+0 old util: 1.0964762744354353 new util: 1.0964762744354353
+1 old util: 1.0999095101723935 new util: 1.0773105646676102
+2 old util: 1.0927182457592057 new util: 0.822750435548445
+3 old util: 1.0865853658536586 new util: 1.099542048293089
+4 old util: 1.0927182457592057 new util: 1.0985539471184214
+5 old util: 0.001629636991100803 new util: 1.099542048293089
+#######################################################################
+Initial platoon speed: 100 Final platoon speed: 110
+The joiner was not rejected
+0 old util: 1.0964762744354353 new util: 1.0964762744354353
+1 old util: 1.0999095101723935 new util: 1.0773105646676102
+2 old util: 1.0927182457592057 new util: 0.822750435548445
+3 old util: 1.0865853658536586 new util: 1.099542048293089
+4 old util: 1.0927182457592057 new util: 1.0985539471184214
+5 old util: 0.001629636991100803 new util: 1.099542048293089
+#######################################################################Initial platoon speed: 100 Final platoon speed: 100
+The joiner was not rejected
+0 old util: 1.0964762744354353 new util: 1.0964762744354353
+1 old util: 1.099542048293089 new util: 1.099542048293089
+2 old util: 1.0462052709053653 new util: 1.0462052709053653
+3 old util: 1.0985539471184214 new util: 1.0985539471184214
+4 old util: 1.099542048293089 new util: 1.099542048293089
+5 old util: 0.0028524000941763986 new util: 1.0865853658536586
+#######################################################################
+Initial platoon speed: 0 Final platoon speed: 0
+The joiner was not rejected
+#######################################################################
+Initial platoon speed: 0 Final platoon speed: 0
+The joiner was rejected
+#######################################################################
+Initial platoon speed: 0 Final platoon speed: 0
+The joiner was not rejected
+#######################################################################
+Initial platoon speed: 100 Final platoon speed: 100
+The joiner was not rejected
+0 old util: 1.0462052709053653 new util: 1.0462052709053653
+1 old util: 1.1 new util: 1.1
+2 old util: 1.0999943439495687 new util: 1.0999943439495687
+3 old util: 1.0999943439495687 new util: 1.0999943439495687
+4 old util: 1.0927182457592057 new util: 1.0927182457592057
+5 old util: 0.0022225457409691986 new util: 1.0999943439495687
+#######################################################################
