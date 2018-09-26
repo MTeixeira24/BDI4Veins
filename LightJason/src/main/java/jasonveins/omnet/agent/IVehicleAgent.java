@@ -49,13 +49,4 @@ public abstract class IVehicleAgent<T extends IAgent<?>> extends IBaseAgent<T> {
         iOb.pushDouble(0.5);
         agentManager.addInstruction(iOb);
     }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "transmit/other/slow" )
-    private void sendSpeedDownMessage(@Nonnull final Number targetId)
-    {
-        InstructionModel iOb = new InstructionModel(this.id, Constants.REQUEST_SPEED_DOWN);
-        iOb.pushInt(targetId.intValue());
-        agentManager.addInstruction(iOb);
-    }
 }

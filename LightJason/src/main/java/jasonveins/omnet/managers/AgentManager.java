@@ -346,4 +346,8 @@ public class AgentManager extends Thread {
     public CStatistics getStats(){
         return stats;
     }
+
+    public void setSimParams(int iteration, int run, String rule, String type) {
+        return;
+    }
 }

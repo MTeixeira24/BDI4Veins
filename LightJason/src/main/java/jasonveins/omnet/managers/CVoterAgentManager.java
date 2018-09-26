@@ -16,12 +16,6 @@ public class CVoterAgentManager extends AgentManager {
 
     private String voteRule;
 
-
-
-    public CVoterAgentManager(String m_aslpath, ConnectionManager m_cm, String p_voteRule){
-        super(m_aslpath, m_cm);
-        voteRule = p_voteRule;
-    }
     /**
      * Class constructor
      *
@@ -30,6 +24,7 @@ public class CVoterAgentManager extends AgentManager {
      */
     public CVoterAgentManager(String m_aslpath, ConnectionManager m_cm) {
         super(m_aslpath, m_cm);
+        voteRule = "Borda";
     }
 
     @Override
@@ -52,6 +47,12 @@ public class CVoterAgentManager extends AgentManager {
             e.printStackTrace();
         }
         return l_ag;
+    }
+
+    @Override
+    public void setSimParams(int platoonSize, int iteration, String rule, String type) {
+        getStats().setSimParams(platoonSize, iteration, rule, type);
+        voteRule = rule;
     }
 
 }

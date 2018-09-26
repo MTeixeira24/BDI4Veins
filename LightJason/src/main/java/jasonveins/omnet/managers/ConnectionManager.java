@@ -46,9 +46,8 @@ public final class ConnectionManager extends Thread {
 
     private void startServer() throws IOException {
         //***************************************/
-        String voteRule = "Copeland";//Borda//Approval//Plurality//Copeland
         while(true){
-            am = new CVoterAgentManager("voter.asl", this, voteRule);
+            am = new CVoterAgentManager("voter.asl", this);
             am_latch = am.getLatch();
             am.start();
             try{
@@ -168,6 +167,15 @@ public final class ConnectionManager extends Thread {
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x7E, 0x01};
                 state = State.DISCONNECTED;
                 break;
+            case Constants.SET_SIM_PARAMS:{
+                int platoonSize = buffer.getInt();
+                String rule = extractString(buffer);
+                String type = extractString(buffer);
+                int iteration = buffer.getInt();
+                am.setSimParams(platoonSize, iteration, rule, type);
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x06, 0x01};
+                break;
+            }
             default:
                 response = new byte[]{0x00};
                 break;
