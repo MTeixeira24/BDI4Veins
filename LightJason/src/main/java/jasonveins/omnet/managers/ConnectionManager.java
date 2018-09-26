@@ -59,7 +59,8 @@ public final class ConnectionManager extends Thread {
                 }else{
                     System.out.println("Terminating connection");
                     state = State.DISCONNECTED;
-                    am.toggleAgentLoop(true, false);
+                    if(am.getAgentLoopStatus())
+                        am.toggleAgentLoop(true, false);
                     System.exit(0);
                     break;
                 }
@@ -68,14 +69,16 @@ public final class ConnectionManager extends Thread {
         } catch(SocketException e){
             System.err.println("Abrupt connection termination! Ending agent loop");
             state = State.DISCONNECTED;
-            am.toggleAgentLoop(true, false);
+            if(am.getAgentLoopStatus())
+                am.toggleAgentLoop(true, false);
             System.exit(0);
         } catch (IOException e) {
             System.out.println("Exception caught when trying to listen on port "
                     + port + " or listening for a connection");
             e.printStackTrace();
             state = State.DISCONNECTED;
-            am.toggleAgentLoop(true, false);
+            if(am.getAgentLoopStatus())
+                am.toggleAgentLoop(true, false);
             System.exit(0);
         } finally {
             serverSocket.close();

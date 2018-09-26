@@ -96,6 +96,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/save")
     private void saveUtils(@Nonnull Number w, @Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil){
         double oldUtil = calculateUtility(w.doubleValue(), platoonSpeed, t.doubleValue(), s.doubleValue());
+        agentManager.getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue());
     }
 
     @IAgentActionFilter
@@ -174,6 +175,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.addAll(l_context);
                 break;
             case "speed":
+                agentManager.getStats().setInitPlatoonSpeed((int)platoonSpeed);
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
                 /*No context is needed*/
                 iOb.pushShort(Constants.VALUE_NULL);
@@ -258,37 +260,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
 
-    @IAgentActionFilter
-    @IAgentActionName( name = "utility/predictplatoonspeed" )
-    private double predictPlatoonSpeed(@Nonnull final Number jspeed,  @Nonnull final Number jtolerance, @Nonnull final Number pspeed)
-    {
-        double expectedSpeedVariance = pspeed.doubleValue() + ((jspeed.doubleValue() - pspeed.doubleValue())*(1-jtolerance.doubleValue()));
 
-        return expectedSpeedVariance;
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "utility/set/platoon/speed" )
-    private void setPlatoonSpeed(@Nonnull final Number p_platoonSpeed)
-    {
-        platoonSpeed = p_platoonSpeed.doubleValue();
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "utility/storemember" )
-    private void storeMember(@Nonnull final Number memberId)
-    {
-        members.add(memberId.intValue());
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "transmit/other/vote/list" )
-    private void sendVote(@Nonnull final List<Integer> vote)
-    {
-        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SUBMIT_VOTE);
-        iOb.pushIntArray(new ArrayList<>(vote));
-        agentManager.addInstruction(iOb);
-    }
 
     @IAgentActionFilter
     @IAgentActionName( name = "vote/store" )
@@ -321,7 +293,17 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     break;
                 }
                 case VoteConstants.CONTEXT_SPEED:{
+                    agentManager.getStats().setFinalPlatoonSpeed(winner);
                     iOb.pushInt(-1);
+                    final ITrigger l_trigger = CTrigger.from(
+                            ITrigger.EType.ADDGOAL,
+                            CLiteral.from(
+                                    "handle/results",
+                                    CRawTerm.from(winner)
+                            )
+
+                    );
+                    this.trigger( l_trigger );
                     break;
                 }
                 default:
@@ -341,6 +323,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private int getNextPlatoon(){
         if(targetPlatoonIndex < targetPlatoons.size())
             return targetPlatoons.get(targetPlatoonIndex++).platoonId();
+        agentManager.getStats().setRejected(true);
         return -1;
     }
 
@@ -384,6 +367,38 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             }
         }
         return -1;
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/predictplatoonspeed" )
+    private double predictPlatoonSpeed(@Nonnull final Number jspeed,  @Nonnull final Number jtolerance, @Nonnull final Number pspeed)
+    {
+        double expectedSpeedVariance = pspeed.doubleValue() + ((jspeed.doubleValue() - pspeed.doubleValue())*(1-jtolerance.doubleValue()));
+
+        return expectedSpeedVariance;
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/set/platoon/speed" )
+    private void setPlatoonSpeed(@Nonnull final Number p_platoonSpeed)
+    {
+        platoonSpeed = p_platoonSpeed.doubleValue();
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/storemember" )
+    private void storeMember(@Nonnull final Number memberId)
+    {
+        members.add(memberId.intValue());
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "transmit/other/vote/list" )
+    private void sendVote(@Nonnull final List<Integer> vote)
+    {
+        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SUBMIT_VOTE);
+        iOb.pushIntArray(new ArrayList<>(vote));
+        agentManager.addInstruction(iOb);
     }
 
     private class PlatoonUtilities{

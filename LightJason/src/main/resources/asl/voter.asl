@@ -99,7 +99,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!handle/results(VALUE) <-
     >>preferedspeed(Speed); >>tolerance(Tolerance);
     Util = utility/generate/utility(1.1, VALUE, Tolerance, Speed);
-    //utility/save(1.1, Tolerance, Speed, Util); //Used to gather data
+    generic/print(VALUE, Tolerance, Speed, Util);
+    utility/save(1.1, Tolerance, Speed, Util); //Used to gather data
     !decide/stay(Util).
 
 +!addmember(L) <-

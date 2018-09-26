@@ -46,12 +46,15 @@ public class AgentManager {
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
 
+    private CStatistics stats;
+
     /**
      * Class constructor
      * @param m_aslpath Path to asl files
      * @param m_cm Reference to the connection manager
      */
     public AgentManager(String m_aslpath, ConnectionManager m_cm) {
+        stats = new CStatistics();
         cmanager = m_cm;
         aslpath = m_aslpath;
         execute = new AtomicBoolean(true);
@@ -295,6 +298,7 @@ public class AgentManager {
                 if(!simulate.get()) break;
             }
         }
+        stats.dump();
         cmanager.finish();
     }
 
@@ -328,5 +332,13 @@ public class AgentManager {
         if( !simulate.compareAndSet(expectedValue, newValue)) throw new RuntimeException();
     }
 
+    public boolean getAgentLoopStatus(){
+        return simulate.get();
+    }
+
     public CountDownLatch getLatch() { return this.latch; }
+
+    public CStatistics getStats(){
+        return stats;
+    }
 }

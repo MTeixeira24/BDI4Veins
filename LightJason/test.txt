@@ -1,0 +1,8 @@
+Initial platoon speed: 100 Final platoon speed: 110
+The joiner was not rejected
+Agent 0 started with util: 1.0462052709053653 and ended with: 1.1
+Agent 1 started with util: 1.0462052709053653 and ended with: 1.1
+Agent 2 started with util: 1.1 and ended with: 1.0462052709053653
+Agent 3 started with util: 1.0462052709053653 and ended with: 1.1
+Agent 4 started with util: 1.0462052709053653 and ended with: 1.1
+Agent 5 started with util: 0.0014592262019603615 and ended with: 1.1

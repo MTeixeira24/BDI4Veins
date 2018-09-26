@@ -7,15 +7,16 @@ import java.util.Map;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CStatistics {
     private int initPlatoonSpeed;
     private int finalPlatoonSpeed;
-    private HashMap<Integer, ArrayList<Double>> initial_final_utilities;
+    private ConcurrentHashMap<Integer, ArrayList<Double>> initial_final_utilities;
     private boolean rejected;
 
     public CStatistics(){
-        initial_final_utilities = new HashMap<>();
+        initial_final_utilities = new ConcurrentHashMap<>();
         rejected = false;
     }
 
@@ -27,7 +28,7 @@ public class CStatistics {
             if(rejected)
                 bw.write("The joiner was rejected\n");
             else{
-                bw.write("The joiner was not rejected");
+                bw.write("The joiner was not rejected\n");
                 for(Map.Entry<Integer, ArrayList<Double>> e : initial_final_utilities.entrySet()){
                     bw.write("Agent " + e.getKey() + " started with util: " + e.getValue().get(0) + " and ended with: " + e.getValue().get(1)+ "\n");
                 }
