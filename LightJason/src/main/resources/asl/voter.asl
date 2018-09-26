@@ -22,10 +22,15 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 //Agent Belief Set up
 +!main <-
     Tolerance = utility/generatetolerance();
-    SpeedPreference = utility/generatespeedpreference();
-    +tolerance(Tolerance);
-    +preferedspeed(SpeedPreference);
-    generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SpeedPreference ," and tolerance of: ", Tolerance).
+    //SpeedPreference = utility/generatespeedpreference();
+    +tolerance(Tolerance).
+    //+preferedspeed(SpeedPreference);
+    //generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SpeedPreference ," and tolerance of: ", Tolerance).
+
++!set/prefered/speed(SPEED) <-
+    +preferedspeed(SPEED);
+    >>tolerance(Tolerance);
+    generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SPEED ," and tolerance of: ", Tolerance).
 
 //Goal triggered plans for all voting agents
 +!lookforplatoon() <-

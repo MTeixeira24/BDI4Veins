@@ -32,6 +32,11 @@ public final class ConnectionManager extends Thread {
 
     public void finish() {
         state = State.FINISH;
+        try {
+            clientSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setAgentManager(AgentManager m_am){
@@ -40,51 +45,65 @@ public final class ConnectionManager extends Thread {
     }
 
     private void startServer() throws IOException {
-        try{
-            serverSocket = new ServerSocket(port);
-            clientSocket = serverSocket.accept();
-            state = State.WAITINGFORAGENT;
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
+        //***************************************/
+        String voteRule = "Approval";//Borda//Approval//Plurality//Copeland
+        while(true){
+            am = new CVoterAgentManager("voter.asl", this, voteRule);
+            am_latch = am.getLatch();
+            am.start();
+            try{
+                serverSocket = new ServerSocket(port);
+                clientSocket = serverSocket.accept();
+                state = State.WAITINGFORAGENT;
+                out = new PrintWriter(clientSocket.getOutputStream(), true);
 
-            OutputStream byteStream = clientSocket.getOutputStream();
-            byte b[] = new byte[1024];
-            InputStream stream = clientSocket.getInputStream();
+                OutputStream byteStream = clientSocket.getOutputStream();
+                byte b[] = new byte[1024];
+                InputStream stream = clientSocket.getInputStream();
 
-            while ( true ) {
+                while ( true ) {
 
-                if( stream.read(b, 0, 1024) != -1){
-                    //int size = ByteBuffer.wrap(b).getInt();
-                    byteStream.write(processInput(b));
-                    if(state == State.FINISH) break;
-                }else{
-                    System.out.println("Terminating connection");
-                    state = State.DISCONNECTED;
-                    if(am.getAgentLoopStatus())
-                        am.toggleAgentLoop(true, false);
-                    System.exit(0);
-                    break;
+                    if( stream.read(b, 0, 1024) != -1){
+                        //int size = ByteBuffer.wrap(b).getInt();
+                        byteStream.write(processInput(b));
+                        if(state == State.FINISH) break;
+                    }else{
+                        System.out.println("Terminating connection");
+                        state = State.DISCONNECTED;
+                        if(am.getAgentLoopStatus())
+                            am.toggleAgentLoop(true, false);
+                        System.exit(0);
+                        break;
+                    }
+
                 }
+            } catch(SocketException e){
+                System.out.println("Connection termination: Ending agent loop");
+                state = State.DISCONNECTED;
+                if(am.getAgentLoopStatus())
+                    am.toggleAgentLoop(true, false);
+                //System.exit(0);
+            } catch (IOException e) {
+                System.out.println("Exception caught when trying to listen on port "
+                        + port + " or listening for a connection");
+                e.printStackTrace();
+                state = State.DISCONNECTED;
+                if(am.getAgentLoopStatus())
+                    am.toggleAgentLoop(true, false);
+                //System.exit(0);
+            } catch (NullPointerException e){
+                serverSocket.close();
+                clientSocket.close();
+                out.close();
 
+            }finally {
+                serverSocket.close();
+                clientSocket.close();
+                out.close();
             }
-        } catch(SocketException e){
-            System.err.println("Abrupt connection termination! Ending agent loop");
-            state = State.DISCONNECTED;
-            if(am.getAgentLoopStatus())
-                am.toggleAgentLoop(true, false);
-            System.exit(0);
-        } catch (IOException e) {
-            System.out.println("Exception caught when trying to listen on port "
-                    + port + " or listening for a connection");
-            e.printStackTrace();
-            state = State.DISCONNECTED;
-            if(am.getAgentLoopStatus())
-                am.toggleAgentLoop(true, false);
-            System.exit(0);
-        } finally {
-            serverSocket.close();
-            clientSocket.close();
-            out.close();
         }
+        //***************************************/
+
     }
 
     public void run(){

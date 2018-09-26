@@ -47,9 +47,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     //Object myvote
     IRule votingRule;
 
-    private int m_minSpeedDeviation;
-    private int m_maxSpeedDeviation;
-
     private ThreadLocalRandom numberGenerator;
 
     /**
@@ -61,13 +58,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      * @param m_vType Vehicle type Id
      */
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id,
-                       @Nonnull String m_vType, int p_minSpeedDeviation, int p_maxSpeedDeviation, String voteRule) {
+                       @Nonnull String m_vType, String voteRule) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
-        m_minSpeedDeviation = p_minSpeedDeviation;
-        m_maxSpeedDeviation = p_maxSpeedDeviation;
         numberGenerator = ThreadLocalRandom.current();
         switch (voteRule){
             case "Borda":{
@@ -115,15 +110,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private double generateTolerance()
     {
         return 0.7;//0.4 + (numberGenerator.nextInt(4) * 0.1);
-    }
-
-    @Nonnull
-    @IAgentActionFilter
-    @IAgentActionName( name = "utility/generatespeedpreference" )
-    private double generatespeedpreference()
-    {
-        int steps = (m_maxSpeedDeviation - m_minSpeedDeviation)/5;
-        return m_minSpeedDeviation + numberGenerator.nextInt(steps + 1)*5;
     }
 
     @IAgentActionFilter
@@ -180,7 +166,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 /*No context is needed*/
                 iOb.pushShort(Constants.VALUE_NULL);
                 /*Prepare a simple list of possible candidates*/
-                for(int i = 80; i <= 120; i += 10){
+                for(int i = 80; i <= 120; i += 5){
                     l_candidates.add(i);
                 }
                 m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size());
@@ -242,7 +228,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         switch (l_context ){
             case VoteConstants.CONTEXT_JOIN: {
                 l_candidates.add((int)platoonSpeed);
-                l_candidates.add((int)predictPlatoonSpeed(p_context.get(1), p_context.get(2), platoonSpeed));
+                l_candidates.add((int)predictPlatoonSpeed(p_context.get(1), p_context.get(3), platoonSpeed));
                 break;
             }
             default:{

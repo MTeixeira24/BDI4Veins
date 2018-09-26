@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  * Manages the runtime environment of the agents and proxies calls between the agents and the omnet nodes
  */
 
-public class AgentManager {
+public class AgentManager extends Thread {
     protected static final String resourceFolder = "src/main/resources/asl/";
     protected Set<IAgent<?>> l_agents;
     protected String aslpath;
@@ -79,6 +79,11 @@ public class AgentManager {
             l_exception.printStackTrace();
             return;
         }
+    }
+
+    @Override
+    public void run(){
+        this.loop();
     }
 
     /**

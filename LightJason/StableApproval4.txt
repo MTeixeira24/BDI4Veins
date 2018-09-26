@@ -1,0 +1,8 @@
+Initial platoon speed: 100 Final platoon speed: 105
+The joiner was not rejected
+0 old util: 1.0865853658536586 new util: 1.0999095101723935
+1 old util: 1.0964762744354353 new util: 1.0462052709053653
+2 old util: 1.0641015310233684 new util: 0.9185567010309279
+3 old util: 1.0964762744354353 new util: 1.1
+4 old util: 0.0015701981608984923 new util: 1.099542048293089
+#######################################################################

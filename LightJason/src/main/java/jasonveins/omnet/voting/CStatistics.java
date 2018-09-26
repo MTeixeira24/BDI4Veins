@@ -1,5 +1,6 @@
 package jasonveins.omnet.voting;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +22,8 @@ public class CStatistics {
     }
 
     public void dump(){
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("test.txt"))) {
-
+        try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("StableApproval5.txt", true));
             bw.write("Initial platoon speed: " + initPlatoonSpeed + " Final platoon speed: " + finalPlatoonSpeed + "\n");
 
             if(rejected)
@@ -30,10 +31,11 @@ public class CStatistics {
             else{
                 bw.write("The joiner was not rejected\n");
                 for(Map.Entry<Integer, ArrayList<Double>> e : initial_final_utilities.entrySet()){
-                    bw.write("Agent " + e.getKey() + " started with util: " + e.getValue().get(0) + " and ended with: " + e.getValue().get(1)+ "\n");
+                    bw.write(e.getKey() + " old util: " + e.getValue().get(0) + " new util: " + e.getValue().get(1)+ "\n");
                 }
             }
-
+            bw.write("#######################################################################\n");
+            bw.close();
             System.out.println("Done");
 
         } catch (IOException e) {
