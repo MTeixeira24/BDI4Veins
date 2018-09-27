@@ -42,6 +42,7 @@ final class CStatisticsProcessor {
                     rootElement.appendChild(ruleElement);
                     //Iterate over every file
                     for(int z = 0; z < platoonSize.length; z++){
+                        ArrayList<Double> exitPercentages = new ArrayList<>();
                         double maxDif = -1;
                         double minDif = Double.MAX_VALUE;
                         double average = 0;
@@ -57,6 +58,7 @@ final class CStatisticsProcessor {
                         trootElement.normalize();
                         NodeList iterations = trootElement.getElementsByTagName("Iteration");
                         for(int iter = 0; iter < iterations.getLength(); iter++){
+                            int platoonExits = 0;
                             Node nNode = iterations.item(iter);
                             Node pNode = nNode.getChildNodes().item(0);
                             int finalPlatoonSpeed = Integer.valueOf(pNode.getAttributes().getNamedItem("finalSpeed").getTextContent());
@@ -79,7 +81,9 @@ final class CStatisticsProcessor {
                                     minDif = diffUtil;
                                 }
                                 diffList.add(diffUtil);
+                                if(finalUtil < 0.8) platoonExits++;
                             }
+                            exitPercentages.add((double)platoonExits/platoonSize[z]);
                         }
                         Collections.sort(diffList);
                         median = diffList.get(diffList.size()/2);
@@ -100,8 +104,14 @@ final class CStatisticsProcessor {
                         sizeElement.appendChild(maxValue);
                         sizeElement.appendChild(avgValue);
                         sizeElement.appendChild(mdnValue);
-                    }
 
+
+                        Element avgRejectionElement = doc.createElement("AverageRejection");
+                        sum = 0;
+                        for(Double r : exitPercentages) sum += r;
+                        avgRejectionElement.appendChild(doc.createTextNode(String.valueOf(100*(sum/exitPercentages.size()))));
+                        sizeElement.appendChild(avgRejectionElement);
+                    }
                 }
                 Element rejectionElement = doc.createElement("Rejections");
                 rejectionElement.appendChild(doc.createTextNode(String.valueOf(numRejections)));

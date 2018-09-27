@@ -115,6 +115,7 @@ void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& cont
         }
 
     }
+    if(contextId == CONTEXT_SPEED) ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
     sendUnicast(msg, -1);
 }
 
@@ -162,11 +163,11 @@ void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
     msg->setResult(winnerValue);
     msg->setJoinerId(joinerId);
     msg->setPlatoonId(platoonId);
+    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_START);
     sendUnicast(msg, -1);
 }
 
 void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
-    //TODO: If this is a beacon for voting handle it
     GeneralPlexeAgentAppl::onPlatoonBeacon(pb);
 }
 
@@ -262,6 +263,7 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
             //TODO: Handle insertion of beliefs
         }else if (myId == msg->getJoinerId()){
             BeliefModel result;
+            ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_END);
             if(msg->getResult() == 1)
                 startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
             else{
@@ -273,6 +275,7 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         }
     }else{
         BeliefModel result;
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
         result.setBelief("handle/results");
         int speed = msg->getResult();
         result.pushInt(&speed);
@@ -324,6 +327,7 @@ void VotingAppl::handleNotifyVote(const NotifyVote* msg){
         switch(msg->getContextId()){
         case CONTEXT_SPEED:
         {
+            ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_MEMBER_END);
             contextArgs[0] = CONTEXT_SPEED;
             break;
         }

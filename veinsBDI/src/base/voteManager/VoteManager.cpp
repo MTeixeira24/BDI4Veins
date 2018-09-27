@@ -9,19 +9,59 @@
 
 Define_Module(VoteManager);
 
-
-VoteManager::VoteManager() {
-
-}
-
-VoteManager::~VoteManager() {
-
+void VoteManager::finish(){
+    double maxTime = -1;
+    //Get the highest time
+    for(int i = endOfVoteTimeStamps.size() - 1; i >= 0; i--){
+        if(endOfVoteTimeStamps[i] > maxTime) maxTime = endOfVoteTimeStamps[i];
+    }
+    double timeToConsensus = maxTime - startOfVoteTimeStamp;
+    maxTime = -1;
+    for(int i = chair2memberTimeStamps.size() - 1; i >= 0; i--){
+        if(chair2memberTimeStamps[i] > maxTime) maxTime = chair2memberTimeStamps[i];
+    }
+    double highestDelayToMember = maxTime - startOfVoteTimeStamp;
+    recordScalar("#timeToConsensus", timeToConsensus);
+    recordScalar("#highestDelayToMember", highestDelayToMember);
+    recordScalar("#delayToJoiner", chair2joinerDelay);
 }
 
 void VoteManager::initialize(int stage){
     LightJasonManager::initialize(stage);
     if(stage == 0){
         writeToSocket(jp.setSimParamenters(par("vote_rule").stdstringValue(), par("platoon_type").stdstringValue(), par("platoon_size").intValue(), par("iteration").intValue()).getBuffer());
+    }
+}
+
+void VoteManager::storeTimeStamp(double time, TimeStampAction action){
+    switch(action){
+    case TimeStampAction::TIME_OF_VOTE_START:{
+        //Called by sendNotificationOfVote
+        startOfVoteTimeStamp = time;
+        break;
+    }
+    case TimeStampAction::TIME_OF_VOTE_END:{
+        //Called by handleNotificationOfResults
+        endOfVoteTimeStamps.push_back(time);
+        break;
+    }
+    case TimeStampAction::CHAIR_TO_JOINER_START:{
+        //Called by sendVoteResults
+        chair2joinerStart = time;
+        break;
+    }
+    case TimeStampAction::CHAIR_TO_JOINER_END:{
+        //Called by handleNotificationOfResults
+        chair2joinerDelay = time - chair2joinerStart;
+        break;
+    }
+    case TimeStampAction::CHAIR_TO_MEMBER_END:{
+        //Called by handleNotifyVote
+        chair2memberTimeStamps.push_back(time);
+        break;
+    }
+    default:
+        break;
     }
 }
 

@@ -42,7 +42,7 @@ public:
     LightJasonManager();
     ~LightJasonManager();
     /*Subscribe the vehicle to the manager and send a request to LightJason to create an agent*/
-    uint8_t subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile);
+    virtual uint8_t subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile);
     /*Update belief base of the associated agent*/
     uint8_t sendInformationToAgents(int, const void*);//(int id, std::string belief, double value);
     /*DEPRECATED: delegate decisions to agents*/

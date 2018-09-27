@@ -6,30 +6,35 @@
             <max>0.17999724608749346</max>
             <average>-0.05244994694191648</average>
             <median>3.674618793043649E-4</median>
+            <AverageRejection>15.0</AverageRejection>
         </Size>
         <Size value="5">
             <min>-0.36292051868438047</min>
             <max>0.17999724608749346</max>
             <average>-0.032208012665435305</average>
             <median>0.0</median>
+            <AverageRejection>5.0</AverageRejection>
         </Size>
         <Size value="6">
             <min>-0.2236738950567173</min>
             <max>0.17999724608749346</max>
             <average>-2.724792888600623E-4</average>
             <median>3.674618793043649E-4</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="7">
             <min>-0.24475262669725195</min>
             <max>0.14554482999244045</max>
             <average>0.019099897348895185</average>
             <median>0.07700728376460497</median>
+            <AverageRejection>7.142857142857142</AverageRejection>
         </Size>
         <Size value="8">
             <min>-0.5081218471653255</min>
             <max>0.17999724608749346</max>
             <average>-0.029748484500005296</average>
             <median>0.0</median>
+            <AverageRejection>10.416666666666668</AverageRejection>
         </Size>
     </Borda>
     <Approval>
@@ -38,30 +43,35 @@
             <max>0.14076683749191177</max>
             <average>-0.0025250200313683747</average>
             <median>0.0</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="5">
             <min>-0.14076683749191177</min>
             <max>0.14076683749191177</max>
             <average>0.0028289347483719846</average>
             <median>0.0</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="6">
             <min>-0.14076683749191177</min>
             <max>0.14076683749191177</max>
             <average>0.005972550252167569</average>
             <median>0.0</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="7">
             <min>-0.14076683749191177</min>
             <max>0.14076683749191177</max>
             <average>0.014145864751004354</average>
             <median>0.0</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="8">
             <min>-0.2002366246365188</min>
             <max>0.11816789198712851</max>
             <average>-0.00888805851827874</average>
             <median>0.0</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
     </Approval>
     <Copeland>
@@ -70,30 +80,35 @@
             <max>0.17340289152664734</max>
             <average>-0.03175493576298065</average>
             <median>0.013324144318734854</median>
+            <AverageRejection>10.0</AverageRejection>
         </Size>
         <Size value="5">
             <min>-0.14554482999244045</min>
             <max>0.14554482999244045</max>
             <average>0.019114493560121</average>
             <median>3.674618793043649E-4</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="6">
             <min>-0.36292051868438047</min>
             <max>0.17999724608749346</max>
             <average>-7.499112167840688E-5</average>
             <median>0.007276098190363012</median>
+            <AverageRejection>4.166666666666666</AverageRejection>
         </Size>
         <Size value="7">
             <min>-0.11816789198712851</min>
             <max>0.14554482999244045</max>
             <average>0.047105722090995804</average>
             <median>0.05027100353006997</median>
+            <AverageRejection>0.0</AverageRejection>
         </Size>
         <Size value="8">
             <min>-0.44270578856357534</min>
             <max>0.17999724608749346</max>
             <average>-0.012384362217061394</average>
             <median>0.0</median>
+            <AverageRejection>5.357142857142857</AverageRejection>
         </Size>
     </Copeland>
     <Plurality>
@@ -102,30 +117,35 @@
             <max>0.1403993756126074</max>
             <average>-0.06114369180447783</average>
             <median>3.674618793043649E-4</median>
+            <AverageRejection>12.5</AverageRejection>
         </Size>
         <Size value="5">
             <min>-0.36292051868438047</min>
             <max>0.14554482999244045</max>
             <average>-0.02599298948020924</average>
             <median>0.0</median>
+            <AverageRejection>8.0</AverageRejection>
         </Size>
         <Size value="6">
             <min>-0.5120460037860456</min>
             <max>0.1403993756126074</max>
             <average>-0.052517724843863474</average>
             <median>0.0</median>
+            <AverageRejection>12.5</AverageRejection>
         </Size>
         <Size value="7">
             <min>-0.25991204982804106</min>
             <max>0.17340289152664734</max>
             <average>-0.019221684918194447</average>
             <median>0.003523725564564817</median>
+            <AverageRejection>9.523809523809524</AverageRejection>
         </Size>
         <Size value="8">
             <min>-0.626289739152454</min>
             <max>0.18143764291864084</max>
             <average>-0.07681907437484503</average>
             <median>0.0</median>
+            <AverageRejection>16.666666666666664</AverageRejection>
         </Size>
     </Plurality>
     <Rejections>99</Rejections>

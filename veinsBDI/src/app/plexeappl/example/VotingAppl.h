@@ -20,6 +20,7 @@
 
 #include "../../../utilities/LeaderPositionHelper.h"
 #include "../../../base/manager/constants/VoteConstants.h"
+#include "../../../base/voteManager/VoteManager.h"
 
 
 class VotingAppl : public GeneralPlexeAgentAppl {
