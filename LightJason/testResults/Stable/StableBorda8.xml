@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<Simulation>
+    <Iteration number="0">
+        <Platoon finalSpeed="95" initialSpeed="100"/>
+        <Rejected>no</Rejected>
+        <Agent id="0">
+            <initialUtility>1.0865853658536586</initialUtility>
+            <finalUtility>0.9940158073014679</finalUtility>
+        </Agent>
+        <Agent id="1">
+            <initialUtility>1.0773105646676102</initialUtility>
+            <finalUtility>0.9591426726804817</finalUtility>
+        </Agent>
+        <Agent id="2">
+            <initialUtility>1.0985539471184214</initialUtility>
+            <finalUtility>1.0999943439495687</finalUtility>
+        </Agent>
+        <Agent id="3">
+            <initialUtility>1.0927182457592057</initialUtility>
+            <finalUtility>1.0999943439495687</finalUtility>
+        </Agent>
+        <Agent id="4">
+            <initialUtility>1.0927182457592057</initialUtility>
+            <finalUtility>1.0229870601849638</finalUtility>
+        </Agent>
+        <Agent id="5">
+            <initialUtility>1.0641015310233684</initialUtility>
+            <finalUtility>1.0985539471184214</finalUtility>
+        </Agent>
+        <Agent id="6">
+            <initialUtility>1.0462052709053653</initialUtility>
+            <finalUtility>1.0964762744354353</finalUtility>
+        </Agent>
+        <Agent id="7">
+            <initialUtility>1.099542048293089</initialUtility>
+            <finalUtility>1.0999095101723935</finalUtility>
+        </Agent>
+        <Agent id="8">
+            <initialUtility>0.0029781129286853445</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+    </Iteration>
+    <Iteration number="1">
+        <Platoon finalSpeed="0" initialSpeed="0"/>
+        <Rejected>no</Rejected>
+    </Iteration>
+    <Iteration number="2">
+        <Platoon finalSpeed="0" initialSpeed="0"/>
+        <Rejected>yes</Rejected>
+    </Iteration>
+    <Iteration number="3">
+        <Platoon finalSpeed="100" initialSpeed="100"/>
+        <Rejected>no</Rejected>
+        <Agent id="0">
+            <initialUtility>1.0999095101723935</initialUtility>
+            <finalUtility>1.0999095101723935</finalUtility>
+        </Agent>
+        <Agent id="1">
+            <initialUtility>1.0999943439495687</initialUtility>
+            <finalUtility>1.0999943439495687</finalUtility>
+        </Agent>
+        <Agent id="2">
+            <initialUtility>1.0927182457592057</initialUtility>
+            <finalUtility>1.0927182457592057</finalUtility>
+        </Agent>
+        <Agent id="3">
+            <initialUtility>1.0773105646676102</initialUtility>
+            <finalUtility>1.0773105646676102</finalUtility>
+        </Agent>
+        <Agent id="4">
+            <initialUtility>1.0985539471184214</initialUtility>
+            <finalUtility>1.0985539471184214</finalUtility>
+        </Agent>
+        <Agent id="5">
+            <initialUtility>1.0999943439495687</initialUtility>
+            <finalUtility>1.0999943439495687</finalUtility>
+        </Agent>
+        <Agent id="6">
+            <initialUtility>1.0865853658536586</initialUtility>
+            <finalUtility>1.0865853658536586</finalUtility>
+        </Agent>
+        <Agent id="7">
+            <initialUtility>1.099542048293089</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+        <Agent id="8">
+            <initialUtility>0.0024111815727561247</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+    </Iteration>
+    <Iteration number="4">
+        <Platoon finalSpeed="95" initialSpeed="100"/>
+        <Rejected>no</Rejected>
+        <Agent id="0">
+            <initialUtility>1.0462052709053653</initialUtility>
+            <finalUtility>1.0964762744354353</finalUtility>
+        </Agent>
+        <Agent id="1">
+            <initialUtility>1.0865853658536586</initialUtility>
+            <finalUtility>1.0999095101723935</finalUtility>
+        </Agent>
+        <Agent id="2">
+            <initialUtility>1.0964762744354353</initialUtility>
+            <finalUtility>1.0462052709053653</finalUtility>
+        </Agent>
+        <Agent id="3">
+            <initialUtility>1.0999095101723935</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+        <Agent id="4">
+            <initialUtility>1.0641015310233684</initialUtility>
+            <finalUtility>1.0985539471184214</finalUtility>
+        </Agent>
+        <Agent id="5">
+            <initialUtility>1.0999095101723935</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+        <Agent id="6">
+            <initialUtility>1.0999095101723935</initialUtility>
+            <finalUtility>1.0865853658536586</finalUtility>
+        </Agent>
+        <Agent id="7">
+            <initialUtility>1.0999095101723935</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+        <Agent id="8">
+            <initialUtility>0.00325098073488339</initialUtility>
+            <finalUtility>1.0964762744354353</finalUtility>
+        </Agent>
+    </Iteration>
+    <Iteration number="5">
+        <Platoon finalSpeed="95" initialSpeed="100"/>
+        <Rejected>no</Rejected>
+        <Agent id="0">
+            <initialUtility>1.0964762744354353</initialUtility>
+            <finalUtility>1.1</finalUtility>
+        </Agent>
+        <Agent id="1">
+            <initialUtility>1.099542048293089</initialUtility>
+            <finalUtility>1.0773105646676102</finalUtility>
+        </Agent>
+        <Agent id="2">
+            <initialUtility>1.0462052709053653</initialUtility>
+            <finalUtility>1.0964762744354353</finalUtility>
+        </Agent>
+        <Agent id="3">
+            <initialUtility>1.0985539471184214</initialUtility>
+            <finalUtility>1.0999943439495687</finalUtility>
+        </Agent>
+        <Agent id="4">
+            <initialUtility>1.099542048293089</initialUtility>
+            <finalUtility>1.0773105646676102</finalUtility>
+        </Agent>
+        <Agent id="5">
+            <initialUtility>1.0865853658536586</initialUtility>
+            <finalUtility>1.0999095101723935</finalUtility>
+        </Agent>
+        <Agent id="6">
+            <initialUtility>1.0462052709053653</initialUtility>
+            <finalUtility>1.0964762744354353</finalUtility>
+        </Agent>
+        <Agent id="7">
+            <initialUtility>1.0999095101723935</initialUtility>
+            <finalUtility>1.0865853658536586</finalUtility>
+        </Agent>
+        <Agent id="8">
+            <initialUtility>0.0029781129286853445</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+    </Iteration>
+    <Iteration number="6">
+        <Platoon finalSpeed="0" initialSpeed="0"/>
+        <Rejected>yes</Rejected>
+    </Iteration>
+    <Iteration number="7">
+        <Platoon finalSpeed="100" initialSpeed="100"/>
+        <Rejected>no</Rejected>
+        <Agent id="0">
+            <initialUtility>1.0641015310233684</initialUtility>
+            <finalUtility>1.0641015310233684</finalUtility>
+        </Agent>
+        <Agent id="1">
+            <initialUtility>1.099542048293089</initialUtility>
+            <finalUtility>1.099542048293089</finalUtility>
+        </Agent>
+        <Agent id="2">
+            <initialUtility>1.0641015310233684</initialUtility>
+            <finalUtility>1.0641015310233684</finalUtility>
+        </Agent>
+        <Agent id="3">
+            <initialUtility>1.0641015310233684</initialUtility>
+            <finalUtility>1.0641015310233684</finalUtility>
+        </Agent>
+        <Agent id="4">
+            <initialUtility>1.0999943439495687</initialUtility>
+            <finalUtility>1.0999943439495687</finalUtility>
+        </Agent>
+        <Agent id="5">
+            <initialUtility>1.0927182457592057</initialUtility>
+            <finalUtility>1.0927182457592057</finalUtility>
+        </Agent>
+        <Agent id="6">
+            <initialUtility>1.0927182457592057</initialUtility>
+            <finalUtility>1.0927182457592057</finalUtility>
+        </Agent>
+        <Agent id="7">
+            <initialUtility>1.0641015310233684</initialUtility>
+            <finalUtility>1.0641015310233684</finalUtility>
+        </Agent>
+        <Agent id="8">
+            <initialUtility>0.002135138561174842</initialUtility>
+            <finalUtility>1.1</finalUtility>
+        </Agent>
+    </Iteration>
+    <Iteration number="8">
+        <Platoon finalSpeed="0" initialSpeed="0"/>
+        <Rejected>no</Rejected>
+    </Iteration>
+    <Iteration number="9">
+        <Platoon finalSpeed="0" initialSpeed="0"/>
+        <Rejected>no</Rejected>
+    </Iteration>
+</Simulation>

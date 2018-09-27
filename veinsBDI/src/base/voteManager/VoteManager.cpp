@@ -20,6 +20,9 @@ VoteManager::~VoteManager() {
 
 void VoteManager::initialize(int stage){
     LightJasonManager::initialize(stage);
+    if(stage == 0){
+        writeToSocket(jp.setSimParamenters(par("vote_rule").stdstringValue(), par("platoon_type").stdstringValue(), par("platoon_size").intValue(), par("iteration").intValue()).getBuffer());
+    }
 }
 
 void VoteManager::parseResponse(uint32_t msgLength){
@@ -67,6 +70,8 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> type;
                 ASSERT(type == VALUE_ARRAY);
                 std::vector<int> votes = parseArrayMessage(rbf);
+                //Save the votes into controller
+                ((VotingAppl*)(vehicles[agentId]))->setVote(votes);
                 ((VotingAppl*)(vehicles[agentId]))->sendVoteSubmition(votes);
                 break;
             }

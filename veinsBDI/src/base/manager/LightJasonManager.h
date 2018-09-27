@@ -97,6 +97,8 @@ protected:
      * Extract an array with double values from a buffer to a vector
      */
     virtual std::vector<double> parseDoubleArrayMessage(LightJasonBuffer& buffer);
+
+    virtual void finish() override;
 private:
     //Timer timer;
 };

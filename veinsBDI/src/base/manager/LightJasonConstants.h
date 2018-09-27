@@ -22,7 +22,7 @@
 
 #define QUERY 0x05
 
-#define REQUEST_SPEED_DOWN 0x06
+#define SET_SIM_PARAMS 0x06
 
 #define SEND_JOIN_REQUEST 0x07
 

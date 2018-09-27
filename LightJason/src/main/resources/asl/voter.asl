@@ -68,7 +68,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         generic/print("Agent", MyName, "Sending the vote down omnet");
        transmit/other/vote/list(VVECTOR). 
 
-+!handle/submit/vote(VOTE) <-
++!@handle/submit/vote(VOTE) <-
     generic/print("Got vote", VOTE);
     vote/store(VOTE).
 

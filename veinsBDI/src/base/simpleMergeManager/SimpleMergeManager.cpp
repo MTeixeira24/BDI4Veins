@@ -46,16 +46,6 @@ void SimpleMergeManager::parseResponse(uint32_t msgLength){
                 rbf >> speed;
                 vehicles[agentId]->changeSpeed(speed);
                 break;*/
-            case REQUEST_SPEED_DOWN:
-                rbf >> type;
-                ASSERT(type == VALUE_INT);
-                int targetid;
-                rbf >> targetid;
-                /*MessageParameters mp;
-                mp.messageRequest = REQUEST_SPEED_DOWN;
-                mp.targetId = id;*/
-                ((SimpleMerge*)(vehicles[agentId]))->startMerge(0,targetid,0);
-                break;
             default:
                 break;
             }

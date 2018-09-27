@@ -35,6 +35,8 @@ public:
     LightJasonBuffer terminateConnection();
     /*Build a request to query for decisions*/
     LightJasonBuffer query();
+    /*Build a request to set simulation parameters*/
+    LightJasonBuffer setSimParamenters(std::string, std::string, int, int);
 };
 
 }

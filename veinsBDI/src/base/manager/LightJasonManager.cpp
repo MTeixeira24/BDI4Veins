@@ -17,41 +17,47 @@ LightJasonManager::~LightJasonManager(){
     close(connSocket);
 }
 
+void LightJasonManager::finish(){
+    //writeToSocket(jp.terminateConnection().getBuffer());
+}
+
 void LightJasonManager::initialize(int stage){
     cSimpleModule::initialize(stage);
-    updateInterval = par("updateInterval");
-    connSocket = socket(AF_INET, SOCK_STREAM, 0);
-    if (connSocket == INVALID_SOCKET)
-            throw cRuntimeError("LightJasonManager: cannot create socket");
-    int n = -1;
+    if(stage == 0){
+        updateInterval = par("updateInterval");
+        connSocket = socket(AF_INET, SOCK_STREAM, 0);
+        if (connSocket == INVALID_SOCKET)
+                throw cRuntimeError("LightJasonManager: cannot create socket");
+        int n = -1;
 
 
-    struct addrinfo *address, hints;
-    hints.ai_family = AF_INET;
-    hints.ai_flags = AI_NUMERICSERV;
-    hints.ai_protocol = 0;
-    hints.ai_socktype = SOCK_STREAM;
-    n = getaddrinfo("localhost", "4242", &hints, &address); //TODO: Have this setting be determine by whether or not we are in a docker container https://forums.docker.com/t/localhost-and-docker-compose-networking-issue/23100
-    if (n != 0) {
-        if (n == EAI_SYSTEM) {
-            throw cRuntimeError("LightJasonManager: EAI_SYSTEM error");
-        } else {
-            throw cRuntimeError(gai_strerror(n));
+        struct addrinfo *address, hints;
+        hints.ai_family = AF_INET;
+        hints.ai_flags = AI_NUMERICSERV;
+        hints.ai_protocol = 0;
+        hints.ai_socktype = SOCK_STREAM;
+        n = getaddrinfo("localhost", "4242", &hints, &address); //TODO: Have this setting be determine by whether or not we are in a docker container https://forums.docker.com/t/localhost-and-docker-compose-networking-issue/23100
+        if (n != 0) {
+            if (n == EAI_SYSTEM) {
+                throw cRuntimeError("LightJasonManager: EAI_SYSTEM error");
+            } else {
+                throw cRuntimeError(gai_strerror(n));
+            }
+            exit(EXIT_FAILURE);
         }
-        exit(EXIT_FAILURE);
-    }
 
-    for(int timeout = 0; timeout <= 10; timeout++){
-        n = connect(connSocket, address->ai_addr, address->ai_addrlen);
-        if (n >= 0) break;
-        if(timeout == 10) throw cRuntimeError("LightJasonManager: socket connect() failed");
-        sleep(1);
+        for(int timeout = 0; timeout <= 10; timeout++){
+            n = connect(connSocket, address->ai_addr, address->ai_addrlen);
+            if (n >= 0) break;
+            if(timeout == 10) throw cRuntimeError("LightJasonManager: socket connect() failed");
+            sleep(1);
+        }
+        LightJasonBuffer res = writeToSocket(jp.connectionRequest().getBuffer());
+        n = int((unsigned char)res.getBuffer()[0]);
+        EV << n << "\n"; //DEBUG
+        queryMsg = new cMessage("query");
+        scheduleAt(simTime() + updateInterval, queryMsg);
     }
-    LightJasonBuffer res = writeToSocket(jp.connectionRequest().getBuffer());
-    n = int((unsigned char)res.getBuffer()[0]);
-    EV << n << "\n"; //DEBUG
-    queryMsg = new cMessage("query");
-    scheduleAt(simTime() + updateInterval, queryMsg);
 }
 
 void LightJasonManager::handleMessage(cMessage* msg){
@@ -109,16 +115,6 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
                 double speed;
                 rbf >> speed;
                 vehicles[agentId]->changeSpeed(speed);
-                break;
-            case REQUEST_SPEED_DOWN:
-                rbf >> type;
-                ASSERT(type == VALUE_INT);
-                int id;
-                rbf >> id;
-                MessageParameters mp;
-                mp.messageRequest = REQUEST_SPEED_DOWN;
-                mp.targetId = id;
-                vehicles[agentId]->sendMessage(MESSAGE_UNICAST, &mp);
                 break;
             default:
                 break;
