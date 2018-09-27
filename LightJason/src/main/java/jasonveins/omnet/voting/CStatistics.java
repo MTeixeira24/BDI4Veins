@@ -2,16 +2,12 @@ package jasonveins.omnet.voting;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
 
-import java.io.File;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -22,7 +18,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
@@ -44,27 +39,6 @@ public class CStatistics {
     }
 
     public void dump(){
-        /*try {
-            BufferedWriter bw = new BufferedWriter(new FileWriter("StableCopeland8.txt", true));
-            bw.write("Initial platoon speed: " + initPlatoonSpeed + " Final platoon speed: " + finalPlatoonSpeed + "\n");
-
-            if(rejected)
-                bw.write("The joiner was rejected\n");
-            else{
-                bw.write("The joiner was not rejected\n");
-                for(Map.Entry<Integer, ArrayList<Double>> e : initial_final_utilities.entrySet()){
-                    bw.write(e.getKey() + " old util: " + e.getValue().get(0) + " new util: " + e.getValue().get(1)+ "\n");
-                }
-            }
-            bw.write("#######################################################################\n");
-            bw.close();
-            System.out.println("Done");
-
-        } catch (IOException e) {
-
-            e.printStackTrace();
-
-        }*/
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
