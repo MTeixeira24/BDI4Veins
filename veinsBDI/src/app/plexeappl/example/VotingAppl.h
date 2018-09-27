@@ -24,7 +24,8 @@
 
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:
-    VotingAppl() : searchingForPlatoon(false){};
+    VotingAppl() :
+        searchingForPlatoon(false), negotiationState(VoteState::NONE){};
     virtual ~VotingAppl();
 
     /** override from GeneralPlexeAgentAppl */
@@ -53,6 +54,14 @@ public:
      *
      */
     void sendVoteResults(int winnerValue, int joinerId);
+    /**
+     * Send ack messages to confirm arrival of message
+     */
+    void sendAck(std::string, int);
+    /**
+     * Save the vote in the controller for future use
+     */
+    void setVote(std::vector<int>);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
@@ -84,11 +93,13 @@ protected:
      *
      */
     void handleNotifyVote(const NotifyVote* msg);
-    enum class InitialState {
+    /**
+     * Process received Ack messages
+     */
+    void handleAck(const Ack* msg);
+    enum class VoteState : size_t {
             NONE,
-            JOINER,
-            FOLLOWER,
-            LEADER
+            AWAITING_ACK_SUBMIT
      };
     /**
      *
@@ -101,6 +112,17 @@ private:
     bool searchingForPlatoon;
 
     cMessage* searchTimer;
+
+    cMessage* awaitAckTimer;
+    /**
+     * Store this vehicles votes for resubmitting
+     */
+    std::vector<int> vote;
+
+    /**
+     * What state in the negotiation is this vehicle in right now?
+     */
+    VoteState negotiationState;
 
 };
 

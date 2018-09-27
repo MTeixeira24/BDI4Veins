@@ -42,7 +42,7 @@ public final class CVoterAgentGenerator extends IBaseAgentGenerator<CVoterAgent>
     public final CVoterAgent generatesingle( @Nullable final Object... p_data )
     {
         assert p_data != null;
-        final CVoterAgent agent = new CVoterAgent( m_configuration, agentManager,(int)p_data[0], (String)p_data[1], (int)p_data[2], (int)p_data[3], (String)p_data[4]);
+        final CVoterAgent agent = new CVoterAgent( m_configuration, agentManager,(int)p_data[0], (String)p_data[1], (String)p_data[2]);
         return agent;
 
     }

@@ -19,4 +19,8 @@ import veinsbdi.base.manager.LightJasonManager;
 simple voteManager extends LightJasonManager{
     parameters:
         @class(VoteManager);
+        string vote_rule = default("borda");
+        string platoon_type = default("Stable");
+        int platoon_size = default(4);
+        int iteration = default(1);
 }

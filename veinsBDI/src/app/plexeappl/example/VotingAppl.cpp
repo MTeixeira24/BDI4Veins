@@ -22,6 +22,10 @@ void VotingAppl::initialize(int stage){
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs;
         searchTimer = NULL;
+        int desiredSpeed = (int)par("desiredSpeed").doubleValue();
+        BeliefModel ds("set/prefered/speed");
+        ds.pushInt(&desiredSpeed);
+        manager->sendInformationToAgents(myId, &ds);
         if(getPlatoonRole() == PlatoonRole::NONE) {
             //This is the joiner vehicle. Call the connection manager to add belief to join platoon to agent
             BeliefModel bm;
@@ -87,6 +91,10 @@ void VotingAppl::initialize(int stage){
     }
 }
 
+void VotingAppl::setVote(std::vector<int> votes){
+    vote = votes;
+}
+
 void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
     NotifyVote* msg = new NotifyVote("NotifyVote");
     msg->setVehicleId(myId);
@@ -137,6 +145,11 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     }
     int position = positionHelper->getPosition();
     scheduleAt(simTime() + 0.1*position, msg);
+    //Vote sent, wait for ack.
+    negotiationState = VoteState::AWAITING_ACK_SUBMIT;
+    awaitAckTimer = new cMessage("awaitAckTimer");
+    //Reschedule to re-send 500ms from now if no ack is received
+    scheduleAt(simTime() + 1, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
@@ -155,6 +168,16 @@ void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
 void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
     //TODO: If this is a beacon for voting handle it
     GeneralPlexeAgentAppl::onPlatoonBeacon(pb);
+}
+
+void VotingAppl::sendAck(std::string ack_type, int destination){
+    Ack* ack = new Ack("Ack");
+    ack->setAckType(ack_type.c_str());
+    ack->setDestinationId(destination);
+    ack->setKind(NEGOTIATION_TYPE);
+    ack->setVehicleId(myId);
+    ack->setExternalId(positionHelper->getExternalId().c_str());
+    sendUnicast(ack, destination);
 }
 
 void VotingAppl::handleLowerMsg(cMessage* msg){
@@ -176,6 +199,9 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
             delete msg;
         }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
             handleNotifyVote(msg);
+            delete msg;
+        }else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
+            handleAck(msg);
             delete msg;
         }
         delete unicast;
@@ -226,6 +252,8 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     std::string test = msg->getName();
     voteSubmission.pushIntArray(votes);
     manager->sendInformationToAgents(myId, &voteSubmission);
+    //Got the vote. Notify of successful delivery
+    sendAck("SUBMIT_VOTE", msg->getVehicleId());
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
@@ -252,6 +280,13 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     }
 }
 
+void VotingAppl::handleAck(const Ack* msg){
+    if(strcmp("SUBMIT_VOTE", msg->getAckType()) == 0){
+        cancelAndDelete(awaitAckTimer);
+        negotiationState = VoteState::NONE;
+    }
+}
+
 void VotingAppl::handleSelfMsg(cMessage* msg){
     if (SubmitVote* sv = dynamic_cast<SubmitVote*>(msg)){
         sendUnicast(sv, sv->getDestinationId());
@@ -262,6 +297,14 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
         searchingForPlatoon = false;
         manager->sendInformationToAgents(myId, &sendRequests);
         delete msg;
+    }else if (msg == awaitAckTimer){
+        delete msg;
+        if(negotiationState == VoteState::AWAITING_ACK_SUBMIT){
+            sendVoteSubmition(vote);
+            awaitAckTimer = new cMessage("awaitAckTimer");
+            //Reschedule to re-send 500ms from now if no ack is received
+            scheduleAt(simTime() + 1, awaitAckTimer);
+        }
     }else {
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }

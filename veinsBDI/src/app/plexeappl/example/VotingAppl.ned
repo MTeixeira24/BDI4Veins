@@ -20,5 +20,6 @@ import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
 simple VotingAppl extends GeneralPlexeAgentAppl{
     parameters:
         int targetPlatoon = default(-1);
+        double desiredSpeed @unit("kmph") = default(100 kmph);
         @class(VotingAppl);
 }

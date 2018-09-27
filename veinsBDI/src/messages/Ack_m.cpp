@@ -202,16 +202,29 @@ Ack& Ack::operator=(const Ack& other)
 
 void Ack::copy(const Ack& other)
 {
+    this->ackType = other.ackType;
 }
 
 void Ack::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::NegotiationMessage::parsimPack(b);
+    doParsimPacking(b,this->ackType);
 }
 
 void Ack::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::NegotiationMessage::parsimUnpack(b);
+    doParsimUnpacking(b,this->ackType);
+}
+
+const char * Ack::getAckType() const
+{
+    return this->ackType.c_str();
+}
+
+void Ack::setAckType(const char * ackType)
+{
+    this->ackType = ackType;
 }
 
 class AckDescriptor : public omnetpp::cClassDescriptor
@@ -279,7 +292,7 @@ const char *AckDescriptor::getProperty(const char *propertyname) const
 int AckDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 0+basedesc->getFieldCount() : 0;
+    return basedesc ? 1+basedesc->getFieldCount() : 1;
 }
 
 unsigned int AckDescriptor::getFieldTypeFlags(int field) const
@@ -290,7 +303,10 @@ unsigned int AckDescriptor::getFieldTypeFlags(int field) const
             return basedesc->getFieldTypeFlags(field);
         field -= basedesc->getFieldCount();
     }
-    return 0;
+    static unsigned int fieldTypeFlags[] = {
+        FD_ISEDITABLE,
+    };
+    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
 }
 
 const char *AckDescriptor::getFieldName(int field) const
@@ -301,12 +317,17 @@ const char *AckDescriptor::getFieldName(int field) const
             return basedesc->getFieldName(field);
         field -= basedesc->getFieldCount();
     }
-    return nullptr;
+    static const char *fieldNames[] = {
+        "ackType",
+    };
+    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
 }
 
 int AckDescriptor::findField(const char *fieldName) const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
+    int base = basedesc ? basedesc->getFieldCount() : 0;
+    if (fieldName[0]=='a' && strcmp(fieldName, "ackType")==0) return base+0;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -318,7 +339,10 @@ const char *AckDescriptor::getFieldTypeString(int field) const
             return basedesc->getFieldTypeString(field);
         field -= basedesc->getFieldCount();
     }
-    return nullptr;
+    static const char *fieldTypeStrings[] = {
+        "string",
+    };
+    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **AckDescriptor::getFieldPropertyNames(int field) const
@@ -385,6 +409,7 @@ std::string AckDescriptor::getFieldValueAsString(void *object, int field, int i)
     }
     Ack *pp = (Ack *)object; (void)pp;
     switch (field) {
+        case 0: return oppstring2string(pp->getAckType());
         default: return "";
     }
 }
@@ -399,6 +424,7 @@ bool AckDescriptor::setFieldValueAsString(void *object, int field, int i, const 
     }
     Ack *pp = (Ack *)object; (void)pp;
     switch (field) {
+        case 0: pp->setAckType((value)); return true;
         default: return false;
     }
 }
@@ -411,7 +437,9 @@ const char *AckDescriptor::getFieldStructName(int field) const
             return basedesc->getFieldStructName(field);
         field -= basedesc->getFieldCount();
     }
-    return nullptr;
+    switch (field) {
+        default: return nullptr;
+    };
 }
 
 void *AckDescriptor::getFieldStructValuePointer(void *object, int field, int i) const

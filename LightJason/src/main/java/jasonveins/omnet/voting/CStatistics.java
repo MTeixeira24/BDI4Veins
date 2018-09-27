@@ -1,5 +1,6 @@
 package jasonveins.omnet.voting;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,11 +10,33 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
+
+import java.io.File;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
 public class CStatistics {
     private int initPlatoonSpeed;
     private int finalPlatoonSpeed;
     private ConcurrentHashMap<Integer, ArrayList<Double>> initial_final_utilities;
     private boolean rejected;
+
+    private int platoonSize;
+    private String type;
+    private String rule;
+    private int iteration;
 
     public CStatistics(){
         initial_final_utilities = new ConcurrentHashMap<>();
@@ -21,8 +44,8 @@ public class CStatistics {
     }
 
     public void dump(){
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("test.txt"))) {
-
+        /*try {
+            BufferedWriter bw = new BufferedWriter(new FileWriter("StableCopeland8.txt", true));
             bw.write("Initial platoon speed: " + initPlatoonSpeed + " Final platoon speed: " + finalPlatoonSpeed + "\n");
 
             if(rejected)
@@ -30,26 +53,98 @@ public class CStatistics {
             else{
                 bw.write("The joiner was not rejected\n");
                 for(Map.Entry<Integer, ArrayList<Double>> e : initial_final_utilities.entrySet()){
-                    bw.write("Agent " + e.getKey() + " started with util: " + e.getValue().get(0) + " and ended with: " + e.getValue().get(1)+ "\n");
+                    bw.write(e.getKey() + " old util: " + e.getValue().get(0) + " new util: " + e.getValue().get(1)+ "\n");
                 }
             }
-
+            bw.write("#######################################################################\n");
+            bw.close();
             System.out.println("Done");
 
         } catch (IOException e) {
 
             e.printStackTrace();
 
-        }
-        System.out.println("Initial platoon speed: " + initPlatoonSpeed + " Final platoon speed: " + finalPlatoonSpeed);
-        if(rejected)
-            System.out.println("The joiner was rejected");
-        else{
-            System.out.println("The joiner was not rejected");
-            for(Map.Entry<Integer, ArrayList<Double>> e : initial_final_utilities.entrySet()){
-                System.out.println("Agent " + e.getKey() + " started with util: " + e.getValue().get(0) + " and ended with: " + e.getValue().get(1));
+        }*/
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc;
+            Element rootElement;
+
+            File f = new File("testResults/" + type + rule + platoonSize + ".xml");
+            if(f.exists() && !f.isDirectory()) {
+                //get existing xml data
+                doc = docBuilder.parse(f);
+                rootElement = doc.getDocumentElement();
+            }else{
+                //create new document and set the root elements
+                doc = docBuilder.newDocument();
+                rootElement = doc.createElement("Simulation");
+                doc.appendChild(rootElement);
             }
+            // Data for each iteration
+            Element iterElement = doc.createElement("Iteration");
+            rootElement.appendChild(iterElement);
+
+            // Iteration Attribute
+            iterElement.setAttribute("number", String.valueOf(iteration));
+
+            //Platoon data node
+            Element platoonData = doc.createElement("Platoon");
+            platoonData.setAttribute("initialSpeed", String.valueOf(initPlatoonSpeed));
+            platoonData.setAttribute("finalSpeed", String.valueOf(finalPlatoonSpeed));
+            iterElement.appendChild(platoonData);
+
+            //Rejection data
+            Element rejectedData = doc.createElement("Rejected");
+            iterElement.appendChild(rejectedData);
+            if(rejected)
+                rejectedData.appendChild(doc.createTextNode("yes"));
+            else{
+                rejectedData.appendChild(doc.createTextNode("no"));
+
+                for(Map.Entry<Integer, ArrayList<Double>> e : initial_final_utilities.entrySet()){
+
+                    //Agent data
+                    Element agentData = doc.createElement("Agent");
+                    agentData.setAttribute("id", String.valueOf(e.getKey()));
+
+                    Element initialUtility = doc.createElement("initialUtility");
+                    initialUtility.appendChild(doc.createTextNode(String.valueOf(e.getValue().get(0))));
+                    agentData.appendChild(initialUtility);
+
+                    Element finalUtility = doc.createElement("finalUtility");
+                    finalUtility.appendChild(doc.createTextNode(String.valueOf(e.getValue().get(1))));
+                    agentData.appendChild(finalUtility);
+
+                    iterElement.appendChild(agentData);
+                }
+            }
+
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            //transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(f);
+
+            // Output to console for testing
+            // StreamResult result = new StreamResult(System.out);
+
+            transformer.transform(source, result);
+
+
+
+        } catch (ParserConfigurationException pce) {
+            pce.printStackTrace();
+        } catch (TransformerException tfe) {
+            tfe.printStackTrace();
+        } catch (SAXException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        System.out.println("XML dump complete");
     }
 
     public void setInitPlatoonSpeed(int initPlatoonSpeed) {
@@ -69,5 +164,12 @@ public class CStatistics {
 
     public void setRejected(boolean val){
         rejected = val;
+    }
+
+    public void setSimParams(int platoonSize, int iteration, String rule, String type){
+        this.platoonSize = platoonSize;
+        this.rule = rule;
+        this.type = type;
+        this.iteration = iteration;
     }
 }
