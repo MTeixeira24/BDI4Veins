@@ -11,8 +11,10 @@
 #include "../manager/LightJasonManager.h"
 #include "../../app/plexeappl/example/VotingAppl.h"
 
-#include <json/json.h>
-
+#include <unistd.h>
+#include "../../utilities/json.hpp"
+#include <fstream>
+using json = nlohmann::json;
 class VoteManager : public LightJasonManager {
 public:
     VoteManager(){};

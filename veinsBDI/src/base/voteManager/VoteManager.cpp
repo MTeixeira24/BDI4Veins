@@ -29,8 +29,28 @@ void VoteManager::finish(){
 void VoteManager::initialize(int stage){
     LightJasonManager::initialize(stage);
     if(stage == 0){
-        writeToSocket(jp.setSimParamenters(par("vote_rule").stdstringValue(), par("platoon_type").stdstringValue(), par("platoon_size").intValue(), par("iteration").intValue()).getBuffer());
+
+        //Collect information about the current run
+        std::string platoonType = par("platoon_type").stdstringValue();
+        int platoonSize = par("platoon_size").intValue();
+        int iteration = par("iteration").intValue();
+
+        writeToSocket(jp.setSimParamenters(par("vote_rule").stdstringValue(), platoonType, platoonSize, iteration).getBuffer());
+
+        char buff[FILENAME_MAX];
+        getcwd( buff, FILENAME_MAX );
+        //Working directory is the simulations folder
+        std::string current_working_dir(buff);
+
+        json j;
+        std::ifstream jsonFile ("preferedSpeeds.json");
+        jsonFile >> j;
+        int size = j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][0].get<int>();
+        std::cout << size << std::endl;
+        //testSpeed = 0;
+
     }
+
 }
 
 void VoteManager::storeTimeStamp(double time, TimeStampAction action){
