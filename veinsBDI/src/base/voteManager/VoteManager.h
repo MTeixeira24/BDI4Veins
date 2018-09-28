@@ -11,6 +11,8 @@
 #include "../manager/LightJasonManager.h"
 #include "../../app/plexeappl/example/VotingAppl.h"
 
+#include <json/json.h>
+
 class VoteManager : public LightJasonManager {
 public:
     VoteManager(){};

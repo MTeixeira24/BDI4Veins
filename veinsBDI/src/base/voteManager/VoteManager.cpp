@@ -152,7 +152,7 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> type;
                 ASSERT(type == VALUE_ARRAY);
                 std::vector<int> candidates = parseArrayMessage(rbf);
-                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfVote(contextId, contextArgs, candidates);
+                ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfVoteGeneral(contextId, contextArgs, candidates);
                 break;
             }
             default:

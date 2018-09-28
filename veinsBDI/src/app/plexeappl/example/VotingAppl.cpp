@@ -11,8 +11,12 @@ Define_Module(VotingAppl);
 
 
 VotingAppl::~VotingAppl() {
-    if(searchTimer != NULL)
-        delete searchTimer;
+    //if(searchTimer != NULL)
+    //     cancelAndDelete(searchTimer);
+    //if(awaitAckTimer != NULL)
+    //         cancelAndDelete(awaitAckTimer);
+   // if(voteTimer != NULL)
+   //          cancelAndDelete(voteTimer);
 }
 
 void VotingAppl::initialize(int stage){
@@ -20,8 +24,7 @@ void VotingAppl::initialize(int stage){
     if (stage == 1){
         // connect negotiation application to protocol
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
-        // set initial beliefs;
-        searchTimer = NULL;
+        // set initial beliefs
         int desiredSpeed = (int)par("desiredSpeed").doubleValue();
         BeliefModel ds("set/prefered/speed");
         ds.pushInt(&desiredSpeed);
@@ -71,6 +74,8 @@ void VotingAppl::initialize(int stage){
                     int member = members[i];
                     mbelief.pushInt(&member);
                     manager->sendInformationToAgents(myId, &mbelief);
+                    //initiate vote list:
+                    received_votes[member] = false;
                 }
             }
             else if (getPlatoonRole() == PlatoonRole::FOLLOWER){
@@ -95,7 +100,7 @@ void VotingAppl::setVote(std::vector<int> votes){
     vote = votes;
 }
 
-void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
+NotifyVote* VotingAppl::fillNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
     NotifyVote* msg = new NotifyVote("NotifyVote");
     msg->setVehicleId(myId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
@@ -113,9 +118,34 @@ void VotingAppl::sendNotificationOfVote(int contextId, std::vector<double>& cont
         for(uint32_t i = 0; i < contextArgs.size(); i++){
             msg->setContextArguments(i, contextArgs[i]);
         }
-
     }
+    return msg;
+}
+
+void VotingAppl::sendNotificationOfVoteDirect(VoteData electionData, int destinationId){
+    Enter_Method_Silent();
+    NotifyVote* msg = fillNotificationOfVote(electionData.contextId, electionData.contextArgs, electionData.candidates);
+    msg->setDestinationId(destinationId);
+    sendUnicast(msg, destinationId);
+}
+
+void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
+    Enter_Method_Silent();
+    NotifyVote* msg = fillNotificationOfVote(contextId, contextArgs, candidates);
     if(contextId == CONTEXT_SPEED) ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
+    std::vector<int> members = positionHelper->getPlatoonFormation();
+    //Set the the list of received votes
+    for (uint32_t i = 0; i < members.size(); i++){
+        received_votes[members[i]] = false;
+    }
+    //The leader agent stores its vote in the lightjason side
+    received_votes[myId] = true;
+    voteTimer = new cMessage("VoteTimer");
+    scheduleAt(simTime() + 0.5, voteTimer);
+    //Store the election data in case someone fails to receive it
+    election_data.candidates = candidates;
+    election_data.contextId = contextId;
+    election_data.contextArgs = contextArgs;
     sendUnicast(msg, -1);
 }
 
@@ -145,6 +175,8 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
         msg->setVotes(i, votes[i]);
     }
     int position = positionHelper->getPosition();
+    //Alterar para tempo aleatório
+    //Ou usar sleep
     scheduleAt(simTime() + 0.1*position, msg);
     //Vote sent, wait for ack.
     negotiationState = VoteState::AWAITING_ACK_SUBMIT;
@@ -199,7 +231,9 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
             handleNotificationOfResults(msg);
             delete msg;
         }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
-            handleNotifyVote(msg);
+            if((msg->getDestinationId() == -1) || (msg->getDestinationId() == myId)){
+                handleNotifyVote(msg);
+            }
             delete msg;
         }else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
             handleAck(msg);
@@ -255,6 +289,7 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     manager->sendInformationToAgents(myId, &voteSubmission);
     //Got the vote. Notify of successful delivery
     sendAck("SUBMIT_VOTE", msg->getVehicleId());
+    received_votes[msg->getVehicleId()] = true;
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
@@ -307,6 +342,22 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
             awaitAckTimer = new cMessage("awaitAckTimer");
             //Reschedule to re-send 500ms from now if no ack is received
             scheduleAt(simTime() + 1, awaitAckTimer);
+        }
+    }else if(msg == voteTimer){
+        delete msg;
+        voteTimer = NULL;
+        //Count how many absentees there are
+        int absentees = 0;
+        for( const auto& kv_pair : received_votes ){
+            if(!kv_pair.second){
+                absentees++;
+                //Resend the notification of vote to whoever is missing
+                sendNotificationOfVoteDirect(election_data, kv_pair.first);
+            }
+        }
+        if(absentees > 0){
+            voteTimer = new cMessage("VoteTimer");
+            scheduleAt(simTime() + 0.5, voteTimer);
         }
     }else {
         GeneralPlexeAgentAppl::handleSelfMsg(msg);

@@ -34,6 +34,14 @@ public:
     //TODO: Add this function to base agent
     virtual void sendToAgent(const BeliefModel* bm);
     /**
+    * Data structure for the leader to hold data about the election without having to query the agent
+    */
+   struct VoteData{
+       int contextId;
+       std::vector<double> contextArgs;
+       std::vector<int> candidates;
+   };
+    /**
      * Send a request to a platoon leader to join the platoon
      *
      * @param targetPlatoonId Id of the platoon leader
@@ -42,7 +50,9 @@ public:
     /**
      *
      */
-    void sendNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
+    NotifyVote* fillNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
+    void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
+    void sendNotificationOfVoteDirect(VoteData electionData, int destinationId);
     /**
      *
      */
@@ -112,9 +122,13 @@ private:
      */
     bool searchingForPlatoon;
 
-    cMessage* searchTimer;
+    cMessage* searchTimer = NULL;
 
-    cMessage* awaitAckTimer;
+    cMessage* awaitAckTimer = NULL;
+    /**
+     * Self message of the leader to verify if all votes are received
+     */
+    cMessage* voteTimer = NULL;
     /**
      * Store this vehicles votes for resubmitting
      */
@@ -124,7 +138,14 @@ private:
      * What state in the negotiation is this vehicle in right now?
      */
     VoteState negotiationState;
-
+    /**
+     * Used by the chair keep track of who submitted their votes
+     */
+    std::map<int, bool> received_votes;
+    /**
+     * Controller memory of the current election in order to resend failed messages
+     */
+    VoteData election_data;
 };
 
 #endif /* APP_PLEXEAPPL_EXAMPLE_VOTINGAPPL_H_ */
