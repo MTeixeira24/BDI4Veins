@@ -22,6 +22,7 @@
 #include "../../../base/manager/constants/VoteConstants.h"
 #include "../../../base/voteManager/VoteManager.h"
 
+#include <random>
 
 class VotingAppl : public GeneralPlexeAgentAppl {
 public:

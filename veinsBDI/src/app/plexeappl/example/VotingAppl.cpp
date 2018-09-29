@@ -14,7 +14,7 @@ VotingAppl::~VotingAppl() {
     //if(searchTimer != NULL)
     //     cancelAndDelete(searchTimer);
     //if(awaitAckTimer != NULL)
-    //         cancelAndDelete(awaitAckTimer);
+    //         delete awaitAckTimer;
    // if(voteTimer != NULL)
    //          cancelAndDelete(voteTimer);
 }
@@ -180,10 +180,12 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     for(uint32_t i = 0; i < votes.size(); i++){
         msg->setVotes(i, votes[i]);
     }
-    int position = positionHelper->getPosition();
-    //Alterar para tempo aleatório
-    //Ou usar sleep
-    scheduleAt(simTime() + 0.1*position, msg);
+    //Send the vote submission with a random delay between 10 and 50 ms to simulate processing time
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<double> distribution(25,2.0);
+    double delay = distribution(gen) * 0.001;
+    scheduleAt(simTime() + delay, msg);
     //Vote sent, wait for ack.
     negotiationState = VoteState::AWAITING_ACK_SUBMIT;
     awaitAckTimer = new cMessage("awaitAckTimer");
@@ -328,7 +330,6 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
 
 void VotingAppl::handleAck(const Ack* msg){
     if(strcmp("SUBMIT_VOTE", msg->getAckType()) == 0){
-        cancelAndDelete(awaitAckTimer);
         negotiationState = VoteState::NONE;
     }
 }

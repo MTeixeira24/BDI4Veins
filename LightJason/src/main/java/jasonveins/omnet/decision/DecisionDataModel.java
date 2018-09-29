@@ -2,11 +2,12 @@ package jasonveins.omnet.decision;
 
 import java.nio.ByteBuffer;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DecisionDataModel {
     protected final CopyOnWriteArrayList<InstructionModel> instructionsList = new CopyOnWriteArrayList<>();
 
-    private int size = 6; //int for length, short for command id
+    //private AtomicInteger size = new AtomicInteger(6); //int for length, short for command id
 
     public DecisionDataModel(){
         /*//Simulate an agent creating a request
@@ -19,15 +20,20 @@ public class DecisionDataModel {
 
     public void addInstruction(InstructionModel iObj){
         instructionsList.add(iObj);
-        size += iObj.getSize();
+        //size.addAndGet(iObj.getSize());
+        //size += iObj.getSize();
     }
 
     public byte[] convertToMessage(){
         @SuppressWarnings("unchecked")
         CopyOnWriteArrayList<InstructionModel> toSend = (CopyOnWriteArrayList<InstructionModel>)instructionsList.clone();
         instructionsList.removeAll(toSend);
-        int messageLength = size;
-        size = 6;
+        //Calculate message length from toSendList
+        int messageLength = 6;
+        for(InstructionModel im : toSend){
+            messageLength += im.getSize();
+        }
+        //int messageLength = size.getAndSet(6);
         ByteBuffer bb = ByteBuffer.allocate(messageLength);
         bb.putInt(messageLength); bb.putShort((short)5);
         for(InstructionModel io : toSend){
