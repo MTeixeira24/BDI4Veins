@@ -165,7 +165,7 @@ public class AgentManager extends Thread {
         /**
          * From the debug below, it is guaranteed that this is not the issue
          * The agent themselves can receive the beliefs just fine.
-         * Problem may be in omnet transmission or in socket
+         * Problem may be in omnet transmission, socket or trigger overload.
          * e.g.
          *Reset debug counter: 0
          * Agent   0    got notification to vote on a join:    [80, 85, 90, 95, 100, 105, 110, 115, 120]
@@ -292,6 +292,7 @@ public class AgentManager extends Thread {
     }
 
     public void loop(){
+        System.out.println("#################################");
         System.out.println("Agent loop: Awaiting agent input");
 
         try {
@@ -302,7 +303,7 @@ public class AgentManager extends Thread {
          toggleAgentLoop(false, true);
 
 
-        System.out.println("Resume");
+        System.out.println("Resume. Iteration number: " + stats.getIteration());
 
         if(cmanager.isDisconnected()){
             //Abrupt connection interruption

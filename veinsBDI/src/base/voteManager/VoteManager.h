@@ -12,6 +12,7 @@
 #include "../../app/plexeappl/example/VotingAppl.h"
 
 #include <unistd.h>
+#include <thread>
 #include "../../utilities/json.hpp"
 #include <fstream>
 using json = nlohmann::json;
@@ -35,7 +36,10 @@ public:
      * Store timestamps as requested by the controllers
      */
     void storeTimeStamp(double time, TimeStampAction action);
-
+    /**
+     * Get this agents associated preferred speed
+     */
+    int getPreferredSpeed(int agentId);
 
 protected:
     void parseResponse(uint32_t msgLength) override;
@@ -48,6 +52,10 @@ private:
     double chair2joinerStart;
     double chair2joinerDelay;
     double startOfVoteTimeStamp;
+    /**
+     * Information about the preferred speeds for the current iteration
+     */
+    std::vector<int> iterationSpeeds;
 };
 
 #endif /* BASE_VOTEMANAGER_VOTEMANAGER_H_ */

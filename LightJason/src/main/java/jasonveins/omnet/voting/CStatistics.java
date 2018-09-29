@@ -146,4 +146,6 @@ public class CStatistics {
         this.type = type;
         this.iteration = iteration;
     }
+
+    public int getIteration(){return iteration;}
 }

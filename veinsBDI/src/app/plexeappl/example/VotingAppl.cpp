@@ -25,11 +25,12 @@ void VotingAppl::initialize(int stage){
         // connect negotiation application to protocol
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs
-        int desiredSpeed = (int)par("desiredSpeed").doubleValue();
-        BeliefModel ds("set/prefered/speed");
-        ds.pushInt(&desiredSpeed);
-        manager->sendInformationToAgents(myId, &ds);
         if(getPlatoonRole() == PlatoonRole::NONE) {
+            //Joiners desired speed is 100
+            int desiredSpeed = 100;
+            BeliefModel ds("set/prefered/speed");
+            ds.pushInt(&desiredSpeed);
+            manager->sendInformationToAgents(myId, &ds);
             //This is the joiner vehicle. Call the connection manager to add belief to join platoon to agent
             BeliefModel bm;
             int targetPlatoon = par("targetPlatoon").intValue();
@@ -49,6 +50,11 @@ void VotingAppl::initialize(int stage){
                 scheduleAt(simTime() + SimTime(0.5), searchTimer);
             }
         }else{
+            //set desiredSpeed from config file
+            int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
+            BeliefModel ds("set/prefered/speed");
+            ds.pushInt(&desiredSpeed);
+            manager->sendInformationToAgents(myId, &ds);
             //This a vehicle belonging to a platoon
             if (getPlatoonRole() == PlatoonRole::LEADER) {
                 //This is a leader, push the beliefs that allow an agent to know its role
@@ -279,6 +285,7 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     if(msg->getPlatoonId() != positionHelper->getPlatoonId()) return;
     if(myId != positionHelper->getLeaderId()) return;
     uint32_t size = msg->getVotesArraySize();
+    int origin = msg->getVehicleId();
     std::vector<int> votes(size);
     for(uint32_t i = 0; i < size; i++){
         votes[i] = msg->getVotes(i);
@@ -286,6 +293,7 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     BeliefModel voteSubmission("handle/submit/vote");
     std::string test = msg->getName();
     voteSubmission.pushIntArray(votes);
+    voteSubmission.pushInt(&origin);
     manager->sendInformationToAgents(myId, &voteSubmission);
     //Got the vote. Notify of successful delivery
     sendAck("SUBMIT_VOTE", msg->getVehicleId());

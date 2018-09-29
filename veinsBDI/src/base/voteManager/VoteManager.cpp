@@ -27,6 +27,7 @@ void VoteManager::finish(){
 }
 
 void VoteManager::initialize(int stage){
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
     LightJasonManager::initialize(stage);
     if(stage == 0){
 
@@ -45,12 +46,18 @@ void VoteManager::initialize(int stage){
         json j;
         std::ifstream jsonFile ("preferedSpeeds.json");
         jsonFile >> j;
-        int size = j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][0].get<int>();
-        std::cout << size << std::endl;
+        iterationSpeeds.reserve(platoonSize);
+        for(int i = 0; i < platoonSize; i++){
+            iterationSpeeds.push_back(j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][i].get<int>());
+        }
         //testSpeed = 0;
 
     }
 
+}
+
+int VoteManager::getPreferredSpeed(int agentId){
+    return iterationSpeeds[agentId];
 }
 
 void VoteManager::storeTimeStamp(double time, TimeStampAction action){

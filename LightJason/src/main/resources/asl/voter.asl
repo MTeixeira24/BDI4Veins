@@ -63,13 +63,13 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!sendvote(VVECTOR)
     : >>isChair(_) <-
         generic/print("Agent", MyName, "Im the chair so no need to pass through omnet");
-        !handle/submit/vote(VVECTOR)
+        !handle/submit/vote(VVECTOR, MyName)
     : ~>>isChair(_) <- 
        generic/print("Agent", MyName, "Sending the vote down omnet");
        transmit/other/vote/list(VVECTOR). 
 
-+!@handle/submit/vote(VOTE) <-
-    generic/print("Got vote", VOTE);
++!@handle/submit/vote(VOTE, ID) <-
+    generic/print("Got vote", VOTE, "from", ID);
     vote/store(VOTE).
 
 +!handle/tie(CANDIDATES, CONTEXT, TIES) <-
