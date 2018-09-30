@@ -17,6 +17,7 @@
 #include "../../../messages/voting/SubmitVote_m.h"
 #include "../../../messages/voting/NotifyResults_m.h"
 #include "../../../messages/voting/NotifyVote_m.h"
+#include "../../../messages/voting/RequestResults_m.h"
 
 #include "../../../utilities/LeaderPositionHelper.h"
 #include "../../../base/manager/constants/VoteConstants.h"
@@ -39,6 +40,8 @@ public:
     */
    struct VoteData{
        int contextId;
+       int currentResult;
+       int joinerId;
        std::vector<double> contextArgs;
        std::vector<int> candidates;
    };
@@ -74,6 +77,10 @@ public:
      * Save the vote in the controller for future use
      */
     void setVote(std::vector<int>);
+    /**
+     * If  no results have been received. Request them directly
+     */
+    void sendResultRequest(int, int);
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting
@@ -109,15 +116,24 @@ protected:
      * Process received Ack messages
      */
     void handleAck(const Ack* msg);
+    /**
+     * If a vehicle hasnt received the results, send it back
+     */
+    void handleRequestResults(RequestResults* msg);
     enum class VoteState : size_t {
             NONE,
-            AWAITING_ACK_SUBMIT
+            AWAITING_ACK_SUBMIT,
+            AWAITING_RESULTS
      };
     /**
      *
      */
     void handleSelfMsg(cMessage* msg) override;
 private:
+    /*
+     * Store data about the leader
+     */
+    int targetLeaderId = -1;
     /**
      * Set to true if agent has instructed the controller to search for open platoons
      */

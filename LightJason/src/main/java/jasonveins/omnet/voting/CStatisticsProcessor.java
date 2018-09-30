@@ -15,12 +15,13 @@ import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 final class CStatisticsProcessor {
+    static String[] fileNames = {"Unstable", "Stable"};
+    static String[] voteRules = {"Borda", "Approval", "Copeland", "Plurality"};
+    static int[] platoonSize = {4,5,6,7,8};
+    static ArrayList<Abnormality> abnormalities = new ArrayList<>();
 
     public static void main(final String[] p_args){
         //DataProcessor dp = new DataProcessor();
-        String[] fileNames = {"Unstable", "Stable"};
-        String[] voteRules = {"Borda", "Approval", "Copeland", "Plurality"};
-        int[] platoonSize = {4,5,6,7,8};
 
         try {
 
@@ -61,18 +62,30 @@ final class CStatisticsProcessor {
                             int platoonExits = 0;
                             Node nNode = iterations.item(iter);
                             Node pNode = nNode.getChildNodes().item(0);
-                            int finalPlatoonSpeed = Integer.valueOf(pNode.getAttributes().getNamedItem("finalSpeed").getTextContent());
+                            String stringSpeed = pNode.getAttributes().getNamedItem("finalSpeed").getTextContent();
+                            int finalPlatoonSpeed = Integer.valueOf(stringSpeed);
                             String rejection = nNode.getChildNodes().item(1).getTextContent();
-                            if(finalPlatoonSpeed == 0 || rejection.equals("yes")){
+                            if(rejection.equals("yes")){
                                 numRejections++;
+                                continue;
+                            }
+                            //See if this is an abnormal ocurence
+                            if(finalPlatoonSpeed == 0){
+                                Abnormality ab = new Abnormality(iter, platoonSize[z], voteRules[j], fileNames[i]);
+                                abnormalities.add(ab);
                                 continue;
                             }
                             //Now loop through all agents
                             for(int a = 0; a < platoonSize[z]; a++){
                                 counter++;
-                                NodeList agent = nNode.getChildNodes().item(a+2).getChildNodes();
-                                double initUtil = Double.valueOf(agent.item(0).getTextContent());
-                                double finalUtil = Double.valueOf(agent.item(1).getTextContent());
+                                Node agent = nNode.getChildNodes().item(a+2);
+                                if(agent == null){
+                                    Abnormality ab = new Abnormality(iter, platoonSize[z], voteRules[j], fileNames[i]);
+                                    abnormalities.add(ab);
+                                    break;
+                                }
+                                double initUtil = Double.valueOf(agent.getChildNodes().item(0).getTextContent());
+                                double finalUtil = Double.valueOf(agent.getChildNodes().item(1).getTextContent());
                                 double diffUtil = finalUtil - initUtil;
                                 if(diffUtil > maxDif){
                                     maxDif = diffUtil;
@@ -145,11 +158,145 @@ final class CStatisticsProcessor {
             e.printStackTrace();
         }
 
-
+        for(Abnormality ab : abnormalities){
+            System.out.println(ab.toString());
+        }
+        System.out.println("There is a total of " + abnormalities.size() + " abnormalities.");
         //Organize by voting rule
         //Then insert minimum, maximum, average and median values for each platoon size run
         //Append amount of rejections to each file (i.e. Unstable / stable), since this action is not influenced
         //by voting rule
+        mergeAll();
+    }
+
+    public static void mergeAll() {
+        try {
+            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            Document doc = docBuilder.newDocument();
+            //File to store information
+            File f = new File("mergedResults.xml");
+            //Root of file
+            Element rootElement = doc.createElement("Results");
+            doc.appendChild(rootElement);
+
+            for (int i = 0; i < fileNames.length; i++) {
+                for (int j = 0; j < voteRules.length; j++) {
+                    for (int z = 0; z < platoonSize.length; z++) {
+                        //Get the file
+                        File p = new File("testResults/" + fileNames[i] + "/" + fileNames[i] + voteRules[j] + platoonSize[z] + ".xml");
+                        Document parseDoc = docBuilder.parse(p);
+                        parseDoc.getDocumentElement().normalize();
+
+                        Element scenario = doc.createElement("Scenario");
+                        Element type = doc.createElement("Type");
+                        type.setTextContent(fileNames[i]);
+                        scenario.appendChild(type);
+
+                        Element rule = doc.createElement("Rule");
+                        rule.setTextContent(voteRules[j]);
+                        scenario.appendChild(rule);
+
+                        Element psize = doc.createElement("platoonSize");
+                        psize.setTextContent(String.valueOf(platoonSize[z]));
+                        scenario.appendChild(psize);
+
+                        NodeList iterations = parseDoc.getDocumentElement().getElementsByTagName("Iteration");
+                        for(int a = 0; a < iterations.getLength(); a++){
+                            Element iter = (Element)iterations.item(a);
+                            String iterNumber = iter.getAttributes().getNamedItem("number").getNodeValue();
+
+                            Element iteration = doc.createElement("Iteration");
+                            Element number = doc.createElement("Number");
+                            number.setTextContent(iterNumber);
+                            iteration.appendChild(number);
+
+
+
+                            String intialSpeed = iter.getElementsByTagName("Platoon").item(0).getAttributes().getNamedItem("initialSpeed").getNodeValue();
+                            String finalSpeed = iter.getElementsByTagName("Platoon").item(0).getAttributes().getNamedItem("finalSpeed").getNodeValue();
+
+                            Element is = doc.createElement("InitialSpeed");
+                            Element fs = doc.createElement("FinalSpeed");
+                            is.setTextContent(intialSpeed);
+                            fs.setTextContent(finalSpeed);
+                            iteration.appendChild(is);
+                            iteration.appendChild(fs);
+
+                            Node clone = iter.cloneNode(true);
+                            doc.adoptNode(clone);
+                            //scenario.appendChild(clone);
+                            Element eClone = (Element)clone;
+                            iteration.appendChild(eClone.getElementsByTagName("Rejected").item(0));
+                            NodeList agentList = eClone.getElementsByTagName("Agent");
+
+                            for(int b = 0; b < platoonSize[z]; b++){
+
+                                Element curAgent = (Element)agentList.item(b);
+
+                                Element agent = doc.createElement("Agent");
+                                String aId = curAgent.getAttributes().getNamedItem("id").getNodeValue();
+
+                                Element idElement = doc.createElement("Id");
+                                idElement.setTextContent(aId);
+                                agent.appendChild(idElement);
+
+
+                                agent.appendChild(curAgent.getElementsByTagName("initialUtility").item(0));
+                                agent.appendChild(curAgent.getElementsByTagName("finalUtility").item(0));
+                                //Node test1 = cloneList.item(2+b).getChildNodes().item(0);
+                                //agent.appendChild(cloneList.item(2+b).getChildNodes().item(0));
+
+                                iteration.appendChild(agent);
+
+                            }
+                            scenario.appendChild(iteration);
+                        }
+
+                        rootElement.appendChild(scenario);
+                    }
+                }
+            }
+
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(doc);
+            StreamResult result = new StreamResult(f);
+
+            // Output to console for testing
+            // StreamResult result = new StreamResult(System.out);
+
+
+            transformer.transform(source, result);
+        } catch(TransformerException e){
+            e.printStackTrace();
+        } catch(ParserConfigurationException e){
+            e.printStackTrace();
+        } catch(SAXException e){
+            e.printStackTrace();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+        static class Abnormality{
+        int iteration;
+        int size;
+        String rule;
+        String type;
+
+        Abnormality(int iteration, int size, String rule, String type){
+            this.iteration = iteration;
+            this.size = size;
+            this.rule = rule;
+            this.type = type;
+        }
+
+        public String toString(){
+            return "Abnormality detected in iteration " + this.iteration + " of size " + this.size + " in rule " + this.rule
+                    + " of type " + this.type;
+        }
     }
 }
 

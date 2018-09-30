@@ -156,7 +156,10 @@ void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double
 }
 
 void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double preferedSpeed, double tolerance){
+    Enter_Method_Silent();
     RequestJoinPlatoonMessage* msg = new RequestJoinPlatoonMessage("RequestJoinPlatoonMessage");
+    targetLeaderId = destinationId;
+    negotiationState = VoteState::AWAITING_RESULTS;
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(myId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
@@ -165,6 +168,9 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     msg->setPreferedSpeed(preferedSpeed);
     msg->setTolerance(tolerance);
     sendUnicast(msg, destinationId);
+    //Wait to seconds to request results if no response is heard
+    awaitAckTimer = new cMessage("awaitAckTimer");
+    scheduleAt(simTime() + 2, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
@@ -195,6 +201,9 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
 
 void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
     NotifyResults* msg = new NotifyResults("NotifyResults");
+    //Save results for future use
+    election_data.currentResult = winnerValue;
+    election_data.joinerId = joinerId;
     int platoonId = positionHelper->getPlatoonId();
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(myId);
@@ -221,6 +230,15 @@ void VotingAppl::sendAck(std::string ack_type, int destination){
     sendUnicast(ack, destination);
 }
 
+void VotingAppl::sendResultRequest(int originId, int targetId){
+    RequestResults* msg = new RequestResults("RequestResults");
+    msg->setDestinationId(targetId);
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    sendUnicast(msg, targetId);
+}
+
 void VotingAppl::handleLowerMsg(cMessage* msg){
     UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
 
@@ -243,7 +261,9 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
                 handleNotifyVote(msg);
             }
             delete msg;
-        }else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
+        }else if(RequestResults* msg = dynamic_cast<RequestResults*>(nm)) {
+            handleRequestResults(msg);
+        } else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
             handleAck(msg);
             delete msg;
         }
@@ -268,6 +288,19 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
     else {
         GeneralPlexeAgentAppl::handleLowerMsg(msg);
     }
+}
+
+void VotingAppl::handleRequestResults(RequestResults* rr){
+    NotifyResults* msg = new NotifyResults("NotifyResults");
+    int platoonId = positionHelper->getPlatoonId();
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(rr->getVehicleId());
+    msg->setResult(election_data.currentResult);
+    msg->setJoinerId(election_data.joinerId);
+    msg->setPlatoonId(platoonId);
+    sendUnicast(msg, rr->getVehicleId());
 }
 
 void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
@@ -303,7 +336,10 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
+    //Try to ease the load
+    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     if(msg->getJoinerId() != -1){
+        std::cout << "@@@@@@@@@@@ GOT VOTE RESULT " << myId << "@@@@@@@@@@@ " << msg->getResult() << std::endl;
         if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
             //TODO: Handle insertion of beliefs
         }else if (myId == msg->getJoinerId()){
@@ -321,16 +357,26 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     }else{
         BeliefModel result;
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
+        std::cout << "############ GOT VOTE RESULT " << myId << "############## " << msg->getResult() << std::endl;
         result.setBelief("handle/results");
         int speed = msg->getResult();
         result.pushInt(&speed);
         manager->sendInformationToAgents(myId, &result);
     }
+    negotiationState = VoteState::NONE;
 }
 
 void VotingAppl::handleAck(const Ack* msg){
     if(strcmp("SUBMIT_VOTE", msg->getAckType()) == 0){
-        negotiationState = VoteState::NONE;
+        //negotiationState = VoteState::NONE;
+        negotiationState = VoteState::AWAITING_RESULTS;
+        //Wait a around 500ms for the results, if there are none send a request for results
+        std::random_device rd{};
+        std::mt19937 gen{rd()};
+        std::normal_distribution<double> distribution(50,2.0);
+        double delay = distribution(gen) * 0.01;
+        awaitAckTimer = new cMessage("awaitAckTimer");
+        scheduleAt(simTime() + delay, awaitAckTimer);
     }
 }
 
@@ -351,6 +397,12 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
             awaitAckTimer = new cMessage("awaitAckTimer");
             //Reschedule to re-send 500ms from now if no ack is received
             scheduleAt(simTime() + 1, awaitAckTimer);
+        } else if (negotiationState == VoteState::AWAITING_RESULTS){
+            //The joiner has not yet received results
+            if(targetLeaderId > -1)
+                sendResultRequest(myId, targetLeaderId);
+            else //The members have not yet received the results
+                sendResultRequest(myId, positionHelper->getLeaderId());
         }
     }else if(msg == voteTimer){
         delete msg;
