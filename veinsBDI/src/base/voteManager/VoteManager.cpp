@@ -47,7 +47,7 @@ void VoteManager::initialize(int stage){
         std::ifstream jsonFile ("preferedSpeeds.json");
         jsonFile >> j;
         iterationSpeeds.reserve(platoonSize);
-        for(int i = 0; i < platoonSize; i++){
+        for(int i = 0; i < platoonSize + 1; i++){
             iterationSpeeds.push_back(j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][i].get<int>());
         }
         //testSpeed = 0;

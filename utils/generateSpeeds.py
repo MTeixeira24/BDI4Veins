@@ -26,6 +26,8 @@ for platoonSize in range(4,9):
         speeds = []
         for speed in range(0,platoonSize):
             speeds.append(random.randint(90,110))
+        #joiner speed
+        speeds.append(random.randint(90,110))
         iterations.update({iteration: speeds})
     stable.update({platoonSize: iterations})
 
@@ -37,6 +39,8 @@ for platoonSize in range(4,9):
         speeds = []
         for speed in range(0,platoonSize):
             speeds.append(random.randint(85,115))
+        #joiner speed
+        speeds.append(random.randint(90,110))
         iterations.update({iteration: speeds})
     unstable.update({platoonSize: iterations})
 

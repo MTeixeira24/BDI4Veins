@@ -330,7 +330,7 @@ public class AgentManager extends Thread {
                 if(!simulate.get()) break;
             }
         }
-        stats.dump();
+        stats.dumpCSV();
         cmanager.finish();
     }
 

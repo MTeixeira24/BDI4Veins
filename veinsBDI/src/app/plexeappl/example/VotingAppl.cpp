@@ -26,8 +26,7 @@ void VotingAppl::initialize(int stage){
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs
         if(getPlatoonRole() == PlatoonRole::NONE) {
-            //Joiners desired speed is 100
-            int desiredSpeed = 100;
+            int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
             BeliefModel ds("set/prefered/speed");
             ds.pushInt(&desiredSpeed);
             manager->sendInformationToAgents(myId, &ds);

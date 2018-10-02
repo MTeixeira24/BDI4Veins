@@ -1,7 +1,9 @@
 package jasonveins.omnet.voting;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Map;
 
 import java.io.IOException;
@@ -36,6 +38,36 @@ public class CStatistics {
     public CStatistics(){
         initial_final_utilities = new ConcurrentHashMap<>();
         rejected = false;
+    }
+
+    public void dumpCSV(){
+
+
+        try {
+            FileWriter out = null;
+            File f = new File("testResults/JoinResults.csv");
+            if(!f.exists() || f.isDirectory()) {
+                out = new FileWriter(f);
+                out.write("Scenario,Rule,PlatoonSize,Iteration,Rejected,Agent,InitialUtility,FinalUtility,Difference\n");
+            }else{
+                out = new FileWriter(f, true);
+            }
+            String head = type+","+rule+","+platoonSize+","+iteration+',';
+            if(rejected){
+                out.write(head+"1,,,,\n");
+            }else{
+                head = head + "0,";
+                Iterator<Map.Entry<Integer, ArrayList<Double>>> it = initial_final_utilities.entrySet().iterator();
+                for(int i = 0; i < initial_final_utilities.entrySet().size() - 1; i++){
+                    Map.Entry<Integer, ArrayList<Double>> e = it.next();
+                    double diff = e.getValue().get(1) - e.getValue().get(0);
+                    out.write(head+e.getKey()+","+e.getValue().get(0)+","+e.getValue().get(1)+","+diff+"\n");
+                }
+            }
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void dump(){
