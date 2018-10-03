@@ -51,6 +51,10 @@ public class CContext {
         return false;
     }
 
+    public void debug(){
+        System.out.println(m_votes.size()+"/"+m_voterCount);
+    }
+
     public void increaseVoterCount(){
         m_voterCount++;
     }

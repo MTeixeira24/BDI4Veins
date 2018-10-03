@@ -8,6 +8,7 @@ import java.util.List;
 public interface IRule {
 
     List<Integer> m_tiedIndexes = new ArrayList<>();
+    List<Integer> scoreVector = new ArrayList<>();
 
     /**
      * Sums all votes and returns the index of the winner.
@@ -31,5 +32,21 @@ public interface IRule {
     List<Integer> getTieBreakerVote(List<CUtilityPair> p_utilities, List<Integer> p_ties);
 
     List<Integer> getTiedIndexes();
+
+    /**
+     * In case of iterative voting, reduces the list candidates to the top half most voted
+     * @param votes List of all votes submitted
+     * @param candidates The candidates to be voted on
+     * @return Candidate list of size floor(candidates.size/2) if candidates.size > 2, null otherwise.
+     */
+    List<Integer> reduceCandidates(List<List<Integer>> votes, List<Integer> candidates);
+
+    /**
+     * Returns the size that a vote vector should have given a certain candidate list size
+     * Used ensure that a received vote is for a valid election
+     * @param size Size of the candidate list
+     * @return Size of the vote vector
+     */
+    int getExpectedVoteSize(int size);
 
 }

@@ -1,13 +1,5 @@
-//Defines a standard voter agent
+//Defines an iterative voter agent
 
-//Belief base definition. Commented beliefs are beliefs that are not held at agent instantiation
-//but are expected to be created during execution.
-//inplatoon(_id).
-//lookforplatoon.
-//targetplatoonkoin(_id).
-//travelroute([_l1, .., _ln]).
-//ischair.
-//platoonMembers([L, M1, ..., Mn]).
 minimumUtility(0.8).
 
 //Initial Goal
@@ -19,26 +11,18 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         PredictedUtility = utility/predictplatoonspeed(JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED).
 
 //Plan definition
-//Agent Belief Set up
 +!main <-
     Tolerance = utility/generatetolerance();
-    //SpeedPreference = utility/generatespeedpreference();
     +tolerance(Tolerance).
-    //+preferedspeed(SpeedPreference);
-    //generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SpeedPreference ," and tolerance of: ", Tolerance).
 
 +!set/prefered/speed(SPEED) <-
     +preferedspeed(SPEED);
     >>tolerance(Tolerance).
-    //generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SPEED ," and tolerance of: ", Tolerance).
 
-//Goal triggered plans for all voting agents
 +!lookforplatoon() <-
     generic/print("Agent ", MyName, " have intention of searching for platoon").
-    //transmit/self/searchForPlatoon(). //Set controller layer to send to agent all platoons that are open for joining
 
 +!set/speed(SPEED) <-
-    //generic/print("Agent ",MyName, " the speed of my platoon is", SPEED);
     utility/set/platoon/speed(SPEED);
     +platoonspeed(SPEED).
 
@@ -49,9 +33,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
     L1 = collection/list/create(JSPEED, JPREFERENCE, JID);
     open/vote("join", L1).
-    //transmit/other/vote/join(JSPEED, JPREFERENCE).
-    //start a list of votes;
-    //set belief of open vote in state of awaiting ack from members +openJoinBallot(JSPEED, JPREFERENCE, [])
 
 +!handle/vote/notification(CANDIDATES, CONTEXT) <-
     generic/print("Agent", MyName, " got notification to vote on a join: ", CANDIDATES);
@@ -70,7 +51,12 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handle/submit/vote(VOTE, ID) <-
     generic/print("Got vote", VOTE, "from", ID);
-    vote/store(VOTE).
+    //CANDIDATESIZE = utility/get/candidates/size();
+    vote/store/iterative(VOTE).
+
++!select/vote/method(VOTE, CANDIDATESIZE)
+    : CANDIDATESIZE > 2 <- vote/store/iterative(VOTE)
+    : CANDIDATESIZE <= 2 <- vote/store(VOTE).
 
 +!handle/tie(CANDIDATES, CONTEXT, TIES) <-
     generic/print("There has been a tie. Submitting my vote to tie brake");
@@ -80,9 +66,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!ischair(PID) <-
     +isChair(PID).
-    //generic/print("Agent ", MyName, " is chair of platoon ", PID).
 
-//Belief triggered plans for all voting agents
 +!foundplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " found a potential platoon: ", PID);
     !attemptjoindep(PID, LID).
@@ -90,16 +74,14 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!attemptjoindep(PID, LID) <-
     +targetplatoonjoin(PID);
     +leaderid(LID);
-    //generic/print("Agent ", MyName, " sending a request to join");
     >>preferedspeed(SPEED);
     >>tolerance(TOLERANCE);
     transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
 
 +!maneuver/complete(L) <-
-    //generic/print("Agent ", MyName, " maneuver complete starting a vote to set speed");
     utility/storemember(L);
     open/vote("speed", [0]).
-    //vote/open/ballot/speed().
+    
 
 +!handle/results(VALUE) <-
     >>preferedspeed(Speed); >>tolerance(Tolerance);

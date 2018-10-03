@@ -10,6 +10,7 @@ public class CCopeland implements IRule {
 
     @Override
     public int getResult(List<List<Integer>> votes, List<Integer> candidates) {
+        scoreVector.clear();
         List<Integer> pairWiseWins = new ArrayList<>(Collections.nCopies(candidates.size(), 0));
         int position = 0;
         for(int i = 0; i < candidates.size() - 1; i++) {
@@ -28,7 +29,7 @@ public class CCopeland implements IRule {
                 position++;
             }
         }
-
+        scoreVector.addAll(pairWiseWins);
         return pairWiseWins.indexOf(Collections.max(pairWiseWins));
     }
 
@@ -76,5 +77,31 @@ public class CCopeland implements IRule {
     @Override
     public List<Integer> getTiedIndexes(){
         return m_tiedIndexes;
+    }
+
+    @Override
+    public List<Integer> reduceCandidates(List<List<Integer>> votes, List<Integer> candidates){
+        if(candidates.size() <= 2)
+            return null;
+        else{
+            int newSize = candidates.size()/2;
+            ArrayList<Integer> redCandidates = new ArrayList<>(newSize);
+            this.getResult(votes, candidates);
+            for(int i = 0; i < newSize; i++){
+                int highestIndex = scoreVector.indexOf(Collections.max(scoreVector));
+                redCandidates.add(candidates.get(highestIndex));
+                scoreVector.set(highestIndex, -1);
+            }
+            return redCandidates;
+        }
+    }
+
+    @Override
+    public int getExpectedVoteSize(int size){
+        int l_size = 0;
+        for(int i = size - 1; i > 0; i--){
+            l_size += i;
+        }
+        return l_size*2;
     }
 }

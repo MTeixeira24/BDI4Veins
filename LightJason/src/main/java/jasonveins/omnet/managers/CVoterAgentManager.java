@@ -33,7 +33,7 @@ public class CVoterAgentManager extends AgentManager {
         try {
             switch(vType){
                 case "vVoter":
-                    if(p_aslFile.equals(resourceFolder+"fuelVoter.asl") || p_aslFile.equals(resourceFolder+"speedVoter.asl") || p_aslFile.equals(resourceFolder+"voter.asl")){
+                    if(p_aslFile.equals(resourceFolder+"voter.asl") || p_aslFile.equals(resourceFolder+"iterativeVoter.asl")){
                         l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, voteRule);
                     }else{
                         throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected FuelVoter.asl, SpeedVoter.asl or voter.asl");

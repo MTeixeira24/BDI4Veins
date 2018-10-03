@@ -174,6 +174,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
         }
         iOb.pushIntArray(l_candidates);
+        iOb.pushInt(votingRule.getExpectedVoteSize(l_candidates.size()));
         agentManager.addInstruction(iOb);
         final ITrigger l_trigger = CTrigger.from(
                 ITrigger.EType.ADDGOAL,
@@ -253,7 +254,9 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private void storeVote(@Nonnull final List<Integer> votes)
     {
         m_context.pushVotes(votes);
+        m_context.debug();
         if(m_context.allVotesSubmitted()){
+            System.out.println("FINAL ITERATION");
             int winnerIndex = votingRule.getResult(m_context.getVotes(), m_context.getCandidates());
             if(winnerIndex == -1){
                 m_context.increaseVoterCount();
@@ -298,6 +301,55 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             iOb.pushInt(winner);
             agentManager.addInstruction(iOb);
         }
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/store/iterative" )
+    private void storeVoteIterative(@Nonnull final List<Integer> votes)
+    {
+        if(getCandidateListSize() > 2){
+            votes.size();
+        }
+        if(votes.size() > votingRule.getExpectedVoteSize(getCandidateListSize())) return;
+        if(getCandidateListSize() <= 2){
+            storeVote(votes);
+            return;
+        }
+        m_context.pushVotes(votes);
+        if(m_context.allVotesSubmitted()){
+            System.out.println("PREPARING NEXT ITERATION");
+            ArrayList<Integer> newCandidates = (ArrayList<Integer>)votingRule.reduceCandidates(m_context.getVotes(), m_context.getCandidates());
+            InstructionModel iOb = new InstructionModel(this.id, VoteConstants.NOTIFY_START_VOTE);
+            ArrayList<Double> l_context_chair = new ArrayList<>();
+            iOb.pushInt(m_context.getVoteType());
+            switch (m_context.getVoteType()){
+                case VoteConstants.CONTEXT_SPEED:{
+                    /*No context is needed*/
+                    iOb.pushShort(Constants.VALUE_NULL);
+                    l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
+                }
+            }
+            m_context = new CContext(newCandidates, VoteConstants.CONTEXT_SPEED, members.size());
+            iOb.pushIntArray(newCandidates);
+            iOb.pushInt(votingRule.getExpectedVoteSize(newCandidates.size()));
+            agentManager.addInstruction(iOb);
+            final ITrigger l_trigger = CTrigger.from(
+                    ITrigger.EType.ADDGOAL,
+                    CLiteral.from(
+                            "handle/vote/notification",
+                            CRawTerm.from(newCandidates),
+                            CRawTerm.from(l_context_chair)
+                    )
+
+            );
+            this.trigger( l_trigger );
+        }
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName(name = "utility/get/candidates/size")
+    public int getCandidateListSize(){
+        return m_context.getCandidates().size();
     }
 
     /**

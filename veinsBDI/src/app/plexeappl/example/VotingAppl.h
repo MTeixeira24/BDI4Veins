@@ -42,6 +42,7 @@ public:
        int contextId;
        int currentResult;
        int joinerId;
+       int expectedVoteVectorSize;
        std::vector<double> contextArgs;
        std::vector<int> candidates;
    };
@@ -55,7 +56,7 @@ public:
      *
      */
     NotifyVote* fillNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
-    void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
+    void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector);
     void sendNotificationOfVoteDirect(VoteData electionData, int destinationId);
     /**
      *
@@ -123,7 +124,9 @@ protected:
     enum class VoteState : size_t {
             NONE,
             AWAITING_ACK_SUBMIT,
-            AWAITING_RESULTS
+            AWAITING_RESULTS,
+            CHAIR_ELECTION_END,
+            CHAIR_ELECTION_ONGOING
      };
     /**
      *

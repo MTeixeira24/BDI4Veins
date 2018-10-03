@@ -8,8 +8,10 @@ import java.util.List;
 
 public class CPlurality implements IRule{
 
+
     @Override
     public int getResult(List<List<Integer>> votes, List<Integer> candidates) {
+        scoreVector.clear();
         boolean ties = false;
         int winnerIndex = -1;
         int highestScore = -1;
@@ -28,6 +30,7 @@ public class CPlurality implements IRule{
                 ties = false;
                 m_tiedIndexes.clear();
             }
+            scoreVector.add(score);
         }
         if(ties) return -1;
         return winnerIndex;
@@ -66,6 +69,28 @@ public class CPlurality implements IRule{
     @Override
     public List<Integer> getTiedIndexes(){
         return m_tiedIndexes;
+    }
+
+    @Override
+    public List<Integer> reduceCandidates(List<List<Integer>> votes, List<Integer> candidates){
+        if(candidates.size() <= 2)
+            return null;
+        else{
+            int newSize = candidates.size()/2;
+            ArrayList<Integer> redCandidates = new ArrayList<>(newSize);
+            this.getResult(votes, candidates);
+            for(int i = 0; i < newSize; i++){
+                int highestIndex = scoreVector.indexOf(Collections.max(scoreVector));
+                redCandidates.add(candidates.get(highestIndex));
+                scoreVector.set(highestIndex, -1);
+            }
+            return redCandidates;
+        }
+    }
+
+    @Override
+    public int getExpectedVoteSize(int size){
+        return size;
     }
 
 }

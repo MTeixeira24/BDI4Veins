@@ -134,10 +134,11 @@ void VotingAppl::sendNotificationOfVoteDirect(VoteData electionData, int destina
     sendUnicast(msg, destinationId);
 }
 
-void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
+void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector){
     Enter_Method_Silent();
+    if((contextId == CONTEXT_SPEED) && (negotiationState == VoteState::CHAIR_ELECTION_END)) ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
+    negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
     NotifyVote* msg = fillNotificationOfVote(contextId, contextArgs, candidates);
-    if(contextId == CONTEXT_SPEED) ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
     std::vector<int> members = positionHelper->getPlatoonFormation();
     //Set the the list of received votes
     for (uint32_t i = 0; i < members.size(); i++){
@@ -148,6 +149,7 @@ void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double
     voteTimer = new cMessage("VoteTimer");
     scheduleAt(simTime() + 0.5, voteTimer);
     //Store the election data in case someone fails to receive it
+    election_data.expectedVoteVectorSize = expectedVoteVector;
     election_data.candidates = candidates;
     election_data.contextId = contextId;
     election_data.contextArgs = contextArgs;
@@ -199,6 +201,7 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
 }
 
 void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
+    negotiationState = VoteState::CHAIR_ELECTION_END;
     NotifyResults* msg = new NotifyResults("NotifyResults");
     //Save results for future use
     election_data.currentResult = winnerValue;
@@ -290,16 +293,33 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
 }
 
 void VotingAppl::handleRequestResults(RequestResults* rr){
-    NotifyResults* msg = new NotifyResults("NotifyResults");
-    int platoonId = positionHelper->getPlatoonId();
-    msg->setKind(NEGOTIATION_TYPE);
-    msg->setVehicleId(myId);
-    msg->setExternalId(positionHelper->getExternalId().c_str());
-    msg->setDestinationId(rr->getVehicleId());
-    msg->setResult(election_data.currentResult);
-    msg->setJoinerId(election_data.joinerId);
-    msg->setPlatoonId(platoonId);
-    sendUnicast(msg, rr->getVehicleId());
+    switch(negotiationState){
+    case VoteState::CHAIR_ELECTION_ONGOING:{
+        //We dont want to send old election data back
+        //Until the agent gives us a new iteration or the results back
+        //ignore requests for results
+        if(!received_votes[rr->getVehicleId()])
+            sendNotificationOfVoteDirect(election_data, rr->getVehicleId());
+        break;
+    }
+    case VoteState::CHAIR_ELECTION_END:{
+        NotifyResults* msg = new NotifyResults("NotifyResults");
+        int platoonId = positionHelper->getPlatoonId();
+        msg->setKind(NEGOTIATION_TYPE);
+        msg->setVehicleId(myId);
+        msg->setExternalId(positionHelper->getExternalId().c_str());
+        msg->setDestinationId(rr->getVehicleId());
+        msg->setResult(election_data.currentResult);
+        msg->setJoinerId(election_data.joinerId);
+        msg->setPlatoonId(platoonId);
+        sendUnicast(msg, rr->getVehicleId());
+        break;
+    }
+    default:{
+        //throw cRuntimeError("VotingAppl: Unknown negotiation state in handleRequestResults");
+        break;
+    }
+    }
 }
 
 void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
@@ -318,10 +338,11 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
 void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     if(msg->getPlatoonId() != positionHelper->getPlatoonId()) return;
     if(myId != positionHelper->getLeaderId()) return;
-    uint32_t size = msg->getVotesArraySize();
+    int size = msg->getVotesArraySize();
+    if(size > election_data.expectedVoteVectorSize) return; //Got a vote for an expired election
     int origin = msg->getVehicleId();
     std::vector<int> votes(size);
-    for(uint32_t i = 0; i < size; i++){
+    for(int i = 0; i < size; i++){
         votes[i] = msg->getVotes(i);
     }
     BeliefModel voteSubmission("handle/submit/vote");
@@ -427,6 +448,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
 
 void VotingAppl::handleNotifyVote(const NotifyVote* msg){
     if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
+        negotiationState = VoteState::NONE;
         BeliefModel voteNotify("handle/vote/notification");
         std::vector<double> contextArgs(msg->getContextArgumentsArraySize() + 1);
         uint32_t size = msg->getCandidatesArraySize();
