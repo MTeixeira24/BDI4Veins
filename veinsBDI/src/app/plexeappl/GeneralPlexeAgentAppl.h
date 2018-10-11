@@ -12,8 +12,6 @@
 #include <algorithm>
 #include <memory>
 
-//#include "veins/modules/application/platooning/maneuver/JoinManeuver.h"
-//#include "veins/modules/application/platooning/maneuver/JoinAtBack.h"
 #include "veins/modules/application/platooning/messages/ManeuverMessage_m.h"
 #include "veins/modules/mobility/traci/TraCIConstants.h"
 #include "veins/modules/application/platooning/UnicastProtocol.h"
@@ -22,8 +20,8 @@
 #include "veins/modules/mobility/traci/TraCIScenarioManager.h"
 
 #include "BasePlexeAgentAppl.h"
-#include "../../maneuvers/BaseJoin.h"
 #include "../../maneuvers/JoinAtN.h"
+#include "../../maneuvers/JoinAtBack.h"
 #include "veins/modules/application/platooning/utilities/DynamicPositionManager.h"
 
 /** possible roles of this vehicle */

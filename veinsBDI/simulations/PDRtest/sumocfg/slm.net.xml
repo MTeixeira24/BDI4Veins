@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on qui 11 out 2018 19:36:10 WEST by Eclipse SUMO netedit Version UNKNOWN
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="/home/miguel/Documents/BDI4Veins/veinsBDI/simulations/PDRtest/sumocfg/slm.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/miguel/Documents/BDI4Veins/veinsBDI/simulations/PDRtest/sumocfg/slm.net.xml"/>
+    </output>
+
+    <processing>
+        <no-turnarounds value="true"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+        <junctions.corner-detail value="0"/>
+        <rectangular-lane-cut value="false"/>
+        <walkingareas value="false"/>
+    </processing>
+
+</configuration>
+-->
+
+<net version="0.27" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="0.00,80.00,10000.00,80.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <edge id="0to1" from="0" to="1" priority="1">
+        <lane id="0to1_0" index="0" speed="13.89" length="10000.00" shape="0.00,72.00 10000.00,72.00"/>
+        <lane id="0to1_1" index="1" speed="13.89" length="10000.00" shape="0.00,75.20 10000.00,75.20"/>
+        <lane id="0to1_2" index="2" speed="13.89" length="10000.00" shape="0.00,78.40 10000.00,78.40"/>
+    </edge>
+    <edge id="1to0" from="1" to="0" priority="1">
+        <lane id="1to0_0" index="0" speed="13.89" length="10000.00" shape="10000.00,84.80 0.00,84.80"/>
+        <lane id="1to0_1" index="1" speed="13.89" length="10000.00" shape="10000.00,81.60 0.00,81.60"/>
+    </edge>
+
+    <junction id="0" type="dead_end" x="0.00" y="80.00" incLanes="1to0_0 1to0_1" intLanes="" shape="0.00,80.00 0.00,86.40 0.00,80.00"/>
+    <junction id="1" type="unregulated" x="10000.00" y="80.00" incLanes="0to1_0 0to1_1 0to1_2" intLanes="" shape="10000.00,80.00 10000.00,70.40 10000.00,80.00"/>
+
+</net>

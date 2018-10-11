@@ -13,9 +13,19 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.scenarios;
+package veinsbdi.simulations.PDRtest;
 
-simple JoinScenarioAI extends JoinScenarioNoAI{
+import org.car2x.veins.nodes.Scenario;
+import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+
+network PDRnetwork extends Scenario
+{
     parameters:
-        @class(JoinScenarioAI);   
+        string traffic_type;
+    submodules:
+        traffic: <traffic_type> like TraCIBaseTrafficManager {
+            parameters:
+                @display("p=200,200");
+        }
+    connections allowunconnected:
 }

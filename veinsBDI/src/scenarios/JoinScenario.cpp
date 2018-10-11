@@ -10,12 +10,6 @@
 
 Define_Module(JoinScenario);
 
-JoinScenario::JoinScenario() {
-
-}
-
-JoinScenario::~JoinScenario() {
-}
 
 void JoinScenario::initialize(int stage)
 {
@@ -40,9 +34,6 @@ void JoinScenario::initialize(int stage)
             positionHelper->setPlatoonId(-1);
             positionHelper->setIsLeader(false);
             positionHelper->setPlatoonLane(-1);
-
-            //startManeuver = new cMessage();
-            //scheduleAt(simTime() + SimTime(0.5), startManeuver);
        }else{
            double speedModifier[] =  {1, 0.6, 1.5};
            int platoonId = positionHelper->getPlatoonId();

@@ -25,53 +25,53 @@ void VotingAppl::initialize(int stage){
         // connect negotiation application to protocol
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs
+        //set speed from config file
+        int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
+        BeliefModel ds("set/prefered/speed");
+        ds.pushInt(&desiredSpeed);
+        manager->sendInformationToAgents(myId, &ds);
         if(getPlatoonRole() == PlatoonRole::NONE) {
-            int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
-            BeliefModel ds("set/prefered/speed");
-            ds.pushInt(&desiredSpeed);
-            manager->sendInformationToAgents(myId, &ds);
             //This is the joiner vehicle. Call the connection manager to add belief to join platoon to agent
-            BeliefModel bm;
-            int targetPlatoon = par("targetPlatoon").intValue();
-            if(targetPlatoon >= 0){
-                bm.setBelief("foundplatoon");
-                int platoonId = targetPlatoon;
-                int leaderId = 0;
-                bm.pushInt(&platoonId);
-                bm.pushInt(&leaderId);
-                manager->sendInformationToAgents(myId,&bm);
-            }else{
-                bm.setBelief("lookforplatoon");
-                manager->sendInformationToAgents(myId,&bm);
-                searchingForPlatoon = true;
-                searchTimer = new cMessage();
-                //Search for platoons for half a second
-                scheduleAt(simTime() + SimTime(0.5), searchTimer);
+            if(par("engageNegotiations").boolValue()){
+                BeliefModel bm;
+                int targetPlatoon = par("targetPlatoon").intValue();
+                if(targetPlatoon >= 0){
+                    bm.setBelief("foundplatoon");
+                    int platoonId = targetPlatoon;
+                    int leaderId = 0;
+                    bm.pushInt(&platoonId);
+                    bm.pushInt(&leaderId);
+                    manager->sendInformationToAgents(myId,&bm);
+                }else{
+                    bm.setBelief("lookforplatoon");
+                    manager->sendInformationToAgents(myId,&bm);
+                    searchingForPlatoon = true;
+                    searchTimer = new cMessage();
+                    //Search for platoons for half a second
+                    scheduleAt(simTime() + SimTime(0.5), searchTimer);
+                }
             }
         }else{
-            //set desiredSpeed from config file
-            int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
-            BeliefModel ds("set/prefered/speed");
-            ds.pushInt(&desiredSpeed);
-            manager->sendInformationToAgents(myId, &ds);
             //This a vehicle belonging to a platoon
+            //Platoon beliefs
+            BeliefModel pbelief;
+            pbelief.setBelief("inplatoon");
+            int platoonId = positionHelper->getPlatoonId();
+            int leaderId = positionHelper->getLeaderId();
+            pbelief.pushInt(&platoonId);
+            pbelief.pushInt(&leaderId);
+            manager->sendInformationToAgents(myId, &pbelief);
+            //Beliefs about the current speed
+            BeliefModel platoonSpeedBelief("set/speed");
+            int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
+            platoonSpeedBelief.pushInt(&platoonSpeed);
+            manager->sendInformationToAgents(myId, &platoonSpeedBelief);
             if (getPlatoonRole() == PlatoonRole::LEADER) {
                 //This is a leader, push the beliefs that allow an agent to know its role
                 BeliefModel cbelief;
-                BeliefModel pbelief;
                 cbelief.setBelief("ischair");
-                int platoonId = positionHelper->getPlatoonId();
                 cbelief.pushInt(&platoonId);
                 manager->sendInformationToAgents(myId, &cbelief);
-                pbelief.setBelief("inplatoon");
-                int leaderId = positionHelper->getLeaderId();
-                pbelief.pushInt(&platoonId);
-                pbelief.pushInt(&leaderId);
-                manager->sendInformationToAgents(myId, &pbelief);
-                BeliefModel platoonSpeedBelief("set/speed");
-                int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-                platoonSpeedBelief.pushInt(&platoonSpeed);
-                manager->sendInformationToAgents(myId, &platoonSpeedBelief);
                 std::vector<int> members = positionHelper->getPlatoonFormation();
                 for (uint32_t i = 0; i < members.size(); i++){
                     BeliefModel mbelief;
@@ -84,18 +84,7 @@ void VotingAppl::initialize(int stage){
                 }
             }
             else if (getPlatoonRole() == PlatoonRole::FOLLOWER){
-                //This is a member, push beliefs
-                BeliefModel pbelief;
-                pbelief.setBelief("inplatoon");
-                int platoonId = positionHelper->getPlatoonId();
-                int leaderId = positionHelper->getLeaderId();
-                pbelief.pushInt(&platoonId);
-                pbelief.pushInt(&leaderId);
-                manager->sendInformationToAgents(myId, &pbelief);
-                BeliefModel platoonSpeedBelief("set/speed");
-                int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-                platoonSpeedBelief.pushInt(&platoonSpeed);
-                manager->sendInformationToAgents(myId, &platoonSpeedBelief);
+                //This is a member
             }
         }
     }

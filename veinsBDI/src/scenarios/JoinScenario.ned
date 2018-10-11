@@ -17,10 +17,10 @@ package veinsbdi.scenarios;
 
 import org.car2x.veins.modules.application.platooning.scenarios.BBaseScenario;
 
-simple JoinScenarioNoAI extends BBaseScenario{
+simple JoinScenario extends BBaseScenario{
     parameters:
         //sumo vehicle type for platooning cars
         string platooningVType;
         @display("i=block/app2");
-        @class(JoinScenarioNoAI);   
+        @class(JoinScenario);   
 }

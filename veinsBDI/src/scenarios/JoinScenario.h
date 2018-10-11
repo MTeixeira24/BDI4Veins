@@ -13,8 +13,8 @@
 
 class JoinScenario : public BaseScenario {
 public:
-    JoinScenario();
-    virtual ~JoinScenario();
+    JoinScenario(){};
+    virtual ~JoinScenario(){};
     virtual void initialize(int stage) override;
 protected:
     void handleSelfMsg(cMessage* msg);

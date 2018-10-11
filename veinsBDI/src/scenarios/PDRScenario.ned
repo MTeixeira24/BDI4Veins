@@ -13,14 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.concrete;
+package veinsbdi.scenarios;
+import org.car2x.veins.modules.application.platooning.scenarios.BBaseScenario;
 
-import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
-
-simple VotingAppl extends GeneralPlexeAgentAppl{
+simple PDRScenario extends BBaseScenario{
     parameters:
-        int targetPlatoon = default(-1);
-        double desiredSpeed @unit("kmph") = default(100 kmph);
-        bool engageNegotiations = default(true);
-        @class(VotingAppl);
+        @display("i=block/app2");
+        @class(PDRScenario);   
 }

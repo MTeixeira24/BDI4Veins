@@ -19,6 +19,8 @@ void GeneralPlexeAgentAppl::initialize(int stage)
         std::string joinManeuverName = par("joinManeuver").stdstringValue();
         if (joinManeuverName == "JoinAtN")
             joinManeuver = new JoinAtN(this);
+        else if(joinManeuverName == "JoinAtBack")
+            joinManeuver = new JoinAtBack(this);
         else
             throw new cRuntimeError("Invalid join maneuver implementation chosen");
         if(DynamicPositionManager::getInstance().vehToPlatoons.count(positionHelper->getId()) == 0){

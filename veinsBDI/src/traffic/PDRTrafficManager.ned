@@ -13,14 +13,13 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.concrete;
+package veinsbdi.traffic;
+import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
 
-import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
-
-simple VotingAppl extends GeneralPlexeAgentAppl{
+network PDRTrafficManager like TraCIBaseTrafficManager{
     parameters:
-        int targetPlatoon = default(-1);
-        double desiredSpeed @unit("kmph") = default(100 kmph);
-        bool engageNegotiations = default(true);
-        @class(VotingAppl);
+        @class(PDRTrafficManager);
+        //distance between vehicles
+        int separation @unit("m") = default(100m);
+        string vehicleVType;
 }
