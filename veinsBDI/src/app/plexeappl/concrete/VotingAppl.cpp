@@ -5,7 +5,7 @@
  *      Author: miguel
  */
 
-#include "VotingAppl.h"
+#include "../concrete/VotingAppl.h"
 
 Define_Module(VotingAppl);
 

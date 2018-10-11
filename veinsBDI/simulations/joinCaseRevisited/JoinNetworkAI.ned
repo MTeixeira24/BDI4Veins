@@ -13,11 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.example;
+package veinsbdi.simulations.joinCaseRevisited;
 
-import veinsbdi.app.plexeappl.BasePlexeAgentAppl;
+import org.car2x.veins.nodes.Scenario;
+import veinsbdi.base.voteManager.voteManager;
+import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
 
-simple SimpleMerge extends BasePlexeAgentAppl{
+network JoinNetworkAI extends Scenario
+{
     parameters:
-        @class(SimpleMerge);
+        string traffic_type;
+    submodules:
+        ljmanager: voteManager;
+        traffic: <traffic_type> like TraCIBaseTrafficManager {
+            parameters:
+                @display("p=200,200");
+        }
+    connections allowunconnected:
 }

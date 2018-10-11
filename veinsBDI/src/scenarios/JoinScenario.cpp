@@ -1,23 +1,23 @@
 /*
- * JoinScenarioNoAI.cpp
+ * JoinScenario.cpp
  *
  *  Created on: Sep 7, 2018
  *      Author: miguel
  */
 
-#include "JoinScenarioNoAI.h"
+#include "JoinScenario.h"
 #include "veins/modules/application/platooning/utilities/DynamicPositionManager.h"
 
-Define_Module(JoinScenarioNoAI);
+Define_Module(JoinScenario);
 
-JoinScenarioNoAI::JoinScenarioNoAI() {
+JoinScenario::JoinScenario() {
 
 }
 
-JoinScenarioNoAI::~JoinScenarioNoAI() {
+JoinScenario::~JoinScenario() {
 }
 
-void JoinScenarioNoAI::initialize(int stage)
+void JoinScenario::initialize(int stage)
 {
 
     BaseScenario::initialize(stage);
@@ -75,17 +75,9 @@ void JoinScenarioNoAI::initialize(int stage)
     }
 }
 
-void JoinScenarioNoAI::handleSelfMsg(cMessage* msg)
+void JoinScenario::handleSelfMsg(cMessage* msg)
 {
 
     // this takes care of feeding data into CACC and reschedule the self message
     BaseScenario::handleSelfMsg(msg);
-
-    if (msg == startManeuver) app->startJoinManeuver(0, 0, -1);
-    if (msg == test){
-        delete test;
-        traciVehicle->setCruiseControlDesiredSpeed(traciVehicle->getCruiseControlDesiredSpeed() - 10);
-        test = new cMessage();
-        scheduleAt(simTime() + SimTime(0.5), test);
-    }
 }

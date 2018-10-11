@@ -5,7 +5,7 @@
  *      Author: miguel
  */
 
-#include "SimpleMerge.h"
+#include "../concrete/SimpleMerge.h"
 
 Define_Module(SimpleMerge)
 

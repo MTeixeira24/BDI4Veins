@@ -13,7 +13,7 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.example;
+package veinsbdi.app.plexeappl.concrete;
 
 import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
 

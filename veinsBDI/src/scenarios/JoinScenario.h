@@ -1,20 +1,20 @@
 /*
- * JoinScenarioNoAI.h
+ * JoinScenario.h
  *
  *  Created on: Sep 7, 2018
  *      Author: miguel
  */
 
-#ifndef SCENARIOS_JOINSCENARIONOAI_H_
-#define SCENARIOS_JOINSCENARIONOAI_H_
+#ifndef SCENARIOS_JOINSCENARIO_H_
+#define SCENARIOS_JOINSCENARIO_H_
 
 #include "veins/modules/application/platooning/scenarios/BaseScenario.h"
 #include "../app/plexeappl/GeneralPlexeAgentAppl.h"
 
-class JoinScenarioNoAI : public BaseScenario {
+class JoinScenario : public BaseScenario {
 public:
-    JoinScenarioNoAI();
-    virtual ~JoinScenarioNoAI();
+    JoinScenario();
+    virtual ~JoinScenario();
     virtual void initialize(int stage) override;
 protected:
     void handleSelfMsg(cMessage* msg);
@@ -24,4 +24,4 @@ protected:
     cMessage* test;
 };
 
-#endif /* SCENARIOS_JOINSCENARIONOAI_H_ */
+#endif /* SCENARIOS_JOINSCENARIO_H_ */

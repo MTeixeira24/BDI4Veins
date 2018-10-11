@@ -8,8 +8,8 @@
 #ifndef BASE_SIMPLEMERGEMANAGER_SIMPLEMERGEMANAGER_H_
 #define BASE_SIMPLEMERGEMANAGER_SIMPLEMERGEMANAGER_H_
 
+#include "../../app/plexeappl/concrete/SimpleMerge.h"
 #include "../manager/LightJasonManager.h"
-#include "../../app/plexeappl/example/SimpleMerge.h"
 
 class SimpleMergeManager : public LightJasonManager {
 public:

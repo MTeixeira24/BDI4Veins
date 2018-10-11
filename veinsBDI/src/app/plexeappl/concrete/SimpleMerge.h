@@ -5,8 +5,8 @@
  *      Author: miguel
  */
 
-#ifndef APP_PLEXEAPPL_EXAMPLE_SIMPLEMERGE_H_
-#define APP_PLEXEAPPL_EXAMPLE_SIMPLEMERGE_H_
+#ifndef APP_PLEXEAPPL_CONCRETE_SIMPLEMERGE_H_
+#define APP_PLEXEAPPL_CONCRETE_SIMPLEMERGE_H_
 
 #include "../BasePlexeAgentAppl.h"
 #include "../../../messages/SimpleMergeMessage_m.h"
@@ -77,4 +77,4 @@ private:
 //    JoinManeuver* joinManeuver;
 };
 
-#endif /* APP_PLEXEAPPL_EXAMPLE_SIMPLEMERGE_H_ */
+#endif /* APP_PLEXEAPPL_CONCRETE_SIMPLEMERGE_H_ */

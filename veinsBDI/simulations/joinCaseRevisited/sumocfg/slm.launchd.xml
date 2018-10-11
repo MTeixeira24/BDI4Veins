@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+	<copy file="slm.net.xml" />
+	<copy file="slm.rou.xml" />
+	<copy file="slm.settings.xml" />
+	<copy file="slm.sumo.cfg" type="config" />
+</launch>

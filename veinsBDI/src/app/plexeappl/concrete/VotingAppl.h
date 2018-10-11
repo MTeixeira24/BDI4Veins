@@ -5,8 +5,8 @@
  *      Author: miguel
  */
 
-#ifndef APP_PLEXEAPPL_EXAMPLE_VOTINGAPPL_H_
-#define APP_PLEXEAPPL_EXAMPLE_VOTINGAPPL_H_
+#ifndef APP_PLEXEAPPL_CONCRETE_VOTINGAPPL_H_
+#define APP_PLEXEAPPL_CONCRETE_VOTINGAPPL_H_
 
 #include "veins/modules/application/platooning/utilities/DynamicPositionHelper.h"
 
@@ -168,4 +168,4 @@ private:
     VoteData election_data;
 };
 
-#endif /* APP_PLEXEAPPL_EXAMPLE_VOTINGAPPL_H_ */
+#endif /* APP_PLEXEAPPL_CONCRETE_VOTINGAPPL_H_ */
