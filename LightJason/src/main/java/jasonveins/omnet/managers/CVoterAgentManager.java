@@ -1,10 +1,9 @@
 package jasonveins.omnet.managers;
 
-import jasonveins.omnet.agent.CVoterAgent;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
-import jasonveins.omnet.voting.CStatistics;
+import jasonveins.omnet.voting.Statistics.CJoinStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
@@ -25,6 +24,8 @@ public class CVoterAgentManager extends AgentManager {
     public CVoterAgentManager(String m_aslpath, ConnectionManager m_cm) {
         super(m_aslpath, m_cm);
         voteRule = "Borda";
+        stats = new CJoinStatistics();
+
     }
 
     @Override
@@ -53,6 +54,10 @@ public class CVoterAgentManager extends AgentManager {
     public void setSimParams(int platoonSize, int iteration, String rule, String type) {
         getStats().setSimParams(platoonSize, iteration, rule, type);
         voteRule = rule;
+    }
+
+    public CJoinStatistics getStats(){
+        return (CJoinStatistics) stats;
     }
 
 }

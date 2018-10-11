@@ -6,7 +6,6 @@ import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.Constants;
 import jasonveins.omnet.voting.CContext;
-import jasonveins.omnet.voting.CStatistics;
 import jasonveins.omnet.voting.CUtilityPair;
 import jasonveins.omnet.voting.rule.*;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
@@ -91,7 +90,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/save")
     private void saveUtils(@Nonnull Number w, @Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil){
         double oldUtil = calculateUtility(w.doubleValue(), platoonSpeed, t.doubleValue(), s.doubleValue());
-        agentManager.getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue());
+        ((CVoterAgentManager)agentManager).getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue());
     }
 
     @IAgentActionFilter
@@ -161,7 +160,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.addAll(l_context);
                 break;
             case "speed":
-                agentManager.getStats().setInitPlatoonSpeed((int)platoonSpeed);
+                ((CVoterAgentManager)agentManager).getStats().setInitPlatoonSpeed((int)platoonSpeed);
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
                 /*No context is needed*/
                 iOb.pushShort(Constants.VALUE_NULL);
@@ -282,7 +281,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     break;
                 }
                 case VoteConstants.CONTEXT_SPEED:{
-                    agentManager.getStats().setFinalPlatoonSpeed(winner);
+                    ((CVoterAgentManager)agentManager).getStats().setFinalPlatoonSpeed(winner);
                     iOb.pushInt(-1);
                     final ITrigger l_trigger = CTrigger.from(
                             ITrigger.EType.ADDGOAL,
@@ -361,7 +360,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private int getNextPlatoon(){
         if(targetPlatoonIndex < targetPlatoons.size())
             return targetPlatoons.get(targetPlatoonIndex++).platoonId();
-        agentManager.getStats().setRejected(true);
+        ((CVoterAgentManager)agentManager).getStats().setRejected(true);
         return -1;
     }
 

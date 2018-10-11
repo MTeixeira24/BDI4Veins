@@ -6,7 +6,8 @@ import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.decision.DecisionDataModel;
 import jasonveins.omnet.decision.InstructionModel;
-import jasonveins.omnet.voting.CStatistics;
+import jasonveins.omnet.voting.Statistics.CJoinStatistics;
+import jasonveins.omnet.voting.Statistics.IStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
@@ -46,8 +47,7 @@ public class AgentManager extends Thread {
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
 
-    private CStatistics stats;
-    private int debugger = 0;
+    protected IStatistics stats;
 
     /**
      * Class constructor
@@ -55,7 +55,7 @@ public class AgentManager extends Thread {
      * @param m_cm Reference to the connection manager
      */
     public AgentManager(String m_aslpath, ConnectionManager m_cm) {
-        stats = new CStatistics();
+        stats = null;
         cmanager = m_cm;
         aslpath = m_aslpath;
         execute = new AtomicBoolean(true);
@@ -370,7 +370,7 @@ public class AgentManager extends Thread {
 
     public CountDownLatch getLatch() { return this.latch; }
 
-    public CStatistics getStats(){
+    public IStatistics getStats(){
         return stats;
     }
 
