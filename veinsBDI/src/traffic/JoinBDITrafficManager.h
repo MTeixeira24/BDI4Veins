@@ -12,8 +12,6 @@
 #include "veins/modules/application/platooning/utilities/DynamicPositionManager.h"
 
 class JoinBDITrafficManager: public TraCIBaseTrafficManager {
-    virtual void initialize(int stage);
-    virtual void scenarioLoaded();
 public:
     JoinBDITrafficManager()
         : platoonSize(0)
@@ -30,6 +28,10 @@ public:
     }
 
 protected:
+    virtual void initialize(int stage);
+    virtual void scenarioLoaded();
+    virtual void injectPlatoon();
+    virtual void injectJoiner();
     cPar* platoonSize;
     int nPlatoons;
     int injectedCars;

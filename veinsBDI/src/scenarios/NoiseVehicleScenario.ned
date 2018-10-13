@@ -13,12 +13,12 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.traffic;
+package veinsbdi.scenarios;
 
-simple NoisePlatoonTrafficManager extends JoinBDITrafficManager {
+import org.car2x.veins.modules.application.platooning.scenarios.BBaseScenario;
+
+simple NoiseVehicleScenario extends BBaseScenario{
     parameters:
-        string noiseVType;
-        int numJoiners = default(1);
-        int noiseLanes = default(1);
-        @class(NoisePlatoonTrafficManager);
+        @display("i=block/app2");
+        @class(NoiseVehicleScenario);   
 }
