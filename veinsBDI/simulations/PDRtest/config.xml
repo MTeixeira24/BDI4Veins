@@ -10,7 +10,7 @@
         </AnalogueModel>
 		<AnalogueModel type="NakagamiFading">
             <parameter name="constM" type="bool" value="true"/>
-            <parameter name="m" type="double" value="0.5"/>
+            <parameter name="m" type="double" value="0.1"/>
         </AnalogueModel>
 		<!--<AnalogueModel type="SimpleObstacleShadowing">
 			<parameter name="carrierFrequency" type="double" value="5.890e+9"/>
