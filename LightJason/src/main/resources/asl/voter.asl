@@ -27,6 +27,18 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     //+preferedspeed(SpeedPreference);
     //generic/print("Agent ", MyName, " of type ", MyType ," started, has preference for speed: ", SpeedPreference ," and tolerance of: ", Tolerance).
 
++!set/initial/beliefs(PID, LID, PSPEED, CHAIR, MEMBERS) <-
+    !inplatoon(PID, LID);
+    !set/speed(PSPEED);
+    utility/storememberlist(MEMBERS);
+    !ischair(CHAIR).
+
++!set/prefered/path(LNODES) <-
+    generic/print("AUX");
+    generic/print(LNODES);
+    +preferedpath(LNODES);
+    generic/print(MyName, "preferred path is:", LNODES).
+
 +!set/prefered/speed(SPEED) <-
     +preferedspeed(SPEED);
     >>tolerance(Tolerance).
@@ -78,9 +90,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     VVECTOR = utility/break/tie/vote(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT, TIES);
     vote/store(VVECTOR).
 
-+!ischair(PID) <-
-    +isChair(PID).
-    //generic/print("Agent ", MyName, " is chair of platoon ", PID).
++!ischair(PID)
+    : PID < 0 <- true
+    : PID >= 0 <-   +isChair(PID); 
+                    generic/print("Agent ", MyName, " is chair of platoon ", PID).
 
 //Belief triggered plans for all voting agents
 +!foundplatoon(PID, LID) <-
@@ -113,6 +126,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 
 +!inplatoon(PID, LID) <-
+    +inplatoon(PID, LID);
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).
 
 

@@ -30,9 +30,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private static final long serialVersionUID = 3455114282889790324L;
 
     private CopyOnWriteArrayList<Integer> members;
-    private List<BitVector> m_bitVotes;
-    private List<Integer> m_candidates;
-    private int m_committeeSize;
+    private CopyOnWriteArrayList<Integer> membersSpeeds;
     /**
      * Stores an ordered linked list containing platoon Ids and their utilities
      */
@@ -60,6 +58,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                        @Nonnull String m_vType, String voteRule) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
+        membersSpeeds = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
         numberGenerator = ThreadLocalRandom.current();
@@ -427,6 +426,14 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private void storeMember(@Nonnull final Number memberId)
     {
         members.add(memberId.intValue());
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/storememberlist" )
+    private void storeMemberList(@Nonnull final List<Integer> members/*, @Nonnull final List<Integer> speeds*/)
+    {
+        this.members.addAll(members);
+        //this.membersSpeeds.addAll(speeds);
     }
 
     @IAgentActionFilter

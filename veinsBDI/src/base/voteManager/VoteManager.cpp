@@ -47,8 +47,15 @@ void VoteManager::initialize(int stage){
         std::ifstream jsonFile ("preferedSpeeds.json");
         jsonFile >> j;
         iterationSpeeds.reserve(platoonSize);
+        std::string paths = "Paths";
         for(int i = 0; i < platoonSize + 1; i++){
             iterationSpeeds.push_back(j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][i].get<int>());
+            std::vector<int> speeds;
+            for(int z = 0; z < 4; z++){
+                int aux = j[paths][std::to_string(platoonSize)][i][z].get<int>();
+                speeds.push_back(aux);
+            }
+            preferredPaths.push_back(speeds);
         }
         //testSpeed = 0;
 
@@ -58,6 +65,18 @@ void VoteManager::initialize(int stage){
 
 int VoteManager::getPreferredSpeed(int agentId){
     return iterationSpeeds[agentId];
+}
+
+std::vector<int> VoteManager::getElementsPreferredSpeed(std::vector<int> elementList){
+    std::vector<int> preferredSpeeds(elementList.size());
+    for(int i = 0; i < elementList.size(); i++){
+        preferredSpeeds.push_back(iterationSpeeds[elementList[i]]);
+    }
+    return preferredSpeeds;
+}
+
+std::vector<int> VoteManager::getPreferredPath(int agentId){
+    return preferredPaths[agentId];
 }
 
 void VoteManager::storeTimeStamp(double time, TimeStampAction action){

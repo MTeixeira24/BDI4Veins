@@ -126,13 +126,14 @@ protected:
             AWAITING_ACK_SUBMIT,
             AWAITING_RESULTS,
             CHAIR_ELECTION_END,
-            CHAIR_ELECTION_ONGOING
+            CHAIR_ELECTION_ONGOING,
+            CHAIR_SEARCHING_JOINERS,
+            JOINER_AWAITING_ACK_JOIN_REQUEST
      };
     /**
      *
      */
     void handleSelfMsg(cMessage* msg) override;
-private:
     /*
      * Store data about the leader
      */

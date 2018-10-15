@@ -24,11 +24,18 @@ def main(argv):
     data = {}
     stable = {}
     unstable = {}
+    nodePreferences = {}
     minspeed = 0
     maxspeed = 0
     minplatoonsize = 0
     maxplatoonsize = 0
     joiners = 0
+    paths = [
+        [2,3,6,8],
+        [2,4,7,8],
+        [2,4,5,6]
+    ]
+
     try:
       opts, args = getopt.getopt(argv,"hn:m:l:p:j:",["minspeed=","maxspeed=","minplatoonsize=", "maxplatoonsize=","joiners="])
     except getopt.GetoptError:
@@ -99,7 +106,15 @@ def main(argv):
         unstable.update({platoonSize: iterations})
 
     data.update({'Unstable': unstable})
+    
+    for platoonSize in range(minplatoonsize, maxplatoonsize + 1):
+        agentPathPreference = []
+        for agent in range(0, platoonSize + joiners):
+            agentPathPreference.append( paths[random.randint(0, 2)] )
+        nodePreferences.update({platoonSize: agentPathPreference})
 
+    print("Aux")
+    data.update({'Paths': nodePreferences})
 
     with open('preferedSpeeds.json', 'w') as outfile:
         json.dump(data, outfile, indent=4)

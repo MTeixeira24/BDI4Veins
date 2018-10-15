@@ -40,6 +40,14 @@ public:
      * Get this agents associated preferred speed
      */
     int getPreferredSpeed(int agentId);
+    /**
+     * Get htis agents associated preferred path
+     */
+    std::vector<int> getPreferredPath(int agentId);
+    /*
+     * Get a list of speeds for a given array of ids
+     */
+    std::vector<int> getElementsPreferredSpeed(std::vector<int> elementList);
 
 protected:
     void parseResponse(uint32_t msgLength) override;
@@ -56,6 +64,10 @@ private:
      * Information about the preferred speeds for the current iteration
      */
     std::vector<int> iterationSpeeds;
+    /**
+     * Store the preferred paths of the agents
+     */
+    std::vector<std::vector<int>> preferredPaths;
 };
 
 #endif /* BASE_VOTEMANAGER_VOTEMANAGER_H_ */
