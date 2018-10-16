@@ -39,10 +39,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private final CopyOnWriteArrayList<Integer> targetPlatoonIds;
     private double platoonSpeed = 0;
 
-    //Object voting group
-    CContext m_context;
-    //Object myvote
-    IRule votingRule;
+    private CContext m_context;
+    private IRule votingRule;
+    private double factor;
+    private String utility;
+    private int currentSpeed;
 
     private ThreadLocalRandom numberGenerator;
 
@@ -55,13 +56,16 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      * @param m_vType Vehicle type Id
      */
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id,
-                       @Nonnull String m_vType, String voteRule) {
+                       @Nonnull String m_vType, String voteRule, double m_factor, String m_utility) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
         membersSpeeds = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
         numberGenerator = ThreadLocalRandom.current();
+        factor = m_factor;
+        utility = m_utility;
+        currentSpeed = 100;
         switch (voteRule){
             case "Borda":{
                 votingRule = new CBorda();
@@ -87,18 +91,33 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     @IAgentActionFilter
     @IAgentActionName( name = "utility/save")
-    private void saveUtils(@Nonnull Number w, @Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil){
-        double oldUtil = calculateUtility(w.doubleValue(), platoonSpeed, t.doubleValue(), s.doubleValue());
+    private void saveUtils(@Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil, @Nonnull Number p_currentSpeed){
+        double oldUtil = calculateUtility(platoonSpeed, t.doubleValue(), s.doubleValue(), p_currentSpeed.intValue());
         ((CVoterAgentManager)agentManager).getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue());
     }
 
     @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/utility" )
-    private double calculateUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
-        double utility = welfareBonus / ( 1 + Math.pow(Math.abs( ( (speed - preferedSpeed)/(30*tolerance) ) ), 4) );
-        /*Make the distinction later on data processing. Returning one will cause abnormal voting:
-        i.e. 110 -> 1.1 120 -> 1.05 leads to voting as [4, 5] due to how sort() and the getVote() method works in Borda*/
-        return utility ;//> 1 ? 1 : utility;
+    private double calculateUtility(double offeredSpeed, double factor, double preferredSpeed, int currentSpeed){
+
+        switch (utility){
+            case "khan":{
+                return khanUtilility(currentSpeed, (int)offeredSpeed, (int)preferredSpeed, factor);
+            }
+            case "distribution":{
+                return normalUtility(1.1, offeredSpeed, factor, preferredSpeed);
+            }
+            default:
+                return -1;
+        }
+    }
+
+    private double normalUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
+        return  welfareBonus / ( 1 + Math.pow(Math.abs( ( (speed - preferedSpeed)/(30*tolerance) ) ), 4) );
+    }
+
+    private double khanUtilility(int currentSpeed, int offeredSpeed, int desiredSpeed, double joinFactor){
+        return  1 - (Math.abs( desiredSpeed - offeredSpeed )/desiredSpeed) - joinFactor*(Math.abs(currentSpeed/offeredSpeed)/currentSpeed);
     }
 
 
@@ -109,6 +128,14 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     {
         return 0.7;//0.4 + (numberGenerator.nextInt(4) * 0.1);
     }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/get/factor" )
+    private double getFactor()
+    {
+        return factor;
+    }
+
 
     @IAgentActionFilter
     @IAgentActionName( name = "transmit/self/searchforplatoon" )
@@ -191,12 +218,12 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      * @param p_candidates A vector containing the possible candidates to vote on
      * @param p_tolerance This agents tolerance to preference deviations
      * @param p_speed This agents preferred speed
-     * @param p_welfare Utility bonus for performing eco-driving
+     * @param p_currentSpeed Current cruising speed
      * @return A vote vector, where vote casted occupies the same index as the candidate in the candidates vector
      */
     @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/vote/vector" )
-    private List<Integer> generateVoteVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_welfare, List<Double> p_context){
+    private List<Integer> generateVoteVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_currentSpeed, List<Double> p_context){
         ArrayList<Integer> l_candidates = new ArrayList<>(p_candidates.size());
         short l_context = (short)p_context.get(0).doubleValue();
         switch (l_context ){
@@ -212,7 +239,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }
         List<CUtilityPair> utils = new ArrayList<>(l_candidates.size());
         for(int i = 0; i < l_candidates.size(); i++) {
-            double util = calculateUtility(p_welfare.doubleValue(), l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue());
+            double util = calculateUtility(l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue(), p_currentSpeed.intValue());
             utils.add(new CUtilityPair(i, util));
         }
         List<Integer> votes = votingRule.getVote(utils);
@@ -221,7 +248,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     @IAgentActionFilter
     @IAgentActionName( name = "utility/break/tie/vote" )
-    private List<Integer> generateTieBreakerVote(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_welfare, List<Double> p_context, List<Integer> p_ties){
+    private List<Integer> generateTieBreakerVote(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_currentSpeed, List<Double> p_context, List<Integer> p_ties){
         ArrayList<Integer> l_candidates = new ArrayList<>(p_candidates.size());
         short l_context = (short)p_context.get(0).doubleValue();
         switch (l_context ){
@@ -237,7 +264,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }
         List<CUtilityPair> utils = new ArrayList<>(l_candidates.size());
         for(int i = 0; i < l_candidates.size(); i++) {
-            double util = calculateUtility(p_welfare.doubleValue(), l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue());
+            double util = calculateUtility(l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue(), p_currentSpeed.intValue());
             utils.add(new CUtilityPair(i, util));
         }
         List<Integer> votes = votingRule.getTieBreakerVote(utils, p_ties);
@@ -373,8 +400,8 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      */
     @IAgentActionFilter
     @IAgentActionName( name = "utility/store/platoon")
-    private void storeTargetPlatoon(@Nonnull Number p_platoonId, @Nonnull Number p_platoonSpeed, @Nonnull Number p_leaderId,@Nonnull Number tolerance, @Nonnull Number p_preferredSpeed){
-        double util = calculateUtility(1, p_platoonSpeed.doubleValue() * 3.2, tolerance.doubleValue(), p_preferredSpeed.doubleValue());
+    private void storeTargetPlatoon(@Nonnull Number p_platoonId, @Nonnull Number p_platoonSpeed, @Nonnull Number p_leaderId,@Nonnull Number tolerance, @Nonnull Number p_preferredSpeed, @Nonnull Number p_currentSpeed){
+        double util = calculateUtility(p_platoonSpeed.intValue(), tolerance.doubleValue(), p_preferredSpeed.doubleValue(), p_currentSpeed.intValue());
         PlatoonUtilities pu = new PlatoonUtilities(p_platoonId.intValue(), util, p_leaderId.intValue());
         synchronized (targetPlatoons){
             if(!targetPlatoonIds.contains(p_platoonId.intValue())){
@@ -409,9 +436,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/predictplatoonspeed" )
     private double predictPlatoonSpeed(@Nonnull final Number jspeed,  @Nonnull final Number jtolerance, @Nonnull final Number pspeed)
     {
-        double expectedSpeedVariance = pspeed.doubleValue() + ((jspeed.doubleValue() - pspeed.doubleValue())*(1-jtolerance.doubleValue()));
-
-        return expectedSpeedVariance;
+        return pspeed.doubleValue() + ((jspeed.doubleValue() - pspeed.doubleValue())*(1-jtolerance.doubleValue()));
     }
 
     @IAgentActionFilter

@@ -143,9 +143,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         generic/print("Agent ", MyName, "rejected by all. Aborting negotiations").
 
 +!pushplatoon(PID, PSPEED, LID) <-
-    >>tolerance(Tolerance);
+    >>factor(Factor);
     >>preferedspeed(Speed);
-    utility/store/platoon(PID, PSPEED, LID, Tolerance, Speed).
+    >>currentspeed(CurrentSpeed);
+    utility/store/platoon(PID, PSPEED, LID, Factor, Speed, CurrentSpeed).
 
 +!startrequests() <- 
     PID = utility/next/platoon();

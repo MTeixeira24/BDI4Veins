@@ -27,14 +27,14 @@
  * <pre>
  * packet Ack extends NegotiationMessage
  * {
- *     string ackType;
+ *     int ackType;
  * }
  * </pre>
  */
 class Ack : public ::NegotiationMessage
 {
   protected:
-    ::omnetpp::opp_string ackType;
+    int ackType;
 
   private:
     void copy(const Ack& other);
@@ -53,8 +53,8 @@ class Ack : public ::NegotiationMessage
     virtual void parsimUnpack(omnetpp::cCommBuffer *b) override;
 
     // field getter/setter methods
-    virtual const char * getAckType() const;
-    virtual void setAckType(const char * ackType);
+    virtual int getAckType() const;
+    virtual void setAckType(int ackType);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const Ack& obj) {obj.parsimPack(b);}

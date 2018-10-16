@@ -124,10 +124,10 @@ LightJasonBuffer JasoNetProtocol::query(){
     uint16_t action = QUERY;
     return LightJasonBuffer() << size << action;
 }
-LightJasonBuffer JasoNetProtocol::setSimParamenters(std::string rule, std::string type, int platoonSize, int iteration){
+LightJasonBuffer JasoNetProtocol::setSimParameters(std::string rule, std::string type, int platoonSize, int iteration, double factor, std::string utilityFunction){
     uint32_t size = 32;
     uint16_t action = SET_SIM_PARAMS;
-    return LightJasonBuffer() << size << action << platoonSize << rule << type << iteration;
+    return LightJasonBuffer() << size << action << platoonSize << rule << type << iteration << factor << utilityFunction;
 }
 
 }

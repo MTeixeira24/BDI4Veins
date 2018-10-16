@@ -18,5 +18,5 @@ cplusplus {{
 packet NegotiationMessage;
 
 packet Ack extends NegotiationMessage {
-    string ackType;
+    int ackType;
 }

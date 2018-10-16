@@ -23,4 +23,6 @@ simple voteManager extends LightJasonManager{
         string platoon_type = default("Stable");
         int platoon_size = default(4);
         int iteration = default(1);
+        double factor = default(0.7);
+		string utilityFunction = default("distribution");
 }

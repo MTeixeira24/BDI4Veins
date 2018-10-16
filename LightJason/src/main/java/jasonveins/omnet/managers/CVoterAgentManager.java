@@ -14,6 +14,8 @@ import java.io.FileInputStream;
 public class CVoterAgentManager extends AgentManager {
 
     private String voteRule;
+    private double factor;
+    private String utility;
 
     /**
      * Class constructor
@@ -35,7 +37,7 @@ public class CVoterAgentManager extends AgentManager {
             switch(vType){
                 case "vVoter":
                     if(p_aslFile.equals(resourceFolder+"voter.asl") || p_aslFile.equals(resourceFolder+"iterativeVoter.asl")){
-                        l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, voteRule);
+                        l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, voteRule, factor, utility);
                     }else{
                         throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected FuelVoter.asl, SpeedVoter.asl or voter.asl");
                     }
@@ -50,10 +52,16 @@ public class CVoterAgentManager extends AgentManager {
         return l_ag;
     }
 
+    /**
+     *
+     * @param params platoonSize, iteration, rule, type, factor, utility (int, int, String, String, double, String)
+     */
     @Override
-    public void setSimParams(int platoonSize, int iteration, String rule, String type) {
-        getStats().setSimParams(platoonSize, iteration, rule, type);
-        voteRule = rule;
+    public void setSimParams(Object... params) {
+        getStats().setSimParams((int)params[0], (int)params[1], (String)params[2], (String)params[3]);
+        voteRule = (String)params[2];
+        factor = (double)params[4];
+        utility = (String)params[5];
     }
 
     public CJoinStatistics getStats(){

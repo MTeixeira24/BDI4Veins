@@ -36,7 +36,8 @@ void VoteManager::initialize(int stage){
         int platoonSize = par("platoon_size").intValue();
         int iteration = par("iteration").intValue();
 
-        writeToSocket(jp.setSimParamenters(par("vote_rule").stdstringValue(), platoonType, platoonSize, iteration).getBuffer());
+        writeToSocket(jp.setSimParameters(par("vote_rule").stdstringValue(), platoonType, platoonSize,
+                iteration, par("factor").doubleValue(), par("utilityFunction").stdstringValue()).getBuffer());
 
         char buff[FILENAME_MAX];
         getcwd( buff, FILENAME_MAX );
@@ -70,7 +71,7 @@ int VoteManager::getPreferredSpeed(int agentId){
 std::vector<int> VoteManager::getElementsPreferredSpeed(std::vector<int> elementList){
     std::vector<int> preferredSpeeds(elementList.size());
     for(int i = 0; i < elementList.size(); i++){
-        preferredSpeeds.push_back(iterationSpeeds[elementList[i]]);
+        preferredSpeeds[i] = iterationSpeeds[elementList[i]];
     }
     return preferredSpeeds;
 }

@@ -36,7 +36,7 @@ public:
     /*Build a request to query for decisions*/
     LightJasonBuffer query();
     /*Build a request to set simulation parameters*/
-    LightJasonBuffer setSimParamenters(std::string, std::string, int, int);
+    LightJasonBuffer setSimParameters(std::string, std::string, int, int, double, std::string);
 };
 
 }

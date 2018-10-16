@@ -94,6 +94,12 @@ void VotingAppl::setVote(std::vector<int> votes){
     vote = votes;
 }
 
+void VotingAppl::backupMessage(NegotiationMessage* msg){
+    if(copy == NULL)
+        delete copy;
+    copy = msg->dup();
+}
+
 NotifyVote* VotingAppl::fillNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates){
     NotifyVote* msg = new NotifyVote("NotifyVote");
     msg->setVehicleId(myId);
@@ -149,7 +155,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     Enter_Method_Silent();
     RequestJoinPlatoonMessage* msg = new RequestJoinPlatoonMessage("RequestJoinPlatoonMessage");
     targetLeaderId = destinationId;
-    negotiationState = VoteState::AWAITING_RESULTS;
+    negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(myId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
@@ -157,6 +163,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     msg->setDestinationId(destinationId);
     msg->setPreferedSpeed(preferedSpeed);
     msg->setTolerance(tolerance);
+    backupMessage(msg);
     sendUnicast(msg, destinationId);
     //Wait to seconds to request results if no response is heard
     awaitAckTimer = new cMessage("awaitAckTimer");
@@ -211,9 +218,9 @@ void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
     GeneralPlexeAgentAppl::onPlatoonBeacon(pb);
 }
 
-void VotingAppl::sendAck(std::string ack_type, int destination){
+void VotingAppl::sendAck(AckType ack_type, int destination){
     Ack* ack = new Ack("Ack");
-    ack->setAckType(ack_type.c_str());
+    ack->setAckType((int)ack_type);
     ack->setDestinationId(destination);
     ack->setKind(NEGOTIATION_TYPE);
     ack->setVehicleId(myId);
@@ -230,6 +237,13 @@ void VotingAppl::sendResultRequest(int originId, int targetId){
     sendUnicast(msg, targetId);
 }
 
+void VotingAppl::fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId){
+    msg->setDestinationId(targetId);
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(originId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+}
+
 void VotingAppl::handleLowerMsg(cMessage* msg){
     UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
 
@@ -238,46 +252,34 @@ void VotingAppl::handleLowerMsg(cMessage* msg){
 
     if (enc->getKind() == NEGOTIATION_TYPE) {
         NegotiationMessage* nm = check_and_cast<NegotiationMessage*>(unicast->decapsulate());
-        if (RequestJoinPlatoonMessage* msg = dynamic_cast<RequestJoinPlatoonMessage*>(nm)) {
-            handleRequestToJoinNegotiation(msg);
-            delete msg;
-        }else if (SubmitVote* msg = dynamic_cast<SubmitVote*>(nm)) {
-            handleSubmitVote(msg);
-            delete msg;
-        }else if (NotifyResults* msg = dynamic_cast<NotifyResults*>(nm)) {
-            handleNotificationOfResults(msg);
-            delete msg;
-        }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
-            if((msg->getDestinationId() == -1) || (msg->getDestinationId() == myId)){
-                handleNotifyVote(msg);
-            }
-            delete msg;
-        }else if(RequestResults* msg = dynamic_cast<RequestResults*>(nm)) {
-            handleRequestResults(msg);
-        } else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
-            handleAck(msg);
-            delete msg;
-        }
-        delete unicast;
-    }else if (searchingForPlatoon){
-        if(enc->getKind() == BaseProtocol::BEACON_TYPE){
-            PlatooningBeacon* pb = check_and_cast<PlatooningBeacon*>(enc);
-            int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(pb->getVehicleId());
-            if( platoonId >= 0 ){
-                BeliefModel platoonBelief;
-                platoonBelief.setBelief("pushplatoon");
-                platoonBelief.pushInt(&platoonId);
-                double platoonSpeed = pb->getSpeed();
-                platoonBelief.pushDouble(&platoonSpeed);
-                int leaderId = pb->getVehicleId();
-                platoonBelief.pushInt(&leaderId);
-                manager->sendInformationToAgents(myId, &platoonBelief);
-            }
-        }
+        delegateNegotiationMessage(nm);
         delete unicast;
     }
     else {
         GeneralPlexeAgentAppl::handleLowerMsg(msg);
+    }
+}
+
+void VotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
+    if (RequestJoinPlatoonMessage* msg = dynamic_cast<RequestJoinPlatoonMessage*>(nm)) {
+        handleRequestToJoinNegotiation(msg);
+        delete msg;
+    }else if (SubmitVote* msg = dynamic_cast<SubmitVote*>(nm)) {
+        handleSubmitVote(msg);
+        delete msg;
+    }else if (NotifyResults* msg = dynamic_cast<NotifyResults*>(nm)) {
+        handleNotificationOfResults(msg);
+        delete msg;
+    }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
+        if((msg->getDestinationId() == -1) || (msg->getDestinationId() == myId)){
+            handleNotifyVote(msg);
+        }
+        delete msg;
+    }else if(RequestResults* msg = dynamic_cast<RequestResults*>(nm)) {
+        handleRequestResults(msg);
+    } else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
+        handleAck(msg);
+        delete msg;
     }
 }
 
@@ -340,7 +342,7 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     voteSubmission.pushInt(&origin);
     manager->sendInformationToAgents(myId, &voteSubmission);
     //Got the vote. Notify of successful delivery
-    sendAck("SUBMIT_VOTE", msg->getVehicleId());
+    sendAck(AckType::VOTE_RECEIVED, msg->getVehicleId());
     received_votes[msg->getVehicleId()] = true;
 }
 
@@ -376,7 +378,8 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
 }
 
 void VotingAppl::handleAck(const Ack* msg){
-    if(strcmp("SUBMIT_VOTE", msg->getAckType()) == 0){
+    AckType type = (AckType)(msg->getAckType());
+    if(type == AckType::VOTE_RECEIVED){
         //negotiationState = VoteState::NONE;
         negotiationState = VoteState::AWAITING_RESULTS;
         //Wait a around 500ms for the results, if there are none send a request for results

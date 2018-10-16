@@ -374,7 +374,7 @@ public class AgentManager extends Thread {
         return stats;
     }
 
-    public void setSimParams(int iteration, int run, String rule, String type) {
+    public void setSimParams(Object... params) {
         return;
     }
 }

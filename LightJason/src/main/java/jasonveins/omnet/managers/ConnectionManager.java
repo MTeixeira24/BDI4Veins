@@ -47,7 +47,7 @@ public final class ConnectionManager extends Thread {
     private void startServer() throws IOException {
         //***************************************/
         while(true){
-            am = new CVoterAgentManager("voter.asl", this);
+            am = new CVoterAgentManager("iterativeVoter.asl", this);
             am_latch = am.getLatch();
             am.start();
             try{
@@ -172,7 +172,9 @@ public final class ConnectionManager extends Thread {
                 String rule = extractString(buffer);
                 String type = extractString(buffer);
                 int iteration = buffer.getInt();
-                am.setSimParams(platoonSize, iteration, rule, type);
+                double factor = buffer.getDouble();
+                String utility = extractString(buffer);
+                am.setSimParams(platoonSize, iteration, rule, type, factor, utility);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x06, 0x01};
                 break;
             }

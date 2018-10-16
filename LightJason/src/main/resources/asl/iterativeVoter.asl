@@ -7,29 +7,27 @@ minimumUtility(0.8).
 
 //Definition of rules
 generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
-    :-  >>tolerance(Tolerance); >>preferedspeed(SpeedPreference);
-        PredictedUtility = utility/predictplatoonspeed(JSPEED, JPREFERENCE, SpeedPreference, Tolerance, PSPEED).
+    :-  >>factor(Factor); >>preferedspeed(SpeedPreference);
+        PredictedUtility = utility/predictplatoonspeed(JSPEED, JPREFERENCE, SpeedPreference, Factor, PSPEED).
 
 //Plan definition
 +!main <-
-    Tolerance = utility/generatetolerance();
-    +tolerance(Tolerance).
+    Factor = utility/get/factor();
+    +factor(Factor).
 
-+!set/initial/beliefs(PID, LID, PSPEED, CHAIR, MEMBERS, SPEEDS) <-
++!set/initial/beliefs(PID, LID, PSPEED, CHAIR, MEMBERS) <-
     !inplatoon(PID, LID);
     !set/speed(PSPEED);
     utility/storememberlist(MEMBERS);
     !ischair(CHAIR).
 
 +!set/prefered/path(LNODES) <-
-    generic/print("AUX");
-    generic/print(LNODES);
     +preferedpath(LNODES);
     generic/print(MyName, "preferred path is:", LNODES).
 
 +!set/prefered/speed(SPEED) <-
     +preferedspeed(SPEED);
-    >>tolerance(Tolerance).
+    >>factor(Factor).
 
 +!lookforplatoon() <-
     generic/print("Agent ", MyName, " have intention of searching for platoon").
@@ -48,8 +46,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handle/vote/notification(CANDIDATES, CONTEXT) <-
     generic/print("Agent", MyName, " got notification to vote on a join: ", CANDIDATES);
-    >>tolerance(Tolerance); >>preferedspeed(Speed);
-    VVECTOR = utility/generate/vote/vector(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT);
+    >>factor(Factor); >>preferedspeed(Speed); >>currentspeed(CurrentSpeed);
+    VVECTOR = utility/generate/vote/vector(CANDIDATES, Factor, Speed, CurrentSpeed, CONTEXT);
     generic/print(VVECTOR);
     !sendvote(VVECTOR).
 
@@ -72,8 +70,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handle/tie(CANDIDATES, CONTEXT, TIES) <-
     generic/print("There has been a tie. Submitting my vote to tie brake");
-    >>tolerance(Tolerance); >>preferedspeed(Speed);
-    VVECTOR = utility/break/tie/vote(CANDIDATES, Tolerance, Speed, 1.1, CONTEXT, TIES);
+    >>factor(Factor); >>preferedspeed(Speed); >>currentspeed(CurrentSpeed);
+    VVECTOR = utility/break/tie/vote(CANDIDATES, Factor, Speed, CurrentSpeed, CONTEXT, TIES);
     vote/store(VVECTOR).
 
 +!ischair(PID)
@@ -89,19 +87,22 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     +targetplatoonjoin(PID);
     +leaderid(LID);
     >>preferedspeed(SPEED);
-    >>tolerance(TOLERANCE);
-    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, TOLERANCE).
+    >>factor(Factor);
+    transmit/other/sendjoinplatoonrequest(PID, LID, SPEED, Factor).
 
 +!maneuver/complete(L) <-
     utility/storemember(L);
     open/vote("speed", [0]).
     
++!update/speed(SPEED) 
+    <- >>currentspeed(S); -currentspeed(S); +currentspeed(SPEED)
+    <- ~>>currentspeed(_); +currentspeed(SPEED).
 
 +!handle/results(VALUE) <-
-    >>preferedspeed(Speed); >>tolerance(Tolerance);
-    Util = utility/generate/utility(1.1, VALUE, Tolerance, Speed);
-    generic/print(VALUE, Tolerance, Speed, Util);
-    utility/save(1.1, Tolerance, Speed, Util); //Used to gather data
+    >>preferedspeed(PreferredSpeed); >>factor(Factor); >>currentspeed(CurrentSpeed);
+    Util = utility/generate/utility(VALUE, Factor, PreferredSpeed, CurrentSpeed);
+    generic/print(VALUE, Factor, PreferredSpeed, Util);
+    utility/save(Factor, PreferredSpeed, CurrentSpeed, Util); //Used to gather data
     !decide/stay(Util).
 
 +!addmember(L) <-
@@ -121,14 +122,16 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     : PID >= 0 <-
         LID = utility/get/leader(PID);
         generic/print("Agent ", MyName, "next platoon is", PID, "whos leader is:", LID);
-        !attemptjoin(PID, LID)
+        !attemptjoindep(PID, LID)
     : PID < 0 <-
         generic/print("Agent ", MyName, "rejected by all. Aborting negotiations").
 
 +!pushplatoon(PID, PSPEED, LID) <-
-    >>tolerance(Tolerance);
+    >>factor(Factor);
     >>preferedspeed(Speed);
-    utility/store/platoon(PID, PSPEED, LID, Tolerance, Speed).
+    >>currentspeed(CurrentSpeed);
+    generic/print("PushPlatoon");
+    utility/store/platoon(PID, PSPEED, LID, Factor, Speed, CurrentSpeed).
 
 +!startrequests() <- 
     PID = utility/next/platoon();

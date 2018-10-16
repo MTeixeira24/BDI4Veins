@@ -38,14 +38,22 @@ public:
     /**
     * Data structure for the leader to hold data about the election without having to query the agent
     */
-   struct VoteData{
+    struct VoteData{
        int contextId;
        int currentResult;
        int joinerId;
        int expectedVoteVectorSize;
        std::vector<double> contextArgs;
        std::vector<int> candidates;
-   };
+    };
+
+    /**
+    * Type identifers for Acks
+    */
+    enum class AckType : size_t {
+       JOIN_REQUEST_RECEIVED,
+       VOTE_RECEIVED
+    };
     /**
      * Send a request to a platoon leader to join the platoon
      *
@@ -73,7 +81,7 @@ public:
     /**
      * Send ack messages to confirm arrival of message
      */
-    void sendAck(std::string, int);
+    void sendAck(AckType, int);
     /**
      * Save the vote in the controller for future use
      */
@@ -99,7 +107,7 @@ protected:
      *
      * @param msg The message received from the potential joiner
      */
-    void handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg);
+    virtual void handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg);
 
     /**
      *
@@ -116,11 +124,19 @@ protected:
     /**
      * Process received Ack messages
      */
-    void handleAck(const Ack* msg);
+    virtual void handleAck(const Ack* msg);
     /**
      * If a vehicle hasnt received the results, send it back
      */
     void handleRequestResults(RequestResults* msg);
+    /**
+     * Fill a negotiation message with the standard information
+     */
+    void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId);
+    /**
+     *
+     */
+    virtual void delegateNegotiationMessage(NegotiationMessage* nm);
     enum class VoteState : size_t {
             NONE,
             AWAITING_ACK_SUBMIT,
@@ -134,6 +150,10 @@ protected:
      *
      */
     void handleSelfMsg(cMessage* msg) override;
+    /**
+     * Save a copy of a message for resending if needed
+     */
+    void backupMessage(NegotiationMessage* msg);
     /*
      * Store data about the leader
      */
@@ -150,6 +170,10 @@ protected:
      * Self message of the leader to verify if all votes are received
      */
     cMessage* voteTimer = NULL;
+    /**
+     *
+     */
+    NegotiationMessage* copy = NULL;
     /**
      * Store this vehicles votes for resubmitting
      */

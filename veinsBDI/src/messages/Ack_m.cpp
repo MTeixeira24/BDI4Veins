@@ -181,6 +181,7 @@ Register_Class(Ack)
 
 Ack::Ack(const char *name, short kind) : ::NegotiationMessage(name,kind)
 {
+    this->ackType = 0;
 }
 
 Ack::Ack(const Ack& other) : ::NegotiationMessage(other)
@@ -217,12 +218,12 @@ void Ack::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->ackType);
 }
 
-const char * Ack::getAckType() const
+int Ack::getAckType() const
 {
-    return this->ackType.c_str();
+    return this->ackType;
 }
 
-void Ack::setAckType(const char * ackType)
+void Ack::setAckType(int ackType)
 {
     this->ackType = ackType;
 }
@@ -340,7 +341,7 @@ const char *AckDescriptor::getFieldTypeString(int field) const
         field -= basedesc->getFieldCount();
     }
     static const char *fieldTypeStrings[] = {
-        "string",
+        "int",
     };
     return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
 }
@@ -409,7 +410,7 @@ std::string AckDescriptor::getFieldValueAsString(void *object, int field, int i)
     }
     Ack *pp = (Ack *)object; (void)pp;
     switch (field) {
-        case 0: return oppstring2string(pp->getAckType());
+        case 0: return long2string(pp->getAckType());
         default: return "";
     }
 }
@@ -424,7 +425,7 @@ bool AckDescriptor::setFieldValueAsString(void *object, int field, int i, const 
     }
     Ack *pp = (Ack *)object; (void)pp;
     switch (field) {
-        case 0: pp->setAckType((value)); return true;
+        case 0: pp->setAckType(string2long(value)); return true;
         default: return false;
     }
 }

@@ -25,6 +25,10 @@ void RouteVotingAppl::initialize(int stage){
         BeliefModel dp("set/prefered/path");
         dp.pushIntArray(desiredPath);
         manager->sendInformationToAgents(myId, &dp);
+        BeliefModel us("update/speed");
+        int currentSpeed = mobility->getSpeed() * 3.6;
+        us.pushInt(&currentSpeed);
+        manager->sendInformationToAgents(myId, &us);
         if(getPlatoonRole() == PlatoonRole::NONE) {
             //Set the belief in the agent that they are looking for platoon proposals
             if(par("engageNegotiations").boolValue()){
@@ -32,9 +36,6 @@ void RouteVotingAppl::initialize(int stage){
                 bm.setBelief("lookforplatoon");
                 manager->sendInformationToAgents(myId,&bm);
                 searchingForPlatoon = true;
-                searchTimer = new cMessage();
-                //Search for platoons for a second
-                scheduleAt(simTime() + SimTime(1), searchTimer);
             }
         }else{
             //This a vehicle belonging to a platoon
@@ -54,15 +55,106 @@ void RouteVotingAppl::initialize(int stage){
                 for (uint32_t i = 0; i < members.size(); i++){
                     received_votes[members[i]] = false;
                 }
+                sendProposal = new cMessage("sendProposal");
+                scheduleAt(simTime() + 0.5, sendProposal);
+                negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
             }
             pbelief.pushInt(&chair);
             pbelief.pushIntArray(members);
             manager->sendInformationToAgents(myId, &pbelief);
         }
+        updateCurrentSpeed = new cMessage("updateCurrentSpeed");
+        scheduleAt(simTime() + 1, updateCurrentSpeed);
     }
 }
 
+void RouteVotingAppl::sendJoinProposal(){
+    JoinProposal* msg = new JoinProposal("JoinProposal");
+    fillNegotiationMessage(msg, myId, -1);
+    msg->setPlatoonId(positionHelper->getPlatoonId());
+    std::vector<int> memberSpeeds = ((VoteManager*)manager)->getElementsPreferredSpeed(positionHelper->getPlatoonFormation());
+    msg->setMemberSpeedsArraySize(memberSpeeds.size());
+    for(uint32_t i = 0; i < memberSpeeds.size(); i++){
+        msg->setMemberSpeeds(i, memberSpeeds[i]);
+    }
+    sendUnicast(msg, -1);
+}
 
-void RouteVotingAppl::handleLowerMsg(cMessage* msg){
-    VotingAppl::handleLowerMsg(msg);
+
+void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
+    if(searchingForPlatoon){
+        if(JoinProposal* jp = dynamic_cast<JoinProposal*>(nm)){
+            int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(jp->getVehicleId());
+            if( platoonId >= 0 ){
+                BeliefModel platoonBelief;
+                platoonBelief.setBelief("pushplatoon");
+                platoonBelief.pushInt(&platoonId);
+                double speedSum = 0;
+                for(uint32_t i = 0; i < jp->getMemberSpeedsArraySize(); i++){
+                    speedSum += jp->getMemberSpeeds(i);
+                }
+                int platoonSpeed = speedSum / jp->getMemberSpeedsArraySize();
+                platoonBelief.pushInt(&platoonSpeed);
+                int leaderId = jp->getVehicleId();
+                platoonBelief.pushInt(&leaderId);
+                manager->sendInformationToAgents(myId, &platoonBelief);
+
+                searchingForPlatoon = false;
+                BeliefModel sendRequests;
+                sendRequests.setBelief("startrequests");
+                manager->sendInformationToAgents(myId, &sendRequests);
+                negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
+            }
+        }
+    }
+    VotingAppl::delegateNegotiationMessage(nm);
+}
+
+void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
+    if(negotiationState == VoteState::CHAIR_SEARCHING_JOINERS){
+        negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
+        VotingAppl::handleRequestToJoinNegotiation(msg);
+    }
+    sendAck(AckType::JOIN_REQUEST_RECEIVED, msg->getVehicleId());
+}
+
+void RouteVotingAppl::handleAck(const Ack* msg){
+    AckType type = (AckType)(msg->getAckType());
+    if((type == AckType::JOIN_REQUEST_RECEIVED) && (negotiationState==VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST)){
+        negotiationState = VoteState::AWAITING_RESULTS;
+        delete awaitAckTimer;
+        std::random_device rd{};
+        std::mt19937 gen{rd()};
+        std::normal_distribution<double> distribution(50,2.0);
+        double delay = distribution(gen) * 0.01;
+        awaitAckTimer = new cMessage("awaitAckTimer");
+        scheduleAt(simTime() + delay, awaitAckTimer);
+    }
+}
+
+void RouteVotingAppl::handleSelfMsg(cMessage* msg){
+    if(msg == sendProposal){
+        delete msg;
+        sendJoinProposal();
+        sendProposal = new cMessage("sendProposal");
+        scheduleAt(simTime() + 0.5, sendProposal);
+    }else if(msg == awaitAckTimer){
+        switch(negotiationState){
+        case VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST:{
+            RequestJoinPlatoonMessage* resend = dynamic_cast<RequestJoinPlatoonMessage*>(copy->dup());
+            sendUnicast(resend, resend->getDestinationId());
+            break;
+        }
+        default:
+            VotingAppl::handleSelfMsg(msg);
+            break;
+        }
+    }else if(msg == updateCurrentSpeed){
+        BeliefModel us("update/speed");
+        int speed = mobility->getSpeed() * 3.6;
+        us.pushInt(&speed);
+        manager->sendInformationToAgents(myId, &us);
+    }else{
+        VotingAppl::handleSelfMsg(msg);
+    }
 }
