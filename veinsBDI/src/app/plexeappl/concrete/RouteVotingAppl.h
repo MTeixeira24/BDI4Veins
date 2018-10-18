@@ -14,10 +14,12 @@
 
 class RouteVotingAppl : public VotingAppl {
 public:
-    RouteVotingAppl(){};
+    RouteVotingAppl() : cycle(VoteCycle::NONE){};
     virtual ~RouteVotingAppl(){}
     /** override from the normal appl */
     virtual void initialize(int stage) override;
+    virtual void finalizeManeuver(int joinerId) override;
+    virtual void sendVoteResults(int winnerValue, int joinerId) override;
 protected:
     /**
      * Fill out and send a proposal message
@@ -36,6 +38,10 @@ protected:
      */
     cMessage* updateCurrentSpeed;
     /*
+     *
+     */
+    cMessage* startSpeedVoteDelay;
+    /*
      * Override from voting appl
      */
     virtual void handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg) override;
@@ -47,6 +53,15 @@ protected:
      *
      */
     virtual void delegateNegotiationMessage(NegotiationMessage* nm) override;
+    /**
+     * Store the current cycle of voting
+     */
+    enum class VoteCycle : size_t {
+            NONE,
+            ROUTE_VOTE,
+            SPEED_VOTE
+     };
+    VoteCycle cycle;
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_ROUTEVOTINGAPPL_H_ */

@@ -77,7 +77,7 @@ public:
     /**
      *
      */
-    void sendVoteResults(int winnerValue, int joinerId);
+    virtual void sendVoteResults(int winnerValue, int joinerId);
     /**
      * Send ack messages to confirm arrival of message
      */

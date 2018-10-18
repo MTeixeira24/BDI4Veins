@@ -76,7 +76,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!ischair(PID)
     : PID < 0 <- true
-    : PID >= 0 <-   +isChair(PID); 
+    : PID >= 0 <-   +isChair(PID); utility/get/nodes();
                     generic/print("Agent ", MyName, " is chair of platoon ", PID).
 
 +!foundplatoon(PID, LID) <-
@@ -92,8 +92,15 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!maneuver/complete(L) <-
     utility/storemember(L);
-    open/vote("speed", [0]).
+    open/vote("speed", [0]). //"node, speed"
     
++!start/vote/node(L) <-
+    utility/storemember(L);
+    open/vote("node", [0]).
+
++!start/vote/speed() <-
+    open/vote("speed", [0]).
+
 +!@update/speed(SPEED) 
     <- >>currentspeed(S); -currentspeed(S); +currentspeed(SPEED)
     <- ~>>currentspeed(_); +currentspeed(SPEED).

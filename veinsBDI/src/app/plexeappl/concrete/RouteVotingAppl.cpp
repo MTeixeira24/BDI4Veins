@@ -68,6 +68,13 @@ void RouteVotingAppl::initialize(int stage){
     }
 }
 
+void RouteVotingAppl::finalizeManeuver(int joinerId){
+    BeliefModel mnv("start/vote/node");
+    mnv.pushInt(&joinerId);
+    manager->sendInformationToAgents(myId, &mnv);
+    cycle = VoteCycle::ROUTE_VOTE;
+}
+
 void RouteVotingAppl::sendJoinProposal(){
     JoinProposal* msg = new JoinProposal("JoinProposal");
     fillNegotiationMessage(msg, myId, -1);
@@ -80,6 +87,13 @@ void RouteVotingAppl::sendJoinProposal(){
     sendUnicast(msg, -1);
 }
 
+
+void RouteVotingAppl::sendVoteResults(int winnerValue, int joinerId){
+    VotingAppl::sendVoteResults(winnerValue, joinerId);
+    //Set a delay to start the speed vote
+    startSpeedVoteDelay = new cMessage("startSpeedVoteDelay");
+    scheduleAt(simTime() + 0.1, startSpeedVoteDelay);
+}
 
 void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
     if(searchingForPlatoon){
@@ -151,7 +165,11 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
         int speed = mobility->getSpeed() * 3.6;
         us.pushInt(&speed);
         manager->sendInformationToAgents(myId, &us);
-    }else{
+    }else if(msg == startSpeedVoteDelay){
+        BeliefModel mnv("start/vote/speed");
+        manager->sendInformationToAgents(myId, &mnv);
+        cyle = VoteCycle::ROUTE_VOTE;
+    }  else{
         VotingAppl::handleSelfMsg(msg);
     }
 }

@@ -196,6 +196,9 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size());
                 l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
+            case "node":
+
+                break;
         }
         iOb.pushIntArray(l_candidates);
         iOb.pushInt(votingRule.getExpectedVoteSize(l_candidates.size()));
