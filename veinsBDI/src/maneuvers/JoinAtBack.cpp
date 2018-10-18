@@ -168,13 +168,13 @@ void JoinAtBack::handleMoveToPosition(const MoveToPosition* msg)
 
     // activate faked CACC. this way we can approach the front car
     // using data obtained through GPS
-    traciVehicle->setCACCConstantSpacing(15);
+    traciVehicle->setCACCConstantSpacing(4);
     // we have no data so far, so for the moment just initialize
     // with some fake data
     traciVehicle->setLeaderVehicleFakeData(0, 0, targetPlatoonData->platoonSpeed);
     traciVehicle->setFrontVehicleFakeData(0, 0, targetPlatoonData->platoonSpeed, 15);
     // set a CC speed higher than the platoon speed to approach it
-    traciVehicle->setCruiseControlDesiredSpeed(targetPlatoonData->platoonSpeed + (30 / 3.6));
+    traciVehicle->setCruiseControlDesiredSpeed(targetPlatoonData->platoonSpeed + (50 / 3.6));
     traciVehicle->setActiveController(Plexe::FAKED_CACC);
 
     joinManeuverState = JoinManeuverState::J_MOVE_IN_POSITION;
@@ -253,5 +253,6 @@ void JoinAtBack::handleJoinFormationAck(const JoinFormationAck* msg)
     }
 
     joinManeuverState = JoinManeuverState::IDLE;
+    app->finalizeManeuver(joinerData->joinerId);
     app->setInManeuver(false);
 }

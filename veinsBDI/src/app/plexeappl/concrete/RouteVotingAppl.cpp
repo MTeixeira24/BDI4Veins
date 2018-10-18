@@ -87,7 +87,7 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
             int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(jp->getVehicleId());
             if( platoonId >= 0 ){
                 BeliefModel platoonBelief;
-                platoonBelief.setBelief("pushplatoon");
+                platoonBelief.setBelief("pushplatoon/start");
                 platoonBelief.pushInt(&platoonId);
                 double speedSum = 0;
                 for(uint32_t i = 0; i < jp->getMemberSpeedsArraySize(); i++){
@@ -98,11 +98,7 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
                 int leaderId = jp->getVehicleId();
                 platoonBelief.pushInt(&leaderId);
                 manager->sendInformationToAgents(myId, &platoonBelief);
-
                 searchingForPlatoon = false;
-                BeliefModel sendRequests;
-                sendRequests.setBelief("startrequests");
-                manager->sendInformationToAgents(myId, &sendRequests);
                 negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
             }
         }
@@ -122,7 +118,8 @@ void RouteVotingAppl::handleAck(const Ack* msg){
     AckType type = (AckType)(msg->getAckType());
     if((type == AckType::JOIN_REQUEST_RECEIVED) && (negotiationState==VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST)){
         negotiationState = VoteState::AWAITING_RESULTS;
-        delete awaitAckTimer;
+        //delete awaitAckTimer;
+        cancelAndDelete(awaitAckTimer);
         std::random_device rd{};
         std::mt19937 gen{rd()};
         std::normal_distribution<double> distribution(50,2.0);

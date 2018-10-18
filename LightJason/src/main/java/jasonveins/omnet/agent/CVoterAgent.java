@@ -21,6 +21,7 @@ import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import jasonveins.omnet.managers.VoteConstants;
 
@@ -43,7 +44,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private IRule votingRule;
     private double factor;
     private String utility;
-    private int currentSpeed;
 
     private ThreadLocalRandom numberGenerator;
 
@@ -65,7 +65,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         numberGenerator = ThreadLocalRandom.current();
         factor = m_factor;
         utility = m_utility;
-        currentSpeed = 100;
         switch (voteRule){
             case "Borda":{
                 votingRule = new CBorda();
@@ -419,6 +418,12 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 targetPlatoonIds.add(p_platoonId.intValue());
             }
         }
+    }
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/store/platoon/start")
+    private void storeTargetPlatoonAndStart(@Nonnull Number p_platoonId, @Nonnull Number p_platoonSpeed, @Nonnull Number p_leaderId,@Nonnull Number tolerance, @Nonnull Number p_preferredSpeed, @Nonnull Number p_currentSpeed){
+        storeTargetPlatoon(p_platoonId, p_platoonSpeed, p_leaderId, tolerance, p_preferredSpeed, p_currentSpeed);
+        sendJoinPlatoonRequest(p_platoonId, p_leaderId, p_preferredSpeed,  tolerance);
     }
 
     @IAgentActionFilter

@@ -94,7 +94,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     utility/storemember(L);
     open/vote("speed", [0]).
     
-+!update/speed(SPEED) 
++!@update/speed(SPEED) 
     <- >>currentspeed(S); -currentspeed(S); +currentspeed(SPEED)
     <- ~>>currentspeed(_); +currentspeed(SPEED).
 
@@ -136,6 +136,14 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!startrequests() <- 
     PID = utility/next/platoon();
     !startjoin(PID).
+
++!pushplatoon/start(PID, PSPEED, LID) <-
+    generic/print("Enter PushPlatoon", PID, PSPEED, LID);
+    >>factor(Factor);
+    >>preferedspeed(Speed);
+    >>currentspeed(CurrentSpeed);
+    utility/store/platoon/start(PID, PSPEED, LID, Factor, Speed, CurrentSpeed).
+    generic/print("Exit PushPlatoon").
 
 +!decide/stay(UTIL)
     <- >>minimumUtility(MUTIL); UTIL > MUTIL; generic/print("Agent", MyName, "stays")
