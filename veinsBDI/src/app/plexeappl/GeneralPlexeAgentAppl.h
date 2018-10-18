@@ -158,6 +158,10 @@ public:
      * @param UpdatePlatoonFormation msg to handle
      */
     virtual void handleUpdatePlatoonFormation(const UpdatePlatoonFormation* msg);
+    /**
+     * Get this vehicle id
+     */
+    virtual int getVehicleId(){return myId;};
 
     bool isJoinAllowed() const;
 

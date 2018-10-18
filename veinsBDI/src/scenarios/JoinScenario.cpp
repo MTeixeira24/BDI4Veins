@@ -59,7 +59,7 @@ void JoinScenario::initialize(int stage)
                ssl << platooningVType << "." << positionHelper->getLeaderId();
                ss << platooningVType << "." << positionHelper->getFrontId();
                //traciVehicle->enableAutoFeed(false, ssl.str(), ss.str());
-               traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed() + 10);
+               traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed());
            }
            positionHelper->setPlatoonSpeed(modSpeed);
        }

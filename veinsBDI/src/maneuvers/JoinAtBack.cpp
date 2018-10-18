@@ -33,7 +33,6 @@ void JoinAtBack::startManeuver(const void* parameters)
 
         app->setInManeuver(true);
         app->setPlatoonRole(PlatoonRole::JOINER);
-
         // collect information about target Platoon
         targetPlatoonData.reset(new TargetPlatoonData());
         targetPlatoonData->platoonId = pars->platoonId;

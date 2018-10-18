@@ -9,6 +9,7 @@
 #define APP_INTERFERANCE_INTERFERANCEAPPL_H_
 
 #include "veins/modules/application/platooning/apps/BaseApp.h"
+#include "protocols/InterferingBeaconing.h"
 
 class InterferanceAppl : public BaseApp {
 public:
