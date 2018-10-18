@@ -16,8 +16,8 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 //
 
-#ifndef JOINATBACK_H_
-#define JOINATBACK_H_
+#ifndef JoinAtBackAgent_H_
+#define JoinAtBackAgent_H_
 
 #include <algorithm>
 
@@ -29,7 +29,7 @@
 
 using namespace Veins;
 
-class JoinAtBack : public BaseJoin {
+class JoinAtBackAgent : public BaseJoin {
 
 public:
     /**
@@ -37,8 +37,8 @@ public:
      *
      * @param app pointer to the generic application used to fetch parameters and inform it about a concluded maneuver
      */
-    JoinAtBack(GeneralPlexeAgentAppl* app);
-    virtual ~JoinAtBack(){};
+    JoinAtBackAgent(GeneralPlexeAgentAppl* app);
+    virtual ~JoinAtBackAgent(){};
 
     /**
      * This method is invoked by the generic application to start the maneuver

@@ -12,15 +12,14 @@ Define_Module(GeneralPlexeAgentAppl);
 void GeneralPlexeAgentAppl::initialize(int stage)
 {
     BasePlexeAgentAppl::initialize(stage);
-
     if (stage == 1) {
         // connect maneuver application to protocol
         protocol->registerApplication(MANEUVER_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         std::string joinManeuverName = par("joinManeuver").stdstringValue();
         if (joinManeuverName == "JoinAtN")
             joinManeuver = new JoinAtN(this);
-        else if(joinManeuverName == "JoinAtBack")
-            joinManeuver = new JoinAtBack(this);
+        else if(joinManeuverName == "JoinAtBackAgent")
+            joinManeuver = new JoinAtBackAgent(this);
         else
             throw new cRuntimeError("Invalid join maneuver implementation chosen");
         if(DynamicPositionManager::getInstance().vehToPlatoons.count(positionHelper->getId()) == 0){
