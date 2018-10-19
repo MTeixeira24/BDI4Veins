@@ -2,6 +2,7 @@ package jasonveins.omnet.agent;
 
 import cern.colt.bitvector.BitVector;
 import jasonveins.omnet.decision.InstructionModel;
+import jasonveins.omnet.environment.dijkstra.Graph;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.Constants;
@@ -31,7 +32,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private static final long serialVersionUID = 3455114282889790324L;
 
     private CopyOnWriteArrayList<Integer> members;
-    private CopyOnWriteArrayList<Integer> membersSpeeds;
     /**
      * Stores an ordered linked list containing platoon Ids and their utilities
      */
@@ -45,7 +45,10 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private double factor;
     private String utility;
 
-    private ThreadLocalRandom numberGenerator;
+    /**
+    * Used by the leader to compute optimal path
+    */
+    private Graph route;
 
     /**
      * ctor
@@ -59,10 +62,8 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                        @Nonnull String m_vType, String voteRule, double m_factor, String m_utility) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
-        membersSpeeds = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
-        numberGenerator = ThreadLocalRandom.current();
         factor = m_factor;
         utility = m_utility;
         switch (voteRule){
@@ -86,6 +87,12 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 throw new RuntimeException("CVoterAgent: Unknown voteRule!");
             }
         }
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/get/nodes")
+    private void getNodes(){
+        route = ((CVoterAgentManager)agentManager).getRoute();
     }
 
     @IAgentActionFilter
@@ -169,6 +176,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             case "join":
                 /*Add the necessary information for the vote*/
                 iOb.pushInt(VoteConstants.CONTEXT_JOIN);
+                /*Send speed (0) and preference(1) of joiner*/
                 l_context.add(contextArgs.get(0));
                 l_context.add(contextArgs.get(1));
                 iOb.pushDoubleArray(l_context);
@@ -197,7 +205,8 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
             case "node":
-
+                iOb.pushInt(VoteConstants.CONTEXT_PATH);
+                //TODO: Get all the information from the environmnet
                 break;
         }
         iOb.pushIntArray(l_candidates);

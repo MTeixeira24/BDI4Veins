@@ -1,4 +1,4 @@
-package jasonveins.lightvoting.simulation.environment.dijkstra;
+package jasonveins.omnet.environment.dijkstra;
 
 import java.util.ArrayList;
 import java.util.Collections;

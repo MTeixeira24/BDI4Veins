@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 
 public class AgentManager extends Thread {
-    protected static final String resourceFolder = "src/main/resources/asl/";
+    protected static final String resourceFolder = "src/main/resources/";
     protected Set<IAgent<?>> l_agents;
     protected String aslpath;
     protected AtomicInteger agentCount = new AtomicInteger(0);
@@ -61,7 +61,7 @@ public class AgentManager extends Thread {
         execute = new AtomicBoolean(true);
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
-        String l_aslpath = resourceFolder+aslpath;
+        String l_aslpath = resourceFolder+"asl/"+aslpath;
         try
                 (
                         final FileInputStream l_stream = new FileInputStream( l_aslpath ) //TODO: Get rid of this

@@ -1,4 +1,4 @@
-package jasonveins.lightvoting.simulation.environment.dijkstra;
+package jasonveins.omnet.environment.dijkstra;
 
 public class Edge {
     private final String id;

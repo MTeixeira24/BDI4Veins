@@ -3,6 +3,7 @@ package jasonveins.omnet.managers;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
+import jasonveins.omnet.environment.dijkstra.Graph;
 import jasonveins.omnet.voting.Statistics.CJoinStatistics;
 
 import javax.annotation.Nonnull;
@@ -17,6 +18,8 @@ public class CVoterAgentManager extends AgentManager {
     private double factor;
     private String utility;
 
+    private Graph scenarioRoute;
+
     /**
      * Class constructor
      *
@@ -27,7 +30,7 @@ public class CVoterAgentManager extends AgentManager {
         super(m_aslpath, m_cm);
         voteRule = "Borda";
         stats = new CJoinStatistics();
-
+        scenarioRoute = new Graph(resourceFolder + "json/routeJoin.json");
     }
 
     @Override
@@ -68,4 +71,7 @@ public class CVoterAgentManager extends AgentManager {
         return (CJoinStatistics) stats;
     }
 
+    public Graph getRoute() {
+        return null;
+    }
 }

@@ -457,6 +457,7 @@ void VotingAppl::handleNotifyVote(const NotifyVote* msg){
             break;
         }
         case CONTEXT_JOIN:
+        case CONTEXT_PATH:
         {
             size = contextArgs.capacity();
             contextArgs[0] = CONTEXT_JOIN;
