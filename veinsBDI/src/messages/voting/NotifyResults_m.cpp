@@ -184,15 +184,21 @@ NotifyResults::NotifyResults(const char *name, short kind) : ::NegotiationMessag
     this->result = 0;
     this->joinerId = 0;
     this->platoonId = 0;
+    this->resultType = 0;
+    committeeResult_arraysize = 0;
+    this->committeeResult = 0;
 }
 
 NotifyResults::NotifyResults(const NotifyResults& other) : ::NegotiationMessage(other)
 {
+    committeeResult_arraysize = 0;
+    this->committeeResult = 0;
     copy(other);
 }
 
 NotifyResults::~NotifyResults()
 {
+    delete [] this->committeeResult;
 }
 
 NotifyResults& NotifyResults::operator=(const NotifyResults& other)
@@ -208,6 +214,12 @@ void NotifyResults::copy(const NotifyResults& other)
     this->result = other.result;
     this->joinerId = other.joinerId;
     this->platoonId = other.platoonId;
+    this->resultType = other.resultType;
+    delete [] this->committeeResult;
+    this->committeeResult = (other.committeeResult_arraysize==0) ? nullptr : new int[other.committeeResult_arraysize];
+    committeeResult_arraysize = other.committeeResult_arraysize;
+    for (unsigned int i=0; i<committeeResult_arraysize; i++)
+        this->committeeResult[i] = other.committeeResult[i];
 }
 
 void NotifyResults::parsimPack(omnetpp::cCommBuffer *b) const
@@ -216,6 +228,9 @@ void NotifyResults::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->result);
     doParsimPacking(b,this->joinerId);
     doParsimPacking(b,this->platoonId);
+    doParsimPacking(b,this->resultType);
+    b->pack(committeeResult_arraysize);
+    doParsimArrayPacking(b,this->committeeResult,committeeResult_arraysize);
 }
 
 void NotifyResults::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -224,6 +239,15 @@ void NotifyResults::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->result);
     doParsimUnpacking(b,this->joinerId);
     doParsimUnpacking(b,this->platoonId);
+    doParsimUnpacking(b,this->resultType);
+    delete [] this->committeeResult;
+    b->unpack(committeeResult_arraysize);
+    if (committeeResult_arraysize==0) {
+        this->committeeResult = 0;
+    } else {
+        this->committeeResult = new int[committeeResult_arraysize];
+        doParsimArrayUnpacking(b,this->committeeResult,committeeResult_arraysize);
+    }
 }
 
 int NotifyResults::getResult() const
@@ -254,6 +278,46 @@ int NotifyResults::getPlatoonId() const
 void NotifyResults::setPlatoonId(int platoonId)
 {
     this->platoonId = platoonId;
+}
+
+int NotifyResults::getResultType() const
+{
+    return this->resultType;
+}
+
+void NotifyResults::setResultType(int resultType)
+{
+    this->resultType = resultType;
+}
+
+void NotifyResults::setCommitteeResultArraySize(unsigned int size)
+{
+    int *committeeResult2 = (size==0) ? nullptr : new int[size];
+    unsigned int sz = committeeResult_arraysize < size ? committeeResult_arraysize : size;
+    for (unsigned int i=0; i<sz; i++)
+        committeeResult2[i] = this->committeeResult[i];
+    for (unsigned int i=sz; i<size; i++)
+        committeeResult2[i] = 0;
+    committeeResult_arraysize = size;
+    delete [] this->committeeResult;
+    this->committeeResult = committeeResult2;
+}
+
+unsigned int NotifyResults::getCommitteeResultArraySize() const
+{
+    return committeeResult_arraysize;
+}
+
+int NotifyResults::getCommitteeResult(unsigned int k) const
+{
+    if (k>=committeeResult_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", committeeResult_arraysize, k);
+    return this->committeeResult[k];
+}
+
+void NotifyResults::setCommitteeResult(unsigned int k, int committeeResult)
+{
+    if (k>=committeeResult_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", committeeResult_arraysize, k);
+    this->committeeResult[k] = committeeResult;
 }
 
 class NotifyResultsDescriptor : public omnetpp::cClassDescriptor
@@ -321,7 +385,7 @@ const char *NotifyResultsDescriptor::getProperty(const char *propertyname) const
 int NotifyResultsDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
 unsigned int NotifyResultsDescriptor::getFieldTypeFlags(int field) const
@@ -336,8 +400,10 @@ unsigned int NotifyResultsDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISARRAY | FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *NotifyResultsDescriptor::getFieldName(int field) const
@@ -352,8 +418,10 @@ const char *NotifyResultsDescriptor::getFieldName(int field) const
         "result",
         "joinerId",
         "platoonId",
+        "resultType",
+        "committeeResult",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
 }
 
 int NotifyResultsDescriptor::findField(const char *fieldName) const
@@ -363,6 +431,8 @@ int NotifyResultsDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='r' && strcmp(fieldName, "result")==0) return base+0;
     if (fieldName[0]=='j' && strcmp(fieldName, "joinerId")==0) return base+1;
     if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+2;
+    if (fieldName[0]=='r' && strcmp(fieldName, "resultType")==0) return base+3;
+    if (fieldName[0]=='c' && strcmp(fieldName, "committeeResult")==0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -378,8 +448,10 @@ const char *NotifyResultsDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **NotifyResultsDescriptor::getFieldPropertyNames(int field) const
@@ -418,6 +490,7 @@ int NotifyResultsDescriptor::getFieldArraySize(void *object, int field) const
     }
     NotifyResults *pp = (NotifyResults *)object; (void)pp;
     switch (field) {
+        case 4: return pp->getCommitteeResultArraySize();
         default: return 0;
     }
 }
@@ -449,6 +522,8 @@ std::string NotifyResultsDescriptor::getFieldValueAsString(void *object, int fie
         case 0: return long2string(pp->getResult());
         case 1: return long2string(pp->getJoinerId());
         case 2: return long2string(pp->getPlatoonId());
+        case 3: return long2string(pp->getResultType());
+        case 4: return long2string(pp->getCommitteeResult(i));
         default: return "";
     }
 }
@@ -466,6 +541,8 @@ bool NotifyResultsDescriptor::setFieldValueAsString(void *object, int field, int
         case 0: pp->setResult(string2long(value)); return true;
         case 1: pp->setJoinerId(string2long(value)); return true;
         case 2: pp->setPlatoonId(string2long(value)); return true;
+        case 3: pp->setResultType(string2long(value)); return true;
+        case 4: pp->setCommitteeResult(i,string2long(value)); return true;
         default: return false;
     }
 }

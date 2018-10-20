@@ -13,6 +13,7 @@ public interface IRule {
     /**
      * Sums all votes and returns the index of the winner.
      * @param votes List of all vote vectors that have been submitted
+     * @param candidates list of candidates to vote on
      * @return Index of the candidate with majority votes. -1 if a tie occurs.
      */
     int getResult(List<List<Integer>> votes, List<Integer> candidates);
@@ -48,5 +49,13 @@ public interface IRule {
      * @return Size of the vote vector
      */
     int getExpectedVoteSize(int size);
+
+    /**
+     * Computes result and returns the entire score vector
+     *@param votes List of all vote vectors that have been submitted
+     *@param candidates list of candidates to vote on
+     *@return Index of the candidate with majority votes. -1 if a tie occurs.
+     */
+    List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates);
 
 }

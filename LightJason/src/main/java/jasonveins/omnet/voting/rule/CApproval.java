@@ -50,7 +50,7 @@ public class CApproval implements IRule{
     }
 
     /**
-     * Generates a vote intended to brake a tie.
+     * Generates a vote intended to break a tie.
      *
      * @param p_utilities A list containing mapping of the index to its utility, ordered bottom to top
      * @return A modified integer list with the votes according to the voting rule
@@ -98,5 +98,11 @@ public class CApproval implements IRule{
     @Override
     public int getExpectedVoteSize(int size){
         return size;
+    }
+
+    @Override
+    public List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates){
+        getResult(votes, candidates);
+        return scoreVector;
     }
 }

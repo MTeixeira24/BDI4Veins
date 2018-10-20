@@ -96,4 +96,10 @@ public class CBorda implements IRule {
     public int getExpectedVoteSize(int size){
         return size;
     }
+
+    @Override
+    public List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates){
+        getResult(votes, candidates);
+        return scoreVector;
+    }
 }

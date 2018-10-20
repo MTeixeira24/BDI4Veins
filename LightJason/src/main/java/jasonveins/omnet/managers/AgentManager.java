@@ -94,7 +94,7 @@ public class AgentManager extends Thread {
      * @param p_aslFile The asl file to be used by the agent
      */
     public void createNewAgent(int id, String vType, String p_aslFile){
-        String l_aslFile = resourceFolder + p_aslFile;
+        String l_aslFile = resourceFolder + "asl/" + p_aslFile;
         try
                 (
                         final FileInputStream l_stream = new FileInputStream( l_aslFile )

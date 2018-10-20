@@ -30,6 +30,8 @@
  *     int result;
  *     int joinerId;
  *     int platoonId;
+ *     int resultType = 0;
+ *     int committeeResult[];
  * }
  * </pre>
  */
@@ -39,6 +41,9 @@ class NotifyResults : public ::NegotiationMessage
     int result;
     int joinerId;
     int platoonId;
+    int resultType;
+    int *committeeResult; // array ptr
+    unsigned int committeeResult_arraysize;
 
   private:
     void copy(const NotifyResults& other);
@@ -63,6 +68,12 @@ class NotifyResults : public ::NegotiationMessage
     virtual void setJoinerId(int joinerId);
     virtual int getPlatoonId() const;
     virtual void setPlatoonId(int platoonId);
+    virtual int getResultType() const;
+    virtual void setResultType(int resultType);
+    virtual void setCommitteeResultArraySize(unsigned int size);
+    virtual unsigned int getCommitteeResultArraySize() const;
+    virtual int getCommitteeResult(unsigned int k) const;
+    virtual void setCommitteeResult(unsigned int k, int committeeResult);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const NotifyResults& obj) {obj.parsimPack(b);}

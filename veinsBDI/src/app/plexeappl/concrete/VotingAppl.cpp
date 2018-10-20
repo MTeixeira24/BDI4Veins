@@ -214,6 +214,10 @@ void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
     sendUnicast(msg, -1);
 }
 
+void VotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
+    throw cRuntimeError("sendCommitteeVoteResults, not implemented!");
+}
+
 void VotingAppl::onPlatoonBeacon(const PlatooningBeacon* pb){
     GeneralPlexeAgentAppl::onPlatoonBeacon(pb);
 }
@@ -337,7 +341,6 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
         votes[i] = msg->getVotes(i);
     }
     BeliefModel voteSubmission("handle/submit/vote");
-    std::string test = msg->getName();
     voteSubmission.pushIntArray(votes);
     voteSubmission.pushInt(&origin);
     manager->sendInformationToAgents(myId, &voteSubmission);
@@ -347,8 +350,6 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
-    //Try to ease the load
-    std::this_thread::sleep_for(std::chrono::milliseconds(10));
     if(msg->getJoinerId() != -1){
         std::cout << "@@@@@@@@@@@ GOT VOTE RESULT " << myId << "@@@@@@@@@@@ " << msg->getResult() << std::endl;
         if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){

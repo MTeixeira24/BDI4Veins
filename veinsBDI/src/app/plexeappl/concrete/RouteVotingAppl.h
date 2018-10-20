@@ -20,6 +20,7 @@ public:
     virtual void initialize(int stage) override;
     virtual void finalizeManeuver(int joinerId) override;
     virtual void sendVoteResults(int winnerValue, int joinerId) override;
+    virtual void sendCommitteeVoteResults(std::vector<int>& results) override;
 protected:
     /**
      * Fill out and send a proposal message
@@ -49,6 +50,10 @@ protected:
      *
      */
     virtual void handleAck(const Ack* msg) override;
+    /**
+     *
+     */
+    virtual void handleNotificationOfResults(const NotifyResults* msg) override;
     /**
      *
      */

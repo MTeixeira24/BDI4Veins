@@ -21,4 +21,6 @@ packet NotifyResults extends NegotiationMessage {
     int result;
     int joinerId;
     int platoonId;
+    int resultType = 0;
+    int committeeResult[];
 }

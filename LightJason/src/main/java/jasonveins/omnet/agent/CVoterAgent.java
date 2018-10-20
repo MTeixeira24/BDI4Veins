@@ -42,6 +42,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private CContext m_context;
     private IRule votingRule;
+    private IRule committeeRule;
     private double factor;
     private String utility;
 
@@ -87,6 +88,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 throw new RuntimeException("CVoterAgent: Unknown voteRule!");
             }
         }
+        committeeRule = new CMinisum();
     }
 
     @IAgentActionFilter
@@ -116,6 +118,36 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             default:
                 return -1;
         }
+    }
+
+    /**
+     * Get the hamming distance
+     * @param results results of the election
+     * @param nodes the preferred nodes of this agent
+     * @return the hamming distance
+     */
+    @IAgentActionFilter
+    @IAgentActionName( name = "utility/generate/utility/committee" )
+    private int calculateCommitteeUtility(List<Integer> results, List<Integer> nodes){
+        ArrayList<Integer> preferredVector = new ArrayList<>(Collections.nCopies(results.size(), 0));
+        Set<Integer> vertexes = ((CVoterAgentManager)agentManager).getRoute().getVertexesMap().keySet();
+        Iterator<Integer> it = vertexes.iterator();
+        int position = 0;
+        while(it.hasNext()){
+            if(nodes.contains(it.next()))
+                preferredVector.set(++position, 1);
+        }
+        /*
+        [1,1,0,0,1,1,1]
+        [2,4,7,8]
+        [0,0,0,0,0,0,0]
+         */
+        //get hamming distance, inverted in order to work with preexisting plans
+        int hammingDistance = results.size();
+        for(int i = 0; i < results.size(); i++){
+            if(!results.get(i).equals(preferredVector.get(i))) hammingDistance--;
+        }
+        return hammingDistance;
     }
 
     private double normalUtility(double welfareBonus, double speed, double tolerance, double preferedSpeed){
@@ -206,7 +238,15 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
             case "node":
                 iOb.pushInt(VoteConstants.CONTEXT_PATH);
-                //TODO: Get all the information from the environmnet
+                //Get the environment data
+                route = ((CVoterAgentManager)agentManager).getRoute();
+                //No special context needed
+                iOb.pushShort(Constants.VALUE_NULL);
+                //Gather all existing nodes to send to agents
+                l_candidates.addAll(route.getVertexesMap().keySet());
+                //Set up the context
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_PATH, members.size());
+                l_context_chair.add((double)VoteConstants.CONTEXT_PATH);
                 break;
         }
         iOb.pushIntArray(l_candidates);
@@ -253,7 +293,18 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             double util = calculateUtility(l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue(), p_currentSpeed.intValue());
             utils.add(new CUtilityPair(i, util));
         }
-        List<Integer> votes = votingRule.getVote(utils);
+        List<Integer> votes;
+        switch (l_context){
+            case VoteConstants.CONTEXT_PATH:{
+                votes = committeeRule.getVote(utils);
+                break;
+            }
+            default:{
+                votes = votingRule.getVote(utils);
+                break;
+            }
+        }
+
         return votes;
     }
 
@@ -292,62 +343,78 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         m_context.pushVotes(votes);
         m_context.debug();
         if(m_context.allVotesSubmitted()){
-            System.out.println("FINAL ITERATION");
-            int winnerIndex = votingRule.getResult(m_context.getVotes(), m_context.getCandidates());
-            if(winnerIndex == -1){
-                m_context.increaseVoterCount();
+            if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH){
+                committeeWinnerDetermination();
+            }else{
+                singleCandidateWinnerDetermination();
+            }
+
+        }
+    }
+
+    private void singleCandidateWinnerDetermination(){
+        System.out.println("FINAL ITERATION");
+        int winnerIndex = votingRule.getResult(m_context.getVotes(), m_context.getCandidates());
+        if(winnerIndex == -1){
+            m_context.increaseVoterCount();
+            final ITrigger l_trigger = CTrigger.from(
+                    ITrigger.EType.ADDGOAL,
+                    CLiteral.from(
+                            "handle/tie",
+                            CRawTerm.from(m_context.getCandidates()),
+                            CRawTerm.from(m_context.getContextSequence()),
+                            CRawTerm.from(votingRule.getTiedIndexes())
+                    )
+
+            );
+            this.trigger( l_trigger );
+            return;
+        }
+        int winner = m_context.getCandidates().get(winnerIndex);
+        System.out.println("Index that won is: " + winner);
+        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
+        switch (m_context.getVoteType()){
+            case VoteConstants.CONTEXT_JOIN:{
+                iOb.pushInt(m_context.getContextArgument("joinerId").intValue());
+                iOb.pushInt(winner);
+                break;
+            }
+            case VoteConstants.CONTEXT_SPEED:{
+                ((CVoterAgentManager)agentManager).getStats().setFinalPlatoonSpeed(winner);
+                iOb.pushInt(-1);
                 final ITrigger l_trigger = CTrigger.from(
                         ITrigger.EType.ADDGOAL,
                         CLiteral.from(
-                                "handle/tie",
-                                CRawTerm.from(m_context.getCandidates()),
-                                CRawTerm.from(m_context.getContextSequence()),
-                                CRawTerm.from(votingRule.getTiedIndexes())
+                                "handle/results",
+                                CRawTerm.from(winner)
                         )
 
                 );
                 this.trigger( l_trigger );
-                return;
+                iOb.pushInt(winner);
+                break;
             }
-            int winner = m_context.getCandidates().get(winnerIndex);
-            System.out.println("Index that won is: " + winner);
-            InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
-            switch (m_context.getVoteType()){
-                case VoteConstants.CONTEXT_JOIN:{
-                    iOb.pushInt(m_context.getContextArgument("joinerId").intValue());
-                    break;
-                }
-                case VoteConstants.CONTEXT_SPEED:{
-                    ((CVoterAgentManager)agentManager).getStats().setFinalPlatoonSpeed(winner);
-                    iOb.pushInt(-1);
-                    final ITrigger l_trigger = CTrigger.from(
-                            ITrigger.EType.ADDGOAL,
-                            CLiteral.from(
-                                    "handle/results",
-                                    CRawTerm.from(winner)
-                            )
-
-                    );
-                    this.trigger( l_trigger );
-                    break;
-                }
-                default:
-                    break;
-            }
-            iOb.pushInt(winner);
-            agentManager.addInstruction(iOb);
+            default:
+                break;
         }
+        agentManager.addInstruction(iOb);
+    }
+
+    private void committeeWinnerDetermination(){
+        System.out.println("COMMITTEE WINNER DETERMINATION");
+        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates()));
+        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
+        iOb.pushInt(-1);
+        iOb.pushIntArray(results);
     }
 
     @IAgentActionFilter
     @IAgentActionName( name = "vote/store/iterative" )
     private void storeVoteIterative(@Nonnull final List<Integer> votes)
     {
-        if(getCandidateListSize() > 2){
-            votes.size();
-        }
         if(votes.size() > votingRule.getExpectedVoteSize(getCandidateListSize())) return;
-        if(getCandidateListSize() <= 2){
+        //TODO: Change to iterative
+        if((getCandidateListSize() <= 2) || m_context.getVoteType() == VoteConstants.CONTEXT_PATH ){
             storeVote(votes);
             return;
         }

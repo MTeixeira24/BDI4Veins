@@ -168,10 +168,16 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 rbf >> type;
                 rbf >> externalId;
                 rbf >> type;
-                ASSERT(type == VALUE_INT);
-                int winnerValue;
-                rbf >> winnerValue;
-                ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(winnerValue, externalId);
+                //Must be either an int for single election or an array for committees
+                ASSERT(type == VALUE_INT || type == VALUE_ARRAY);
+                if(type == VALUE_INT){
+                    int winnerValue;
+                    rbf >> winnerValue;
+                    ((VotingAppl*)(vehicles[agentId]))->sendVoteResults(winnerValue, externalId);
+                }else{
+                    std::vector<int> results = parseArrayMessage(rbf);
+                    ((VotingAppl*)(vehicles[agentId]))->sendCommitteeVoteResults(results);
+                }
                 break;
             }
             case NOTIFY_START_VOTE:

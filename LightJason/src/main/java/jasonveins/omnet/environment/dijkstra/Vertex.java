@@ -3,11 +3,13 @@ package jasonveins.omnet.environment.dijkstra;
 public class Vertex {
     final private String id;
     final private String name;
+    private int value;
 
 
     public Vertex(String id, String name) {
         this.id = id;
         this.name = name;
+        this.value = 0;
     }
     public String getId() {
         return id;
@@ -16,6 +18,12 @@ public class Vertex {
     public String getName() {
         return name;
     }
+
+    public int getValue() {
+        return value;
+    }
+
+    public void setValue(int value){ this.value = value; }
 
     @Override
     public int hashCode() {

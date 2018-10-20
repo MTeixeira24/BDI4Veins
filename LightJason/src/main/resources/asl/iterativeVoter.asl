@@ -110,7 +110,14 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     Util = utility/generate/utility(VALUE, Factor, PreferredSpeed, CurrentSpeed);
     generic/print(VALUE, Factor, PreferredSpeed, Util);
     utility/save(Factor, PreferredSpeed, CurrentSpeed, Util); //Used to gather data
-    !decide/stay(Util).
+    >>minimumUtility(MUTIL);
+    !decide/stay(Util, MUTIL).
+
++!handle/results/committee(VALUE) <-
+    >>preferedpath(LNODES);
+    Util = utility/generate/utility/committee(VALUE, LNODES);
+    generic/print(VALUE, LNODES, Util);
+    !decide/stay(Util, 4).
 
 +!addmember(L) <-
     utility/storemember(L).
@@ -152,6 +159,6 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     utility/store/platoon/start(PID, PSPEED, LID, Factor, Speed, CurrentSpeed).
     generic/print("Exit PushPlatoon").
 
-+!decide/stay(UTIL)
-    <- >>minimumUtility(MUTIL); UTIL > MUTIL; generic/print("Agent", MyName, "stays")
-    <- >>minimumUtility(MUTIL); UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").
++!decide/stay(UTIL, MUTIL)
+    <-  UTIL > MUTIL; generic/print("Agent", MyName, "stays")
+    <-  UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").

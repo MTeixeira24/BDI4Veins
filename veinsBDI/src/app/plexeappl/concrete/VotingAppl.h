@@ -45,6 +45,7 @@ public:
        int expectedVoteVectorSize;
        std::vector<double> contextArgs;
        std::vector<int> candidates;
+       std::vector<int> committeeResult;
     };
 
     /**
@@ -78,6 +79,10 @@ public:
      *
      */
     virtual void sendVoteResults(int winnerValue, int joinerId);
+    /**
+     *
+     */
+    virtual void sendCommitteeVoteResults(std::vector<int>& results);
     /**
      * Send ack messages to confirm arrival of message
      */
@@ -116,7 +121,7 @@ protected:
     /**
      *
      */
-    void handleNotificationOfResults(const NotifyResults* msg);
+    virtual void handleNotificationOfResults(const NotifyResults* msg);
     /**
      *
      */

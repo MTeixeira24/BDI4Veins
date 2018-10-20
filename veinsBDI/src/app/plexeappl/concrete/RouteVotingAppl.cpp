@@ -90,6 +90,25 @@ void RouteVotingAppl::sendJoinProposal(){
 
 void RouteVotingAppl::sendVoteResults(int winnerValue, int joinerId){
     VotingAppl::sendVoteResults(winnerValue, joinerId);
+}
+
+void RouteVotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
+    negotiationState = VoteState::CHAIR_ELECTION_END;
+    NotifyResults* msg = new NotifyResults("NotifyResults");
+    //Save results for future use
+    election_data.currentResult = -1;
+    election_data.committeeResult = results;
+    int platoonId = positionHelper->getPlatoonId();
+    msg->setKind(NEGOTIATION_TYPE);
+    msg->setVehicleId(myId);
+    msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setDestinationId(-1);
+    msg->setResult(-1);
+    msg->setPlatoonId(platoonId);
+    msg->setCommitteeResultArraySize(results.size());
+    for(uint32_t i = 0; i < results.size(); i++) msg->setCommitteeResult(i, results[i]);
+    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_START);
+    sendUnicast(msg, -1);
     //Set a delay to start the speed vote
     startSpeedVoteDelay = new cMessage("startSpeedVoteDelay");
     scheduleAt(simTime() + 0.1, startSpeedVoteDelay);
@@ -118,6 +137,19 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
         }
     }
     VotingAppl::delegateNegotiationMessage(nm);
+}
+
+void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
+    if(msg->getResult() > -1){
+        VotingAppl::handleNotificationOfResults(msg);
+    }else{
+        BeliefModel result("handle/results/committee");
+        std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
+        for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
+        result.pushIntArray(resultsVector);
+        manager->sendInformationToAgents(myId, &result);
+    }
+    negotiationState = VoteState::NONE;
 }
 
 void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
@@ -168,7 +200,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
     }else if(msg == startSpeedVoteDelay){
         BeliefModel mnv("start/vote/speed");
         manager->sendInformationToAgents(myId, &mnv);
-        cycle = VoteCycle::ROUTE_VOTE;
+        cycle = VoteCycle::SPEED_VOTE;
     }  else{
         VotingAppl::handleSelfMsg(msg);
     }
