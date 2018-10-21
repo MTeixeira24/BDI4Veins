@@ -93,6 +93,7 @@ void RouteVotingAppl::sendVoteResults(int winnerValue, int joinerId){
 }
 
 void RouteVotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
+    Enter_Method_Silent();
     negotiationState = VoteState::CHAIR_ELECTION_END;
     NotifyResults* msg = new NotifyResults("NotifyResults");
     //Save results for future use
@@ -107,7 +108,6 @@ void RouteVotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
     msg->setPlatoonId(platoonId);
     msg->setCommitteeResultArraySize(results.size());
     for(uint32_t i = 0; i < results.size(); i++) msg->setCommitteeResult(i, results[i]);
-    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_START);
     sendUnicast(msg, -1);
     //Set a delay to start the speed vote
     startSpeedVoteDelay = new cMessage("startSpeedVoteDelay");

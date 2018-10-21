@@ -54,8 +54,9 @@ public interface IRule {
      * Computes result and returns the entire score vector
      *@param votes List of all vote vectors that have been submitted
      *@param candidates list of candidates to vote on
+     *@param size specifies the amount of candidates to select
      *@return Index of the candidate with majority votes. -1 if a tie occurs.
      */
-    List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates);
+    List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates, int scoreThreshold);
 
 }

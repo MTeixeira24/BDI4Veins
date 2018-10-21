@@ -38,7 +38,7 @@ public class Graph {
             //Get the nodes
             while (it.hasNext()){
                 String key = (String)it.next();
-                Vertex node = new Vertex("N"+key, "N"+key);
+                Vertex node = new Vertex(key, "N"+key);
                 vertexMap.put(Integer.parseInt(key), node);
             }
             //Create the links
@@ -51,7 +51,7 @@ public class Graph {
                 Iterator ait = jar.iterator();
                 int counter = 0;
                 while(ait.hasNext()){
-                    Edge link = new Edge("Edge_" + ++counter, vertexMap.get(key), vertexMap.get((String)ait.next()), 0);
+                    Edge link = new Edge("Edge_" + ++counter, vertexMap.get(Integer.parseInt(key)), vertexMap.get(Integer.parseInt((String)ait.next())), 0);
                     edges.add(link);
                 }
             }

@@ -46,8 +46,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handle/vote/notification(CANDIDATES, CONTEXT) <-
     generic/print("Agent", MyName, " got notification to vote on a join: ", CANDIDATES);
-    >>factor(Factor); >>preferedspeed(Speed); >>currentspeed(CurrentSpeed);
-    VVECTOR = utility/generate/vote/vector(CANDIDATES, Factor, Speed, CurrentSpeed, CONTEXT);
+    >>factor(Factor); >>preferedspeed(Speed); >>currentspeed(CurrentSpeed); >>preferedpath(LNODES);
+    VVECTOR = utility/generate/vote/vector(CANDIDATES, Factor, Speed, CurrentSpeed, CONTEXT, LNODES);
     generic/print(VVECTOR);
     !sendvote(VVECTOR).
 
@@ -101,23 +101,27 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 +!start/vote/speed() <-
     open/vote("speed", [0]).
 
-+!@update/speed(SPEED) 
-    <- >>currentspeed(S); -currentspeed(S); +currentspeed(SPEED)
-    <- ~>>currentspeed(_); +currentspeed(SPEED).
++!update/speed(SPEED) 
+    : >>currentspeed(S) <-  -currentspeed(S); +currentspeed(SPEED)
+    : ~>>currentspeed(_) <- +currentspeed(SPEED).
+
++!decide/stay(UTIL, MUTIL)
+    <-  test/debug(); UTIL > MUTIL; generic/print("Agent", MyName, "stays")
+    <-  test/debug(); UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").
 
 +!handle/results(VALUE) <-
     >>preferedspeed(PreferredSpeed); >>factor(Factor); >>currentspeed(CurrentSpeed);
     Util = utility/generate/utility(VALUE, Factor, PreferredSpeed, CurrentSpeed);
-    generic/print(VALUE, Factor, PreferredSpeed, Util);
-    utility/save(Factor, PreferredSpeed, CurrentSpeed, Util); //Used to gather data
     >>minimumUtility(MUTIL);
+    generic/print(VALUE, Factor, PreferredSpeed, Util, MUTIL);
+    utility/save(Factor, PreferredSpeed, Util, VALUE); //Used to gather 
     !decide/stay(Util, MUTIL).
 
 +!handle/results/committee(VALUE) <-
     >>preferedpath(LNODES);
     Util = utility/generate/utility/committee(VALUE, LNODES);
     generic/print(VALUE, LNODES, Util);
-    !decide/stay(Util, 4).
+    !decide/stay(Util, 4.0).
 
 +!addmember(L) <-
     utility/storemember(L).
@@ -158,7 +162,3 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     >>currentspeed(CurrentSpeed);
     utility/store/platoon/start(PID, PSPEED, LID, Factor, Speed, CurrentSpeed).
     generic/print("Exit PushPlatoon").
-
-+!decide/stay(UTIL, MUTIL)
-    <-  UTIL > MUTIL; generic/print("Agent", MyName, "stays")
-    <-  UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").

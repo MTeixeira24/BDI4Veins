@@ -106,7 +106,7 @@ public class CCopeland implements IRule {
     }
 
     @Override
-    public List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates){
+    public List<Integer> getResultVector(List<List<Integer>> votes, List<Integer> candidates, int scoreThreshold){
         getResult(votes, candidates);
         return scoreVector;
     }

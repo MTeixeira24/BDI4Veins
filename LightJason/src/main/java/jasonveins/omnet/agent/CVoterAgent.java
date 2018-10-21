@@ -2,7 +2,9 @@ package jasonveins.omnet.agent;
 
 import cern.colt.bitvector.BitVector;
 import jasonveins.omnet.decision.InstructionModel;
+import jasonveins.omnet.environment.dijkstra.Dijkstra;
 import jasonveins.omnet.environment.dijkstra.Graph;
+import jasonveins.omnet.environment.dijkstra.Vertex;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.Constants;
@@ -134,8 +136,10 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         Iterator<Integer> it = vertexes.iterator();
         int position = 0;
         while(it.hasNext()){
-            if(nodes.contains(it.next()))
-                preferredVector.set(++position, 1);
+            int node = it.next();
+            if(nodes.contains(node))
+                preferredVector.set(position, 1);
+            position++;
         }
         /*
         [1,1,0,0,1,1,1]
@@ -154,8 +158,11 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         return  welfareBonus / ( 1 + Math.pow(Math.abs( ( (speed - preferedSpeed)/(30*tolerance) ) ), 4) );
     }
 
-    private double khanUtilility(int currentSpeed, int offeredSpeed, int desiredSpeed, double joinFactor){
-        return  1 - (Math.abs( desiredSpeed - offeredSpeed )/desiredSpeed) - joinFactor*(Math.abs(currentSpeed/offeredSpeed)/currentSpeed);
+    private double khanUtilility(double currentSpeed, double offeredSpeed, double desiredSpeed, double joinFactor){
+        double d1 = Math.abs(desiredSpeed - offeredSpeed)/desiredSpeed;
+        double d2 = Math.abs(currentSpeed/offeredSpeed)/currentSpeed;
+        double result = 1 - d1 - factor*d2;
+        return  result;
     }
 
 
@@ -176,12 +183,10 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
 
     @IAgentActionFilter
-    @IAgentActionName( name = "transmit/self/searchforplatoon" )
-    private void searchForPlatoon()
+    @IAgentActionName( name = "test/debug" )
+    private void debug()
     {
-            /*InstructionModel iOb = new InstructionModel(this.id, Constants.REQUEST_SPEED_DOWN);
-            iOb.pushInt(targetId.intValue());
-            agentManager.addInstruction(iOb);*/
+            System.out.println("Test");
     }
 
     @IAgentActionFilter
@@ -250,7 +255,18 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
         }
         iOb.pushIntArray(l_candidates);
-        iOb.pushInt(votingRule.getExpectedVoteSize(l_candidates.size()));
+        //Add additional information
+        switch (context){
+            case "join":
+            case "speed":
+                iOb.pushInt(votingRule.getExpectedVoteSize(l_candidates.size()));
+                break;
+            case "node":
+                iOb.pushInt(committeeRule.getExpectedVoteSize(l_candidates.size()));
+                break;
+            default:
+                break;
+        }
         agentManager.addInstruction(iOb);
         final ITrigger l_trigger = CTrigger.from(
                 ITrigger.EType.ADDGOAL,
@@ -274,7 +290,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      */
     @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/vote/vector" )
-    private List<Integer> generateVoteVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_currentSpeed, List<Double> p_context){
+    private List<Integer> generateVoteVector(List<Integer> p_candidates, Number p_tolerance, Number p_speed, Number p_currentSpeed, List<Double> p_context, List<Integer> nodes){
         ArrayList<Integer> l_candidates = new ArrayList<>(p_candidates.size());
         short l_context = (short)p_context.get(0).doubleValue();
         switch (l_context ){
@@ -289,17 +305,23 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             }
         }
         List<CUtilityPair> utils = new ArrayList<>(l_candidates.size());
-        for(int i = 0; i < l_candidates.size(); i++) {
-            double util = calculateUtility(l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue(), p_currentSpeed.intValue());
-            utils.add(new CUtilityPair(i, util));
-        }
         List<Integer> votes;
         switch (l_context){
             case VoteConstants.CONTEXT_PATH:{
+                for(int i = 0; i < l_candidates.size(); i++){
+                    if(nodes.contains(l_candidates.get(i)))
+                        utils.add(new CUtilityPair(i, 1));
+                    else
+                        utils.add(new CUtilityPair(i, 0));
+                }
                 votes = committeeRule.getVote(utils);
                 break;
             }
             default:{
+                for(int i = 0; i < l_candidates.size(); i++) {
+                    double util = calculateUtility(l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue(), p_currentSpeed.intValue());
+                    utils.add(new CUtilityPair(i, util));
+                }
                 votes = votingRule.getVote(utils);
                 break;
             }
@@ -402,10 +424,48 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private void committeeWinnerDetermination(){
         System.out.println("COMMITTEE WINNER DETERMINATION");
-        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates()));
+        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates(), 4));
         InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
         iOb.pushInt(-1);
-        iOb.pushIntArray(results);
+        if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH){
+            //Update node values
+            for(int i = 0; i < route.getVertexes().size(); i++){
+                route.getVertexes().get(i).setValue(results.get(i));
+            }
+            //Update the graphs weights
+            route.updateWeights(Collections.max(results));
+            //Get the route
+            Dijkstra dijkstra = new Dijkstra(route);
+            //Assume that the origin is at the beginning of the config file and the destination at the end of the config file
+            dijkstra.execute(route.getVertexes().get(0));
+            LinkedList<Vertex> path = dijkstra.getPath(route.getVertexes().get(route.getVertexes().size() - 1));
+            //Convert to a score list
+            ArrayList<Integer> pathIds = new ArrayList<>();
+            for (Vertex aPath : path) {
+                pathIds.add(Integer.parseInt(aPath.getId()));
+            }
+            ArrayList<Integer> scoreVector = new ArrayList<>();
+            for(int i = 0; i < m_context.getCandidates().size(); i++){
+                if(pathIds.contains(m_context.getCandidates().get(i)))
+                    scoreVector.add(1);
+                else
+                    scoreVector.add(0);
+            }
+            iOb.pushIntArray(scoreVector);
+
+            final ITrigger l_trigger = CTrigger.from(
+                    ITrigger.EType.ADDGOAL,
+                    CLiteral.from(
+                            "handle/results/committee",
+                            CRawTerm.from(scoreVector)
+                    )
+
+            );
+            this.trigger( l_trigger );
+        }else{
+            iOb.pushIntArray(results);
+        }
+        agentManager.addInstruction(iOb);
     }
 
     @IAgentActionFilter
