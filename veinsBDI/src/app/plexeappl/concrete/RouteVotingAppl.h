@@ -15,7 +15,7 @@
 class RouteVotingAppl : public VotingAppl {
 public:
     RouteVotingAppl() : cycle(VoteCycle::NONE){};
-    virtual ~RouteVotingAppl(){}
+    virtual ~RouteVotingAppl();
     /** override from the normal appl */
     virtual void initialize(int stage) override;
     virtual void finalizeManeuver(int joinerId) override;

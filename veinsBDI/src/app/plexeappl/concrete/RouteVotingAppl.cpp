@@ -9,6 +9,10 @@
 
 Define_Module(RouteVotingAppl);
 
+RouteVotingAppl::~RouteVotingAppl(){
+    cancelAndDelete(updateCurrentSpeed);
+}
+
 void RouteVotingAppl::initialize(int stage){
     GeneralPlexeAgentAppl::initialize(stage);
     if (stage == 1){
@@ -115,8 +119,8 @@ void RouteVotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
 }
 
 void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
-    if(searchingForPlatoon){
-        if(JoinProposal* jp = dynamic_cast<JoinProposal*>(nm)){
+    if(JoinProposal* jp = dynamic_cast<JoinProposal*>(nm)){
+        if(searchingForPlatoon){
             int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(jp->getVehicleId());
             if( platoonId >= 0 ){
                 BeliefModel platoonBelief;
@@ -133,10 +137,12 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
                 manager->sendInformationToAgents(myId, &platoonBelief);
                 searchingForPlatoon = false;
                 negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
+                std::cout << "888888888 GOT THE JOIN PROPOSAL 888888888888" << std::endl;
             }
         }
-    }
-    VotingAppl::delegateNegotiationMessage(nm);
+        delete jp;
+    }else
+        VotingAppl::delegateNegotiationMessage(nm);
 }
 
 void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
@@ -184,8 +190,11 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
     }else if(msg == awaitAckTimer){
         switch(negotiationState){
         case VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST:{
+            delete msg;
             RequestJoinPlatoonMessage* resend = dynamic_cast<RequestJoinPlatoonMessage*>(copy->dup());
             sendUnicast(resend, resend->getDestinationId());
+            awaitAckTimer = new cMessage("awaitAckTimer");
+            scheduleAt(simTime() + 0.5, awaitAckTimer);
             break;
         }
         default:
@@ -193,11 +202,15 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
             break;
         }
     }else if(msg == updateCurrentSpeed){
+        delete msg;
         BeliefModel us("update/speed");
         int speed = mobility->getSpeed() * 3.6;
         us.pushInt(&speed);
         manager->sendInformationToAgents(myId, &us);
+        updateCurrentSpeed = new cMessage("updateCurrentSpeed");
+        scheduleAt(simTime() + 1, updateCurrentSpeed);
     }else if(msg == startSpeedVoteDelay){
+        delete msg;
         BeliefModel mnv("start/vote/speed");
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::SPEED_VOTE;

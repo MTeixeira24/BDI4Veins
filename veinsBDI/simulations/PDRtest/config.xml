@@ -9,7 +9,7 @@
             <parameter name="DielectricConstant" type="double" value="1.02"/>
         </AnalogueModel>
 		<AnalogueModel type="NakagamiFading">
-            <parameter name="constM" type="bool" value="true"/>
+            <parameter name="constM" type="bool" value="false"/>
             <parameter name="m" type="double" value="0.1"/>
         </AnalogueModel>
 		<!--<AnalogueModel type="SimpleObstacleShadowing">

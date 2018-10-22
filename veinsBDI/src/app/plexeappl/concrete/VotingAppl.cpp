@@ -11,12 +11,14 @@ Define_Module(VotingAppl);
 
 
 VotingAppl::~VotingAppl() {
+    cancelAndDelete(awaitAckTimer);
     //if(searchTimer != NULL)
     //     cancelAndDelete(searchTimer);
     //if(awaitAckTimer != NULL)
     //         delete awaitAckTimer;
    // if(voteTimer != NULL)
    //          cancelAndDelete(voteTimer);
+    cancelAndDelete(voteTimer);
 }
 
 void VotingAppl::initialize(int stage){
@@ -165,9 +167,9 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     msg->setTolerance(tolerance);
     backupMessage(msg);
     sendUnicast(msg, destinationId);
-    //Wait to seconds to request results if no response is heard
+    //Wait half a second to request ack if no response is heard
     awaitAckTimer = new cMessage("awaitAckTimer");
-    scheduleAt(simTime() + 2, awaitAckTimer);
+    scheduleAt(simTime() + 0.5, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
@@ -336,17 +338,19 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
     int size = msg->getVotesArraySize();
     if(size > election_data.expectedVoteVectorSize) return; //Got a vote for an expired election
     int origin = msg->getVehicleId();
-    std::vector<int> votes(size);
-    for(int i = 0; i < size; i++){
-        votes[i] = msg->getVotes(i);
+    if(!received_votes[origin]){
+        std::vector<int> votes(size);
+        for(int i = 0; i < size; i++){
+            votes[i] = msg->getVotes(i);
+        }
+        BeliefModel voteSubmission("handle/submit/vote");
+        voteSubmission.pushIntArray(votes);
+        voteSubmission.pushInt(&origin);
+        manager->sendInformationToAgents(myId, &voteSubmission);
+        received_votes[origin] = true;
     }
-    BeliefModel voteSubmission("handle/submit/vote");
-    voteSubmission.pushIntArray(votes);
-    voteSubmission.pushInt(&origin);
-    manager->sendInformationToAgents(myId, &voteSubmission);
     //Got the vote. Notify of successful delivery
-    sendAck(AckType::VOTE_RECEIVED, msg->getVehicleId());
-    received_votes[msg->getVehicleId()] = true;
+    sendAck(AckType::VOTE_RECEIVED, origin);
 }
 
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
@@ -419,7 +423,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
         }
     }else if(msg == voteTimer){
         delete msg;
-        voteTimer = NULL;
+        //voteTimer = NULL;
         //Count how many absentees there are
         int absentees = 0;
         for( const auto& kv_pair : received_votes ){

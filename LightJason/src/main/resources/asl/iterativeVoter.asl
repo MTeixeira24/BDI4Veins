@@ -106,8 +106,8 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     : ~>>currentspeed(_) <- +currentspeed(SPEED).
 
 +!decide/stay(UTIL, MUTIL)
-    <-  test/debug(); UTIL > MUTIL; generic/print("Agent", MyName, "stays")
-    <-  test/debug(); UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").
+    <-  UTIL > MUTIL; generic/print("Agent", MyName, "stays")
+    <-  UTIL <= MUTIL; generic/print("Agent", MyName, "leaves").
 
 +!handle/results(VALUE) <-
     >>preferedspeed(PreferredSpeed); >>factor(Factor); >>currentspeed(CurrentSpeed);

@@ -20,8 +20,12 @@ void NoisePlatoonTrafficManager::initialize(int stage) {
 }
 
 void NoisePlatoonTrafficManager::scenarioLoaded()  {
+    /*Compute the estimated size of the platoon, in order to reserve space*/
+    int platoonSize = int(par("platoonSize").doubleValue());
+    double platoonSpeed = par("platoonInsertSpeed").doubleValue() / 3.6;
+    int minDistance = platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed);
+
     int initialVehicleCount = 20;
-    int minDistance = 60;
     int length = 300;
     int base_speed = baseSpeed;
     struct Vehicle automated;
