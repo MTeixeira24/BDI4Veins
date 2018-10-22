@@ -17,7 +17,7 @@ public class CVoterAgentManager extends AgentManager {
     private String voteRule;
     private double factor;
     private String utility;
-
+    private String committee_vote_rule;
     private Graph scenarioRoute;
 
     /**
@@ -40,7 +40,7 @@ public class CVoterAgentManager extends AgentManager {
             switch(vType){
                 case "vVoter":
                     if(p_aslFile.equals(resourceFolder+"asl/voter.asl") || p_aslFile.equals(resourceFolder+"asl/iterativeVoter.asl")){
-                        l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, voteRule, factor, utility);
+                        l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, voteRule, factor, utility, committee_vote_rule);
                     }else{
                         throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected FuelVoter.asl, SpeedVoter.asl or voter.asl");
                     }
@@ -61,8 +61,9 @@ public class CVoterAgentManager extends AgentManager {
      */
     @Override
     public void setSimParams(Object... params) {
-        getStats().setSimParams((int)params[0], (int)params[1], (String)params[2], (String)params[3]);
+        getStats().setSimParams((int)params[0], (int)params[1], (String)params[2], (String)params[3], (String)params[6]);
         voteRule = (String)params[2];
+        committee_vote_rule = (String)params[6];
         factor = (double)params[4];
         utility = (String)params[5];
     }

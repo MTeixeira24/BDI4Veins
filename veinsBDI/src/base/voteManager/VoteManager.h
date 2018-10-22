@@ -48,6 +48,10 @@ public:
      * Get a list of speeds for a given array of ids
      */
     std::vector<int> getElementsPreferredSpeed(std::vector<int> elementList);
+    /*
+     * Increments the retransmission counts
+     */
+    void incrementRetransmission();
 
 protected:
     void parseResponse(uint32_t msgLength) override;
@@ -60,6 +64,10 @@ private:
     double chair2joinerStart;
     double chair2joinerDelay;
     double startOfVoteTimeStamp;
+    /**
+     * Retransmissions
+     */
+    int voteRetransmissions;
     /**
      * Information about the preferred speeds for the current iteration
      */

@@ -77,6 +77,7 @@ void RouteVotingAppl::finalizeManeuver(int joinerId){
     mnv.pushInt(&joinerId);
     manager->sendInformationToAgents(myId, &mnv);
     cycle = VoteCycle::ROUTE_VOTE;
+    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
 }
 
 void RouteVotingAppl::sendJoinProposal(){
@@ -195,6 +196,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
             sendUnicast(resend, resend->getDestinationId());
             awaitAckTimer = new cMessage("awaitAckTimer");
             scheduleAt(simTime() + 0.5, awaitAckTimer);
+            ((VoteManager*)manager)->incrementRetransmission();
             break;
         }
         default:

@@ -174,7 +174,8 @@ public final class ConnectionManager extends Thread {
                 int iteration = buffer.getInt();
                 double factor = buffer.getDouble();
                 String utility = extractString(buffer);
-                am.setSimParams(platoonSize, iteration, rule, type, factor, utility);
+                String committee_vote_rule = extractString(buffer);
+                am.setSimParams(platoonSize, iteration, rule, type, factor, utility, committee_vote_rule);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x06, 0x01};
                 break;
             }

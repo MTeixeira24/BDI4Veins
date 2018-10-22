@@ -17,7 +17,7 @@ final class App
     static
     {
         // disable logger
-       LogManager.getLogManager().reset();
+       //LogManager.getLogManager().reset();
     }
 
     /**
@@ -35,8 +35,6 @@ final class App
      */
     public static void main( final String[] p_args )
     {
-        /*Run variables, TODO: move this to a config file*/
-        //String voteRule = "Approval";//Borda//Approval//Plurality//Copeland
 
 
         ConnectionManager cm = new ConnectionManager();

@@ -41,6 +41,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private int targetPlatoonIndex = 0;
     private final CopyOnWriteArrayList<Integer> targetPlatoonIds;
     private double platoonSpeed = 0;
+    private int hammingDistance = 0;
 
     private CContext m_context;
     private IRule votingRule;
@@ -62,7 +63,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
      * @param m_vType Vehicle type Id
      */
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id,
-                       @Nonnull String m_vType, String voteRule, double m_factor, String m_utility) {
+                       @Nonnull String m_vType, String voteRule, double m_factor, String m_utility, String m_committee_vote_rule) {
         super(p_configuration, m_am, m_id, m_vType);
         members = new CopyOnWriteArrayList<>();
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
@@ -90,7 +91,19 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 throw new RuntimeException("CVoterAgent: Unknown voteRule!");
             }
         }
-        committeeRule = new CMinisum();
+        switch (m_committee_vote_rule){
+            case "Minisum":{
+                committeeRule = new CMinisum();
+                break;
+            }
+            case "Minimax":{
+                committeeRule = new CMinimax();
+                break;
+            }
+            default:{
+                throw new RuntimeException("CVoterAgent: Unknown committeeRule!");
+            }
+        }
     }
 
     @IAgentActionFilter
@@ -103,7 +116,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/save")
     private void saveUtils(@Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil, @Nonnull Number p_currentSpeed){
         double oldUtil = calculateUtility(platoonSpeed, t.doubleValue(), s.doubleValue(), p_currentSpeed.intValue());
-        ((CVoterAgentManager)agentManager).getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue());
+        ((CVoterAgentManager)agentManager).getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue(), hammingDistance);
     }
 
     @IAgentActionFilter
@@ -151,6 +164,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         for(int i = 0; i < results.size(); i++){
             if(!results.get(i).equals(preferredVector.get(i))) hammingDistance--;
         }
+        this.hammingDistance = hammingDistance;
         return hammingDistance;
     }
 

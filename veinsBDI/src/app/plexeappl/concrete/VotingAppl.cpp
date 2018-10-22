@@ -133,7 +133,6 @@ void VotingAppl::sendNotificationOfVoteDirect(VoteData electionData, int destina
 
 void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector){
     Enter_Method_Silent();
-    if((contextId == CONTEXT_SPEED) && (negotiationState == VoteState::CHAIR_ELECTION_END)) ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
     negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
     NotifyVote* msg = fillNotificationOfVote(contextId, contextArgs, candidates);
     std::vector<int> members = positionHelper->getPlatoonFormation();
@@ -414,6 +413,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
             awaitAckTimer = new cMessage("awaitAckTimer");
             //Reschedule to re-send 500ms from now if no ack is received
             scheduleAt(simTime() + 1, awaitAckTimer);
+            ((VoteManager*)manager)->incrementRetransmission();
         } else if (negotiationState == VoteState::AWAITING_RESULTS){
             //The joiner has not yet received results
             if(targetLeaderId > -1)
@@ -431,6 +431,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
                 absentees++;
                 //Resend the notification of vote to whoever is missing
                 sendNotificationOfVoteDirect(election_data, kv_pair.first);
+                ((VoteManager*)manager)->incrementRetransmission();
             }
         }
         if(absentees > 0){

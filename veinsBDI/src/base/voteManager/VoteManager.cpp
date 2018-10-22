@@ -24,6 +24,7 @@ void VoteManager::finish(){
     recordScalar("#timeToConsensus", timeToConsensus);
     recordScalar("#highestDelayToMember", highestDelayToMember);
     recordScalar("#delayToJoiner", chair2joinerDelay);
+    recordScalar("#retransmissions", voteRetransmissions);
 }
 
 void VoteManager::initialize(int stage){
@@ -37,7 +38,8 @@ void VoteManager::initialize(int stage){
         int iteration = par("iteration").intValue();
 
         writeToSocket(jp.setSimParameters(par("vote_rule").stdstringValue(), platoonType, platoonSize,
-                iteration, par("factor").doubleValue(), par("utilityFunction").stdstringValue()).getBuffer());
+                iteration, par("factor").doubleValue(), par("utilityFunction").stdstringValue(),
+                par("committee_vote_rule").stdstringValue()).getBuffer());
 
         char buff[FILENAME_MAX];
         getcwd( buff, FILENAME_MAX );
@@ -58,10 +60,13 @@ void VoteManager::initialize(int stage){
             }
             preferredPaths.push_back(speeds);
         }
-        //testSpeed = 0;
-
+        voteRetransmissions = 0;
     }
 
+}
+
+void VoteManager::incrementRetransmission(){
+    voteRetransmissions++;
 }
 
 int VoteManager::getPreferredSpeed(int agentId){
