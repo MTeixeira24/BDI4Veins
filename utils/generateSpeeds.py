@@ -31,9 +31,12 @@ def main(argv):
     maxplatoonsize = 0
     joiners = 0
     paths = [
-        [2,3,6,8],
-        [2,4,7,8],
-        [2,4,5,6]
+        [2,4,9,10],
+        [2,4,7,9,10],
+        [2,4,6,9,10],
+        [2,4,6,8,10],
+        [2,3,5,8,10],
+        [2,3,8,10]
     ]
 
     try:
@@ -110,7 +113,7 @@ def main(argv):
     for platoonSize in range(minplatoonsize, maxplatoonsize + 1):
         agentPathPreference = []
         for agent in range(0, platoonSize + joiners):
-            agentPathPreference.append( paths[random.randint(0, 2)] )
+            agentPathPreference.append( paths[random.randint(0, len(paths) - 1)] )
         nodePreferences.update({platoonSize: agentPathPreference})
 
     print("Aux")

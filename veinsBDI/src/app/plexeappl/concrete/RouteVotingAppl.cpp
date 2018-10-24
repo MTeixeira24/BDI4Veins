@@ -179,6 +179,8 @@ void RouteVotingAppl::handleAck(const Ack* msg){
         double delay = distribution(gen) * 0.01;
         awaitAckTimer = new cMessage("awaitAckTimer");
         scheduleAt(simTime() + delay, awaitAckTimer);
+    }else{
+        VotingAppl::handleAck(msg);
     }
 }
 

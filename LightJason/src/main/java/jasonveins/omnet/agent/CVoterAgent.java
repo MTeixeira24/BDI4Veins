@@ -438,7 +438,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private void committeeWinnerDetermination(){
         System.out.println("COMMITTEE WINNER DETERMINATION");
-        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates(), 4));
+        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates(), 5));
         InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
         iOb.pushInt(-1);
         if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH){

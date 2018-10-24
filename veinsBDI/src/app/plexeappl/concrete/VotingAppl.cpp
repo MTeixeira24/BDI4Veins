@@ -212,6 +212,7 @@ void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
     msg->setJoinerId(joinerId);
     msg->setPlatoonId(platoonId);
     ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_START);
+    std::cout << "SENT RESULTS" << std::endl; //GOT VOTE RESULT
     sendUnicast(msg, -1);
 }
 
