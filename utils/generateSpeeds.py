@@ -85,6 +85,10 @@ def main(argv):
                 speeds = [90,90,90,90,95,95,95,100,100,100,100]
             elif platoonSize == 12:
                 speeds = [90,90,90,90,95,95,95, 95,100,100,100,100]
+            elif platoonSize == 13:
+                speeds = [90,90,90,90,95,95,95,95,95,100,100,100,100]
+            elif platoonSize == 14:
+                speeds = [90,90,90,90,95,95,95,95,95,100,100,100,100]
             else:
                 for speed in range(0,platoonSize):
                     speeds.append(random.randint(minspeed,maxspeed))

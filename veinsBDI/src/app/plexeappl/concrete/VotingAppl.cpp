@@ -11,14 +11,13 @@ Define_Module(VotingAppl);
 
 
 VotingAppl::~VotingAppl() {
-    cancelAndDelete(awaitAckTimer);
+    //cancelAndDelete(awaitAckTimer);
     //if(searchTimer != NULL)
     //     cancelAndDelete(searchTimer);
     //if(awaitAckTimer != NULL)
     //         delete awaitAckTimer;
    // if(voteTimer != NULL)
    //          cancelAndDelete(voteTimer);
-    cancelAndDelete(voteTimer);
 }
 
 void VotingAppl::initialize(int stage){

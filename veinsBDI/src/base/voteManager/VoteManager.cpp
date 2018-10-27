@@ -12,19 +12,21 @@ Define_Module(VoteManager);
 void VoteManager::finish(){
     double maxTime = -1;
     //Get the highest time
-    for(int i = endOfVoteTimeStamps.size() - 1; i >= 0; i--){
-        if(endOfVoteTimeStamps[i] > maxTime) maxTime = endOfVoteTimeStamps[i];
+    if(endOfVoteTimeStamps.size() > 0){
+        for(int i = endOfVoteTimeStamps.size() - 1; i >= 0; i--){
+            if(endOfVoteTimeStamps[i] > maxTime) maxTime = endOfVoteTimeStamps[i];
+        }
+        double timeToConsensus = maxTime - startOfVoteTimeStamp;
+        maxTime = -1;
+        for(int i = chair2memberTimeStamps.size() - 1; i >= 0; i--){
+            if(chair2memberTimeStamps[i] > maxTime) maxTime = chair2memberTimeStamps[i];
+        }
+        double highestDelayToMember = maxTime - startOfVoteTimeStamp;
+        recordScalar("#timeToConsensus", timeToConsensus);
+        recordScalar("#highestDelayToMember", highestDelayToMember);
+        recordScalar("#delayToJoiner", chair2joinerDelay);
+        recordScalar("#retransmissions", voteRetransmissions);
     }
-    double timeToConsensus = maxTime - startOfVoteTimeStamp;
-    maxTime = -1;
-    for(int i = chair2memberTimeStamps.size() - 1; i >= 0; i--){
-        if(chair2memberTimeStamps[i] > maxTime) maxTime = chair2memberTimeStamps[i];
-    }
-    double highestDelayToMember = maxTime - startOfVoteTimeStamp;
-    recordScalar("#timeToConsensus", timeToConsensus);
-    recordScalar("#highestDelayToMember", highestDelayToMember);
-    recordScalar("#delayToJoiner", chair2joinerDelay);
-    recordScalar("#retransmissions", voteRetransmissions);
 }
 
 void VoteManager::initialize(int stage){
