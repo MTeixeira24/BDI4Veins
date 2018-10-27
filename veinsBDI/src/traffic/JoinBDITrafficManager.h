@@ -32,6 +32,7 @@ protected:
     virtual void scenarioLoaded();
     virtual void injectPlatoon();
     virtual void injectJoiner();
+    int numJoiners;
     cPar* platoonSize;
     int nPlatoons;
     int injectedCars;

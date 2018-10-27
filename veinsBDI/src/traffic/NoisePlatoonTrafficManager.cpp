@@ -13,7 +13,6 @@ void NoisePlatoonTrafficManager::initialize(int stage) {
     JoinBDITrafficManager::initialize(stage);
 
     noiseVType = par("noiseVType").stdstringValue();
-    numJoiners = par("numJoiners").intValue();
     noiseLanes = par("noiseLanes").intValue();
     addNoise = new cMessage();
     scheduleAt(simTime() + 0.5, addNoise);

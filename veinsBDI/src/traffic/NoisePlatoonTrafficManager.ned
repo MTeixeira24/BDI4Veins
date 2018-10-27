@@ -18,7 +18,6 @@ package veinsbdi.traffic;
 simple NoisePlatoonTrafficManager extends JoinBDITrafficManager {
     parameters:
         string noiseVType;
-        int numJoiners = default(1);
         int noiseLanes = default(1);
         @class(NoisePlatoonTrafficManager);
 }

@@ -16,6 +16,7 @@ void JoinBDITrafficManager::initialize(int stage)
     TraCIBaseTrafficManager::initialize(stage);
 
     platoonSize = &par("platoonSize");
+    numJoiners = par("numJoiners").intValue();
     nPlatoons = par("nPlatoons").intValue();
     nLanes = par("nLanes").intValue();
     platoonInsertSpeed = &par("platoonInsertSpeed");
@@ -103,9 +104,11 @@ void JoinBDITrafficManager::injectJoiner(){
     automated.id = findVehicleTypeIndex(platooningVType);
     /*Insert the joiner vehicle*/
     if (joinerLane >= 0){
-        automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);
-        automated.lane = joinerLane;
-        automated.position = 10;
-        addVehicleToQueue(0, automated);
+        for(int i = numJoiners; i > 0; i--){
+            automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);
+            automated.lane = joinerLane;
+            automated.position = 10 + (5*i);
+            addVehicleToQueue(0, automated);
+        }
     }
 }

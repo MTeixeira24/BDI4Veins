@@ -21,7 +21,6 @@ protected:
     virtual void handleSelfMsg(cMessage* msg) override;
     void injectVehicle(int lane, int speed);
     std::string noiseVType;
-    int numJoiners;
     int noiseLanes;
     //Prevent traffic injections from occurring at lanes occupied by platoons and joiners
     bool suppressInjections;

@@ -38,7 +38,8 @@ void JoinAtBackAgent::startManeuver(const void* parameters)
         targetPlatoonData.reset(new TargetPlatoonData());
         targetPlatoonData->platoonId = pars->platoonId;
         targetPlatoonData->platoonLeader = pars->leaderId;
-
+        //traciVehicle->setSpeedMode(0);
+        traciVehicle->setSpeed(-1);
         // send join request to leader
         JoinPlatoonRequest* req = createJoinPlatoonRequest(positionHelper->getId(), positionHelper->getExternalId(), targetPlatoonData->platoonId, targetPlatoonData->platoonLeader, traciVehicle->getLaneIndex(), mobility->getCurrentPosition().x, mobility->getCurrentPosition().y);
         app->sendUnicast(req, targetPlatoonData->platoonLeader);

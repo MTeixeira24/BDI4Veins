@@ -37,5 +37,7 @@ simple JoinBDITrafficManager like TraCIBaseTrafficManager {
         double platoonLeaderHeadway @unit("s") = default(1.2s);
         //lane in which to insert the joiner. -1 To not insert
         int joinerLane = default(-1);
+        //Number of joiners to insert
+        int numJoiners = default(1);
         @class(JoinBDITrafficManager);
 }
