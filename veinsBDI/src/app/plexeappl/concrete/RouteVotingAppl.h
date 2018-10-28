@@ -23,6 +23,10 @@ public:
     virtual void sendCommitteeVoteResults(std::vector<int>& results) override;
 protected:
     /**
+     * Defines what behavior the leader should start with
+     */
+    virtual void leaderInitialBehaviour();
+    /**
      * Fill out and send a proposal message
      */
     virtual void sendJoinProposal();

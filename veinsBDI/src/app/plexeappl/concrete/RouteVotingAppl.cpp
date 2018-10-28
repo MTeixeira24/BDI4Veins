@@ -58,10 +58,8 @@ void RouteVotingAppl::initialize(int stage){
                 chair = platoonId;
                 for (uint32_t i = 0; i < members.size(); i++){
                     received_votes[members[i]] = false;
+                    leaderInitialBehaviour();
                 }
-                sendProposal = new cMessage("sendProposal");
-                scheduleAt(simTime() + 0.5, sendProposal);
-                negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
             }
             pbelief.pushInt(&chair);
             pbelief.pushIntArray(members);
@@ -70,6 +68,12 @@ void RouteVotingAppl::initialize(int stage){
         updateCurrentSpeed = new cMessage("updateCurrentSpeed");
         scheduleAt(simTime() + 1, updateCurrentSpeed);
     }
+}
+
+void RouteVotingAppl::leaderInitialBehaviour(){
+    sendProposal = new cMessage("sendProposal");
+    scheduleAt(simTime() + 0.5, sendProposal);
+    negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
 }
 
 void RouteVotingAppl::finalizeManeuver(int joinerId){

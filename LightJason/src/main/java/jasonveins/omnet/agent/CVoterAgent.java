@@ -608,7 +608,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/storemember" )
     private void storeMember(@Nonnull final Number memberId)
     {
-        members.add(memberId.intValue());
+        if(memberId.intValue() > -1 ) members.add(memberId.intValue());
     }
 
     @IAgentActionFilter
