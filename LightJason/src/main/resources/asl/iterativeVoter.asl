@@ -94,9 +94,11 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     utility/storemember(L);
     open/vote("speed", [0]). //"node, speed"
     
-+!start/vote/node(L) <-
-    utility/storemember(L);
-    open/vote("node", [0]).
++!start/vote/node(L, ARGS) <-
+        utility/storemember(L);
+        L1 = collection/list/create(ARGS);
+        open/vote("node", L1).
+
 
 +!start/vote/speed() <-
     open/vote("speed", [0]).

@@ -107,7 +107,7 @@ void JoinBDITrafficManager::injectJoiner(){
         for(int i = numJoiners; i > 0; i--){
             automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);
             automated.lane = joinerLane;
-            automated.position = 10 + (5*i);
+            automated.position = 10 + (6*i);
             addVehicleToQueue(0, automated);
         }
     }

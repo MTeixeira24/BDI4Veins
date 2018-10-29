@@ -79,6 +79,8 @@ void RouteVotingAppl::leaderInitialBehaviour(){
 void RouteVotingAppl::finalizeManeuver(int joinerId){
     BeliefModel mnv("start/vote/node");
     mnv.pushInt(&joinerId);
+    double args = -1;
+    mnv.pushDouble(&args);
     manager->sendInformationToAgents(myId, &mnv);
     cycle = VoteCycle::ROUTE_VOTE;
     ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);

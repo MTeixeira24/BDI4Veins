@@ -19,5 +19,5 @@ import veinsbdi.app.plexeappl.concrete.VotingAppl;
 
 simple DissatisfactionAppl extends VotingAppl{
     parameters:
-        @class(RouteVotingAppl);
+        @class(DissatisfactionAppl);
 }

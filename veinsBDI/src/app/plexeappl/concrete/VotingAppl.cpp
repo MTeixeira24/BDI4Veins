@@ -14,8 +14,8 @@ VotingAppl::~VotingAppl() {
     //cancelAndDelete(awaitAckTimer);
     //if(searchTimer != NULL)
     //     cancelAndDelete(searchTimer);
-    //if(awaitAckTimer != NULL)
-    //         delete awaitAckTimer;
+    if(awaitAckTimer != NULL)
+             cancelAndDelete(awaitAckTimer);
    // if(voteTimer != NULL)
    //          cancelAndDelete(voteTimer);
 }
@@ -408,6 +408,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
         delete msg;
     }else if (msg == awaitAckTimer){
         delete msg;
+        awaitAckTimer = NULL;
         if(negotiationState == VoteState::AWAITING_ACK_SUBMIT){
             sendVoteSubmition(vote);
             awaitAckTimer = new cMessage("awaitAckTimer");

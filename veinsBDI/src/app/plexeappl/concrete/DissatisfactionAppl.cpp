@@ -18,7 +18,7 @@ void DissatisfactionAppl::initialize(int stage){
 
 void DissatisfactionAppl::leaderInitialBehaviour(){
     startInitialVote = new cMessage("startInitialVote");
-    scheduleAt(simTime() + 0.5, startInitialVote);
+    scheduleAt(simTime() + 1.5, startInitialVote);
     stage = Stage::INITIAL;
 }
 
@@ -26,7 +26,7 @@ void DissatisfactionAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoo
     int joinerId = msg->getVehicleId();
     //See if we already have this joiner in the stack
     std::vector<int>::iterator it = std::find(potentialJoiners.begin(), potentialJoiners.end(), joinerId);
-    if(it != potentialJoiners.end()){
+    if(it == potentialJoiners.end()){
         potentialJoiners.push_back(joinerId);
     }
     //Send ack to stop the joiner from broadcasting requests
@@ -36,14 +36,22 @@ void DissatisfactionAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoo
 void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
     if(msg == callJoinersTimer){
         delete msg;
+        callJoinersTimer = NULL;
         //sort the vector
         std::sort(potentialJoiners.begin(), potentialJoiners.end());
         //Notify the first joiner to enter the platoon
         callToJoin();
     } else if (msg == startInitialVote){
+        delete msg;
+        startInitialVote = NULL;
         int joinerId = -1;
         BeliefModel mnv("start/vote/node");
         mnv.pushInt(&joinerId);
+        double args = -1;
+        if(stage == Stage::ENVIRONMENTAL){
+            args = 1;
+        }
+        mnv.pushDouble(&args);
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::ROUTE_VOTE;
     } else{
@@ -65,9 +73,14 @@ void DissatisfactionAppl::sendVoteResults(int winnerValue, int joinerId){
         sendProposal = new cMessage("sendProposal");
         scheduleAt(simTime() + 0.5, sendProposal);
         callJoinersTimer = new cMessage("callJoinersTimer");
-        scheduleAt(simTime() + 2, callJoinersTimer);
+        scheduleAt(simTime() + 6, callJoinersTimer);
         negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
         stage = Stage::JOINERS;
+    }else if(stage == Stage::JOINERS){
+        //start a vote due to environmental changes
+        startInitialVote = new cMessage("startInitialVote");
+        scheduleAt(simTime() + 4, startInitialVote);
+        stage = Stage::ENVIRONMENTAL;
     }
 }
 
@@ -80,6 +93,8 @@ void DissatisfactionAppl::finalizeManeuver(int joinerId){
     }
     else{
         mnv.setBelief("start/vote/node");
+        double args = -1;
+        mnv.pushDouble(&args);
         cycle = VoteCycle::ROUTE_VOTE;
     }
     manager->sendInformationToAgents(myId, &mnv);

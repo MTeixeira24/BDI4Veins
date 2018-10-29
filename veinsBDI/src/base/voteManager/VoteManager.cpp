@@ -53,7 +53,7 @@ void VoteManager::initialize(int stage){
         jsonFile >> j;
         iterationSpeeds.reserve(platoonSize);
         std::string paths = "Paths";
-        for(int i = 0; i < platoonSize + 1; i++){
+        for(int i = 0; i < platoonSize + 3; i++){
             iterationSpeeds.push_back(j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][i].get<int>());
             std::vector<int> speeds;
             for(int z = 0; z < 4; z++){

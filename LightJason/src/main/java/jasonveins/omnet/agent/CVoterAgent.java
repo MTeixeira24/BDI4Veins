@@ -255,10 +255,15 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size());
                 l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
-            case "node":
+            case "node":{
                 iOb.pushInt(VoteConstants.CONTEXT_PATH);
                 //Get the environment data
                 route = ((CVoterAgentManager)agentManager).getRoute();
+                if(contextArgs.get(0) == 1){
+                    //Alternate route voting choosen. Remove the previously chosen route
+                    //from the possible candidates
+                    break;
+                }
                 //No special context needed
                 iOb.pushShort(Constants.VALUE_NULL);
                 //Gather all existing nodes to send to agents
@@ -267,6 +272,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 m_context = new CContext(l_candidates, VoteConstants.CONTEXT_PATH, members.size());
                 l_context_chair.add((double)VoteConstants.CONTEXT_PATH);
                 break;
+            }
         }
         iOb.pushIntArray(l_candidates);
         //Add additional information
