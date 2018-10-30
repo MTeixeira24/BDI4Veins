@@ -245,7 +245,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.add((double)VoteConstants.CONTEXT_JOIN);
                 l_context_chair.addAll(l_context);
                 break;
-            case "speed":
+            case "speed":{
                 ((CVoterAgentManager)agentManager).getStats().setInitPlatoonSpeed((int)platoonSpeed);
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
                 /*No context is needed*/
@@ -253,10 +253,17 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 /*Prepare a simple list of possible candidates*/
                 for(int i = 80; i <= 120; i += 5){
                     l_candidates.add(i);
+                }//80 85 90 95 100 105 110 115 120
+                double cArg = contextArgs.get(0);
+                if( cArg == 1){
+                    //Alternate speed voting chosen. Remove the previously chosen speed
+                    //and the other alternatives around it
+                    l_candidates.removeIf( s -> s >= (int)platoonSpeed - 5 && s < (int)platoonSpeed + 5);
                 }
                 m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size());
                 l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
+            }//platoonSpeed
             case "node":{
                 iOb.pushInt(VoteConstants.CONTEXT_PATH);
                 //Get the environment data
@@ -425,6 +432,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
             }
             case VoteConstants.CONTEXT_SPEED:{
+                platoonSpeed = winner;
                 ((CVoterAgentManager)agentManager).getStats().setFinalPlatoonSpeed(winner);
                 iOb.pushInt(-1);
                 final ITrigger l_trigger = CTrigger.from(

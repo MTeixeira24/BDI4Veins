@@ -100,8 +100,9 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         open/vote("node", L1).
 
 
-+!start/vote/speed() <-
-    open/vote("speed", [0]).
++!start/vote/speed(ARGS) <-
+    L1 = collection/list/create(ARGS);
+    open/vote("speed", L1).
 
 +!update/speed(SPEED) 
     : >>currentspeed(S) <-  -currentspeed(S); +currentspeed(SPEED)

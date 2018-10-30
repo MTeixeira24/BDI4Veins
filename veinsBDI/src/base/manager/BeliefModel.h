@@ -27,9 +27,11 @@ public:
     void pushBool(bool*);
     void pushChar(char*);
     void pushInt(int*);
+    void pushInt(int);
     void pushLong(long*);
     void pushFloat(float*);
     void pushDouble(double*);
+    //void pushDouble(double);
 
     void pushIntArray(std::vector<int>&);
     void pushIntArray(int* array, uint32_t size);

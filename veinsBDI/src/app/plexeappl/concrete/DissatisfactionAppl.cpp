@@ -55,6 +55,14 @@ void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
         mnv.pushDouble(&args);
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::ROUTE_VOTE;
+    } else if(msg == startSpeedVoteDelay && stage == Stage::ENVIRONMENTAL){
+        delete msg;
+        BeliefModel mnv("start/vote/speed");
+        //Set an identifier to remove potential speeds
+        double arg = 1;
+        mnv.pushDouble(&arg);
+        manager->sendInformationToAgents(myId, &mnv);
+        cycle = VoteCycle::SPEED_VOTE;
     } else{
         RouteVotingAppl::handleSelfMsg(msg);
     }

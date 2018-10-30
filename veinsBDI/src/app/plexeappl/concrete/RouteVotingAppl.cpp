@@ -222,6 +222,8 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
     }else if(msg == startSpeedVoteDelay){
         delete msg;
         BeliefModel mnv("start/vote/speed");
+        double arg = 0;
+        mnv.pushDouble(&arg);
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::SPEED_VOTE;
     }  else{

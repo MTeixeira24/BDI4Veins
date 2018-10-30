@@ -30,6 +30,14 @@ void BeliefModel::pushInt(int* value){
     totalSize += 4;
 }
 
+void BeliefModel::pushInt(int value){
+    BeliefObject bo;
+    bo.setData(VALUE_INT, &value, 4);
+    values.push_back(bo);
+    totalSize += 4;
+}
+
+
 void BeliefModel::pushDouble(double* value){
     BeliefObject bo;
     bo.setData(VALUE_DOUBLE, value, 8);

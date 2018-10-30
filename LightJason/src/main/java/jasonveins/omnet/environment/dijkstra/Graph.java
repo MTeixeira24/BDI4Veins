@@ -90,15 +90,11 @@ public class Graph {
             Vertex v = currentPath.get(i);
             int id = Integer.parseInt(v.getId());
             if(Arrays.binarySearch(toRemove, id) >= 0){
-                //Remove the edge that leads to this node in the current path
-                Vertex s = currentPath.get(i-1);
-                for(Iterator<Edge> it = edges.iterator(); it.hasNext();){
-                    Edge e = it.next();
-                    if(e.getSource().equals(s) && e.getDestination().equals(v)){
-                        it.remove();
-                        break;
-                    }
-                }
+                //Remove the edges leading to and from this vertex
+                edges.removeIf(e -> e.getSource().equals(v) || e.getDestination().equals(v));
+                //remove the vertex
+                vertexMap.remove(id);
+                vertexes.remove(v);
                 return;
             }
         }
