@@ -48,6 +48,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private IRule committeeRule;
     private double factor;
     private String utility;
+    private LinkedList<Vertex> currentPath;
 
     /**
     * Used by the leader to compute optimal path
@@ -70,6 +71,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         targetPlatoonIds = new CopyOnWriteArrayList<>();
         factor = m_factor;
         utility = m_utility;
+        currentPath = null;
         switch (voteRule){
             case "Borda":{
                 votingRule = new CBorda();
@@ -260,9 +262,10 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 //Get the environment data
                 route = ((CVoterAgentManager)agentManager).getRoute();
                 if(contextArgs.get(0) == 1){
-                    //Alternate route voting choosen. Remove the previously chosen route
+                    //Alternate route voting chosen. Remove the previously chosen route
                     //from the possible candidates
-                    break;
+                    int[] toRemove = {5,6,7,8,9};
+                    route.alterRoute(currentPath,toRemove);
                 }
                 //No special context needed
                 iOb.pushShort(Constants.VALUE_NULL);
@@ -459,6 +462,8 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             //Assume that the origin is at the beginning of the config file and the destination at the end of the config file
             dijkstra.execute(route.getVertexes().get(0));
             LinkedList<Vertex> path = dijkstra.getPath(route.getVertexes().get(route.getVertexes().size() - 1));
+            //Store the path to take
+            currentPath = path;
             //Convert to a score list
             ArrayList<Integer> pathIds = new ArrayList<>();
             for (Vertex aPath : path) {

@@ -56,7 +56,7 @@ void VoteManager::initialize(int stage){
         for(int i = 0; i < platoonSize + 3; i++){
             iterationSpeeds.push_back(j[platoonType][std::to_string(platoonSize)][std::to_string(iteration)][i].get<int>());
             std::vector<int> speeds;
-            for(int z = 0; z < 4; z++){
+            for(int z = 0; z < j[paths][std::to_string(platoonSize)][i].size(); z++){
                 int aux = j[paths][std::to_string(platoonSize)][i][z].get<int>();
                 speeds.push_back(aux);
             }

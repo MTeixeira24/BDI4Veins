@@ -48,6 +48,7 @@ void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
         BeliefModel mnv("start/vote/node");
         mnv.pushInt(&joinerId);
         double args = -1;
+        //Warn the agent to remove a link from the previous path
         if(stage == Stage::ENVIRONMENTAL){
             args = 1;
         }
