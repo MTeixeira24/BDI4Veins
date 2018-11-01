@@ -26,7 +26,7 @@ void JoinBDITrafficManager::initialize(int stage)
     platooningVType = par("platooningVType").stdstringValue();
     joinerLane = par("joinerLane").intValue();
     addJoiner = new cMessage();
-    scheduleAt(simTime() + 1, addJoiner);
+    scheduleAt(simTime() + 1.5, addJoiner);
 }
 
 void JoinBDITrafficManager::scenarioLoaded()

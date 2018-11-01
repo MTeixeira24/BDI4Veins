@@ -59,7 +59,7 @@ public class CJoinStatistics extends IStatistics {
                     //double diff = e.getValue().get(1) - e.getValue().get(0);
                     //out.write(head+e.getKey()+","+e.getValue().get(0)+","+e.getValue().get(1)+","+diff+","+e.getValue().get(2)+"\n");
                     out.write(head+e.getKey());
-                    {
+                   try{
                         int j = 0, buff = 0;
                         if(e.getValue().size() < 6){
                             buff = 2;
@@ -69,6 +69,9 @@ public class CJoinStatistics extends IStatistics {
                         for(; j < 6; j += 2){
                             out.write("," + e.getValue().get(j-buff) + "," + e.getValue().get(j+1-buff));
                         }
+                    }
+                    catch (IndexOutOfBoundsException x){
+                       x.printStackTrace();
                     }
                     out.write("\n");
                 }

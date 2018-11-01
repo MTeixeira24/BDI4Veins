@@ -31,7 +31,7 @@ void JoinScenario::initialize(int stage)
             traciVehicle->setActiveController(Plexe::ACC);
             //To faciliate maneuvering and speed up simulation, have the joiner
             //travel at a constant speed
-            traciVehicle->setSpeed(mobility->getSpeed() - 1);
+            traciVehicle->setSpeed(mobility->getSpeed());
             //traciVehicle->setSpeedMode(0);
             traciVehicle->setCruiseControlDesiredSpeed(mobility->getSpeed() + 2.88);
             positionHelper->setPlatoonId(-1);
