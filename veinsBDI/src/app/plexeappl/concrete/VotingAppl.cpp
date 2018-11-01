@@ -370,6 +370,7 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
             }
         }
     }else{
+        if(positionHelper->getPlatoonId() != msg->getPlatoonId()) return;
         BeliefModel result;
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
         std::cout << "############ GOT VOTE RESULT " << myId << "############## " << msg->getResult() << std::endl;

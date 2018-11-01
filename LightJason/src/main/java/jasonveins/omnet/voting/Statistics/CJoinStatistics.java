@@ -43,20 +43,34 @@ public class CJoinStatistics extends IStatistics {
             File f = new File("testResults/JoinResults.csv");
             if(!f.exists() || f.isDirectory()) {
                 out = new FileWriter(f);
-                out.write("Scenario,Rule,CommitteeRule,PlatoonSize,Iteration,Rejected,Agent,InitialUtility,FinalUtility,Difference,HammingDistance\n");
+                //out.write("Scenario,Rule,CommitteeRule,PlatoonSize,Iteration,Rejected,Agent,InitialUtility,FinalUtility,Difference,HammingDistance\n");
+                out.write("Scenario,Rule,CommitteeRule,PlatoonSize,Iteration,Rejected,Agent,Utility1,HammingDistance1,Utility2,HammingDistance2,Utility3,HammingDistance3\n");
             }else{
                 out = new FileWriter(f, true);
             }
             String head = type+","+rule+","+committeeRule+","+platoonSize+","+iteration+',';
             if(rejected){
-                out.write(head+"1,,,,,\n");
+                out.write(head+"1,,,,,,,\n");
             }else{
                 head = head + "0,";
                 Iterator<Map.Entry<Integer, ArrayList<Double>>> it = initial_final_utilities.entrySet().iterator();
-                for(int i = 0; i < initial_final_utilities.entrySet().size() - 1; i++){
+                for(int i = 0; i < initial_final_utilities.entrySet().size(); i++){
                     Map.Entry<Integer, ArrayList<Double>> e = it.next();
-                    double diff = e.getValue().get(1) - e.getValue().get(0);
-                    out.write(head+e.getKey()+","+e.getValue().get(0)+","+e.getValue().get(1)+","+diff+","+e.getValue().get(2)+"\n");
+                    //double diff = e.getValue().get(1) - e.getValue().get(0);
+                    //out.write(head+e.getKey()+","+e.getValue().get(0)+","+e.getValue().get(1)+","+diff+","+e.getValue().get(2)+"\n");
+                    out.write(head+e.getKey());
+                    {
+                        int j = 0, buff = 0;
+                        if(e.getValue().size() < 6){
+                            buff = 2;
+                            j += 2;
+                            out.write(",,");
+                        }
+                        for(; j < 6; j += 2){
+                            out.write("," + e.getValue().get(j-buff) + "," + e.getValue().get(j+1-buff));
+                        }
+                    }
+                    out.write("\n");
                 }
             }
             out.close();
@@ -74,8 +88,14 @@ public class CJoinStatistics extends IStatistics {
     }
 
     public void setInitAndFinalUtil(int id, double init, double fin, double hamming){
-        ArrayList<Double> utils = new ArrayList<>(3);
-        utils.add(init);
+        ArrayList<Double> utils = initial_final_utilities.get(id);
+        if(utils == null){
+            utils = new ArrayList<>(6);
+        }
+        else{
+            int stop = 0;
+        }
+        //utils.add(init);
         utils.add(fin);
         utils.add(hamming);
         initial_final_utilities.put(id, utils);
