@@ -10,7 +10,7 @@
 Define_Module(RouteVotingAppl);
 
 RouteVotingAppl::~RouteVotingAppl(){
-    cancelAndDelete(updateCurrentSpeed);
+    //cancelAndDelete(updateCurrentSpeed);
 }
 
 void RouteVotingAppl::initialize(int stage){

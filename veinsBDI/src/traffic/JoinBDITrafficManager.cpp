@@ -15,6 +15,12 @@ void JoinBDITrafficManager::initialize(int stage)
 
     TraCIBaseTrafficManager::initialize(stage);
 
+
+    DynamicPositionManager& positions = DynamicPositionManager::getInstance();
+    positions.platoons.clear();
+    positions.positions.clear();
+    positions.vehToPlatoons.clear();
+
     platoonSize = &par("platoonSize");
     numJoiners = par("numJoiners").intValue();
     nPlatoons = par("nPlatoons").intValue();

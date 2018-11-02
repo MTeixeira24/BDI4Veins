@@ -142,8 +142,8 @@ void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double
     //The leader agent stores its vote in the lightjason side
     received_votes[myId] = true;
     if(voteTimer != NULL){
-        cancelAndDelete(voteTimer);
-        voteTimer = NULL;
+        //cancelAndDelete(voteTimer);
+        //voteTimer = NULL;
     }
     voteTimer = new cMessage("VoteTimerA");
     scheduleAt(simTime() + 0.5, voteTimer);
