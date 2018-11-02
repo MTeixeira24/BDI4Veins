@@ -58,8 +58,8 @@ void RouteVotingAppl::initialize(int stage){
                 chair = platoonId;
                 for (uint32_t i = 0; i < members.size(); i++){
                     received_votes[members[i]] = false;
-                    leaderInitialBehaviour();
                 }
+                leaderInitialBehaviour();
             }
             pbelief.pushInt(&chair);
             pbelief.pushIntArray(members);
@@ -176,6 +176,7 @@ void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMes
 void RouteVotingAppl::handleAck(const Ack* msg){
     AckType type = (AckType)(msg->getAckType());
     if((type == AckType::JOIN_REQUEST_RECEIVED) && (negotiationState==VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST)){
+        delete copy;
         negotiationState = VoteState::AWAITING_RESULTS;
         //delete awaitAckTimer;
         cancelAndDelete(awaitAckTimer);
@@ -200,6 +201,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
         switch(negotiationState){
         case VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST:{
             delete msg;
+            awaitAckTimer = NULL;
             RequestJoinPlatoonMessage* resend = dynamic_cast<RequestJoinPlatoonMessage*>(copy->dup());
             sendUnicast(resend, resend->getDestinationId());
             awaitAckTimer = new cMessage("awaitAckTimer");

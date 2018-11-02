@@ -15,9 +15,9 @@ VotingAppl::~VotingAppl() {
     //if(searchTimer != NULL)
     //     cancelAndDelete(searchTimer);
     if(awaitAckTimer != NULL)
-             cancelAndDelete(awaitAckTimer);
-   // if(voteTimer != NULL)
-   //          cancelAndDelete(voteTimer);
+            cancelAndDelete(awaitAckTimer);
+    if(voteTimer != NULL)
+             cancelAndDelete(voteTimer);
 }
 
 void VotingAppl::initialize(int stage){
@@ -141,7 +141,11 @@ void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double
     }
     //The leader agent stores its vote in the lightjason side
     received_votes[myId] = true;
-    voteTimer = new cMessage("VoteTimer");
+    if(voteTimer != NULL){
+        cancelAndDelete(voteTimer);
+        voteTimer = NULL;
+    }
+    voteTimer = new cMessage("VoteTimerA");
     scheduleAt(simTime() + 0.5, voteTimer);
     //Store the election data in case someone fails to receive it
     election_data.expectedVoteVectorSize = expectedVoteVector;
@@ -166,6 +170,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     backupMessage(msg);
     sendUnicast(msg, destinationId);
     //Wait half a second to request ack if no response is heard
+    if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
     awaitAckTimer = new cMessage("awaitAckTimer");
     scheduleAt(simTime() + 0.5, awaitAckTimer);
 }
@@ -191,6 +196,7 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     scheduleAt(simTime() + delay, msg);
     //Vote sent, wait for ack.
     negotiationState = VoteState::AWAITING_ACK_SUBMIT;
+    if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
     awaitAckTimer = new cMessage("awaitAckTimer");
     //Reschedule to re-send 500ms from now if no ack is received
     scheduleAt(simTime() + 1, awaitAckTimer);
@@ -282,6 +288,7 @@ void VotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
         delete msg;
     }else if(RequestResults* msg = dynamic_cast<RequestResults*>(nm)) {
         handleRequestResults(msg);
+        delete msg;
     } else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
         handleAck(msg);
         delete msg;
@@ -392,6 +399,7 @@ void VotingAppl::handleAck(const Ack* msg){
         std::mt19937 gen{rd()};
         std::normal_distribution<double> distribution(50,2.0);
         double delay = distribution(gen) * 0.01;
+        if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
         awaitAckTimer = new cMessage("awaitAckTimer");
         scheduleAt(simTime() + delay, awaitAckTimer);
     }
@@ -425,7 +433,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
         }
     }else if(msg == voteTimer){
         delete msg;
-        //voteTimer = NULL;
+        voteTimer = NULL;
         //Count how many absentees there are
         int absentees = 0;
         for( const auto& kv_pair : received_votes ){
@@ -437,7 +445,7 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
             }
         }
         if(absentees > 0){
-            voteTimer = new cMessage("VoteTimer");
+            voteTimer = new cMessage("VoteTimerB");
             scheduleAt(simTime() + 0.5, voteTimer);
         }
     }else {

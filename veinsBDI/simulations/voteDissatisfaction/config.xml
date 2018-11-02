@@ -8,10 +8,10 @@
 		<AnalogueModel type="TwoRayInterferenceModel">
             <parameter name="DielectricConstant" type="double" value="1.02"/>
         </AnalogueModel>
-		<AnalogueModel type="NakagamiFading">
+		<!--<AnalogueModel type="NakagamiFading">
             <parameter name="constM" type="bool" value="false"/>
             <parameter name="m" type="double" value="0.1"/>
-        </AnalogueModel>
+        </AnalogueModel> -->
 		<!--<AnalogueModel type="SimpleObstacleShadowing">
 			<parameter name="carrierFrequency" type="double" value="5.890e+9"/>
 			<obstacles>
