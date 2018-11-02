@@ -26,6 +26,7 @@ public:
         platoonLeaderHeadway = 0;
         nLanes = 0;
     }
+    ~JoinBDITrafficManager(){}
 
 protected:
     virtual void initialize(int stage);

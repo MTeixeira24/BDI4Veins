@@ -37,8 +37,8 @@ void JoinBDITrafficManager::scenarioLoaded()
 void JoinBDITrafficManager::handleSelfMsg(cMessage* msg){
     TraCIBaseTrafficManager::handleSelfMsg(msg);
     if(msg == addJoiner){
+        delete msg;
         injectJoiner();
-        delete addJoiner;
     }
 }
 
