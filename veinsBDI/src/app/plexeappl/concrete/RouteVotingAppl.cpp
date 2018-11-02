@@ -205,7 +205,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
             RequestJoinPlatoonMessage* resend = dynamic_cast<RequestJoinPlatoonMessage*>(copy->dup());
             sendUnicast(resend, resend->getDestinationId());
             awaitAckTimer = new cMessage("awaitAckTimer");
-            scheduleAt(simTime() + 0.5, awaitAckTimer);
+            scheduleAt(simTime() + 0.1, awaitAckTimer);
             ((VoteManager*)manager)->incrementRetransmission();
             break;
         }
@@ -223,6 +223,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
         scheduleAt(simTime() + 1, updateCurrentSpeed);
     }else if(msg == startSpeedVoteDelay){
         delete msg;
+        startSpeedVoteDelay = NULL;
         BeliefModel mnv("start/vote/speed");
         double arg = 0;
         mnv.pushDouble(&arg);

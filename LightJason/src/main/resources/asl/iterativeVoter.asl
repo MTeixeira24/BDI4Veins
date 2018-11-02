@@ -163,5 +163,5 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     >>factor(Factor);
     >>preferedspeed(Speed);
     >>currentspeed(CurrentSpeed);
-    utility/store/platoon/start(PID, PSPEED, LID, Factor, Speed, CurrentSpeed).
+    utility/store/platoon/start(PID, PSPEED, LID, Factor, Speed, CurrentSpeed);
     generic/print("Exit PushPlatoon").

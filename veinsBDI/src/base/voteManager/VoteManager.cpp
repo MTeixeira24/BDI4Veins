@@ -220,6 +220,10 @@ void VoteManager::parseResponse(uint32_t msgLength){
                 ((VotingAppl*)(vehicles[agentId]))->sendNotificationOfVoteGeneral(contextId, contextArgs, candidates, expectedVoteVector);
                 break;
             }
+            case HANDLE_END_OF_VOTE:{
+                ((VotingAppl*)(vehicles[agentId]))->handleEndOfVote();
+                break;
+            }
             default:
                 break;
             }

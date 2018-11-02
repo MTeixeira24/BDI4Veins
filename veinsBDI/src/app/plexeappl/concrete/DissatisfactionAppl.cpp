@@ -57,6 +57,8 @@ void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
         cycle = VoteCycle::ROUTE_VOTE;
     } else if(msg == startSpeedVoteDelay && stage == Stage::ENVIRONMENTAL){
         delete msg;
+        startSpeedVoteDelay = NULL;
+        stage = Stage::NONE;
         BeliefModel mnv("start/vote/speed");
         //Set an identifier to remove potential speeds
         double arg = 1;
@@ -75,12 +77,11 @@ void DissatisfactionAppl::callToJoin(){
     VotingAppl::sendVoteResults(1, next);
 }
 
-void DissatisfactionAppl::sendVoteResults(int winnerValue, int joinerId){
+void DissatisfactionAppl::handleEndOfVote(){
     Enter_Method_Silent();
-    VotingAppl::sendVoteResults(winnerValue, joinerId);
     if(stage == Stage::INITIAL){
         sendProposal = new cMessage("sendProposal");
-        scheduleAt(simTime() + 0.5, sendProposal);
+        scheduleAt(simTime() + 3, sendProposal);
         callJoinersTimer = new cMessage("callJoinersTimer");
         scheduleAt(simTime() + 6, callJoinersTimer);
         negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
@@ -88,7 +89,7 @@ void DissatisfactionAppl::sendVoteResults(int winnerValue, int joinerId){
     }else if(stage == Stage::JOINERS){
         //start a vote due to environmental changes
         startInitialVote = new cMessage("startInitialVote");
-        scheduleAt(simTime() + 4, startInitialVote);
+        scheduleAt(simTime() + 12, startInitialVote);
         stage = Stage::ENVIRONMENTAL;
     }
 }
@@ -97,7 +98,7 @@ void DissatisfactionAppl::finalizeManeuver(int joinerId){
     BeliefModel mnv;
     mnv.pushInt(&joinerId);
     if(potentialJoiners.size() > 0){
-        mnv.setBelief("utility/storemember");
+        mnv.setBelief("addmember");
         callToJoin();
     }
     else{

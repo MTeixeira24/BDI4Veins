@@ -17,12 +17,14 @@ public:
     virtual void initialize(int stage) override;
     //Instruct any other joiners to enter the platoon. Otherwise start the votes
     virtual void finalizeManeuver(int joinerId) override;
+    virtual void handleEndOfVote() override;
 protected:
     /**
      * Votes are made for three scenarios: Initial vote at formation, vote after joiners have entered and a vote
      * after some environmental conditions changes the allowed route/speed
      */
     enum class Stage : size_t {
+            NONE,
             INITIAL,
             JOINERS,
             ENVIRONMENTAL
@@ -59,7 +61,7 @@ protected:
      /**
      * Override in order to add the joiners after the initial voting
      */
-    virtual void sendVoteResults(int winnerValue, int joinerId) override;
+    //virtual void sendVoteResults(int winnerValue, int joinerId) override;
 private:
     void callToJoin();
 };

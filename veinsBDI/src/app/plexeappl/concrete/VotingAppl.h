@@ -95,6 +95,10 @@ public:
      * If  no results have been received. Request them directly
      */
     void sendResultRequest(int, int);
+    /*
+     *
+     */
+    virtual void handleEndOfVote(){return;};
 protected:
     /**
      * Extend from GeneralPlexeAgentAppl to handle messages related to voting

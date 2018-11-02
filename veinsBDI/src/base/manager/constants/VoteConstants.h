@@ -17,6 +17,8 @@
 
 #define NOTIFY_START_VOTE 0x0C
 
+#define HANDLE_END_OF_VOTE 0x0D
+
 #define CONTEXT_SPEED 0x00
 
 #define CONTEXT_JOIN 0x01

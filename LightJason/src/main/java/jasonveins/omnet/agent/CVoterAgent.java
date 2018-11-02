@@ -398,13 +398,16 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH){
                 committeeWinnerDetermination();
             }else{
-                singleCandidateWinnerDetermination();
+                if(singleCandidateWinnerDetermination() >= 0){
+                    InstructionModel iOb = new InstructionModel(this.id, VoteConstants.HANDLE_END_OF_VOTE);
+                    agentManager.addInstruction(iOb);
+                }
             }
 
         }
     }
 
-    private void singleCandidateWinnerDetermination(){
+    private int singleCandidateWinnerDetermination(){
         System.out.println("FINAL ITERATION");
         int winnerIndex = votingRule.getResult(m_context.getVotes(), m_context.getCandidates());
         if(winnerIndex == -1){
@@ -420,7 +423,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
             );
             this.trigger( l_trigger );
-            return;
+            return  -1;
         }
         int winner = m_context.getCandidates().get(winnerIndex);
         System.out.println("Index that won is: " + winner);
@@ -451,6 +454,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
         }
         agentManager.addInstruction(iOb);
+        return 0;
     }
 
     private void committeeWinnerDetermination(){
@@ -507,7 +511,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     {
         if(votes.size() > votingRule.getExpectedVoteSize(getCandidateListSize())) return;
         //TODO: Change to iterative
-        if((getCandidateListSize() <= 2) || m_context.getVoteType() == VoteConstants.CONTEXT_PATH ){
+        if((getCandidateListSize() <= 3) || m_context.getVoteType() == VoteConstants.CONTEXT_PATH ){
             storeVote(votes);
             return;
         }

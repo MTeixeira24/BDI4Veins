@@ -172,7 +172,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     //Wait half a second to request ack if no response is heard
     if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
     awaitAckTimer = new cMessage("awaitAckTimer");
-    scheduleAt(simTime() + 0.5, awaitAckTimer);
+    scheduleAt(simTime() + 0.3, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
