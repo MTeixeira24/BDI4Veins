@@ -126,7 +126,6 @@ public class CMinimaxApproval
             if ( l_curHD > l_maxHD )
                 l_maxHD = l_curHD;
         }
-        System.out.println( " maximal HD for committee " + p_comVect + ": " + l_maxHD );
         return l_maxHD;
     }
 

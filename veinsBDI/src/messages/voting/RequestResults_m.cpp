@@ -181,6 +181,7 @@ Register_Class(RequestResults)
 
 RequestResults::RequestResults(const char *name, short kind) : ::NegotiationMessage(name,kind)
 {
+    this->platoonId = 0;
 }
 
 RequestResults::RequestResults(const RequestResults& other) : ::NegotiationMessage(other)
@@ -203,18 +204,21 @@ RequestResults& RequestResults::operator=(const RequestResults& other)
 void RequestResults::copy(const RequestResults& other)
 {
     this->ackType = other.ackType;
+    this->platoonId = other.platoonId;
 }
 
 void RequestResults::parsimPack(omnetpp::cCommBuffer *b) const
 {
     ::NegotiationMessage::parsimPack(b);
     doParsimPacking(b,this->ackType);
+    doParsimPacking(b,this->platoonId);
 }
 
 void RequestResults::parsimUnpack(omnetpp::cCommBuffer *b)
 {
     ::NegotiationMessage::parsimUnpack(b);
     doParsimUnpacking(b,this->ackType);
+    doParsimUnpacking(b,this->platoonId);
 }
 
 const char * RequestResults::getAckType() const
@@ -225,6 +229,16 @@ const char * RequestResults::getAckType() const
 void RequestResults::setAckType(const char * ackType)
 {
     this->ackType = ackType;
+}
+
+int RequestResults::getPlatoonId() const
+{
+    return this->platoonId;
+}
+
+void RequestResults::setPlatoonId(int platoonId)
+{
+    this->platoonId = platoonId;
 }
 
 class RequestResultsDescriptor : public omnetpp::cClassDescriptor
@@ -292,7 +306,7 @@ const char *RequestResultsDescriptor::getProperty(const char *propertyname) cons
 int RequestResultsDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 1+basedesc->getFieldCount() : 1;
+    return basedesc ? 2+basedesc->getFieldCount() : 2;
 }
 
 unsigned int RequestResultsDescriptor::getFieldTypeFlags(int field) const
@@ -305,8 +319,9 @@ unsigned int RequestResultsDescriptor::getFieldTypeFlags(int field) const
     }
     static unsigned int fieldTypeFlags[] = {
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<1) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<2) ? fieldTypeFlags[field] : 0;
 }
 
 const char *RequestResultsDescriptor::getFieldName(int field) const
@@ -319,8 +334,9 @@ const char *RequestResultsDescriptor::getFieldName(int field) const
     }
     static const char *fieldNames[] = {
         "ackType",
+        "platoonId",
     };
-    return (field>=0 && field<1) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<2) ? fieldNames[field] : nullptr;
 }
 
 int RequestResultsDescriptor::findField(const char *fieldName) const
@@ -328,6 +344,7 @@ int RequestResultsDescriptor::findField(const char *fieldName) const
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
     int base = basedesc ? basedesc->getFieldCount() : 0;
     if (fieldName[0]=='a' && strcmp(fieldName, "ackType")==0) return base+0;
+    if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+1;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -341,8 +358,9 @@ const char *RequestResultsDescriptor::getFieldTypeString(int field) const
     }
     static const char *fieldTypeStrings[] = {
         "string",
+        "int",
     };
-    return (field>=0 && field<1) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<2) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **RequestResultsDescriptor::getFieldPropertyNames(int field) const
@@ -410,6 +428,7 @@ std::string RequestResultsDescriptor::getFieldValueAsString(void *object, int fi
     RequestResults *pp = (RequestResults *)object; (void)pp;
     switch (field) {
         case 0: return oppstring2string(pp->getAckType());
+        case 1: return long2string(pp->getPlatoonId());
         default: return "";
     }
 }
@@ -425,6 +444,7 @@ bool RequestResultsDescriptor::setFieldValueAsString(void *object, int field, in
     RequestResults *pp = (RequestResults *)object; (void)pp;
     switch (field) {
         case 0: pp->setAckType((value)); return true;
+        case 1: pp->setPlatoonId(string2long(value)); return true;
         default: return false;
     }
 }

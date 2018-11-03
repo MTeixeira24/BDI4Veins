@@ -28,6 +28,7 @@
  * packet RequestResults extends NegotiationMessage
  * {
  *     string ackType;
+ *     int platoonId;
  * }
  * </pre>
  */
@@ -35,6 +36,7 @@ class RequestResults : public ::NegotiationMessage
 {
   protected:
     ::omnetpp::opp_string ackType;
+    int platoonId;
 
   private:
     void copy(const RequestResults& other);
@@ -55,6 +57,8 @@ class RequestResults : public ::NegotiationMessage
     // field getter/setter methods
     virtual const char * getAckType() const;
     virtual void setAckType(const char * ackType);
+    virtual int getPlatoonId() const;
+    virtual void setPlatoonId(int platoonId);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const RequestResults& obj) {obj.parsimPack(b);}

@@ -141,9 +141,8 @@ void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double
     }
     //The leader agent stores its vote in the lightjason side
     received_votes[myId] = true;
-    if(voteTimer != NULL){
-        //cancelAndDelete(voteTimer);
-        //voteTimer = NULL;
+    if(voteTimer){
+        cancelAndDelete(voteTimer);
     }
     voteTimer = new cMessage("VoteTimerA");
     scheduleAt(simTime() + 0.5, voteTimer);
@@ -241,6 +240,7 @@ void VotingAppl::sendAck(AckType ack_type, int destination){
 
 void VotingAppl::sendResultRequest(int originId, int targetId){
     RequestResults* msg = new RequestResults("RequestResults");
+    msg->setPlatoonId(positionHelper->getPlatoonId());
     msg->setDestinationId(targetId);
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(myId);
@@ -319,7 +319,6 @@ void VotingAppl::handleRequestResults(RequestResults* rr){
         break;
     }
     default:{
-        //throw cRuntimeError("VotingAppl: Unknown negotiation state in handleRequestResults");
         break;
     }
     }

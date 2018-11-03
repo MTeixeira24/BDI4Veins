@@ -194,6 +194,7 @@ void RouteVotingAppl::handleAck(const Ack* msg){
 void RouteVotingAppl::handleSelfMsg(cMessage* msg){
     if(msg == sendProposal){
         delete msg;
+        sendProposal = NULL;
         sendJoinProposal();
         sendProposal = new cMessage("sendProposal");
         scheduleAt(simTime() + 0.5, sendProposal);

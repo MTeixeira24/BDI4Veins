@@ -37,10 +37,17 @@ void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
     if(msg == callJoinersTimer){
         delete msg;
         callJoinersTimer = NULL;
+        if(potentialJoiners.size() == 0){
+            callJoinersTimer = new cMessage("callJoinersTimer");
+            scheduleAt(simTime() + 3, callJoinersTimer);
+            return;
+        }
+        if(sendProposal != NULL) cancelAndDelete(sendProposal);
         //sort the vector
         std::sort(potentialJoiners.begin(), potentialJoiners.end());
         //Notify the first joiner to enter the platoon
         callToJoin();
+        negotiationState = VoteState::CHAIR_ELECTION_END;
     } else if (msg == startInitialVote){
         delete msg;
         startInitialVote = NULL;
@@ -75,6 +82,8 @@ void DissatisfactionAppl::callToJoin(){
     potentialJoiners.erase(potentialJoiners.begin());
     //Skip the voting and accept
     VotingAppl::sendVoteResults(1, next);
+    election_data.currentResult = 1;
+    election_data.joinerId = next;
 }
 
 void DissatisfactionAppl::handleEndOfVote(){
@@ -84,7 +93,6 @@ void DissatisfactionAppl::handleEndOfVote(){
         scheduleAt(simTime() + 3, sendProposal);
         callJoinersTimer = new cMessage("callJoinersTimer");
         scheduleAt(simTime() + 6, callJoinersTimer);
-        negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
         stage = Stage::JOINERS;
     }else if(stage == Stage::JOINERS){
         //start a vote due to environmental changes
@@ -102,6 +110,7 @@ void DissatisfactionAppl::finalizeManeuver(int joinerId){
         callToJoin();
     }
     else{
+        negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
         mnv.setBelief("start/vote/node");
         double args = -1;
         mnv.pushDouble(&args);

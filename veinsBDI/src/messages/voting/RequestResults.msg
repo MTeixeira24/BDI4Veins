@@ -20,4 +20,5 @@ packet NegotiationMessage;
 
 packet RequestResults extends NegotiationMessage {
     string ackType;
+    int platoonId;
 }
