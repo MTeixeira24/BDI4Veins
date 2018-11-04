@@ -74,7 +74,7 @@ void JoinAtBackAgent::onPlatoonBeacon(const PlatooningBeacon* pb)
             double distance = position.distance(frontPosition) - pb->getLength();
             traciVehicle->setFrontVehicleFakeData(pb->getControllerAcceleration(), pb->getAcceleration(), pb->getSpeed(), distance);
             // if we are in position, tell the leader about that
-            if (distance < 7) { // TODO fixed value? make dependent on
+            if (distance < 10) { // TODO fixed value? make dependent on
                 // controller and headway time
                 // send move to position response to confirm the parameters
                 MoveToPositionAck* ack = createMoveToPositionAck(positionHelper->getId(), positionHelper->getExternalId(), targetPlatoonData->platoonId, targetPlatoonData->platoonLeader, targetPlatoonData->platoonSpeed, targetPlatoonData->platoonLane, targetPlatoonData->newFormation);

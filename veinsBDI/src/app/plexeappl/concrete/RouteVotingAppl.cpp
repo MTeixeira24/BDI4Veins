@@ -10,12 +10,15 @@
 Define_Module(RouteVotingAppl);
 
 RouteVotingAppl::~RouteVotingAppl(){
-    //cancelAndDelete(updateCurrentSpeed);
+    cancelAndDelete(updateCurrentSpeed);
+    if(startSpeedVoteDelay != NULL)
+        cancelAndDelete(startSpeedVoteDelay);
 }
 
 void RouteVotingAppl::initialize(int stage){
     GeneralPlexeAgentAppl::initialize(stage);
     if (stage == 1){
+        awaitAckTimer = new cMessage("awaitAckTimer");
         // connect negotiation application to protocol
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs
@@ -59,6 +62,8 @@ void RouteVotingAppl::initialize(int stage){
                 for (uint32_t i = 0; i < members.size(); i++){
                     received_votes[members[i]] = false;
                 }
+                sendProposal = new cMessage("sendProposal");
+                voteTimer = new cMessage("VoteTimerA");
                 leaderInitialBehaviour();
             }
             pbelief.pushInt(&chair);
@@ -71,7 +76,6 @@ void RouteVotingAppl::initialize(int stage){
 }
 
 void RouteVotingAppl::leaderInitialBehaviour(){
-    sendProposal = new cMessage("sendProposal");
     scheduleAt(simTime() + 0.5, sendProposal);
     negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
 }
@@ -121,7 +125,9 @@ void RouteVotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
     for(uint32_t i = 0; i < results.size(); i++) msg->setCommitteeResult(i, results[i]);
     sendUnicast(msg, -1);
     //Set a delay to start the speed vote
-    startSpeedVoteDelay = new cMessage("startSpeedVoteDelay");
+    if(startSpeedVoteDelay == NULL)
+        startSpeedVoteDelay = new cMessage("startSpeedVoteDelay");
+    cancelEvent(startSpeedVoteDelay);
     scheduleAt(simTime() + 0.1, startSpeedVoteDelay);
 }
 
@@ -167,6 +173,8 @@ void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
 
 void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
     if(negotiationState == VoteState::CHAIR_SEARCHING_JOINERS){
+        cancelEvent(sendProposal);
+        delete sendProposal;
         negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
         VotingAppl::handleRequestToJoinNegotiation(msg);
     }
@@ -179,12 +187,11 @@ void RouteVotingAppl::handleAck(const Ack* msg){
         delete copy;
         negotiationState = VoteState::AWAITING_RESULTS;
         //delete awaitAckTimer;
-        cancelAndDelete(awaitAckTimer);
+        cancelEvent(awaitAckTimer);
         std::random_device rd{};
         std::mt19937 gen{rd()};
         std::normal_distribution<double> distribution(50,2.0);
         double delay = distribution(gen) * 0.01;
-        awaitAckTimer = new cMessage("awaitAckTimer");
         scheduleAt(simTime() + delay, awaitAckTimer);
     }else{
         VotingAppl::handleAck(msg);
@@ -193,19 +200,13 @@ void RouteVotingAppl::handleAck(const Ack* msg){
 
 void RouteVotingAppl::handleSelfMsg(cMessage* msg){
     if(msg == sendProposal){
-        delete msg;
-        sendProposal = NULL;
         sendJoinProposal();
-        sendProposal = new cMessage("sendProposal");
         scheduleAt(simTime() + 0.5, sendProposal);
     }else if(msg == awaitAckTimer){
         switch(negotiationState){
         case VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST:{
-            delete msg;
-            awaitAckTimer = NULL;
             RequestJoinPlatoonMessage* resend = dynamic_cast<RequestJoinPlatoonMessage*>(copy->dup());
             sendUnicast(resend, resend->getDestinationId());
-            awaitAckTimer = new cMessage("awaitAckTimer");
             scheduleAt(simTime() + 0.1, awaitAckTimer);
             ((VoteManager*)manager)->incrementRetransmission();
             break;
@@ -215,16 +216,12 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
             break;
         }
     }else if(msg == updateCurrentSpeed){
-        delete msg;
         BeliefModel us("update/speed");
         int speed = mobility->getSpeed() * 3.6;
         us.pushInt(&speed);
         manager->sendInformationToAgents(myId, &us);
-        updateCurrentSpeed = new cMessage("updateCurrentSpeed");
         scheduleAt(simTime() + 1, updateCurrentSpeed);
     }else if(msg == startSpeedVoteDelay){
-        delete msg;
-        startSpeedVoteDelay = NULL;
         BeliefModel mnv("start/vote/speed");
         double arg = 0;
         mnv.pushDouble(&arg);

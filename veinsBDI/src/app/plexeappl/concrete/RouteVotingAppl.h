@@ -45,7 +45,7 @@ protected:
     /*
      *
      */
-    cMessage* startSpeedVoteDelay;
+    cMessage* startSpeedVoteDelay = NULL;
     /*
      * Override from voting appl
      */

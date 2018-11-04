@@ -48,11 +48,15 @@ protected:
     /*
      * Self message to notify of when to handle the saved joiners
      */
-    cMessage* callJoinersTimer;
+    cMessage* callJoinersTimer = NULL;
     /**
      * Self message to start the initial vote
      */
-    cMessage* startInitialVote;
+    cMessage* startInitialVote = NULL;
+    /**
+     *
+     */
+    cMessage* joinTimeout;
     /**
      * Instead of starting with a join proposal, start by voting on speed and route
      * with the current elements

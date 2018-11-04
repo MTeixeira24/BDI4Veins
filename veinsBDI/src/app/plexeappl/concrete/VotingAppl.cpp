@@ -17,12 +17,13 @@ VotingAppl::~VotingAppl() {
     if(awaitAckTimer != NULL)
             cancelAndDelete(awaitAckTimer);
     if(voteTimer != NULL)
-             cancelAndDelete(voteTimer);
+        cancelAndDelete(voteTimer);
 }
 
 void VotingAppl::initialize(int stage){
     GeneralPlexeAgentAppl::initialize(stage);
     if (stage == 1){
+        awaitAckTimer = new cMessage("awaitAckTimer");
         // connect negotiation application to protocol
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
         // set initial beliefs
@@ -47,7 +48,7 @@ void VotingAppl::initialize(int stage){
                     bm.setBelief("lookforplatoon");
                     manager->sendInformationToAgents(myId,&bm);
                     searchingForPlatoon = true;
-                    searchTimer = new cMessage();
+                    searchTimer = new cMessage("searchTimer");
                     //Search for platoons for half a second
                     scheduleAt(simTime() + SimTime(0.5), searchTimer);
                 }
@@ -68,6 +69,7 @@ void VotingAppl::initialize(int stage){
             platoonSpeedBelief.pushInt(&platoonSpeed);
             manager->sendInformationToAgents(myId, &platoonSpeedBelief);
             if (getPlatoonRole() == PlatoonRole::LEADER) {
+                voteTimer = new cMessage("VoteTimerA");
                 //This is a leader, push the beliefs that allow an agent to know its role
                 BeliefModel cbelief;
                 cbelief.setBelief("ischair");
@@ -141,10 +143,7 @@ void VotingAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double
     }
     //The leader agent stores its vote in the lightjason side
     received_votes[myId] = true;
-    if(voteTimer){
-        cancelAndDelete(voteTimer);
-    }
-    voteTimer = new cMessage("VoteTimerA");
+    cancelEvent(voteTimer);
     scheduleAt(simTime() + 0.5, voteTimer);
     //Store the election data in case someone fails to receive it
     election_data.expectedVoteVectorSize = expectedVoteVector;
@@ -169,8 +168,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     backupMessage(msg);
     sendUnicast(msg, destinationId);
     //Wait half a second to request ack if no response is heard
-    if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
-    awaitAckTimer = new cMessage("awaitAckTimer");
+    cancelEvent(awaitAckTimer);
     scheduleAt(simTime() + 0.3, awaitAckTimer);
 }
 
@@ -195,8 +193,7 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     scheduleAt(simTime() + delay, msg);
     //Vote sent, wait for ack.
     negotiationState = VoteState::AWAITING_ACK_SUBMIT;
-    if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
-    awaitAckTimer = new cMessage("awaitAckTimer");
+    cancelEvent(awaitAckTimer);
     //Reschedule to re-send 500ms from now if no ack is received
     scheduleAt(simTime() + 1, awaitAckTimer);
 }
@@ -365,7 +362,6 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
             //TODO: Handle insertion of beliefs
         }else if (myId == msg->getJoinerId()){
             BeliefModel result;
-            ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_END);
             if(msg->getResult() == 1)
                 startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
             else{
@@ -398,8 +394,7 @@ void VotingAppl::handleAck(const Ack* msg){
         std::mt19937 gen{rd()};
         std::normal_distribution<double> distribution(50,2.0);
         double delay = distribution(gen) * 0.01;
-        if(awaitAckTimer != NULL) cancelAndDelete(awaitAckTimer);
-        awaitAckTimer = new cMessage("awaitAckTimer");
+        cancelEvent(awaitAckTimer);
         scheduleAt(simTime() + delay, awaitAckTimer);
     }
 }
@@ -414,14 +409,10 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
         searchingForPlatoon = false;
         manager->sendInformationToAgents(myId, &sendRequests);
         delete msg;
+        searchTimer = NULL;
     }else if (msg == awaitAckTimer){
-        delete msg;
-        awaitAckTimer = NULL;
         if(negotiationState == VoteState::AWAITING_ACK_SUBMIT){
             sendVoteSubmition(vote);
-            awaitAckTimer = new cMessage("awaitAckTimer");
-            //Reschedule to re-send 500ms from now if no ack is received
-            scheduleAt(simTime() + 1, awaitAckTimer);
             ((VoteManager*)manager)->incrementRetransmission();
         } else if (negotiationState == VoteState::AWAITING_RESULTS){
             //The joiner has not yet received results
@@ -431,8 +422,6 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
                 sendResultRequest(myId, positionHelper->getLeaderId());
         }
     }else if(msg == voteTimer){
-        delete msg;
-        voteTimer = NULL;
         //Count how many absentees there are
         int absentees = 0;
         for( const auto& kv_pair : received_votes ){
@@ -444,7 +433,6 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
             }
         }
         if(absentees > 0){
-            voteTimer = new cMessage("VoteTimerB");
             scheduleAt(simTime() + 0.5, voteTimer);
         }
     }else {
