@@ -323,6 +323,10 @@ public class AgentManager extends Thread {
                             catch ( final Exception l_exception )
                             {
                                 l_exception.printStackTrace();
+                                System.out.println(i.beliefbase());
+                                System.out.println(i.plans());
+                                System.out.println(i.rules());
+                                System.out.println(i.runningplans());
                                 throw new RuntimeException();
                             }
                         } );

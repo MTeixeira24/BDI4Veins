@@ -49,7 +49,7 @@ void NoisePlatoonTrafficManager::scenarioLoaded()  {
             //If the platoon will be generated in this lane, break before vehicles are generated on top of each other
             //otherwise prevent negative values
             if(i < nLanes || (joinerLane > -1 && i == joinerLane )){
-                if(insertPosition < minDistance) break;
+                if(insertPosition < minDistance + 10) break;
             }else{
                 if(insertPosition < 4) break;
             }
