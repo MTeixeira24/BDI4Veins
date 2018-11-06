@@ -9,12 +9,16 @@
 
 Define_Module(NoisePlatoonTrafficManager);
 
+NoisePlatoonTrafficManager::~NoisePlatoonTrafficManager(){
+    cancelAndDelete(addNoise);
+}
+
 void NoisePlatoonTrafficManager::initialize(int stage) {
     JoinBDITrafficManager::initialize(stage);
 
     noiseVType = par("noiseVType").stdstringValue();
     noiseLanes = par("noiseLanes").intValue();
-    addNoise = new cMessage();
+    addNoise = new cMessage("addNoise");
     scheduleAt(simTime() + 0.5, addNoise);
 }
 
@@ -22,7 +26,7 @@ void NoisePlatoonTrafficManager::scenarioLoaded()  {
     /*Compute the estimated size of the platoon, in order to reserve space*/
     int platoonSize = int(par("platoonSize").doubleValue());
     double platoonSpeed = par("platoonInsertSpeed").doubleValue() / 3.6;
-    int minDistance = platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed);
+    int minDistance = platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed) + 4;
 
     int initialVehicleCount = 20;
     int length = 300;
@@ -65,10 +69,8 @@ void NoisePlatoonTrafficManager::handleSelfMsg(cMessage* msg)  {
     TraCIBaseTrafficManager::handleSelfMsg(msg);
         if(msg == addJoiner){
             injectJoiner();
-            delete addJoiner;
             suppressInjections = false;
         }else if(msg == addNoise){
-            delete addNoise;
             if(suppressInjections){
                 if(injectLane < nLanes || (joinerLane > -1 && injectLane == joinerLane )){
                     int originalLane = injectLane;
@@ -90,7 +92,6 @@ void NoisePlatoonTrafficManager::handleSelfMsg(cMessage* msg)  {
                 injectVehicle(injectLane, baseSpeed + (10*injectLane));
                 injectLane = (injectLane + 1) % noiseLanes;
             }
-            addNoise = new cMessage();
             scheduleAt(simTime() + 1, addNoise);
         }
 }

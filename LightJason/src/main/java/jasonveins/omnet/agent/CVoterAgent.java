@@ -116,9 +116,9 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     @IAgentActionFilter
     @IAgentActionName( name = "utility/save")
-    private void saveUtils(@Nonnull Number t, @Nonnull Number s, @Nonnull Number p_newUtil, @Nonnull Number p_currentSpeed){
-        double oldUtil = calculateUtility(platoonSpeed, t.doubleValue(), s.doubleValue(), p_currentSpeed.intValue());
-        ((CVoterAgentManager)agentManager).getStats().setInitAndFinalUtil(this.id, oldUtil, p_newUtil.doubleValue(), hammingDistance);
+    private void saveUtils(@Nonnull Number factor, @Nonnull Number p_preferredSpeed, @Nonnull Number p_newUtil, @Nonnull Number p_currentSpeed){
+        //double oldUtil = calculateUtility(platoonSpeed, t.doubleValue(), s.doubleValue(), p_currentSpeed.intValue());
+        ((CVoterAgentManager)agentManager).getStats().storeUtil(this.id, p_newUtil.doubleValue(), hammingDistance);
     }
 
     @IAgentActionFilter

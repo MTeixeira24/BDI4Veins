@@ -10,6 +10,10 @@
 
 Define_Module(JoinBDITrafficManager);
 
+JoinBDITrafficManager::~JoinBDITrafficManager(){
+    cancelAndDelete(addJoiner);
+}
+
 void JoinBDITrafficManager::initialize(int stage)
 {
 
@@ -43,7 +47,6 @@ void JoinBDITrafficManager::scenarioLoaded()
 void JoinBDITrafficManager::handleSelfMsg(cMessage* msg){
     TraCIBaseTrafficManager::handleSelfMsg(msg);
     if(msg == addJoiner){
-        delete msg;
         injectJoiner();
     }
 }

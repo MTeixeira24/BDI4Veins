@@ -26,7 +26,7 @@ public:
         platoonLeaderHeadway = 0;
         nLanes = 0;
     }
-    ~JoinBDITrafficManager(){}
+    ~JoinBDITrafficManager();
 
 protected:
     virtual void initialize(int stage);
@@ -51,7 +51,7 @@ protected:
     std::string platooningVType;
     cPar* platoonInsertSpeed;
     int joinerLane;
-    cMessage* addJoiner;
+    cMessage* addJoiner = NULL;
 
     typedef struct {
         int size;
