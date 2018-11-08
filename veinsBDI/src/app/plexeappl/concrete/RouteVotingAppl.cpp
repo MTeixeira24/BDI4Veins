@@ -176,8 +176,8 @@ void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
         result.pushIntArray(resultsVector);
         manager->sendInformationToAgents(myId, &result);
+        negotiationState = VoteState::NONE;
     }
-    negotiationState = VoteState::NONE;
 }
 
 void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
@@ -197,7 +197,7 @@ void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMes
 
 void RouteVotingAppl::handleEndOfVote(){
     Enter_Method_Silent();
-    scheduleAt(simTime() + 2, sendProposal);
+    scheduleAt(simTime() + 4, sendProposal);
 }
 
 void RouteVotingAppl::handleAck(const Ack* msg){

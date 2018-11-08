@@ -236,6 +236,7 @@ void VotingAppl::sendAck(AckType ack_type, int destination){
 }
 
 void VotingAppl::sendResultRequest(int originId, int targetId){
+    Enter_Method_Silent();
     RequestResults* msg = new RequestResults("RequestResults");
     msg->setPlatoonId(positionHelper->getPlatoonId());
     msg->setDestinationId(targetId);
@@ -243,6 +244,9 @@ void VotingAppl::sendResultRequest(int originId, int targetId){
     msg->setVehicleId(myId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
     sendUnicast(msg, targetId);
+    cancelEvent(awaitAckTimer);
+    //Reschedule to re-send 500ms from now if no ack is received
+    scheduleAt(simTime() + 0.1, awaitAckTimer);
 }
 
 void VotingAppl::fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId){
@@ -302,6 +306,7 @@ void VotingAppl::handleRequestResults(RequestResults* rr){
             sendNotificationOfVoteDirect(election_data, rr->getVehicleId());
         break;
     }
+    case VoteState::CHAIR_SEARCHING_JOINERS:
     case VoteState::CHAIR_ELECTION_END:{
         NotifyResults* msg = new NotifyResults("NotifyResults");
         int platoonId = positionHelper->getPlatoonId();
@@ -358,9 +363,12 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
 void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     if(msg->getJoinerId() != -1){
         std::cout << "@@@@@@@@@@@ GOT VOTE RESULT " << myId << "@@@@@@@@@@@ " << msg->getResult() << std::endl;
+        negotiationState = VoteState::NONE;
         if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
+            cancelEvent(awaitAckTimer);
             //TODO: Handle insertion of beliefs
         }else if (myId == msg->getJoinerId()){
+            cancelEvent(awaitAckTimer);
             BeliefModel result;
             if(msg->getResult() == 1)
                 startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
@@ -374,6 +382,7 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     }else{
         if(positionHelper->getPlatoonId() != msg->getPlatoonId()) return;
         if(negotiationState != VoteState::AWAITING_RESULTS) return;
+        cancelEvent(awaitAckTimer);
         BeliefModel result;
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
         std::cout << "############ GOT VOTE RESULT " << myId << "############## " << msg->getResult() << std::endl;
@@ -381,14 +390,13 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         int speed = msg->getResult();
         result.pushInt(&speed);
         manager->sendInformationToAgents(myId, &result);
+        negotiationState = VoteState::NONE;
     }
-    negotiationState = VoteState::NONE;
 }
 
 void VotingAppl::handleAck(const Ack* msg){
     AckType type = (AckType)(msg->getAckType());
     if(type == AckType::VOTE_RECEIVED){
-        //negotiationState = VoteState::NONE;
         negotiationState = VoteState::AWAITING_RESULTS;
         //Wait a around 500ms for the results, if there are none send a request for results
         std::random_device rd{};
