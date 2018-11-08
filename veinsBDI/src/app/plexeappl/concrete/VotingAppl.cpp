@@ -212,7 +212,6 @@ void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
     msg->setResult(winnerValue);
     msg->setJoinerId(joinerId);
     msg->setPlatoonId(platoonId);
-    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_JOINER_START);
     std::cout << "SENT RESULTS" << std::endl; //GOT VOTE RESULT
     sendUnicast(msg, -1);
 }
@@ -384,7 +383,6 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         if(negotiationState != VoteState::AWAITING_RESULTS) return;
         cancelEvent(awaitAckTimer);
         BeliefModel result;
-        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
         std::cout << "############ GOT VOTE RESULT " << myId << "############## " << msg->getResult() << std::endl;
         result.setBelief("handle/results");
         int speed = msg->getResult();
@@ -464,7 +462,6 @@ void VotingAppl::handleNotifyVote(const NotifyVote* msg){
         switch(msg->getContextId()){
         case CONTEXT_SPEED:
         {
-            ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::CHAIR_TO_MEMBER_END);
             contextArgs[0] = CONTEXT_SPEED;
             break;
         }

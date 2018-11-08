@@ -98,7 +98,7 @@ void RouteVotingAppl::finalizeManeuver(int joinerId){
     mnv.pushDouble(&args);
     manager->sendInformationToAgents(myId, &mnv);
     cycle = VoteCycle::ROUTE_VOTE;
-    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
+    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_START);
 }
 
 void RouteVotingAppl::sendJoinProposal(){
@@ -170,6 +170,7 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
 void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     if(msg->getResult() > -1){
         VotingAppl::handleNotificationOfResults(msg);
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
     }else{
         BeliefModel result("handle/results/committee");
         std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
@@ -177,6 +178,7 @@ void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         result.pushIntArray(resultsVector);
         manager->sendInformationToAgents(myId, &result);
         negotiationState = VoteState::NONE;
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_END);
     }
 }
 
@@ -247,6 +249,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
         mnv.pushDouble(&arg);
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::SPEED_VOTE;
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
     }else if(msg == startInitialVote){
         int joinerId = -1;
         BeliefModel mnv("start/vote/node");

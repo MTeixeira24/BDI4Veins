@@ -11,6 +11,29 @@ public class CCopeland implements IRule {
     @Override
     public int getResult(List<List<Integer>> votes, List<Integer> candidates) {
         scoreVector.clear();
+        boolean ties = false;
+        int winnerIndex = -1;
+        int highestScore = -1;
+        int voteVectorLength = votes.get(0).size();
+        for(int i = 0; i < voteVectorLength; i++){
+            int score = 0;
+            for(int j = 0; j < votes.size(); j++){
+                score += votes.get(j).get(i);
+            }
+            if(score == highestScore){
+                ties = true;
+                m_tiedIndexes.add(i);
+            }else if(score > highestScore){
+                highestScore = score;
+                winnerIndex = i;
+                ties = false;
+                m_tiedIndexes.clear();
+            }
+            scoreVector.add(score);
+        }
+        if(ties) return -1;
+        return winnerIndex;
+        /*scoreVector.clear();
         List<Integer> pairWiseWins = new ArrayList<>(Collections.nCopies(candidates.size(), 0));
         int position = 0;
         for(int i = 0; i < candidates.size() - 1; i++) {
@@ -30,7 +53,7 @@ public class CCopeland implements IRule {
             }
         }
         scoreVector.addAll(pairWiseWins);
-        return pairWiseWins.indexOf(Collections.max(pairWiseWins));
+        return pairWiseWins.indexOf(Collections.max(pairWiseWins));*/
     }
 
     /**
@@ -49,8 +72,8 @@ public class CCopeland implements IRule {
      */
     @Override
     public List<Integer> getVote(List<CUtilityPair> p_utilities) {
-        ArrayList<Integer> votes = new ArrayList<>();
-        for(int i = 0; i < p_utilities.size() - 1; i++){
+        ArrayList<Integer> votes = new ArrayList<>(Collections.nCopies(p_utilities.size(), 0));
+        /*for(int i = 0; i < p_utilities.size() - 1; i++){
             for(int j = i + 1; j < p_utilities.size(); j++){
                 if(p_utilities.get(i).getUtility() > p_utilities.get(j).getUtility()){
                     votes.add(1); votes.add(0);
@@ -58,6 +81,14 @@ public class CCopeland implements IRule {
                 else{
                     votes.add(0);  votes.add(1);
                 }
+            }
+        }*/
+        for(int i = 0; i < p_utilities.size() - 1; i++){
+            for(int j = i + 1; j < p_utilities.size(); j++){
+                if(p_utilities.get(i).getUtility() > p_utilities.get(j).getUtility())
+                    votes.set(i, votes.get(i) + 1);
+                else
+                    votes.set(j, votes.get(j) + 1);
             }
         }
         return votes;
@@ -71,7 +102,7 @@ public class CCopeland implements IRule {
      */
     @Override
     public List<Integer> getTieBreakerVote(List<CUtilityPair> p_utilities, List<Integer> p_ties) {
-        throw new RuntimeException("getTieBreakerVote: not implemented!");
+        return getVote(p_utilities);
     }
 
     @Override
@@ -98,11 +129,12 @@ public class CCopeland implements IRule {
 
     @Override
     public int getExpectedVoteSize(int size){
-        int l_size = 0;
+        return size;
+        /*int l_size = 0;
         for(int i = size - 1; i > 0; i--){
             l_size += i;
         }
-        return l_size*2;
+        return l_size*2;*/
     }
 
     @Override
