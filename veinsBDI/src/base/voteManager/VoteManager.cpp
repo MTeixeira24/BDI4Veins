@@ -18,13 +18,12 @@ void VoteManager::finish(){
         }
         double timeToConsensus = maxTime - startOfVoteTimeStamp;
         maxTime = -1;
-        for(int i = chair2memberTimeStamps.size() - 1; i >= 0; i--){
-            if(chair2memberTimeStamps[i] > maxTime) maxTime = chair2memberTimeStamps[i];
+        for(int i = endOfRouteVoteTimeStamps.size() - 1; i >= 0; i--){
+            if(endOfRouteVoteTimeStamps[i] > maxTime) maxTime = endOfRouteVoteTimeStamps[i];
         }
-        double highestDelayToMember = maxTime - startOfVoteTimeStamp;
-        recordScalar("#timeToConsensus", timeToConsensus);
-        recordScalar("#highestDelayToMember", highestDelayToMember);
-        recordScalar("#delayToJoiner", chair2joinerDelay);
+        double timeToRouteConsensus = maxTime - startOfRouteVoteTimeStamp;
+        recordScalar("#timeToSpeedConsensus", timeToConsensus);
+        recordScalar("#timeToRouteConsensus", timeToRouteConsensus);
         recordScalar("#retransmissions", voteRetransmissions);
     }
 }
@@ -99,19 +98,12 @@ void VoteManager::storeTimeStamp(double time, TimeStampAction action){
         endOfVoteTimeStamps.push_back(time);
         break;
     }
-    case TimeStampAction::CHAIR_TO_JOINER_START:{
-        //Called by sendVoteResults
-        chair2joinerStart = time;
+    case TimeStampAction::TIME_OF_ROUTE_VOTE_START:{
+        startOfRouteVoteTimeStamp = time;
         break;
     }
-    case TimeStampAction::CHAIR_TO_JOINER_END:{
-        //Called by handleNotificationOfResults
-        chair2joinerDelay = time - chair2joinerStart;
-        break;
-    }
-    case TimeStampAction::CHAIR_TO_MEMBER_END:{
-        //Called by handleNotifyVote
-        chair2memberTimeStamps.push_back(time);
+    case TimeStampAction::TIME_OF_ROUTE_VOTE_END:{
+        endOfRouteVoteTimeStamps.push_back(time);
         break;
     }
     default:

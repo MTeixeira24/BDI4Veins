@@ -2,9 +2,7 @@ package jasonveins.omnet.voting.Statistics;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,22 +54,11 @@ public class CJoinStatistics extends IStatistics {
                 Iterator<Map.Entry<Integer, ArrayList<Double>>> it = initial_final_utilities.entrySet().iterator();
                 for(int i = 0; i < initial_final_utilities.entrySet().size(); i++){
                     Map.Entry<Integer, ArrayList<Double>> e = it.next();
-                    //double diff = e.getValue().get(1) - e.getValue().get(0);
-                    //out.write(head+e.getKey()+","+e.getValue().get(0)+","+e.getValue().get(1)+","+diff+","+e.getValue().get(2)+"\n");
+                    if(e.getValue().size() < 6)
+                        for(int n = e.getValue().size(); n < 6; n++) e.getValue().add((double)0);
                     out.write(head+e.getKey());
-                   try{
-                        int j = 0, buff = 0;
-                        if(e.getValue().size() < 6){
-                            buff = 2;
-                            j += 2;
-                            out.write(",,");
-                        }
-                        for(; j < 6; j += 2){
-                            out.write("," + e.getValue().get(j-buff) + "," + e.getValue().get(j+1-buff));
-                        }
-                    }
-                    catch (IndexOutOfBoundsException x){
-                       x.printStackTrace();
+                    for(int j = 0; j < 6; j += 2){
+                        out.write("," + e.getValue().get(j) + "," + e.getValue().get(j+1));
                     }
                     out.write("\n");
                 }
@@ -90,16 +77,13 @@ public class CJoinStatistics extends IStatistics {
         this.finalPlatoonSpeed = finalPlatoonSpeed;
     }
 
-    public void setInitAndFinalUtil(int id, double init, double fin, double hamming){
+    public void storeUtil(int id, double util, double hamming){
         ArrayList<Double> utils = initial_final_utilities.get(id);
         if(utils == null){
             utils = new ArrayList<>(6);
         }
-        else{
-            int stop = 0;
-        }
         //utils.add(init);
-        utils.add(fin);
+        utils.add(util);
         utils.add(hamming);
         initial_final_utilities.put(id, utils);
     }

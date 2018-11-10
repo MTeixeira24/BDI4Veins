@@ -126,6 +126,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     generic/print(VALUE, LNODES, Util);
     !decide/stay(Util, 4.0).
 
++!save/utility(UTIL) <-
+    utility/save(0,0,UTIL,0).
+
+
 +!addmember(L) <-
     utility/storemember(L).
 

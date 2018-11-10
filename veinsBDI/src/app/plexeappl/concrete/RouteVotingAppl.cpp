@@ -13,6 +13,8 @@ RouteVotingAppl::~RouteVotingAppl(){
     cancelAndDelete(updateCurrentSpeed);
     if(startSpeedVoteDelay != NULL)
         cancelAndDelete(startSpeedVoteDelay);
+    if(startInitialVote != NULL)
+        cancelAndDelete(startInitialVote);
 }
 
 void RouteVotingAppl::initialize(int stage){
@@ -37,17 +39,22 @@ void RouteVotingAppl::initialize(int stage){
         us.pushInt(&currentSpeed);
         manager->sendInformationToAgents(myId, &us);
         if(getPlatoonRole() == PlatoonRole::NONE) {
+            //Fill the initial utility with placeholder values
+            {
+                BeliefModel bm("save/utility");
+                double util = 0;
+                bm.pushDouble(&util);
+                manager->sendInformationToAgents(myId,&bm);
+            }
             //Set the belief in the agent that they are looking for platoon proposals
             if(par("engageNegotiations").boolValue()){
-                BeliefModel bm;
-                bm.setBelief("lookforplatoon");
+                BeliefModel bm("lookforplatoon");
                 manager->sendInformationToAgents(myId,&bm);
                 searchingForPlatoon = true;
             }
         }else{
             //This a vehicle belonging to a platoon
-            BeliefModel pbelief;
-            pbelief.setBelief("set/initial/beliefs");
+            BeliefModel pbelief("set/initial/beliefs");
             int platoonId = positionHelper->getPlatoonId();
             int leaderId = positionHelper->getLeaderId();
             pbelief.pushInt(&platoonId);
@@ -76,8 +83,12 @@ void RouteVotingAppl::initialize(int stage){
 }
 
 void RouteVotingAppl::leaderInitialBehaviour(){
+    /*
     scheduleAt(simTime() + 0.5, sendProposal);
     negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
+    */
+    startInitialVote = new cMessage("startInitialVote");
+    scheduleAt(simTime() + 0.5, startInitialVote);
 }
 
 void RouteVotingAppl::finalizeManeuver(int joinerId){
@@ -87,7 +98,7 @@ void RouteVotingAppl::finalizeManeuver(int joinerId){
     mnv.pushDouble(&args);
     manager->sendInformationToAgents(myId, &mnv);
     cycle = VoteCycle::ROUTE_VOTE;
-    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
+    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_START);
 }
 
 void RouteVotingAppl::sendJoinProposal(){
@@ -133,25 +144,23 @@ void RouteVotingAppl::sendCommitteeVoteResults(std::vector<int>& results){
 
 void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
     if(JoinProposal* jp = dynamic_cast<JoinProposal*>(nm)){
-        if(searchingForPlatoon){
-            int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(jp->getVehicleId());
-            if( platoonId >= 0 ){
-                BeliefModel platoonBelief;
-                platoonBelief.setBelief("pushplatoon/start");
-                platoonBelief.pushInt(&platoonId);
-                double speedSum = 0;
-                for(uint32_t i = 0; i < jp->getMemberSpeedsArraySize(); i++){
-                    speedSum += jp->getMemberSpeeds(i);
-                }
-                int platoonSpeed = speedSum / jp->getMemberSpeedsArraySize();
-                platoonBelief.pushInt(&platoonSpeed);
-                int leaderId = jp->getVehicleId();
-                platoonBelief.pushInt(&leaderId);
-                manager->sendInformationToAgents(myId, &platoonBelief);
-                searchingForPlatoon = false;
-                negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
-                std::cout << "888888888 GOT THE JOIN PROPOSAL 888888888888" << std::endl;
+        int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(jp->getVehicleId());
+        if(searchingForPlatoon && platoonId >= 0){
+            searchingForPlatoon = false;
+            BeliefModel platoonBelief;
+            platoonBelief.setBelief("pushplatoon/start");
+            platoonBelief.pushInt(&platoonId);
+            double speedSum = 0;
+            for(uint32_t i = 0; i < jp->getMemberSpeedsArraySize(); i++){
+                speedSum += jp->getMemberSpeeds(i);
             }
+            int platoonSpeed = speedSum / jp->getMemberSpeedsArraySize();
+            platoonBelief.pushInt(&platoonSpeed);
+            int leaderId = jp->getVehicleId();
+            platoonBelief.pushInt(&leaderId);
+            manager->sendInformationToAgents(myId, &platoonBelief);
+            negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
+            std::cout << "888888888 GOT THE JOIN PROPOSAL 888888888888" << std::endl;
         }
         delete jp;
     }else
@@ -161,24 +170,37 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
 void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
     if(msg->getResult() > -1){
         VotingAppl::handleNotificationOfResults(msg);
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
     }else{
         BeliefModel result("handle/results/committee");
         std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
         for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
         result.pushIntArray(resultsVector);
         manager->sendInformationToAgents(myId, &result);
+        negotiationState = VoteState::NONE;
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_END);
     }
-    negotiationState = VoteState::NONE;
 }
 
 void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage* msg){
     if(negotiationState == VoteState::CHAIR_SEARCHING_JOINERS){
         cancelEvent(sendProposal);
-        delete sendProposal;
-        negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
-        VotingAppl::handleRequestToJoinNegotiation(msg);
+        /*negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
+        VotingAppl::handleRequestToJoinNegotiation(msg);*/
+
+        //Skip the voting and accept
+        VotingAppl::sendVoteResults(1, msg->getVehicleId());
+        election_data.currentResult = 1;
+        election_data.joinerId = msg->getVehicleId();
+        negotiationState = VoteState::CHAIR_ELECTION_END;
     }
     sendAck(AckType::JOIN_REQUEST_RECEIVED, msg->getVehicleId());
+}
+
+void RouteVotingAppl::handleEndOfVote(){
+    Enter_Method_Silent();
+    cancelEvent(sendProposal);
+    scheduleAt(simTime() + 4, sendProposal);
 }
 
 void RouteVotingAppl::handleAck(const Ack* msg){
@@ -200,6 +222,7 @@ void RouteVotingAppl::handleAck(const Ack* msg){
 
 void RouteVotingAppl::handleSelfMsg(cMessage* msg){
     if(msg == sendProposal){
+        negotiationState = VoteState::CHAIR_SEARCHING_JOINERS;
         sendJoinProposal();
         scheduleAt(simTime() + 0.5, sendProposal);
     }else if(msg == awaitAckTimer){
@@ -227,6 +250,16 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
         mnv.pushDouble(&arg);
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::SPEED_VOTE;
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
+    }else if(msg == startInitialVote){
+        int joinerId = -1;
+        BeliefModel mnv("start/vote/node");
+        mnv.pushInt(&joinerId);
+        double args = -1;
+        mnv.pushDouble(&args);
+        manager->sendInformationToAgents(myId, &mnv);
+        cycle = VoteCycle::ROUTE_VOTE;
+        negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
     }  else{
         VotingAppl::handleSelfMsg(msg);
     }

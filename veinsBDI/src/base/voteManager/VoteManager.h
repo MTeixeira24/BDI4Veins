@@ -28,9 +28,8 @@ public:
     enum class TimeStampAction{
         TIME_OF_VOTE_START,
         TIME_OF_VOTE_END,
-        CHAIR_TO_JOINER_START,
-        CHAIR_TO_JOINER_END,
-        CHAIR_TO_MEMBER_END
+        TIME_OF_ROUTE_VOTE_START,
+        TIME_OF_ROUTE_VOTE_END
      };
     /**
      * Store timestamps as requested by the controllers
@@ -59,10 +58,9 @@ private:
     /**
      * Store data about voting time
      */
-    std::vector<double> chair2memberTimeStamps;
+    std::vector<double> endOfRouteVoteTimeStamps;
     std::vector<double> endOfVoteTimeStamps;
-    double chair2joinerStart;
-    double chair2joinerDelay;
+    double startOfRouteVoteTimeStamp;
     double startOfVoteTimeStamp;
     /**
      * Retransmissions

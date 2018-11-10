@@ -21,6 +21,7 @@ public:
     virtual void finalizeManeuver(int joinerId) override;
     virtual void sendVoteResults(int winnerValue, int joinerId) override;
     virtual void sendCommitteeVoteResults(std::vector<int>& results) override;
+    virtual void handleEndOfVote() override;
 protected:
     /**
      * Defines what behavior the leader should start with
@@ -46,6 +47,11 @@ protected:
      *
      */
     cMessage* startSpeedVoteDelay = NULL;
+
+    /**
+     * Self message to start the initial vote
+     */
+    cMessage* startInitialVote = NULL;
     /*
      * Override from voting appl
      */

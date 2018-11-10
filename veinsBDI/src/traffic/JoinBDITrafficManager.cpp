@@ -10,6 +10,10 @@
 
 Define_Module(JoinBDITrafficManager);
 
+JoinBDITrafficManager::~JoinBDITrafficManager(){
+    cancelAndDelete(addJoiner);
+}
+
 void JoinBDITrafficManager::initialize(int stage)
 {
 
@@ -32,7 +36,7 @@ void JoinBDITrafficManager::initialize(int stage)
     platooningVType = par("platooningVType").stdstringValue();
     joinerLane = par("joinerLane").intValue();
     addJoiner = new cMessage();
-    scheduleAt(simTime() + 1.5, addJoiner);
+    scheduleAt(simTime() + 3, addJoiner);
 }
 
 void JoinBDITrafficManager::scenarioLoaded()
@@ -43,7 +47,6 @@ void JoinBDITrafficManager::scenarioLoaded()
 void JoinBDITrafficManager::handleSelfMsg(cMessage* msg){
     TraCIBaseTrafficManager::handleSelfMsg(msg);
     if(msg == addJoiner){
-        delete msg;
         injectJoiner();
     }
 }
@@ -113,7 +116,7 @@ void JoinBDITrafficManager::injectJoiner(){
         for(int i = numJoiners; i > 0; i--){
             automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);
             automated.lane = joinerLane;
-            automated.position = 10 + (6*i);
+            automated.position = 50 + (6*i);
             addVehicleToQueue(0, automated);
         }
     }

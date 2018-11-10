@@ -13,8 +13,8 @@
 
 class NoisePlatoonTrafficManager : public JoinBDITrafficManager {
 public:
-    NoisePlatoonTrafficManager() : suppressInjections(true), injectLane(0), baseSpeed(90) {};
-    virtual ~NoisePlatoonTrafficManager(){};
+    NoisePlatoonTrafficManager() : suppressInjections(true), injectLane(0), baseSpeed(100) {};
+    virtual ~NoisePlatoonTrafficManager();
     virtual void initialize(int stage) override;
     virtual void scenarioLoaded() override;
 protected:
@@ -28,7 +28,7 @@ protected:
     int injectLane;
     int baseSpeed;
     int vehTypeId;
-    cMessage* addNoise;
+    cMessage* addNoise = NULL;
 };
 
 #endif /* TRAFFIC_NOISEPLATOONTRAFFICMANAGER_H_ */
