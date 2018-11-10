@@ -199,6 +199,7 @@ void RouteVotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMes
 
 void RouteVotingAppl::handleEndOfVote(){
     Enter_Method_Silent();
+    cancelEvent(sendProposal);
     scheduleAt(simTime() + 4, sendProposal);
 }
 
