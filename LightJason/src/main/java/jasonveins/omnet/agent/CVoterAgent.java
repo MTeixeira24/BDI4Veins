@@ -176,7 +176,7 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private double khanUtilility(double currentSpeed, double offeredSpeed, double desiredSpeed, double joinFactor){
         double d1 = Math.abs(desiredSpeed - offeredSpeed)/desiredSpeed;
-        double d2 = Math.abs(currentSpeed/offeredSpeed)/currentSpeed;
+        double d2 = Math.abs(currentSpeed - offeredSpeed)/currentSpeed;
         double result = 1 - d1 - factor*d2;
         return  result;
     }

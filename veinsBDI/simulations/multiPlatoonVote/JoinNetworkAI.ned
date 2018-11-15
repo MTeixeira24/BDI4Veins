@@ -13,16 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.base.voteManager;
-import veinsbdi.base.manager.LightJasonManager;
+package veinsbdi.simulations.multiPlatoonVote;
 
-simple voteManager extends LightJasonManager{
+import org.car2x.veins.nodes.Scenario;
+import veinsbdi.base.voteManager.voteManager;
+import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+
+network JoinNetworkAI extends Scenario
+{
     parameters:
-        @class(VoteManager);
-        string vote_rule = default("Borda");
-        string committee_vote_rule = default("Minisum");
-        string platoon_type = default("Stable");
-        int platoon_size = default(4);
-        double factor = default(0.7);
-		string utilityFunction = default("distribution");
+        string traffic_type;
+    submodules:
+        ljmanager: voteManager;
+        traffic: <traffic_type> like TraCIBaseTrafficManager {
+            parameters:
+                @display("p=200,200");
+        }
+    connections allowunconnected:
 }

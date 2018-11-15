@@ -38,10 +38,10 @@ void JoinScenario::initialize(int stage)
             positionHelper->setIsLeader(false);
             positionHelper->setPlatoonLane(-1);
        }else{
-           double speedModifier[] =  {1, 0.6, 1.5};
-           int platoonId = positionHelper->getPlatoonId();
+           //double speedModifier[] =  {1, 0.6, 1.5};
+           //int platoonId = positionHelper->getPlatoonId();
            //traciVehicle->setSpeed(mobility->getSpeed() * speedModifier[platoonId]);
-           double modSpeed = mobility->getSpeed() * speedModifier[platoonId];
+           double modSpeed = mobility->getSpeed(); //* speedModifier[platoonId];
 
            platooningVType = par("platooningVType").stdstringValue();
 

@@ -21,4 +21,7 @@ simple LightJasonManager{
         int port = default(4242);
         string hostname = default("localhost");
         double updateInterval @unit("s") = default(1s); //Update interval synchronized with TraCI updates
+        int iteration = default(1);
+        string statisticsCollector = default("CJoinStatistics");
+        string agentManager = default("AgentManager");
 }

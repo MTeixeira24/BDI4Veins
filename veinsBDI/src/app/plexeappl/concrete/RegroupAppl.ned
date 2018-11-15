@@ -13,16 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.base.voteManager;
-import veinsbdi.base.manager.LightJasonManager;
+package veinsbdi.app.plexeappl.concrete;
 
-simple voteManager extends LightJasonManager{
+import veinsbdi.app.plexeappl.concrete.VotingAppl;
+
+simple RegroupAppl extends VotingAppl{
     parameters:
-        @class(VoteManager);
-        string vote_rule = default("Borda");
-        string committee_vote_rule = default("Minisum");
-        string platoon_type = default("Stable");
-        int platoon_size = default(4);
-        double factor = default(0.7);
-		string utilityFunction = default("distribution");
+        @class(RegroupAppl);
 }
