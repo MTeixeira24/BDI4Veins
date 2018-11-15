@@ -54,6 +54,10 @@ public:
     /**/
     BaseAgentAppl* getVehicle(int id);
 protected:
+    /*
+     * Define the parameters to send to the java agent manager
+     */
+    virtual void setLightJasonParameters();
     /*Port number for Server */
     int port;
     /*Map of all subscribed vehicle IDs and respective pointers*/

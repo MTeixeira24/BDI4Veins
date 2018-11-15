@@ -19,7 +19,6 @@
 namespace Jason{
 class JasoNetProtocol{
 private:
-
 public:
     JasoNetProtocol();
     ~JasoNetProtocol();
@@ -37,6 +36,13 @@ public:
     LightJasonBuffer query();
     /*Build a request to set simulation parameters*/
     LightJasonBuffer setSimParameters(std::string, std::string, int, int, double, std::string, std::string);
+
+    void initializeParamsBuffer(LightJasonBuffer& buffer);
+
+    template<typename t>
+    void setSimParameters(LightJasonBuffer& buffer, t param){
+        buffer << param;
+    }
 };
 
 }

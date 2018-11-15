@@ -378,7 +378,7 @@ public class AgentManager extends Thread {
         return stats;
     }
 
-    public void setSimParams(Object... params) {
+    public void setSimParams(ByteBuffer params) {
         return;
     }
 }

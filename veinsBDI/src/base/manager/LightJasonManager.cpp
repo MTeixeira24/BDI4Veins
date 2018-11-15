@@ -57,7 +57,16 @@ void LightJasonManager::initialize(int stage){
         EV << n << "\n"; //DEBUG
         queryMsg = new cMessage("query");
         scheduleAt(simTime() + updateInterval, queryMsg);
+
+        setLightJasonParameters();
     }
+}
+
+void LightJasonManager::setLightJasonParameters(){
+    LightJasonBuffer buff;
+    jp.initializeParamsBuffer(buff);
+    jp.setSimParameters(buff, par("agentManager").stdstringValue());
+    writeToSocket(buff.getBuffer());
 }
 
 void LightJasonManager::handleMessage(cMessage* msg){

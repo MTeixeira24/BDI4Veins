@@ -47,9 +47,9 @@ public final class ConnectionManager extends Thread {
     private void startServer() throws IOException {
         //***************************************/
         while(true){
-            am = new CVoterAgentManager("iterativeVoter.asl", this);
-            am_latch = am.getLatch();
-            am.start();
+            //am = new CVoterAgentManager("iterativeVoter.asl", this);
+            //am_latch = am.getLatch();
+            //am.start();
             try{
                 serverSocket = new ServerSocket(port);
                 clientSocket = serverSocket.accept();
@@ -132,8 +132,8 @@ public final class ConnectionManager extends Thread {
                 break;
             case Constants.AGENT_ADD:
                 id = buffer.getInt();
-                String vType = extractString(buffer);
-                String aslFile = extractString(buffer);
+                String vType = CByteUtils.extractString(buffer);
+                String aslFile = CByteUtils.extractString(buffer);
                 am.createNewAgent(id, vType, aslFile);
                 if(state == State.WAITINGFORAGENT){
                     //am.toggleAgentLoop(false, true);
@@ -150,7 +150,7 @@ public final class ConnectionManager extends Thread {
             case Constants.SET_BELIEF:
                 id = buffer.getInt();
                 size -= 4;
-                String belief = extractString(buffer);
+                String belief = CByteUtils.extractString(buffer);
                 size -= belief.length();
                 am.updateGoals(id, belief ,buffer.slice(), size);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
@@ -168,14 +168,21 @@ public final class ConnectionManager extends Thread {
                 state = State.DISCONNECTED;
                 break;
             case Constants.SET_SIM_PARAMS:{
-                int platoonSize = buffer.getInt();
-                String rule = extractString(buffer);
-                String type = extractString(buffer);
-                int iteration = buffer.getInt();
-                double factor = buffer.getDouble();
-                String utility = extractString(buffer);
-                String committee_vote_rule = extractString(buffer);
-                am.setSimParams(platoonSize, iteration, rule, type, factor, utility, committee_vote_rule);
+                String managerType = CByteUtils.extractString(buffer);
+                switch (managerType){
+                    case "AgentManager":
+                        am = new AgentManager("vehicle.asl", this);
+                        break;
+                    case "CVoterAgentManager":
+                        am = new CVoterAgentManager("iterativeVoter.asl", this);
+                        break;
+                    default:
+                        throw new RuntimeException("ConnectionManager: Invalid manager specified!");
+                }
+                am_latch = am.getLatch();
+                am.start();
+                am.setSimParams(buffer);
+                //am.setSimParams(platoonSize, iteration, rule, type, factor, utility, committee_vote_rule);
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x06, 0x01};
                 break;
             }
@@ -184,13 +191,6 @@ public final class ConnectionManager extends Thread {
                 break;
         }
         return response;
-    }
-
-    private String extractString(ByteBuffer buffer){
-        int strlen = buffer.getInt();
-        byte[] utf8bytes = new byte[strlen];
-        buffer.get(utf8bytes, 0, strlen);
-        return new String(utf8bytes, StandardCharsets.UTF_8);
     }
 
 }

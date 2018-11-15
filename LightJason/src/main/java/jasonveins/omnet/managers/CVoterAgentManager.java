@@ -8,6 +8,7 @@ import jasonveins.omnet.voting.Statistics.CJoinStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
+import java.nio.ByteBuffer;
 
 /**
  * Agent Manager to handle the creation of voting agents
@@ -57,15 +58,36 @@ public class CVoterAgentManager extends AgentManager {
 
     /**
      *
-     * @param params platoonSize, iteration, rule, type, factor, utility (int, int, String, String, double, String)
+     * @param params The parameters for the agent manager
      */
     @Override
-    public void setSimParams(Object... params) {
-        getStats().setSimParams((int)params[0], (int)params[1], (String)params[2], (String)params[3], (String)params[6]);
+    public void setSimParams(ByteBuffer params) {
+        String statsType = CByteUtils.extractString(params);
+        switch (statsType){
+            case "CJoinStatistics":{
+                stats = new CJoinStatistics();
+                break;
+            }
+            default:
+                throw new RuntimeException("VoterAgentManager: Unknown stats type");
+        }
+        int platoonSize = params.getInt();
+        String rule = CByteUtils.extractString(params);
+        String type = CByteUtils.extractString(params);
+        int iteration = params.getInt();
+        double factor = params.getDouble();
+        String utility = CByteUtils.extractString(params);
+        String committee_vote_rule = CByteUtils.extractString(params);
+        getStats().setSimParams(platoonSize,iteration,rule,type,committee_vote_rule);
+        voteRule = rule;
+        this.committee_vote_rule = committee_vote_rule;
+        this.factor = factor;
+        this.utility = utility;
+        /*getStats().setSimParams((int)params[0], (int)params[1], (String)params[2], (String)params[3], (String)params[6]);
         voteRule = (String)params[2];
         committee_vote_rule = (String)params[6];
         factor = (double)params[4];
-        utility = (String)params[5];
+        utility = (String)params[5];*/
     }
 
     public CJoinStatistics getStats(){

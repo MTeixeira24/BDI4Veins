@@ -131,4 +131,10 @@ LightJasonBuffer JasoNetProtocol::setSimParameters(std::string rule, std::string
     return LightJasonBuffer() << size << action << platoonSize << rule << type << iteration << factor << utilityFunction << committee_vote_rule;
 }
 
+void JasoNetProtocol::initializeParamsBuffer(LightJasonBuffer& buffer){
+    uint32_t size = 32;
+    uint16_t action = SET_SIM_PARAMS;
+    buffer << size << action;
+}
+
 }

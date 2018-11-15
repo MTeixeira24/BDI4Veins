@@ -54,6 +54,10 @@ public:
 
 protected:
     void parseResponse(uint32_t msgLength) override;
+    /*
+     * Define the parameters to send to the java agent manager
+     */
+    virtual void setLightJasonParameters() override;
 private:
     /**
      * Store data about voting time
