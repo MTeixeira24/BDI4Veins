@@ -176,6 +176,9 @@ public final class ConnectionManager extends Thread {
                     case "CVoterAgentManager":
                         am = new CVoterAgentManager("iterativeVoter.asl", this);
                         break;
+                    case "CRouterManager":
+                        am = new CRouterManager("router.asl", this);
+                        break;
                     default:
                         throw new RuntimeException("ConnectionManager: Invalid manager specified!");
                 }

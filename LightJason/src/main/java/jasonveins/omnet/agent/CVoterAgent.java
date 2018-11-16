@@ -1,6 +1,5 @@
 package jasonveins.omnet.agent;
 
-import cern.colt.bitvector.BitVector;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.environment.dijkstra.Dijkstra;
 import jasonveins.omnet.environment.dijkstra.Graph;
@@ -23,9 +22,6 @@ import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import jasonveins.omnet.managers.VoteConstants;
 
 @IAgentAction

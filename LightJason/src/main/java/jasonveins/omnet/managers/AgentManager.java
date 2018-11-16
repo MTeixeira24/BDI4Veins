@@ -61,25 +61,6 @@ public class AgentManager extends Thread {
         execute = new AtomicBoolean(true);
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
-        String l_aslpath = resourceFolder+"asl/"+aslpath;
-        try
-                (
-                        final FileInputStream l_stream = new FileInputStream( l_aslpath ) //TODO: Get rid of this
-                )
-        {
-            final int l_agentNumber = 0;
-            l_agents =
-                    new CVoterAgentGenerator( l_stream, this )
-                            .generatemultiple( l_agentNumber, 0 )
-                            .collect( Collectors.toSet()
-
-            );
-        }
-        catch ( final Exception l_exception )
-        {
-            l_exception.printStackTrace();
-            return;
-        }
     }
 
     @Override

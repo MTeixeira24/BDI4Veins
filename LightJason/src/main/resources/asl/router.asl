@@ -22,10 +22,14 @@ currentRoute([n1,n3,n6]).
 
 //Rule definition
 
-findnode(TargetNode, [L|ListRoutes], NewRoute)
-    :- L != TargetNode; $findnode(TargetNode, ListRoutes, NewRoute)
-    :- L == TargetNode; NewRoute = ListRoutes
+findnode(TargetNode, ListRoutes, NewRoute)
+    :- [FirstNode|ListTail] = L; $travelnodes(TargetNode, FirstNode, ListTail, NewRoute).
+
+travelnodes(TargetNode, FirstNode, ListRoutes, NewRoute)
+    :- FirstNode != TargetNode; [NextNode|ListTail] = L; $travelnodes(TargetNode, NextNode, ListTail, NewRoute)
+    :- FirstNode == TargetNode; NewRoute = ListRoutes
 .
+
 
 //Plan definition
 
@@ -35,7 +39,11 @@ findnode(TargetNode, [L|ListRoutes], NewRoute)
     send/target(N). //Send this node to the controller
 
 //Controller says that it has reached the target node
-+!target/reached(N) : (>>currentRoute(L); S = collection/size(L)) 
++!target/reached(N) : true
+    <- S = collection/size(L); !set/next/target(N, S).
+
+//Tell the controller what the next destination is
++!set/next/target(N, S) : >>currentRoute(L)
     <- S > 0; -currentRoute(L); collection/list/remove(L, 0); +currentRoute(L); [NN|_] = L; send/target(NN).
     <- S == 0. //We have reached the target
 
