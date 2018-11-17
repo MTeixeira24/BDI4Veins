@@ -3,6 +3,7 @@ package jasonveins.omnet.managers;
 import jasonveins.omnet.agent.CRouterAgent;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
+import jasonveins.omnet.voting.Statistics.CBaseStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
@@ -24,12 +25,11 @@ public class CRouterManager extends AgentManager {
         IVehicleAgent<?> l_ag = null;
         try {
             switch(vType){
-                case "vVoter":
+                case "vRouter":
                     if(p_aslFile.equals(resourceFolder+"asl/router.asl")){
-                       // l_ag = new CVoterAgentGenerator(p_stream, this).generatesingle(p_id, vType, voteRule, factor, utility, committee_vote_rule);
                         l_ag = new CRouterAgent.CRouterAgentGenerator(p_stream, this).generatesingle(p_id, vType);
                     }else{
-                        throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected FuelVoter.asl, SpeedVoter.asl or voter.asl");
+                        throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected router.asl");
                     }
                     break;
                 default:
@@ -50,5 +50,7 @@ public class CRouterManager extends AgentManager {
     public void setSimParams(ByteBuffer params) {
         //String statsType = CByteUtils.extractString(params);
         int iteration = params.getInt();
+        stats = new CBaseStatistics();
+        stats.setSimParams(iteration);
     }
 }

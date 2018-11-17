@@ -61,6 +61,7 @@ public class AgentManager extends Thread {
         execute = new AtomicBoolean(true);
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
+        l_agents = new HashSet<>();
     }
 
     @Override

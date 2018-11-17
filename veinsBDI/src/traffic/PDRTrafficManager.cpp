@@ -22,9 +22,11 @@ void PDRTrafficManager::scenarioLoaded()
     struct Vehicle automated;
     automated.id = findVehicleTypeIndex(vehicleVType);
     automated.speed = 100;
-    automated.position = separation;
     automated.lane = 0;
-    addVehicleToQueue(0, automated);
+    if(separation > -1 ){
+        automated.position = separation;
+        addVehicleToQueue(0, automated);
+    }
     automated.position = 0;
     addVehicleToQueue(0, automated);
 }

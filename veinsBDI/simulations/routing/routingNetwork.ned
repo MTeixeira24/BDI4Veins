@@ -13,13 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.traffic;
+package veinsbdi.simulations.routing;
+
+import org.car2x.veins.nodes.Scenario;
+import veinsbdi.base.manager.LightJasonManager;
 import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
 
-network PDRTrafficManager like TraCIBaseTrafficManager{
+network routingNetwork extends Scenario
+{
     parameters:
-        @class(PDRTrafficManager);
-        //distance between vehicles, -1 to add no vehicle
-        int separation @unit("m") = default(100m);
-        string vehicleVType;
+        string traffic_type;
+    submodules:
+        ljmanager: LightJasonManager;
+        traffic: <traffic_type> like TraCIBaseTrafficManager {
+            parameters:
+                @display("p=200,200");
+        }
+    connections allowunconnected:
 }

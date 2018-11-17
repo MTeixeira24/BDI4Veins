@@ -2,18 +2,11 @@ package jasonveins.omnet.voting.Statistics;
 
 public abstract class IStatistics {
 
-    int platoonSize = -1;
-    String type = null;
-    String rule = null;
-    int iteration = -1;
-    String committeeRule = null;
 
-    public void setSimParams(int platoonSize, int iteration, String rule, String type, String committeeRule){
-        this.platoonSize = platoonSize;
-        this.rule = rule;
-        this.type = type;
+    int iteration = -1;
+
+    public void setSimParams(int iteration){
         this.iteration = iteration;
-        this.committeeRule = committeeRule;
     }
 
     public void dumpCSV(){

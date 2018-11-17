@@ -24,10 +24,13 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 public class CJoinStatistics extends IStatistics {
-    private int initPlatoonSpeed;
-    private int finalPlatoonSpeed;
+
     private ConcurrentHashMap<Integer, ArrayList<Double>> initial_final_utilities;
     private boolean rejected;
+    int platoonSize = -1;
+    String type = null;
+    String rule = null;
+    String committeeRule = null;
 
     public CJoinStatistics(){
         initial_final_utilities = new ConcurrentHashMap<>();
@@ -69,14 +72,6 @@ public class CJoinStatistics extends IStatistics {
         }
     }
 
-    public void setInitPlatoonSpeed(int initPlatoonSpeed) {
-        this.initPlatoonSpeed = initPlatoonSpeed;
-    }
-
-    public void setFinalPlatoonSpeed(int finalPlatoonSpeed) {
-        this.finalPlatoonSpeed = finalPlatoonSpeed;
-    }
-
     public void storeUtil(int id, double util, double hamming){
         ArrayList<Double> utils = initial_final_utilities.get(id);
         if(utils == null){
@@ -90,5 +85,12 @@ public class CJoinStatistics extends IStatistics {
 
     public void setRejected(boolean val){
         rejected = val;
+    }
+
+    public void setSimParams(int platoonSize, int iteration, String rule, String type, String committeeRule){
+        this.platoonSize = platoonSize;
+        this.rule = rule;
+        this.type = type;
+        this.committeeRule = committeeRule;
     }
 }

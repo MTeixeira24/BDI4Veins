@@ -242,7 +242,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.addAll(l_context);
                 break;
             case "speed":{
-                ((CVoterAgentManager)agentManager).getStats().setInitPlatoonSpeed((int)platoonSpeed);
                 iOb.pushInt(VoteConstants.CONTEXT_SPEED);
                 /*No context is needed*/
                 iOb.pushShort(Constants.VALUE_NULL);
@@ -432,7 +431,6 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             }
             case VoteConstants.CONTEXT_SPEED:{
                 platoonSpeed = winner;
-                ((CVoterAgentManager)agentManager).getStats().setFinalPlatoonSpeed(winner);
                 iOb.pushInt(-1);
                 final ITrigger l_trigger = CTrigger.from(
                         ITrigger.EType.ADDGOAL,
