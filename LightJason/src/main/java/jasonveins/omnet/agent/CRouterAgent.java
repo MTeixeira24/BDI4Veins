@@ -8,6 +8,7 @@ import org.lightjason.agentspeak.action.binding.IAgentActionName;
 import org.lightjason.agentspeak.common.CCommon;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
 import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
+import org.lightjason.agentspeak.language.CLiteral;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -33,7 +34,7 @@ public final class CRouterAgent extends IVehicleAgent<CRouterAgent> {
     @IAgentActionFilter
     @IAgentActionName( name = "send/target")
     private void sendTarget(String node){
-        return;
+        System.out.println("Got a request to send down the node: " + node);
     }
 
     public static final class CRouterAgentGenerator extends IBaseAgentGenerator<CRouterAgent> {

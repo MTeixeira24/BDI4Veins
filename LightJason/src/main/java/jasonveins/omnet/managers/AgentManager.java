@@ -1,5 +1,6 @@
 package jasonveins.omnet.managers;
 
+import com.google.common.collect.Sets;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleAgent;
@@ -61,7 +62,7 @@ public class AgentManager extends Thread {
         execute = new AtomicBoolean(true);
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
-        l_agents = new HashSet<>();
+        l_agents =  Sets.newConcurrentHashSet();
     }
 
     @Override
