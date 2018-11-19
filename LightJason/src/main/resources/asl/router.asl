@@ -37,10 +37,10 @@ setnodes(Origin, Route)
 
 //Entry point plan, send the first destination to the controller
 +!main : >>currentRoute(L) <-
-    generic/print("Router agent started");
-    [_|NL] = L; //We start by exiting the first node
-    -currentRoute(L);
-    +currentRoute(NL).
+    generic/print("Router agent started").
+    //[_|NL] = L; //We start by exiting the first node
+    //-currentRoute(L);
+    //+currentRoute(NL).
 
 +!test() : true <-
     !!test/target/reached().
@@ -93,7 +93,7 @@ setnodes(Origin, Route)
     -link(N1, N2, _);
     +link(N1, N2, 0);
     >>(link(T1, T2, 1), T1 == N1); //Get an alternative link
-    $findroute(T2,R);
+    $findroute('n0',R);
     -currentRoute(_);
     +currentRoute(R);
     send/route(R).

@@ -12,6 +12,11 @@ Define_Module(RouterAppl);
 void RouterAppl::initialize(int stage){
     BasePlexeAgentAppl::initialize(stage);
     if(stage == 1){
+        std::string closedNodes  = par("blocked_link").stdstringValue();
+        std::size_t pos = closedNodes.find(",");
+        n1 = closedNodes.substr(0,pos);
+        n2 = closedNodes.substr(pos + 1, closedNodes.size());
+
         notifyNodeClose = new cMessage("notifyNodeClose");
         scheduleAt(simTime() + 0.3, notifyNodeClose);
     }
@@ -25,7 +30,7 @@ void RouterAppl::setTarget(std::vector<int> route){
     edges.push_back("1,2");
     edges.push_back("2,5");
     edges.push_back("5,7");*/
-    traciVehicle->newRoute(roadId);
+    traciVehicle->changeVehicleRoute(edges);
 }
 
 void RouterAppl::convertToEdgesList(std::vector<int>& route, std::list<std::string>& edges){
@@ -39,8 +44,8 @@ void RouterAppl::handleSelfMsg(cMessage* msg)
     if(msg == notifyNodeClose){
         delete msg;
         BeliefModel b("link/closed");
-        b.pushString("n1");
-        b.pushString("n3");
+        b.pushString(n1);
+        b.pushString(n2);
         manager->sendInformationToAgents(myId, &b);
     }else{
         BasePlexeAgentAppl::handleSelfMsg(msg);

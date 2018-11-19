@@ -24,6 +24,8 @@ protected:
 private:
     cMessage* notifyNodeClose;
     void convertToEdgesList(std::vector<int>& route, std::list<std::string>& edges);
+    std::string n1;
+    std::string n2;
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_ROUTER_ROUTERAPPL_H_ */

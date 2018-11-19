@@ -230,11 +230,6 @@ public class AgentManager extends Thread {
                             byte[] utf8bytes = new byte[strlen];
                             values.get(utf8bytes, 0, strlen);
                             String str = new String (utf8bytes, UTF_8);
-                            /*arraySize = values.getInt();
-                            StringBuilder sb = new StringBuilder();
-                            for(int i = 0; i < arraySize; i++){
-                                sb.append(values.getChar());
-                            }*/
                             terms.add(CRawTerm.from(str));
                             size -= (strlen + 8);
                             break;

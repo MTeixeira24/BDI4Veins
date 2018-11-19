@@ -16,10 +16,10 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     +factor(Factor).
 
 +!set/initial/beliefs(PID, LID, PSPEED, CHAIR, MEMBERS) <-
-    !inplatoon(PID, LID);
-    !set/speed(PSPEED);
+    !!inplatoon(PID, LID);
+    !!set/speed(PSPEED);
     utility/storememberlist(MEMBERS);
-    !ischair(CHAIR).
+    !!ischair(CHAIR).
 
 +!set/prefered/path(LNODES) <-
     +preferedpath(LNODES);
@@ -37,7 +37,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     +platoonspeed(SPEED).
 
 +!requestjoin(JID, JSPEED, JPREFERENCE) <-
-    !handlejoinrequest(JID, JSPEED, JPREFERENCE).
+    !!handlejoinrequest(JID, JSPEED, JPREFERENCE).
 
 +!handlejoinrequest(JID, JSPEED, JPREFERENCE) <-
     generic/print("Agent ", MyName, " received a request to join the platoon from ", JID, "who preferes speed:", JSPEED, " with a tolerance of ", JPREFERENCE);
@@ -49,12 +49,12 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     >>factor(Factor); >>preferedspeed(Speed); >>currentspeed(CurrentSpeed); >>preferedpath(LNODES);
     VVECTOR = utility/generate/vote/vector(CANDIDATES, Factor, Speed, CurrentSpeed, CONTEXT, LNODES);
     generic/print(VVECTOR);
-    !sendvote(VVECTOR).
+    !!sendvote(VVECTOR).
 
 +!sendvote(VVECTOR)
     : >>isChair(_) <-
         generic/print("Agent", MyName, "Im the chair so no need to pass through omnet");
-        !handle/submit/vote(VVECTOR, MyName)
+        !!handle/submit/vote(VVECTOR, MyName)
     : ~>>isChair(_) <- 
        generic/print("Agent", MyName, "Sending the vote down omnet");
        transmit/other/vote/list(VVECTOR). 
@@ -81,7 +81,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!foundplatoon(PID, LID) <-
     generic/print("Agent ", MyName, " found a potential platoon: ", PID);
-    !attemptjoindep(PID, LID).
+    !!attemptjoindep(PID, LID).
 
 +!attemptjoindep(PID, LID) <-
     +targetplatoonjoin(PID);
@@ -118,13 +118,13 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     >>minimumUtility(MUTIL);
     generic/print(VALUE, Factor, PreferredSpeed, Util, MUTIL);
     utility/save(Factor, PreferredSpeed, Util, VALUE); //Used to gather 
-    !decide/stay(Util, MUTIL).
+    !!decide/stay(Util, MUTIL).
 
 +!handle/results/committee(VALUE) <-
     >>preferedpath(LNODES);
     Util = utility/generate/utility/committee(VALUE, LNODES);
     generic/print(VALUE, LNODES, Util);
-    !decide/stay(Util, 4.0).
+    !!decide/stay(Util, 4.0).
 
 +!save/utility(UTIL) <-
     utility/save(0,0,UTIL,0).
@@ -141,13 +141,13 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!handlerejection(PID) <-
     NPID = utility/next/platoon();
-    !startjoin(NPID).
+    !!startjoin(NPID).
 
 +!startjoin(PID) 
     : PID >= 0 <-
         LID = utility/get/leader(PID);
         generic/print("Agent ", MyName, "next platoon is", PID, "whos leader is:", LID);
-        !attemptjoindep(PID, LID)
+        !!attemptjoindep(PID, LID)
     : PID < 0 <-
         generic/print("Agent ", MyName, "rejected by all. Aborting negotiations").
 
@@ -160,7 +160,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!startrequests() <- 
     PID = utility/next/platoon();
-    !startjoin(PID).
+    !!startjoin(PID).
 
 +!pushplatoon/start(PID, PSPEED, LID) <-
     generic/print("Enter PushPlatoon", PID, PSPEED, LID);

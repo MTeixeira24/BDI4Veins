@@ -18,5 +18,6 @@ import veinsbdi.app.plexeappl.BasePlexeAgentAppl;
 
 simple RouterAppl extends BasePlexeAgentAppl{
     parameters:
+        string blocked_link = default("n1,n2");
         @class(RouterAppl);
 }

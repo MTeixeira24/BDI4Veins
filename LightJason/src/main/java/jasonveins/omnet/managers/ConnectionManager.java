@@ -123,7 +123,7 @@ public final class ConnectionManager extends Thread {
         int id;
         if(state == State.FINISH){
             out.println("EndConnection");
-            return null;
+            return new byte[]{0x00, 0x00, 0x00, 0x06, 0x7E, 0x01};
         }
         size -= 2;
         switch (buffer.getShort()){
