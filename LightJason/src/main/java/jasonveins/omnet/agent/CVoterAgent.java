@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import jasonveins.omnet.managers.VoteConstants;
 
 @IAgentAction
-public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
+public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private static final long serialVersionUID = 3455114282889790324L;
 
@@ -54,10 +54,14 @@ public final class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     /**
      * ctor
      *
-     * @param p_configuration agent configuration
-     * @param m_am Reference to the agent manager
-     * @param m_id Id to be assigned to the new agent
-     * @param m_vType Vehicle type Id
+     * @param p_configuration       agent configuration
+     * @param m_am                  Reference to the agent manager
+     * @param m_id                  Id to be assigned to the new agent
+     * @param m_vType               Vehicle type Id
+     * @param voteRule              The single candidate vote rule this agent uses
+     * @param m_factor              Factor used in utility functions
+     * @param m_utility             Utility function identifier
+     * @param m_committee_vote_rule The committee election voting rule this agent uses
      */
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id,
                        @Nonnull String m_vType, String voteRule, double m_factor, String m_utility, String m_committee_vote_rule) {
