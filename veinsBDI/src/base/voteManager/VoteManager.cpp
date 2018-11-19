@@ -94,7 +94,7 @@ int VoteManager::getPreferredSpeed(int agentId){
     return iterationSpeeds[agentId];
 }
 
-std::vector<int> VoteManager::getElementsPreferredSpeed(std::vector<int> elementList){
+std::vector<int> VoteManager::getElementsPreferredSpeed(const std::vector<int>& elementList){
     std::vector<int> preferredSpeeds(elementList.size());
     for(uint32_t i = 0; i < elementList.size(); i++){
         preferredSpeeds[i] = iterationSpeeds[elementList[i]];

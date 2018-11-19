@@ -46,7 +46,7 @@ public:
     /*
      * Get a list of speeds for a given array of ids
      */
-    std::vector<int> getElementsPreferredSpeed(std::vector<int> elementList);
+    std::vector<int> getElementsPreferredSpeed(const std::vector<int>& elementList);
     /*
      * Increments the retransmission counts
      */

@@ -22,6 +22,8 @@ public:
 protected:
     virtual void leaderInitialBehaviour() override;
     void handleSelfMsg(cMessage* msg) override;
+    virtual void delegateNegotiationMessage(NegotiationMessage* msg) override;
+    void createRegroupElection(MemberExchange* me);
     /**
      * Process data exchange messages
      */
@@ -55,6 +57,12 @@ protected:
         VOTE_DATA,
         ELECTION_RESULT
     };
+    /*
+     * Hold pointers to messages we are not ready to process
+     */
+    MemberExchange* buffer;
+public:
+    void sendMemberExchange(RegroupMsgTypes type);
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_REGROUPAPPL_H_ */
