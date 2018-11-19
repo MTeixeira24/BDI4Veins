@@ -75,6 +75,14 @@ LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* bel
                 }
                 break;
             }
+            case VALUE_CHAR:
+            {
+                char* cptr = (char*)(ptr + 2) + 1;
+                for(uint32_t i = 0; i < size; i++){
+                    buffer << *(cptr + i);
+                }
+                break;
+            }
             default:
                 throw cRuntimeError("JasoNetProtocol: Unknown array type!");
                 break;

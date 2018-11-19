@@ -29,7 +29,6 @@ void VoteManager::finish(){
 }
 
 void VoteManager::initialize(int stage){
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
     LightJasonManager::initialize(stage);
     if(stage == 0){
 

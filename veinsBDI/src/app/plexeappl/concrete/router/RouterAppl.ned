@@ -13,21 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.routing;
+package veinsbdi.app.plexeappl.concrete.router;
+import veinsbdi.app.plexeappl.BasePlexeAgentAppl;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.routerManager.RouterManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
-
-network routingNetwork extends Scenario
-{
+simple RouterAppl extends BasePlexeAgentAppl{
     parameters:
-        string traffic_type;
-    submodules:
-        ljmanager: RouterManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+        @class(RouterAppl);
 }

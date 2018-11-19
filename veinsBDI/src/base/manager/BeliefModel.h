@@ -35,6 +35,7 @@ public:
 
     void pushIntArray(std::vector<int>&);
     void pushIntArray(int* array, uint32_t size);
+    void pushString(std::string str);
 
     void pushDoubleArray(std::vector<double>&);
 

@@ -86,3 +86,17 @@ void BeliefModel::pushDoubleArray(std::vector<double>& elements){
     values.push_back(bo);
     totalSize += size;
 }
+
+void BeliefModel::pushString(std::string str){
+    BeliefObject bo;
+    size_t size = str.size() + 8;
+    char *array = new char[size];
+    *( (int*)array ) = VALUE_CHAR;
+    *( (int*)array + 1 ) = str.size();
+    for(uint32_t i = 0; i < str.size(); i++){
+            array[i + 9] = str[i];
+    }
+    bo.setData(VALUE_ARRAY, array, size);
+    values.push_back(bo);
+    totalSize += size;
+}

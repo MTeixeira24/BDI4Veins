@@ -9,6 +9,8 @@
 
 Define_Module(BaseAgentAppl);
 
+const simsignalwrap_t BaseAgentAppl::mobilityStateChangedSignal = simsignalwrap_t(MIXIM_SIGNAL_MOBILITY_CHANGE_NAME);
+
  void BaseAgentAppl::initialize(int stage){
      BaseApplLayer::initialize(stage); //TODO: Header subclasses BaseWave. Maybe change that?
      if(stage == 0){
@@ -17,11 +19,6 @@ Define_Module(BaseAgentAppl);
          //findHost()->subscribe(parkingStateChangedSignal, this);
      }
 
-}
-
-void BaseAgentAppl::changeSpeed(double speed){
-    EV << "Slowing down to speed on agent command\n";
-    traciVehicle->setMaxSpeed(speed);
 }
 
 void BaseAgentAppl::sendMessage(uint8_t message_type, const void* args){

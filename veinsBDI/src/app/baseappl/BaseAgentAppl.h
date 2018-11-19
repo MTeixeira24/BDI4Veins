@@ -24,6 +24,7 @@ public:
     virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){};
     virtual void sendMessage(uint8_t message_type, const void* args);
 protected:
+    static const simsignalwrap_t mobilityStateChangedSignal;
     int myId;
     TraCIMobility* mobility;
     TraCICommandInterface* traci;
@@ -39,11 +40,6 @@ protected:
     virtual void handleLowerMsg(cMessage* msg){}
     virtual void handleSelfMsg(cMessage* msg){}
     virtual void handleLowerControl(cMessage* msg){}
-
-    //virtual void startManeuver();
-
-public:
-    virtual void changeSpeed(double speed);
 };
 
 #endif /* BASEAGENTAPPL_H_ */

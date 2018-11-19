@@ -1,6 +1,7 @@
 package jasonveins.omnet.agent;
 
 import jasonveins.omnet.constants.CVariableBuilder;
+import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
@@ -9,16 +10,22 @@ import org.lightjason.agentspeak.common.CCommon;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
 import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
 import org.lightjason.agentspeak.language.CLiteral;
+import org.lightjason.agentspeak.language.CRawTerm;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
 @IAgentAction
 public final class CRouterAgent extends IVehicleAgent<CRouterAgent> {
+
+    private final int SEND_ROUTE = 9;
+
     /**
      * ctor
      *
@@ -32,9 +39,17 @@ public final class CRouterAgent extends IVehicleAgent<CRouterAgent> {
     }
 
     @IAgentActionFilter
-    @IAgentActionName( name = "send/target")
-    private void sendTarget(String node){
-        System.out.println("Got a request to send down the node: " + node);
+    @IAgentActionName( name = "send/route")
+    private void sendRoute(List<String> node){
+        System.out.println("Got a request to send down the route: " + node.toString());
+        ArrayList<Integer> integerList = new ArrayList<>(node.size());
+        node.forEach(
+                n -> integerList.add(Integer.parseInt(n.split("n")[1]))
+        );
+        System.out.println("Parsed list: " + integerList.toString());
+        InstructionModel iOb = new InstructionModel(this.id, SEND_ROUTE);
+        iOb.pushIntArray(integerList);
+        agentManager.addInstruction(iOb);
     }
 
     public static final class CRouterAgentGenerator extends IBaseAgentGenerator<CRouterAgent> {

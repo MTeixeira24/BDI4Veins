@@ -92,10 +92,6 @@ BaseAgentAppl* LightJasonManager::getVehicle(int id){
 
 void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string data){
     if(action.compare("none") != 0){
-        if(action.compare("setMaxSpeed") == 0){
-            double amount = std::stod(data);
-            vehicles[id]->changeSpeed(amount);
-        }
     }
 }
 
@@ -118,13 +114,6 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
             uint32_t agentAction;
             rbf >> agentAction;
             switch (agentAction){
-            case 0x04: //TODO: Make a specific code for this
-                rbf >> type;
-                ASSERT(type == VALUE_DOUBLE);
-                double speed;
-                rbf >> speed;
-                vehicles[agentId]->changeSpeed(speed);
-                break;
             default:
                 break;
             }

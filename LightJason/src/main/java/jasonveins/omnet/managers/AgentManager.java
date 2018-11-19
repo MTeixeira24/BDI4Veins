@@ -27,6 +27,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 /**
  * Manages the runtime environment of the agents and proxies calls between the agents and the omnet nodes
  */
@@ -221,6 +223,20 @@ public class AgentManager extends Thread {
                             }
                             terms.add(CRawTerm.from(elements));
                             size -= 8*(arraySize + 1);
+                            break;
+                        }
+                        case Constants.VALUE_CHAR:{
+                            int strlen = values.getInt();
+                            byte[] utf8bytes = new byte[strlen];
+                            values.get(utf8bytes, 0, strlen);
+                            String str = new String (utf8bytes, UTF_8);
+                            /*arraySize = values.getInt();
+                            StringBuilder sb = new StringBuilder();
+                            for(int i = 0; i < arraySize; i++){
+                                sb.append(values.getChar());
+                            }*/
+                            terms.add(CRawTerm.from(str));
+                            size -= (strlen + 8);
                             break;
                         }
                         default:
