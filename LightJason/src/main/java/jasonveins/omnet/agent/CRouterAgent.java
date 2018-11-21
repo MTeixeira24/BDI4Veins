@@ -24,6 +24,10 @@ import java.util.stream.Stream;
 @IAgentAction
 public final class CRouterAgent extends IVehicleAgent<CRouterAgent> {
 
+
+
+    private static final long serialVersionUID = -563558245660729346L;
+
     private final int SEND_ROUTE = 9;
 
     /**

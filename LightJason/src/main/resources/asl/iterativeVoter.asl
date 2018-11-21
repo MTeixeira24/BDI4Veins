@@ -45,7 +45,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     open/vote("join", L1).
 
 +!handle/vote/notification(CANDIDATES, CONTEXT) <-
-    generic/print("Agent", MyName, " got notification to vote on a join: ", CANDIDATES);
+    generic/print("Agent", MyName, " got notification to vote on: ", CANDIDATES);
     >>factor(Factor); >>preferedspeed(Speed); >>currentspeed(CurrentSpeed); >>preferedpath(LNODES);
     VVECTOR = utility/generate/vote/vector(CANDIDATES, Factor, Speed, CurrentSpeed, CONTEXT, LNODES);
     generic/print(VVECTOR);
@@ -99,6 +99,9 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         L1 = collection/list/create(ARGS);
         open/vote("node", L1).
 
++!start/vote/regroup(Candidates, Context) : true <-
+    List =collection/list/flatconcat(Candidates, Context);
+    open/vote("regroup", List).
 
 +!start/vote/speed(ARGS) <-
     L1 = collection/list/create(ARGS);

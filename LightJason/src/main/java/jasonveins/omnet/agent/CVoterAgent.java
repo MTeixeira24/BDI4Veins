@@ -29,27 +29,27 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private static final long serialVersionUID = 3455114282889790324L;
 
-    private CopyOnWriteArrayList<Integer> members;
+    protected CopyOnWriteArrayList<Integer> members;
     /**
      * Stores an ordered linked list containing platoon Ids and their utilities
      */
-    private final List<PlatoonUtilities> targetPlatoons;
-    private int targetPlatoonIndex = 0;
-    private final CopyOnWriteArrayList<Integer> targetPlatoonIds;
-    private double platoonSpeed = 0;
-    private int hammingDistance = 0;
+    protected final List<PlatoonUtilities> targetPlatoons;
+    protected int targetPlatoonIndex = 0;
+    protected final CopyOnWriteArrayList<Integer> targetPlatoonIds;
+    protected double platoonSpeed = 0;
+    protected int hammingDistance = 0;
 
-    private CContext m_context;
-    private IRule votingRule;
-    private IRule committeeRule;
-    private double factor;
-    private String utility;
-    private LinkedList<Vertex> currentPath;
+    protected CContext m_context;
+    protected IRule votingRule;
+    protected IRule committeeRule;
+    protected double factor;
+    protected String utility;
+    protected LinkedList<Vertex> currentPath;
 
     /**
     * Used by the leader to compute optimal path
     */
-    private Graph route;
+    protected Graph route;
 
     /**
      * ctor
@@ -219,7 +219,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     @IAgentActionFilter
     @IAgentActionName( name = "open/vote" )
-    private void openNewVote(@Nonnull final String context, @Nonnull final List<Double> contextArgs){
+    protected void openNewVote(@Nonnull final String context, @Nonnull final List<Double> contextArgs){
 
         InstructionModel iOb = new InstructionModel(this.id, VoteConstants.NOTIFY_START_VOTE);
         ArrayList<Integer> l_candidates = new ArrayList<>();
@@ -282,6 +282,30 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_context_chair.add((double)VoteConstants.CONTEXT_PATH);
                 break;
             }
+            case "regroup":{
+                int contextStart = (contextArgs.size() / 2);
+                //First half contains the candidates
+                contextArgs.stream().limit(contextStart).forEach(
+                        dvalue -> l_candidates.add(dvalue.intValue())
+                );
+                //Second half their speeds
+                contextArgs.stream().skip(contextStart).forEach(
+                        l_context::add
+                );
+                //First parameter, what are the agents voting for?
+                iOb.pushInt(VoteConstants.CONTEXT_REGROUP);
+                //What information do the agents need to know about the candidates? Their preferred speed
+                iOb.pushDoubleArray(l_context);
+                //Save the context for later use
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_REGROUP, members.size());
+                for(int i = 0 ; i < l_context.size(); i++){
+                    m_context.addContextArgument(l_candidates.get(i).toString(), l_context.get(i));
+                }
+                //Create a data structure for the leader. The leader can cast its vote
+                l_context_chair.add((double)VoteConstants.CONTEXT_REGROUP);
+                l_context_chair.addAll(l_context);
+                break;
+            }
         }
         iOb.pushIntArray(l_candidates);
         //Add additional information
@@ -290,6 +314,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             case "speed":
                 iOb.pushInt(votingRule.getExpectedVoteSize(l_candidates.size()));
                 break;
+            case "regroup":
             case "node":
                 iOb.pushInt(committeeRule.getExpectedVoteSize(l_candidates.size()));
                 break;
@@ -328,6 +353,9 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_candidates.add((int)predictPlatoonSpeed(p_context.get(1), p_context.get(2), platoonSpeed));
                 break;
             }
+            case VoteConstants.CONTEXT_REGROUP:{
+                p_context.forEach( j -> l_candidates.add(j.intValue()));
+            }
             default:{
                 l_candidates.addAll(p_candidates);
                 break;
@@ -343,7 +371,6 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     else
                         utils.add(new CUtilityPair(i, 0));
                 }
-                votes = committeeRule.getVote(utils);
                 break;
             }
             default:{
@@ -351,11 +378,13 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     double util = calculateUtility(l_candidates.get(i), p_tolerance.doubleValue(), p_speed.doubleValue(), p_currentSpeed.intValue());
                     utils.add(new CUtilityPair(i, util));
                 }
-                votes = votingRule.getVote(utils);
                 break;
             }
         }
-
+        if( l_context == VoteConstants.CONTEXT_PATH || l_context == VoteConstants.CONTEXT_REGROUP)
+            votes = committeeRule.getVote(utils);
+        else
+            votes = votingRule.getVote(utils);
         return votes;
     }
 
