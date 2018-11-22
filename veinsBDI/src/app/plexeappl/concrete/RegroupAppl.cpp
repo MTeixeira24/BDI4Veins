@@ -26,7 +26,6 @@ void RegroupAppl::leaderInitialBehaviour(){
 void RegroupAppl::createRegroupElection(MemberExchange* me){
     std::vector<int> myCandidates = positionHelper->getPlatoonFormation();
     std::vector<int> myPrefSpeeds = ((VoteManager*)manager)->getElementsPreferredSpeed(myCandidates);
-    BeliefModel startVote("start/vote/regroup");
     const uint32_t size = me->getIdMembersArraySize();
     std::vector<double> candidates(size);
     for(uint32_t i = 0; i < size; i++)
@@ -50,10 +49,25 @@ void RegroupAppl::createRegroupElection(MemberExchange* me){
         fullContext.insert(fullContext.end(), context.begin(), context.end());
         fullContext.insert(fullContext.end(), myPrefSpeeds.begin(), myPrefSpeeds.end());
     }
-
+    BeliefModel startVote("start/vote/regroup");
     startVote.pushDoubleArray(candidates);
     startVote.pushDoubleArray(context);
     manager->sendInformationToAgents(myId, &startVote);
+}
+
+void RegroupAppl::sendVoteSubmition(std::vector<int>& votes){
+    if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
+        databuffer = new DataExchange("dataExchange");
+        //databuffer->setDataMatrix(std::vector<std::vector<int>>(positionHelper->getPlatoonSize()));
+        databuffer->setVotesBuffer(std::list<int>(votes.begin(), votes.end()));
+        //The amount of votes to be held
+        databuffer->getVotesBuffer().push_front(positionHelper->getPlatoonSize());
+        //databuffer->getDataMatrix().push_back(votes);
+        fillNegotiationMessage(databuffer, myId, targetLeaderId);
+        databuffer->setPlatoonId(positionHelper->getPlatoonId());
+    }else{
+        RouteVotingAppl::sendVoteSubmition(votes);
+    }
 }
 
 void RegroupAppl::sendDataExchange(RegroupMsgTypes msgType, int origin, int target, std::vector<int>& data){
@@ -85,27 +99,66 @@ void RegroupAppl::sendMemberExchange(RegroupMsgTypes type){
     sendUnicast(me, targetLeaderId);
 }
 
+void RegroupAppl::sendCommitteeVoteResults(std::vector<int>& results){
+    if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
+        //The sender still hasnt sent over their results, store our results
+        if(databuffer == NULL){
+            regroupState = RegroupState::AWAITING_OTHER_RESULTS;
+            databuffer = new DataExchange("Storage");
+            databuffer->setDataArraySize(results.size());
+            for(uint32_t i = 0; i < results.size(); i++)
+                databuffer->setData(i, results[i]);
+        }else{
+            //The sender has sent over their votes, call the winner determination module
+            /*int size = databuffer->getDataArraySize();
+            std::vector<int> totalVotes(size);
+            for(int i = 0; i < size; i++)
+                totalVotes[i] = databuffer->getData(i) + results[i];*/
+            std::vector<int> extraVotes(databuffer->getVotesBuffer().begin(), databuffer->getVotesBuffer().end());
+            BeliefModel bf("call/winner/determination");
+            bf.pushIntArray(extraVotes);
+            manager->sendInformationToAgents(myId, &bf);
+            regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
+            delete databuffer;
+            databuffer = NULL;
+        }
+    }else if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
+        //Send over our votes
+        ASSERT(false);
+        sendDataExchange(RegroupMsgTypes::VOTE_DATA, myId, targetLeaderId, results);
+        regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
+    }else if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::AWAITING_WINNER_DETERMINATION)){
+        //We got the results of the winner determination, notify all
+        sendDataExchange(RegroupMsgTypes::ELECTION_RESULT, myId, targetLeaderId, results);
+        regroupState = RegroupState::COMMITTEE_VOTE_FINISHED;
+        RouteVotingAppl::sendCommitteeVoteResults(results);
+    }else {
+        RouteVotingAppl::sendCommitteeVoteResults(results);
+    }
+}
+
 void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
     if(DataExchange* de = dynamic_cast<DataExchange*>(nm)){
         handleDataExchange(de);
     }else if(MemberExchange* me = dynamic_cast<MemberExchange*>(nm)){
         handleMemberExchange(me);
     }else
-        VotingAppl::delegateNegotiationMessage(nm);
+        RouteVotingAppl::delegateNegotiationMessage(nm);
 }
 
 void RegroupAppl::handleDataExchange(DataExchange* de){
     if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
         //We are still in a voting process. Save the message so we handle it when we are done.
-        databuffer = de;
+        databuffer = de->dup();
     }else if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::AWAITING_OTHER_RESULTS)){
         //We have all the data we need, call the winner determination module
-        int size = databuffer->getDataArraySize();
+        /*int size = databuffer->getDataArraySize();
         std::vector<int> totalVotes(size);
         for(int i = 0; i < size; i++)
-            totalVotes[i] = databuffer->getData(i) + de->getData(i);
+            totalVotes[i] = databuffer->getData(i) + de->getData(i);*/
+        std::vector<int> extraVotes(de->getVotesBuffer().begin(), de->getVotesBuffer().end());
         BeliefModel bf("call/winner/determination");
-        bf.pushIntArray(totalVotes);
+        bf.pushIntArray(extraVotes);
         manager->sendInformationToAgents(myId, &bf);
         regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
         delete databuffer;
@@ -120,63 +173,56 @@ void RegroupAppl::handleDataExchange(DataExchange* de){
             result[i] = de->getData(i);
         sendCommitteeVoteResults(result);
         delete de;
+        delete databuffer;
+        databuffer = NULL;
     }
 }
 
 void RegroupAppl::handleMemberExchange(MemberExchange* me){
     if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::NONE)){
+        ASSERT(me->getType() == (int)RegroupMsgTypes::REQUEST);
         //Make sure that our election is over
         regroupState = RegroupState::AWAITING_ACK_ACCEPT;
         if(negotiationState == VoteState::CHAIR_ELECTION_END){
             sendMemberExchange(RegroupMsgTypes::OK);
         }
         //Store the message for later use.
-        buffer = me;
+        buffer = me->dup();
         targetLeaderId = me->getVehicleId();
         return;
     }else if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::REQUESTING_EXCHANGE)){
+        ASSERT(me->getType() == (int)RegroupMsgTypes::OK);
         sendMemberExchange(RegroupMsgTypes::ACK);
         regroupState = RegroupState::COMMITTEE_VOTE;
         createRegroupElection(me);
     }else if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::AWAITING_ACK_ACCEPT)){
+        ASSERT(me->getType() == (int)RegroupMsgTypes::ACK);
         regroupState = RegroupState::COMMITTEE_VOTE;
         createRegroupElection(me);
     }
     delete me;
 }
 
-void RegroupAppl::sendCommitteeVoteResults(std::vector<int>& results){
-    if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
-        //The sender still hasnt sent over their results, store our results
-        if(databuffer == NULL){
-            regroupState = RegroupState::AWAITING_OTHER_RESULTS;
-            databuffer = new DataExchange("Storage");
-            databuffer->setDataArraySize(results.size());
-            for(uint32_t i = 0; i < results.size(); i++)
-                databuffer->setData(i, results[i]);
-        }else{
-            //The sender has sent over their votes, call the winner determination module
-            int size = databuffer->getDataArraySize();
-            std::vector<int> totalVotes(size);
-            for(int i = 0; i < size; i++)
-                totalVotes[i] = databuffer->getData(i) + results[i];
-            BeliefModel bf("call/winner/determination");
-            bf.pushIntArray(totalVotes);
-            manager->sendInformationToAgents(myId, &bf);
-            regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
-            delete databuffer;
-            databuffer = NULL;
+void RegroupAppl::handleSubmitVote(const SubmitVote* msg){
+    if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
+        //The sender proxies the vote to the other platoon leader
+
+        if(msg->getPlatoonId() != positionHelper->getPlatoonId()) return;
+        if(myId != positionHelper->getLeaderId()) return;
+        int size = msg->getVotesArraySize();
+        if(size > election_data.expectedVoteVectorSize) return; //Got a vote for an expired election
+        int origin = msg->getVehicleId();
+        if(!received_votes[origin]){
+            for(int i = 0; i < size; i++){
+                databuffer->getVotesBuffer().push_back(msg->getVotes(i));
+            }
+            received_votes[origin] = true;
+            if(databuffer->getVotesBuffer().size() == (uint32_t)positionHelper->getPlatoonSize()){
+                sendUnicast(databuffer, targetLeaderId);
+            }
         }
-    }else if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
-        //Send over our votes
-        sendDataExchange(RegroupMsgTypes::VOTE_DATA, myId, targetLeaderId, results);
-        regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
-    }else if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::AWAITING_WINNER_DETERMINATION)){
-        //We got the results of the winner determination, notify all
-        sendDataExchange(RegroupMsgTypes::ELECTION_RESULT, myId, targetLeaderId, results);
-        regroupState = RegroupState::COMMITTEE_VOTE_FINISHED;
-    }else {
-        RouteVotingAppl::sendCommitteeVoteResults(results);
+    }else{
+        RouteVotingAppl::handleSubmitVote(msg);
     }
 }
 
@@ -196,7 +242,7 @@ void RegroupAppl::handleEndOfVote(){
 }
 
 void RegroupAppl::fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs){
-    VotingAppl::fillContextVector(msg, contextArgs);
+    RouteVotingAppl::fillContextVector(msg, contextArgs);
 }
 
 void RegroupAppl::handleSelfMsg(cMessage* msg){

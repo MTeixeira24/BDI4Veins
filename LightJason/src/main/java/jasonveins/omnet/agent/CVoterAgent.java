@@ -355,6 +355,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             }
             case VoteConstants.CONTEXT_REGROUP:{
                 p_context.forEach( j -> l_candidates.add(j.intValue()));
+                break;
             }
             default:{
                 l_candidates.addAll(p_candidates);
@@ -537,6 +538,19 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             iOb.pushIntArray(results);
         }
         agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName(name = "finalize/regroup")
+    private void finalizeRegroup(List<Integer> extraVotes){
+        //Number of extra voters are in the first position
+        m_context.setVoterCount(m_context.getVoterCount() + extraVotes.get(0));
+        int numberOfCandidates = m_context.getCandidates().size();
+        for(int i = 1,  j = 1; j < extraVotes.size(); j =  i*numberOfCandidates){
+            ArrayList<Integer> vote = new ArrayList<>(extraVotes.subList(i, i+numberOfCandidates));
+            m_context.pushVotes(vote);
+        }
+        committeeWinnerDetermination();
     }
 
     @IAgentActionFilter

@@ -20,10 +20,12 @@
 
 // cplusplus {{
 #include "../NegotiationMessage_m.h"
+typedef std::vector<std::vector<int>> IntMatrix;
+typedef std::list<int> IntList;
 // }}
 
 /**
- * Class generated from <tt>messages/regroupVoting/DataExchange.msg:20</tt> by nedtool.
+ * Class generated from <tt>messages/regroupVoting/DataExchange.msg:24</tt> by nedtool.
  * <pre>
  * //Used to trade vote data, such election results and votes
  * packet DataExchange extends NegotiationMessage
@@ -31,6 +33,8 @@
  *     int platoonId;
  *     int type; //Either VOTE_DATA or ELECTION_RESULT
  *     int data[]; //Array containing votes or election_results
+ *     IntMatrix dataMatrix; //TODO: Consider instead a linkedlist with votes in sequence
+ *     IntList votesBuffer;
  * }
  * </pre>
  */
@@ -41,6 +45,8 @@ class DataExchange : public ::NegotiationMessage
     int type;
     int *data; // array ptr
     unsigned int data_arraysize;
+    IntMatrix dataMatrix;
+    IntList votesBuffer;
 
   private:
     void copy(const DataExchange& other);
@@ -67,6 +73,12 @@ class DataExchange : public ::NegotiationMessage
     virtual unsigned int getDataArraySize() const;
     virtual int getData(unsigned int k) const;
     virtual void setData(unsigned int k, int data);
+    virtual IntMatrix& getDataMatrix();
+    virtual const IntMatrix& getDataMatrix() const {return const_cast<DataExchange*>(this)->getDataMatrix();}
+    virtual void setDataMatrix(const IntMatrix& dataMatrix);
+    virtual IntList& getVotesBuffer();
+    virtual const IntList& getVotesBuffer() const {return const_cast<DataExchange*>(this)->getVotesBuffer();}
+    virtual void setVotesBuffer(const IntList& votesBuffer);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const DataExchange& obj) {obj.parsimPack(b);}

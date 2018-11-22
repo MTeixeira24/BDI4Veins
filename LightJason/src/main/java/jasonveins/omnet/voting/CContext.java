@@ -75,4 +75,10 @@ public class CContext {
         }
         return context;
     }
+
+    public void setVoterCount(int x){
+        m_voterCount = x;
+    }
+
+    public int getVoterCount(){return m_voterCount;}
 }

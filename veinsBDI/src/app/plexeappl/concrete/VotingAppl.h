@@ -74,7 +74,7 @@ public:
     /**
      *
      */
-    void sendVoteSubmition(std::vector<int>& votes);
+    virtual void sendVoteSubmition(std::vector<int>& votes);
     /**
      *
      */
@@ -121,7 +121,7 @@ protected:
     /**
      *
      */
-    void handleSubmitVote(const SubmitVote* msg);
+    virtual void handleSubmitVote(const SubmitVote* msg);
     /**
      *
      */

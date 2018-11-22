@@ -53,16 +53,27 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!sendvote(VVECTOR)
     : >>isChair(_) <-
+        ~>>proxyChair(_);
         generic/print("Agent", MyName, "Im the chair so no need to pass through omnet");
         !!handle/submit/vote(VVECTOR, MyName)
+    : >> isChair(_) <-
+        >>proxyChair(C);
+        generic/print("Agent", MyName, "is a proxy chair sending the vote ");
+       transmit/other/vote/list(VVECTOR);
+       -proxyChair(C);
     : ~>>isChair(_) <- 
        generic/print("Agent", MyName, "Sending the vote down omnet");
-       transmit/other/vote/list(VVECTOR). 
+       transmit/other/vote/list(VVECTOR)
+. 
 
 +!handle/submit/vote(VOTE, ID) <-
     generic/print("Got vote", VOTE, "from", ID);
     //CANDIDATESIZE = utility/get/candidates/size();
     vote/store/iterative(VOTE).
+
++!call/winner/determination(ExtraVotes) <-
+    finalize/regroup(ExtraVotes)
+.
 
 +!select/vote/method(VOTE, CANDIDATESIZE)
     : CANDIDATESIZE > 2 <- vote/store/iterative(VOTE)
@@ -99,9 +110,17 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         L1 = collection/list/create(ARGS);
         open/vote("node", L1).
 
-+!start/vote/regroup(Candidates, Context) : true <-
-    List =collection/list/flatconcat(Candidates, Context);
-    open/vote("regroup", List).
++!start/vote/regroup(Candidates, Context) 
+    : >>(isChair(PID), PID == 0) <-
+        List =collection/list/flatconcat(Candidates, Context);
+        open/vote("regroup", List)
+    : >>(isChair(PID), PID != 0) <-
+        List =collection/list/flatconcat(Candidates, Context);
+        generic/print("AGENT", MyName, "IS A PROXY CHAIR")
+        +proxyChair(PID);
+        open/vote("regroup", List)
+.
+
 
 +!start/vote/speed(ARGS) <-
     L1 = collection/list/create(ARGS);

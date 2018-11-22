@@ -20,7 +20,9 @@ public:
     virtual ~RegroupAppl();
     virtual void handleEndOfVote() override;
     virtual void sendCommitteeVoteResults(std::vector<int>& results) override;
+    virtual void sendVoteSubmition(std::vector<int>& votes) override;
 protected:
+    virtual void handleSubmitVote(const SubmitVote* msg) override;
     virtual void leaderInitialBehaviour() override;
     void handleSelfMsg(cMessage* msg) override;
     virtual void delegateNegotiationMessage(NegotiationMessage* msg) override;
@@ -49,9 +51,10 @@ protected:
     RegroupState regroupState;
     enum class LeaderRole: size_t {
         RECEIVER,
-        SENDER
+        SENDER,
+        NONE
     };
-    LeaderRole leaderRole;
+    LeaderRole leaderRole = LeaderRole::NONE;
     enum class RegroupMsgTypes: uint8_t {
         OK,
         ACK,

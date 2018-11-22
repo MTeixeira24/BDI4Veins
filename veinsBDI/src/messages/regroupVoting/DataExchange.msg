@@ -14,11 +14,17 @@
 //
 cplusplus {{
 #include "../NegotiationMessage_m.h"
+typedef std::vector<std::vector<int>> IntMatrix;
+typedef std::list<int> IntList;
 }}
 packet NegotiationMessage;
+class noncobject IntMatrix;
+class noncobject IntList;
 //Used to trade vote data, such election results and votes
 packet DataExchange extends NegotiationMessage {
     int platoonId;
     int type; //Either VOTE_DATA or ELECTION_RESULT
     int data[]; //Array containing votes or election_results
+    IntMatrix dataMatrix; //TODO: Consider instead a linkedlist with votes in sequence
+    IntList votesBuffer;
 }

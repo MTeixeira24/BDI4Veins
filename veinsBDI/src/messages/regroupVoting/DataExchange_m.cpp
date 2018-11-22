@@ -216,6 +216,8 @@ void DataExchange::copy(const DataExchange& other)
     data_arraysize = other.data_arraysize;
     for (unsigned int i=0; i<data_arraysize; i++)
         this->data[i] = other.data[i];
+    this->dataMatrix = other.dataMatrix;
+    this->votesBuffer = other.votesBuffer;
 }
 
 void DataExchange::parsimPack(omnetpp::cCommBuffer *b) const
@@ -225,6 +227,8 @@ void DataExchange::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->type);
     b->pack(data_arraysize);
     doParsimArrayPacking(b,this->data,data_arraysize);
+    doParsimPacking(b,this->dataMatrix);
+    doParsimPacking(b,this->votesBuffer);
 }
 
 void DataExchange::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -240,6 +244,8 @@ void DataExchange::parsimUnpack(omnetpp::cCommBuffer *b)
         this->data = new int[data_arraysize];
         doParsimArrayUnpacking(b,this->data,data_arraysize);
     }
+    doParsimUnpacking(b,this->dataMatrix);
+    doParsimUnpacking(b,this->votesBuffer);
 }
 
 int DataExchange::getPlatoonId() const
@@ -290,6 +296,26 @@ void DataExchange::setData(unsigned int k, int data)
 {
     if (k>=data_arraysize) throw omnetpp::cRuntimeError("Array of size %d indexed by %d", data_arraysize, k);
     this->data[k] = data;
+}
+
+IntMatrix& DataExchange::getDataMatrix()
+{
+    return this->dataMatrix;
+}
+
+void DataExchange::setDataMatrix(const IntMatrix& dataMatrix)
+{
+    this->dataMatrix = dataMatrix;
+}
+
+IntList& DataExchange::getVotesBuffer()
+{
+    return this->votesBuffer;
+}
+
+void DataExchange::setVotesBuffer(const IntList& votesBuffer)
+{
+    this->votesBuffer = votesBuffer;
 }
 
 class DataExchangeDescriptor : public omnetpp::cClassDescriptor
@@ -357,7 +383,7 @@ const char *DataExchangeDescriptor::getProperty(const char *propertyname) const
 int DataExchangeDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
 unsigned int DataExchangeDescriptor::getFieldTypeFlags(int field) const
@@ -372,8 +398,10 @@ unsigned int DataExchangeDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISARRAY | FD_ISEDITABLE,
+        FD_ISCOMPOUND,
+        FD_ISCOMPOUND,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *DataExchangeDescriptor::getFieldName(int field) const
@@ -388,8 +416,10 @@ const char *DataExchangeDescriptor::getFieldName(int field) const
         "platoonId",
         "type",
         "data",
+        "dataMatrix",
+        "votesBuffer",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
 }
 
 int DataExchangeDescriptor::findField(const char *fieldName) const
@@ -399,6 +429,8 @@ int DataExchangeDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+0;
     if (fieldName[0]=='t' && strcmp(fieldName, "type")==0) return base+1;
     if (fieldName[0]=='d' && strcmp(fieldName, "data")==0) return base+2;
+    if (fieldName[0]=='d' && strcmp(fieldName, "dataMatrix")==0) return base+3;
+    if (fieldName[0]=='v' && strcmp(fieldName, "votesBuffer")==0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -414,8 +446,10 @@ const char *DataExchangeDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "IntMatrix",
+        "IntList",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **DataExchangeDescriptor::getFieldPropertyNames(int field) const
@@ -486,6 +520,8 @@ std::string DataExchangeDescriptor::getFieldValueAsString(void *object, int fiel
         case 0: return long2string(pp->getPlatoonId());
         case 1: return long2string(pp->getType());
         case 2: return long2string(pp->getData(i));
+        case 3: {std::stringstream out; out << pp->getDataMatrix(); return out.str();}
+        case 4: {std::stringstream out; out << pp->getVotesBuffer(); return out.str();}
         default: return "";
     }
 }
@@ -516,6 +552,8 @@ const char *DataExchangeDescriptor::getFieldStructName(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case 3: return omnetpp::opp_typename(typeid(IntMatrix));
+        case 4: return omnetpp::opp_typename(typeid(IntList));
         default: return nullptr;
     };
 }
@@ -530,6 +568,8 @@ void *DataExchangeDescriptor::getFieldStructValuePointer(void *object, int field
     }
     DataExchange *pp = (DataExchange *)object; (void)pp;
     switch (field) {
+        case 3: return (void *)(&pp->getDataMatrix()); break;
+        case 4: return (void *)(&pp->getVotesBuffer()); break;
         default: return nullptr;
     }
 }
