@@ -19,6 +19,7 @@ public:
     {};
     virtual ~RegroupAppl();
     virtual void handleEndOfVote() override;
+    virtual void sendCommitteeVoteResults(std::vector<int>& results) override;
 protected:
     virtual void leaderInitialBehaviour() override;
     void handleSelfMsg(cMessage* msg) override;
@@ -35,6 +36,7 @@ protected:
     /**
      * Store the current cycle of voting
      */
+    virtual void fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs) override;
     enum class RegroupState: size_t {
             NONE,
             REQUESTING_EXCHANGE,
@@ -60,7 +62,14 @@ protected:
     /*
      * Hold pointers to messages we are not ready to process
      */
-    MemberExchange* buffer;
+    MemberExchange* buffer = NULL;
+    DataExchange* databuffer = NULL;
+    /**
+     * hold the id of leader we dealing with
+     */
+    int targetLeaderId = -1;
+
+    void sendDataExchange(RegroupMsgTypes msgType, int origin, int target, std::vector<int>& data);
 public:
     void sendMemberExchange(RegroupMsgTypes type);
 };

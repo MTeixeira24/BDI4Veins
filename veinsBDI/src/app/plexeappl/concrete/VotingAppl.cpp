@@ -452,38 +452,26 @@ void VotingAppl::handleNotifyVote(const NotifyVote* msg){
     if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
         negotiationState = VoteState::NONE;
         BeliefModel voteNotify("handle/vote/notification");
-        std::vector<double> contextArgs(msg->getContextArgumentsArraySize() + 1);
+        std::vector<double> contextArgs;
         uint32_t size = msg->getCandidatesArraySize();
         std::vector<int> candidates(size);
         for(uint32_t i = 0; i < size; i++){
             candidates[i] = msg->getCandidates(i);
         }
         voteNotify.pushIntArray(candidates);
-        switch(msg->getContextId()){
-        case CONTEXT_SPEED:
-        {
-            contextArgs[0] = CONTEXT_SPEED;
-            break;
-        }
-        case CONTEXT_PATH:{
-            contextArgs[0] = CONTEXT_PATH;
-            break;
-        }
-        case CONTEXT_JOIN:
-        {
-            size = contextArgs.capacity();
-            contextArgs[0] = CONTEXT_JOIN;
-            for(uint32_t i = 1; i < size; i++){
-                contextArgs[i] = msg->getContextArguments(i - 1);
-            }
-            break;
-        }
-        default:
-            throw cRuntimeError("VotingAppl: Invalid context identifier!");
-            break;
-        }
+        fillContextVector(msg, contextArgs);
         voteNotify.pushDoubleArray(contextArgs);
         manager->sendInformationToAgents(myId, &voteNotify);
+    }
+}
+
+void VotingAppl::fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs){
+    contextArgs[0] = msg->getContextId();
+    if(msg->getContextId() == CONTEXT_JOIN)
+    {
+        for(uint32_t i = 1; i < msg->getContextArgumentsArraySize() + 1; i++){
+            contextArgs[i] = msg->getContextArguments(i - 1);
+        }
     }
 }
 

@@ -41,7 +41,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     protected CContext m_context;
     protected IRule votingRule;
-    protected IRule committeeRule;
+    protected CApproval committeeRule;
     protected double factor;
     protected String utility;
     protected LinkedList<Vertex> currentPath;
@@ -423,9 +423,16 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         m_context.pushVotes(votes);
         m_context.debug();
         if(m_context.allVotesSubmitted()){
-            if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH){
+            if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH) {
                 committeeWinnerDetermination();
-            }else{
+            }else if( m_context.getVoteType() == VoteConstants.CONTEXT_REGROUP){
+                //Scenario 3 requires all votes to be sent over
+                InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
+                iOb.pushInt(-1);
+                iOb.pushIntArray(new ArrayList<>(committeeRule.getApprovalSum(m_context.getVotes(), m_context.getCandidates())));
+                agentManager.addInstruction(iOb);
+            }
+            else{
                 if(singleCandidateWinnerDetermination() >= 0){
                     InstructionModel iOb = new InstructionModel(this.id, VoteConstants.HANDLE_END_OF_VOTE);
                     agentManager.addInstruction(iOb);

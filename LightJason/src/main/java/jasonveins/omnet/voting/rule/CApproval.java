@@ -35,6 +35,11 @@ public class CApproval implements IRule{
         return winnerIndex;
     }
 
+    public List<Integer> getApprovalSum(List<List<Integer>> votes, List<Integer> candidates){
+        getResult(votes, candidates);
+        return scoreVector;
+    }
+
     @Override
     public List<Integer> getVote(List<CUtilityPair> p_utilities) {
         Collections.sort(p_utilities);
