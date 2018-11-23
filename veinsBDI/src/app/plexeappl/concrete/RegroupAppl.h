@@ -11,6 +11,7 @@
 #include "RouteVotingAppl.h"
 #include "../../../messages/regroupVoting/DataExchange_m.h"
 #include "../../../messages/regroupVoting/MemberExchange_m.h"
+#include "../../../messages/regroupVoting/RegroupMessage_m.h"
 
 class RegroupAppl : public RouteVotingAppl {
 public:
@@ -72,7 +73,15 @@ protected:
      */
     int targetLeaderId = -1;
 
-    void sendDataExchange(RegroupMsgTypes msgType, int origin, int target, std::vector<int>& data);
+    //void sendDataExchange(RegroupMsgTypes msgType, int origin, int target, std::vector<int>& data);
+
+    void sendRegroupResults(std::vector<int>& p1, std::vector<int>& p2, int l1, int l2);
+
+    void handleRegroupResults(RegroupMessage* msg);
+
+    void regroup(std::vector<int>& p, int l);
+
+    std::vector<int> vectorDiff(const std::vector<int>& v1, const std::vector<int>& v2);
 public:
     void sendMemberExchange(RegroupMsgTypes type);
 };

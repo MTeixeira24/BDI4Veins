@@ -329,7 +329,6 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                         CRawTerm.from(l_candidates),
                         CRawTerm.from(l_context_chair)
                 )
-
         );
         this.trigger( l_trigger );
     }

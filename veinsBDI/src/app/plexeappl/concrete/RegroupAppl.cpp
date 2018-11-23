@@ -70,7 +70,7 @@ void RegroupAppl::sendVoteSubmition(std::vector<int>& votes){
     }
 }
 
-void RegroupAppl::sendDataExchange(RegroupMsgTypes msgType, int origin, int target, std::vector<int>& data){
+/*void RegroupAppl::sendDataExchange(RegroupMsgTypes msgType, int origin, int target, std::vector<int>& data){
     DataExchange* de = new DataExchange("DataExchange");
     de->setType((int)msgType);
     de->setDataArraySize(data.size());
@@ -78,7 +78,7 @@ void RegroupAppl::sendDataExchange(RegroupMsgTypes msgType, int origin, int targ
         de->setData(i, data[i]);
     fillNegotiationMessage(de, origin, target);
     sendUnicast(de, target);
-}
+}*/
 
 void RegroupAppl::sendMemberExchange(RegroupMsgTypes type){
     MemberExchange* me = new MemberExchange("MemberExchange");
@@ -125,16 +125,38 @@ void RegroupAppl::sendCommitteeVoteResults(std::vector<int>& results){
     }else if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::COMMITTEE_VOTE)){
         //Send over our votes
         ASSERT(false);
-        sendDataExchange(RegroupMsgTypes::VOTE_DATA, myId, targetLeaderId, results);
+        //sendDataExchange(RegroupMsgTypes::VOTE_DATA, myId, targetLeaderId, results);
         regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
     }else if((leaderRole == LeaderRole::RECEIVER) && (regroupState == RegroupState::AWAITING_WINNER_DETERMINATION)){
         //We got the results of the winner determination, notify all
-        sendDataExchange(RegroupMsgTypes::ELECTION_RESULT, myId, targetLeaderId, results);
+        //sendDataExchange(RegroupMsgTypes::ELECTION_RESULT, myId, targetLeaderId, results);
         regroupState = RegroupState::COMMITTEE_VOTE_FINISHED;
-        RouteVotingAppl::sendCommitteeVoteResults(results);
+        std::vector<int> g2 = vectorDiff(election_data.candidates, results);
+        sendRegroupResults(results, g2, results[0], g2[0]);
+        //RouteVotingAppl::sendCommitteeVoteResults(results);
     }else {
         RouteVotingAppl::sendCommitteeVoteResults(results);
     }
+}
+
+void RegroupAppl::sendRegroupResults(std::vector<int>& p1, std::vector<int>& p2, int l1, int l2){
+    RegroupMessage* rm = new RegroupMessage("RegroupMessage");
+    rm->setLeader1(l1);
+    rm->setLeader2(l2);
+    rm->setPlatoon1(p1);
+    rm->setPlatoon2(p2);
+    fillNegotiationMessage(rm, myId, -1);
+    sendUnicast(rm, -1);
+    //have the sender also process the results
+    handleRegroupResults(rm);
+    positionHelper->setIsLeader(false);
+}
+
+std::vector<int> RegroupAppl::vectorDiff(const std::vector<int>& v1, const std::vector<int>& v2){
+    std::vector<int> diff;
+    std::set_difference(v1.begin(), v1.end(), v2.begin(), v2.end(),
+                          std::inserter(diff, diff.begin()));
+    return diff;
 }
 
 void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
@@ -142,8 +164,47 @@ void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
         handleDataExchange(de);
     }else if(MemberExchange* me = dynamic_cast<MemberExchange*>(nm)){
         handleMemberExchange(me);
-    }else
+    }else if(RegroupMessage* rm = dynamic_cast<RegroupMessage*>(nm)){
+        handleRegroupResults(rm);
+        delete rm;
+    }else {
         RouteVotingAppl::delegateNegotiationMessage(nm);
+    }
+}
+
+void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
+    if(leaderRole == LeaderRole::SENDER){
+        ASSERT(regroupState == RegroupState::AWAITING_WINNER_DETERMINATION);
+        regroupState = RegroupState::COMMITTEE_VOTE_FINISHED;
+        positionHelper->setIsLeader(false);
+    }
+    auto find = std::find(std::begin(msg->getPlatoon1()), std::end(msg->getPlatoon1()), myId);
+    if(find != std::end(msg->getPlatoon1())){
+        regroup(msg->getPlatoon1(), msg->getLeader1());
+    }else{
+        regroup(msg->getPlatoon2(), msg->getLeader2());
+    }
+}
+
+void RegroupAppl::regroup(std::vector<int>& p, int l){
+    positionHelper->setPlatoonFormation(p);
+    positionHelper->setLeaderId(l);
+    positionHelper->setPlatoonId(l);
+    BeliefModel pbelief("set/initial/beliefs");
+    pbelief.pushInt(l);
+    pbelief.pushInt(l);
+    pbelief.pushInt(positionHelper->getPlatoonSpeed() * 3.6);
+    if(l == myId){
+        positionHelper->setIsLeader(true);
+        for (uint32_t i = 0; i < p.size(); i++){
+            received_votes[p[i]] = false;
+        }
+        leaderInitialBehaviour();
+        pbelief.pushInt(l);
+    }else{
+        pbelief.pushInt(-1);
+    }
+    pbelief.pushIntArray(p);
 }
 
 void RegroupAppl::handleDataExchange(DataExchange* de){
@@ -219,6 +280,7 @@ void RegroupAppl::handleSubmitVote(const SubmitVote* msg){
             received_votes[origin] = true;
             if(databuffer->getVotesBuffer().size() == (uint32_t)positionHelper->getPlatoonSize()){
                 sendUnicast(databuffer, targetLeaderId);
+                regroupState = RegroupState::AWAITING_WINNER_DETERMINATION;
             }
         }
     }else{
