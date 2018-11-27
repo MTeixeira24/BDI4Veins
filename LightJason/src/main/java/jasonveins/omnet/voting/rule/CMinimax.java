@@ -30,14 +30,13 @@ public class CMinimax extends CApproval {
             bit_votes.add(bv);
         }
         //Get the results
-        BitVector bit_results = new CMinimaxApproval().applyRuleBV(alternatives, bit_votes, size);
+        BitVector bit_results = new CMinimaxApproval().applyRuleBV(alternatives, bit_votes, 5);
         //Convert to integer list for return
         List<Integer> results = new ArrayList<>(bit_results.size());
         for(int i = 0; i < bit_results.size(); i++){
             int intValue = bit_results.get(i) ? 1 : 0;
             results.add(intValue);
         }
-
         return results;
     }
 }

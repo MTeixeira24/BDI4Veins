@@ -1,9 +1,8 @@
 package jasonveins.omnet.voting.rule;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import org.apache.commons.math3.analysis.function.Max;
+
+import java.util.*;
 
 public class CMinisum extends CApproval {
     @Override
@@ -25,6 +24,17 @@ public class CMinisum extends CApproval {
         }
         return result;
         */
-        return scoreVector;
+        if(size > -1){
+            //Get the size max values
+            ArrayList<Integer> binaryResult = new ArrayList<>(Collections.nCopies(scoreVector.size()-1, 0));
+            ArrayList<Integer> dup = new ArrayList<>(scoreVector);
+            for(int i = 0; i < size; i++){
+                int maxIndex = dup.indexOf(Collections.max(dup));
+                binaryResult.set(maxIndex, 1);
+                dup.set(maxIndex, -1);
+            }
+            return binaryResult;
+        }else
+            return scoreVector;
     }
 }

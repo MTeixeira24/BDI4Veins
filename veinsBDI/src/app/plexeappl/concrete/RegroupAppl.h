@@ -39,7 +39,6 @@ protected:
     /**
      * Store the current cycle of voting
      */
-    virtual void fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs) override;
     enum class RegroupState: size_t {
             NONE,
             REQUESTING_EXCHANGE,
@@ -68,6 +67,8 @@ protected:
      */
     MemberExchange* buffer = NULL;
     DataExchange* databuffer = NULL;
+    //Wait after speed vote to start the regroup
+    cMessage* regroupDelay = NULL;
     /**
      * hold the id of leader we dealing with
      */

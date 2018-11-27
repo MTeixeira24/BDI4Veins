@@ -466,13 +466,15 @@ void VotingAppl::handleNotifyVote(const NotifyVote* msg){
 }
 
 void VotingAppl::fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs){
-    contextArgs[0] = msg->getContextId();
+    contextArgs.push_back(msg->getContextId());
     if(msg->getContextId() == CONTEXT_JOIN)
     {
         for(uint32_t i = 1; i < msg->getContextArgumentsArraySize() + 1; i++){
             contextArgs[i] = msg->getContextArguments(i - 1);
         }
     }
+    for(uint32_t i = 0; i < msg->getContextArgumentsArraySize(); i++)
+        contextArgs.push_back(msg->getContextArguments(i));
 }
 
 void VotingAppl::sendToAgent(const BeliefModel* bm){

@@ -60,7 +60,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         >>proxyChair(C);
         generic/print("Agent", MyName, "is a proxy chair sending the vote ");
        transmit/other/vote/list(VVECTOR);
-       -proxyChair(C);
+       -proxyChair(C)
     : ~>>isChair(_) <- 
        generic/print("Agent", MyName, "Sending the vote down omnet");
        transmit/other/vote/list(VVECTOR)
@@ -86,7 +86,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     vote/store(VVECTOR).
 
 +!ischair(PID)
-    : PID < 0 <- true
+    : PID < 0 <- >>isChair(C); -isChair(C)
     : PID >= 0 <-   +isChair(PID); utility/get/nodes();
                     generic/print("Agent ", MyName, " is chair of platoon ", PID).
 
@@ -116,7 +116,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
         open/vote("regroup", List)
     : >>(isChair(PID), PID != 0) <-
         List =collection/list/flatconcat(Candidates, Context);
-        generic/print("AGENT", MyName, "IS A PROXY CHAIR")
+        generic/print("AGENT", MyName, "IS A PROXY CHAIR");
         +proxyChair(PID);
         open/vote("regroup", List)
 .

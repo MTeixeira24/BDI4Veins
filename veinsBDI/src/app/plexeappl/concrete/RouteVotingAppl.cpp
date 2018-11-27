@@ -173,6 +173,7 @@ void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
     }else{
         BeliefModel result("handle/results/committee");
+        cancelEvent(awaitAckTimer);
         std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
         for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
         result.pushIntArray(resultsVector);

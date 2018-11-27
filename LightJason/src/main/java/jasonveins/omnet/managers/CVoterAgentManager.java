@@ -4,6 +4,7 @@ import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.environment.dijkstra.Graph;
+import jasonveins.omnet.voting.Statistics.CBaseStatistics;
 import jasonveins.omnet.voting.Statistics.CJoinStatistics;
 
 import javax.annotation.Nonnull;
@@ -66,6 +67,10 @@ public class CVoterAgentManager extends AgentManager {
         switch (statsType){
             case "CJoinStatistics":{
                 stats = new CJoinStatistics();
+                break;
+            }
+            case "CBaseStatistics":{
+                stats = new CBaseStatistics();
                 break;
             }
             default:

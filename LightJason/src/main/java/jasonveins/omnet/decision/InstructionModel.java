@@ -2,6 +2,7 @@ package jasonveins.omnet.decision;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 
 import static jasonveins.omnet.managers.Constants.*;
 
@@ -62,7 +63,7 @@ public class InstructionModel {
         values.add(new ByteData(type, ByteBuffer.allocate(8).putDouble(_value).array()));
         size += 10;
     }
-    public void pushIntArray(ArrayList<Integer> p_list){
+    public void pushIntArray(List<Integer> p_list){
         ByteBuffer bb = ByteBuffer.allocate(6 + 4*p_list.size());
         //Type of elements in array
         bb.putShort(VALUE_INT);

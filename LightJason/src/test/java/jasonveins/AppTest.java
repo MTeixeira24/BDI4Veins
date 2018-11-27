@@ -84,7 +84,7 @@ public class AppTest
                         try
                         {
                             i.call();
-                            if(j == 5){
+                            /*if(j == 5){
                                 ArrayList<Double> can = new ArrayList<>();
                                 IntStream.range(1,4).forEach(d -> can.add((double)d));
                                 ArrayList<Double> con = new ArrayList<>();
@@ -98,7 +98,7 @@ public class AppTest
                                         )
                                 );
                                 i.trigger( l_trigger );
-                            }
+                            }*/
                         }
                         catch ( final Exception l_exception )
                         {

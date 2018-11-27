@@ -353,7 +353,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
             }
             case VoteConstants.CONTEXT_REGROUP:{
-                p_context.forEach( j -> l_candidates.add(j.intValue()));
+                p_context.subList(1,p_context.size()).forEach( j -> l_candidates.add(j.intValue()));
                 break;
             }
             default:{
@@ -493,7 +493,8 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private void committeeWinnerDetermination(){
         System.out.println("COMMITTEE WINNER DETERMINATION");
-        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates(), 5));
+        int size = m_context.getVoteType() == VoteConstants.CONTEXT_PATH ? -1 : m_context.getCandidates().size() / 2;
+        ArrayList<Integer> results = new ArrayList<>(committeeRule.getResultVector(m_context.getVotes(), m_context.getCandidates(), size));
         InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
         iOb.pushInt(-1);
         if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH){
@@ -534,7 +535,11 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             );
             this.trigger( l_trigger );
         }else{
-            iOb.pushIntArray(results);
+            LinkedList<Integer> p1 = new LinkedList<>();
+            for (int i = 0; i < results.size(); i++) {
+                if(results.get(i) == 1) p1.add(i);
+            }
+            iOb.pushIntArray(p1);
         }
         agentManager.addInstruction(iOb);
     }
@@ -545,8 +550,8 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         //Number of extra voters are in the first position
         m_context.setVoterCount(m_context.getVoterCount() + extraVotes.get(0));
         int numberOfCandidates = m_context.getCandidates().size();
-        for(int i = 1,  j = 1; j < extraVotes.size(); j =  i*numberOfCandidates){
-            ArrayList<Integer> vote = new ArrayList<>(extraVotes.subList(i, i+numberOfCandidates));
+        for(int j = 1; j < extraVotes.size(); j += numberOfCandidates){
+            ArrayList<Integer> vote = new ArrayList<>(extraVotes.subList(j, j+numberOfCandidates));
             m_context.pushVotes(vote);
         }
         committeeWinnerDetermination();
@@ -558,7 +563,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     {
         if(votes.size() > votingRule.getExpectedVoteSize(getCandidateListSize())) return;
         //TODO: Change to iterative
-        if((getCandidateListSize() <= 3) || m_context.getVoteType() == VoteConstants.CONTEXT_PATH ){
+        if((getCandidateListSize() <= 3) || m_context.getVoteType() > 1){
             storeVote(votes);
             return;
         }
