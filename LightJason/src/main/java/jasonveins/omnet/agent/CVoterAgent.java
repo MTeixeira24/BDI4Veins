@@ -690,6 +690,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionName( name = "utility/storememberlist" )
     private void storeMemberList(@Nonnull final List<Integer> members/*, @Nonnull final List<Integer> speeds*/)
     {
+        this.members.clear();
         this.members.addAll(members);
         //this.membersSpeeds.addAll(speeds);
     }

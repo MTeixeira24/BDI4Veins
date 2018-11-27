@@ -67,7 +67,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 . 
 
 +!handle/submit/vote(VOTE, ID) <-
-    generic/print("Got vote", VOTE, "from", ID);
+    generic/print(MyName,": Got vote", VOTE, "from", ID);
     //CANDIDATESIZE = utility/get/candidates/size();
     vote/store/iterative(VOTE).
 
@@ -123,6 +123,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 
 +!start/vote/speed(ARGS) <-
+    generic/print(MyName,": Opening speed vote......");
     L1 = collection/list/create(ARGS);
     open/vote("speed", L1).
 

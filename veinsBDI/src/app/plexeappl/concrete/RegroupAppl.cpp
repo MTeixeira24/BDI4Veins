@@ -157,6 +157,9 @@ void RegroupAppl::sendRegroupResults(std::vector<int>& p1, std::vector<int>& p2,
     fillNegotiationMessage(rm, myId, -1);
     sendUnicast(rm, -1);
     positionHelper->setIsLeader(false);
+    cancelEvent(voteTimer);
+    delete voteTimer;
+    voteTimer = NULL;
     //have the sender also process the results
     handleRegroupResults(rm);
 }
@@ -184,6 +187,9 @@ void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
 void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
     if(leaderRole == LeaderRole::SENDER){
         ASSERT(regroupState == RegroupState::AWAITING_WINNER_DETERMINATION);
+        cancelEvent(voteTimer);
+        delete voteTimer;
+        voteTimer = NULL;
         regroupState = RegroupState::COMMITTEE_VOTE_FINISHED;
         positionHelper->setIsLeader(false);
     }
@@ -196,6 +202,7 @@ void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
 }
 
 void RegroupAppl::regroup(std::vector<int>& p, int l){
+    Enter_Method_Silent();
     positionHelper->setPlatoonFormation(p);
     positionHelper->setLeaderId(l);
     positionHelper->setPlatoonId(l);
@@ -210,10 +217,9 @@ void RegroupAppl::regroup(std::vector<int>& p, int l){
         for (uint32_t i = 0; i < p.size(); i++){
             received_votes[p[i]] = false;
         }
-        if(startInitialVote == NULL)
-            startInitialVote = new cMessage("startInitialVote");
-        if(voteTimer == NULL)
-            voteTimer = new cMessage("VoteTimerA");
+        startInitialVote = new cMessage("startInitialVote");
+        voteTimer = new cMessage("VoteTimer");
+        regroupState = RegroupState::COMMITTEE_VOTE_FINISHED;
         scheduleAt(simTime() + 0.5, startInitialVote);
         pbelief.pushInt(&l);
     }else{
@@ -313,7 +319,8 @@ void RegroupAppl::handleSubmitVote(const SubmitVote* msg){
 
 void RegroupAppl::handleEndOfVote(){
     Enter_Method_Silent();
-    scheduleAt(simTime() + 1, regroupDelay);
+    if((regroupState == RegroupState::NONE) || (regroupState == RegroupState::AWAITING_ACK_ACCEPT))
+        scheduleAt(simTime() + 1, regroupDelay);
 }
 
 void RegroupAppl::handleSelfMsg(cMessage* msg){
