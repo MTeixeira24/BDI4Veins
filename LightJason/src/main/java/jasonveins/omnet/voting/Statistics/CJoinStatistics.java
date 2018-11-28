@@ -7,30 +7,14 @@ import java.util.*;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.apache.commons.text.similarity.HammingDistance;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
 public class CJoinStatistics extends IStatistics {
 
     private ConcurrentHashMap<Integer, ArrayList<Double>> initial_final_utilities;
     private boolean rejected;
-    int platoonSize = -1;
-    String type = null;
-    String rule = null;
-    String committeeRule = null;
+    private int platoonSize = -1;
+    private String type = null;
+    private String rule = null;
+    private String committeeRule = null;
 
     public CJoinStatistics(){
         initial_final_utilities = new ConcurrentHashMap<>();
@@ -40,7 +24,7 @@ public class CJoinStatistics extends IStatistics {
     public void dumpCSV(){
 
         try {
-            FileWriter out = null;
+            FileWriter out;
             File f = new File("testResults/JoinResults.csv");
             if(!f.exists() || f.isDirectory()) {
                 out = new FileWriter(f);
@@ -92,5 +76,6 @@ public class CJoinStatistics extends IStatistics {
         this.rule = rule;
         this.type = type;
         this.committeeRule = committeeRule;
+        this.iteration = iteration;
     }
 }

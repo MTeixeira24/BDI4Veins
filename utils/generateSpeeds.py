@@ -65,7 +65,7 @@ def main(argv):
 
     for platoonSize in range(minplatoonsize,maxplatoonsize + 1):
         iterations = {}
-        for iteration in range(0,41):
+        for iteration in range(0,101):
             speeds = []
             if platoonSize == 4:
                 speeds = [90,90,100,100]
@@ -102,7 +102,7 @@ def main(argv):
 
     for platoonSize in range(minplatoonsize,maxplatoonsize + 1):
         iterations = {}
-        for iteration in range(0,41):
+        for iteration in range(0,101):
             speeds = []
             for speed in range(0,platoonSize):
                 speeds.append(random.randint(minspeed,maxspeed))

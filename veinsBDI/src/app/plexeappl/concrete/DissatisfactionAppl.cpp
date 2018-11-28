@@ -10,6 +10,23 @@
 Define_Module(DissatisfactionAppl);
 
 DissatisfactionAppl::~DissatisfactionAppl() {
+    if(myId == 0){
+        if(stage != Stage::ENVIRONMENTAL){
+            switch(stage){
+            case Stage::INITIAL:
+                throw cRuntimeError("INVALID END STATE - INITIAL");
+                break;
+            case Stage::JOINERS:
+                throw cRuntimeError("INVALID END STATE - JOINERS");
+                break;
+            case Stage::NONE:
+                throw cRuntimeError("INVALID END STATE- NONE");
+                break;
+            }
+        }
+        if(ballotsFinished < 3)
+            throw cRuntimeError("INVALID BALLOT COUNT");
+    }
     if(startInitialVote != NULL)
         cancelAndDelete(startInitialVote);
     if(callJoinersTimer != NULL)
@@ -42,8 +59,8 @@ void DissatisfactionAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoo
 
 void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
     if(msg == callJoinersTimer){
-        if(potentialJoiners.size() == 0){
-            scheduleAt(simTime() + 3, callJoinersTimer);
+        if(potentialJoiners.size() < 3){
+            scheduleAt(simTime() + 1, callJoinersTimer);
             return;
         }
         delete msg;
@@ -68,7 +85,7 @@ void DissatisfactionAppl::handleSelfMsg(cMessage* msg){
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::ROUTE_VOTE;
     } else if(msg == startSpeedVoteDelay && stage == Stage::ENVIRONMENTAL){
-        stage = Stage::NONE;
+        //stage = Stage::NONE;
         BeliefModel mnv("start/vote/speed");
         //Set an identifier to remove potential speeds
         double arg = 1;
@@ -89,11 +106,12 @@ void DissatisfactionAppl::callToJoin(){
     election_data.currentResult = 1;
     election_data.joinerId = next;
     cancelEvent(joinTimeout);
-    scheduleAt(simTime() + 10, joinTimeout);
+    scheduleAt(simTime() + 2, joinTimeout);
 }
 
 void DissatisfactionAppl::handleEndOfVote(){
     Enter_Method_Silent();
+    ballotsFinished++;
     if(stage == Stage::INITIAL){
         scheduleAt(simTime() + 3, sendProposal);
         callJoinersTimer = new cMessage("callJoinersTimer");
@@ -101,12 +119,13 @@ void DissatisfactionAppl::handleEndOfVote(){
         stage = Stage::JOINERS;
     }else if(stage == Stage::JOINERS){
         //start a vote due to environmental changes
-        scheduleAt(simTime() + 12, startInitialVote);
+        scheduleAt(simTime() + 3, startInitialVote);
         stage = Stage::ENVIRONMENTAL;
     }
 }
 
 void DissatisfactionAppl::finalizeManeuver(int joinerId){
+    std::cout << "CALLED FINALIZE" << std::endl;
     BeliefModel mnv;
     mnv.pushInt(&joinerId);
     potentialJoiners.erase(potentialJoiners.begin());
@@ -117,6 +136,8 @@ void DissatisfactionAppl::finalizeManeuver(int joinerId){
     else{
         cancelEvent(joinTimeout);
         delete joinTimeout;
+        if(positionHelper->getPlatoonSize() != 9)
+            throw cRuntimeError("INVALID SIZE");
         negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
         mnv.setBelief("start/vote/node");
         double args = -1;

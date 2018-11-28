@@ -5,6 +5,8 @@ import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.ConnectionManager;
 
 
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.util.logging.LogManager;
 
 
@@ -33,9 +35,18 @@ final class App
      *
      * @param p_args command-line arguments
      */
-    public static void main( final String[] p_args )
-    {
+    public static void main( final String[] p_args ) throws FileNotFoundException {
 
+
+        /*// Create a new file output stream.
+        PrintStream fileOut = new PrintStream("./out.txt");
+        // Create a new file error stream.
+        PrintStream fileErr = new PrintStream("./err.txt");
+
+        // Redirect standard out to file.
+        System.setOut(fileOut);
+        // Redirect standard err to file.
+        System.setErr(fileErr);*/
 
         ConnectionManager cm = new ConnectionManager();
         //AgentManager am = new AgentManager(/*"manager.asl"*/"laneMergeVehicle.asl", cm);

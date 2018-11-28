@@ -9,6 +9,8 @@ import jasonveins.omnet.voting.Statistics.CJoinStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -84,6 +86,15 @@ public class CVoterAgentManager extends AgentManager {
         String utility = CByteUtils.extractString(params);
         String committee_vote_rule = CByteUtils.extractString(params);
         getStats().setSimParams(platoonSize,iteration,rule,type,committee_vote_rule);
+
+        //Create a new file output stream.
+        PrintStream fileOut = null;
+        try {
+            fileOut = new PrintStream("logs/out"+iteration+".txt");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        System.setOut(fileOut);
         voteRule = rule;
         this.committee_vote_rule = committee_vote_rule;
         this.factor = factor;

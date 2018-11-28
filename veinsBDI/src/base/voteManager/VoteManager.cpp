@@ -65,7 +65,6 @@ void VoteManager::setLightJasonParameters(){
     //std::string platoonType = par("platoon_type").stdstringValue();
     //int platoonSize = par("platoon_size").intValue();
     //int iteration = par("iteration").intValue();
-
     LightJasonBuffer buff;
     jp.initializeParamsBuffer(buff);
     jp.setSimParameters(buff, par("agentManager").stdstringValue());

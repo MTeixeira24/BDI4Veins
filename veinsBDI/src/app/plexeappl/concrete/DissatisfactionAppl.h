@@ -68,6 +68,7 @@ protected:
     //virtual void sendVoteResults(int winnerValue, int joinerId) override;
 private:
     void callToJoin();
+    uint8_t ballotsFinished = 0;
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_DISSATISFACTIONAPPL_H_ */

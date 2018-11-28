@@ -29,7 +29,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     private static final long serialVersionUID = 3455114282889790324L;
 
-    protected CopyOnWriteArrayList<Integer> members;
+    protected List<Integer> members;
     /**
      * Stores an ordered linked list containing platoon Ids and their utilities
      */
@@ -66,7 +66,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration, @Nonnull AgentManager m_am, int m_id,
                        @Nonnull String m_vType, String voteRule, double m_factor, String m_utility, String m_committee_vote_rule) {
         super(p_configuration, m_am, m_id, m_vType);
-        members = new CopyOnWriteArrayList<>();
+        members = Collections.synchronizedList(new ArrayList<>());
         targetPlatoons = Collections.synchronizedList(new LinkedList<>());
         targetPlatoonIds = new CopyOnWriteArrayList<>();
         factor = m_factor;

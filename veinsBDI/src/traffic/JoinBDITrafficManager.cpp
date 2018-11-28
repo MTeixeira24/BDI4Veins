@@ -36,7 +36,7 @@ void JoinBDITrafficManager::initialize(int stage)
     platooningVType = par("platooningVType").stdstringValue();
     joinerLane = par("joinerLane").intValue();
     addJoiner = new cMessage();
-    scheduleAt(simTime() + 3, addJoiner);
+    scheduleAt(simTime() + 2.75, addJoiner);
 }
 
 void JoinBDITrafficManager::scenarioLoaded()
@@ -116,7 +116,7 @@ void JoinBDITrafficManager::injectJoiner(){
         for(int i = numJoiners; i > 0; i--){
             automated.speed = (platoonInsertSpeed->doubleValue() / 3.6);
             automated.lane = joinerLane;
-            automated.position = 50 + (6*i);
+            automated.position = 50 + (8*i);
             addVehicleToQueue(0, automated);
         }
     }

@@ -106,6 +106,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
     open/vote("speed", [0]). //"node, speed"
     
 +!start/vote/node(L, ARGS) <-
+        generic/print(MyName,": Opening node vote......");
         utility/storemember(L);
         L1 = collection/list/create(ARGS);
         open/vote("node", L1).
@@ -154,6 +155,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 
 +!addmember(L) <-
+    generic/print("Adding member...", L);
     utility/storemember(L).
 
 
