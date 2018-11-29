@@ -1,3 +1,5 @@
+#Log files
+LightJason/logs/*
 #Omnet files
 *.oppbuildspec
 *.settings/*
@@ -9,6 +11,7 @@ veinsBDI/.settings/*
 *.vec
 *.vci
 *.sca
+*.csv
 # Java compiled classes
 LightJason/target/*
 LightJason/out/*
