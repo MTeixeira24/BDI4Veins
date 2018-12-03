@@ -66,7 +66,6 @@ protected:
      */
     MemberExchange* buffer = NULL;
     DataExchange* databuffer = NULL;
-    RegroupMessage* rmbuffer = NULL;
     //Wait after speed vote to start the regroup
     cMessage* regroupDelay = NULL;
     /**
@@ -97,21 +96,21 @@ protected:
         int platoonId;
         void setFormation(const std::vector<int>& newFormation){
             platoonFormation.clear();
-            platoonFormation.insert(newFormation.begin(), newFormation.begin(), newFormation.end());
+            platoonFormation.insert(platoonFormation.begin(), newFormation.begin(), newFormation.end());
         }
         std::vector<int>& getFormation(){ return platoonFormation; }
         void setLeaderId(int id){leaderId = id;}
         int getLeaderId(){return leaderId;}
         void setPlatoonId(int id){platoonId = id;}
         int getPlatoonId(){return platoonId;}
-    };
+    } altPlatoon;
     //Due to the previous problem, we need to override the base voting cycle
     void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector) override;
-    void sendNotificationOfVoteDirect(VoteData electionData, int destinationId);
+    void sendNotificationOfVoteDirect(VoteData electionData, int destinationId) override;
+    virtual void sendVoteResults(int winnerValue, int joinerId) override;
     virtual void handleSubmitVote(const SubmitVote* msg) override;
-    virtual void handleSubmitVote(const SubmitVote* msg);
-    virtual void handleNotificationOfResults(const NotifyResults* msg);
-    void handleNotifyVote(const NotifyVote* msg);
+    virtual void handleNotificationOfResults(const NotifyResults* msg) override;
+    void handleNotifyVote(const NotifyVote* msg) override;
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_REGROUPAPPL_H_ */
