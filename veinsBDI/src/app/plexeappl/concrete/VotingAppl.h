@@ -94,7 +94,7 @@ public:
     /**
      * If  no results have been received. Request them directly
      */
-    void sendResultRequest(int, int);
+    virtual void sendResultRequest(int, int);
     /*
      *
      */
@@ -137,7 +137,7 @@ protected:
     /**
      * If a vehicle hasnt received the results, send it back
      */
-    void handleRequestResults(RequestResults* msg);
+    virtual void handleRequestResults(RequestResults* msg);
     /**
      * Fill a negotiation message with the standard information
      */

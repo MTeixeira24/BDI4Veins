@@ -111,6 +111,8 @@ protected:
     virtual void handleSubmitVote(const SubmitVote* msg) override;
     virtual void handleNotificationOfResults(const NotifyResults* msg) override;
     void handleNotifyVote(const NotifyVote* msg) override;
+    void sendResultRequest(int, int) override;
+    virtual void handleRequestResults(RequestResults* msg) override;
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_REGROUPAPPL_H_ */

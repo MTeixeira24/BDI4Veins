@@ -195,7 +195,7 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     negotiationState = VoteState::AWAITING_ACK_SUBMIT;
     cancelEvent(awaitAckTimer);
     //Reschedule to re-send 500ms from now if no ack is received
-    scheduleAt(simTime() + 1, awaitAckTimer);
+    scheduleAt(simTime() + 0.5, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteResults(int winnerValue, int joinerId){

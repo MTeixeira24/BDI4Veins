@@ -188,15 +188,6 @@ void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
 }
 
 void RegroupAppl::regroup(std::vector<int>& p, int l){
-    if(myId == 1){
-        int x = 0;
-    }
-    if(l == 1){
-        int x = 0;
-    }
-    //positionHelper->setPlatoonId((l+1)*10);
-    //positionHelper->setPlatoonFormation(dup);
-    //positionHelper->setLeaderId(l);
     altPlatoon.inAlternatePlatoon = true;
     altPlatoon.setFormation(p);
     altPlatoon.setLeaderId(l);
@@ -485,7 +476,54 @@ void RegroupAppl::handleSelfMsg(cMessage* msg){
             delete buffer;
             buffer = NULL;
         }
-    }  else{
+    }else if(msg == awaitAckTimer && altPlatoon.inAlternatePlatoon){
+        sendResultRequest(myId, altPlatoon.getLeaderId());
+    }else{
         RouteVotingAppl::handleSelfMsg(msg);
+    }
+}
+
+void RegroupAppl::sendResultRequest(int originId, int targetId){
+    if(altPlatoon.inAlternatePlatoon){
+        Enter_Method_Silent();
+        RequestResults* msg = new RequestResults("RequestResults");
+        fillNegotiationMessage(msg, myId, altPlatoon.getLeaderId());
+        msg->setPlatoonId(altPlatoon.getPlatoonId());
+        sendUnicast(msg, targetId);
+        cancelEvent(awaitAckTimer);
+        scheduleAt(simTime() + 0.1, awaitAckTimer);
+    }else{
+        RouteVotingAppl::sendResultRequest(originId, targetId);
+    }
+}
+
+void RegroupAppl::handleRequestResults(RequestResults* rr){
+    if(altPlatoon.inAlternatePlatoon){
+        switch(negotiationState){
+            case VoteState::CHAIR_ELECTION_ONGOING:{
+                //We dont want to send old election data back
+                //Until the agent gives us a new iteration or the results back
+                //ignore requests for results
+                if(!received_votes[rr->getVehicleId()])
+                    sendNotificationOfVoteDirect(election_data, rr->getVehicleId());
+                break;
+            }
+            case VoteState::CHAIR_SEARCHING_JOINERS:
+            case VoteState::CHAIR_ELECTION_END:{
+                NotifyResults* msg = new NotifyResults("NotifyResults");
+                int platoonId = altPlatoon.getPlatoonId();
+                fillNegotiationMessage(msg, myId, altPlatoon.getLeaderId());
+                msg->setResult(election_data.currentResult);
+                msg->setJoinerId(election_data.joinerId);
+                msg->setPlatoonId(platoonId);
+                sendUnicast(msg, rr->getVehicleId());
+                break;
+            }
+            default:{
+                break;
+            }
+        }
+    }else{
+        VotingAppl::handleRequestResults(rr);
     }
 }

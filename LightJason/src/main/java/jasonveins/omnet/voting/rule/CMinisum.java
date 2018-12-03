@@ -26,7 +26,7 @@ public class CMinisum extends CApproval {
         */
         if(size > -1){
             //Get the size max values
-            ArrayList<Integer> binaryResult = new ArrayList<>(Collections.nCopies(scoreVector.size()-1, 0));
+            ArrayList<Integer> binaryResult = new ArrayList<>(Collections.nCopies(scoreVector.size(), 0));
             ArrayList<Integer> dup = new ArrayList<>(scoreVector);
             for(int i = 0; i < size; i++){
                 int maxIndex = dup.indexOf(Collections.max(dup));
