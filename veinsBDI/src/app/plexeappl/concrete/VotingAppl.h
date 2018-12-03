@@ -65,8 +65,8 @@ public:
      *
      */
     NotifyVote* fillNotificationOfVote(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates);
-    void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector);
-    void sendNotificationOfVoteDirect(VoteData electionData, int destinationId);
+    virtual void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector);
+    virtual void sendNotificationOfVoteDirect(VoteData electionData, int destinationId);
     /**
      *
      */
@@ -129,7 +129,7 @@ protected:
     /**
      *
      */
-    void handleNotifyVote(const NotifyVote* msg);
+    virtual void handleNotifyVote(const NotifyVote* msg);
     /**
      * Process received Ack messages
      */

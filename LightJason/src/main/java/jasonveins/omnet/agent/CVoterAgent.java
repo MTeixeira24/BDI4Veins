@@ -119,6 +119,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     private void saveUtils(@Nonnull Number factor, @Nonnull Number p_preferredSpeed, @Nonnull Number p_newUtil, @Nonnull Number p_currentSpeed){
         //double oldUtil = calculateUtility(platoonSpeed, t.doubleValue(), s.doubleValue(), p_currentSpeed.intValue());
         ((CVoterAgentManager)agentManager).getStats().storeUtil(this.id, p_newUtil.doubleValue(), hammingDistance);
+        System.out.println("Agent "+id+": Stored util as Single: "+p_newUtil.doubleValue()+" and Committee: "+hammingDistance);
     }
 
     @IAgentActionFilter

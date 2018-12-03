@@ -38,7 +38,7 @@ protected:
     /*
      * Timer to send proposals to join
      */
-    cMessage* sendProposal;
+    cMessage* sendProposal = NULL;
     /*
      * Timer to send speed updates to the agent
      */

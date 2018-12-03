@@ -19,7 +19,7 @@ final class App
     static
     {
         // disable logger
-       //LogManager.getLogManager().reset();
+       LogManager.getLogManager().reset();
     }
 
     /**

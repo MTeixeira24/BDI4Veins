@@ -15,6 +15,8 @@ RouteVotingAppl::~RouteVotingAppl(){
         cancelAndDelete(startSpeedVoteDelay);
     if(startInitialVote != NULL)
         cancelAndDelete(startInitialVote);
+    if(sendProposal != NULL)
+        cancelAndDelete(sendProposal);
 }
 
 void RouteVotingAppl::initialize(int stage){

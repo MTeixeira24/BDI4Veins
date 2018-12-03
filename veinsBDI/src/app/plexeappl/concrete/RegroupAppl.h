@@ -23,7 +23,6 @@ public:
     virtual void sendCommitteeVoteResults(std::vector<int>& results) override;
     virtual void sendVoteSubmition(std::vector<int>& votes) override;
 protected:
-    virtual void handleSubmitVote(const SubmitVote* msg) override;
     virtual void leaderInitialBehaviour() override;
     void handleSelfMsg(cMessage* msg) override;
     virtual void delegateNegotiationMessage(NegotiationMessage* msg) override;
@@ -67,6 +66,7 @@ protected:
      */
     MemberExchange* buffer = NULL;
     DataExchange* databuffer = NULL;
+    RegroupMessage* rmbuffer = NULL;
     //Wait after speed vote to start the regroup
     cMessage* regroupDelay = NULL;
     /**
@@ -85,6 +85,33 @@ protected:
     std::vector<int> vectorDiff(const std::vector<int>& v1, const std::vector<int>& v2);
 public:
     void sendMemberExchange(RegroupMsgTypes type);
+    const std::vector<int>& getPlatoonFormation(){return positionHelper->getPlatoonFormation();};
+protected:
+    //Due to Plexes positions helper classes not properly changing platoon formation
+    //define alternate memory structure
+    struct AltPlatoon{
+        bool inAlternatePlatoon = false;
+        bool isLeader = false;
+        std::vector<int> platoonFormation;
+        int leaderId;
+        int platoonId;
+        void setFormation(const std::vector<int>& newFormation){
+            platoonFormation.clear();
+            platoonFormation.insert(newFormation.begin(), newFormation.begin(), newFormation.end());
+        }
+        std::vector<int>& getFormation(){ return platoonFormation; }
+        void setLeaderId(int id){leaderId = id;}
+        int getLeaderId(){return leaderId;}
+        void setPlatoonId(int id){platoonId = id;}
+        int getPlatoonId(){return platoonId;}
+    };
+    //Due to the previous problem, we need to override the base voting cycle
+    void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector) override;
+    void sendNotificationOfVoteDirect(VoteData electionData, int destinationId);
+    virtual void handleSubmitVote(const SubmitVote* msg) override;
+    virtual void handleSubmitVote(const SubmitVote* msg);
+    virtual void handleNotificationOfResults(const NotifyResults* msg);
+    void handleNotifyVote(const NotifyVote* msg);
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_REGROUPAPPL_H_ */

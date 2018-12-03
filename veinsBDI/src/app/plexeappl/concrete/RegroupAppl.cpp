@@ -11,7 +11,7 @@ Define_Module(RegroupAppl);
 
 RegroupAppl::~RegroupAppl() {
     if(regroupDelay != NULL){
-        delete regroupDelay;
+        cancelAndDelete(regroupDelay);
     }
 }
 
@@ -185,8 +185,9 @@ void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
 }
 
 void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
-    if(leaderRole == LeaderRole::SENDER){
-        ASSERT(regroupState == RegroupState::AWAITING_WINNER_DETERMINATION);
+    Enter_Method_Silent();
+    if(leaderRole == LeaderRole::SENDER && regroupState == RegroupState::AWAITING_WINNER_DETERMINATION){
+        //ASSERT(regroupState == RegroupState::AWAITING_WINNER_DETERMINATION);
         cancelEvent(voteTimer);
         delete voteTimer;
         voteTimer = NULL;
@@ -199,13 +200,22 @@ void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
     }else{
         regroup(msg->getPlatoon2(), msg->getLeader2());
     }
+    //rmbuffer = msg->dup();
+    //scheduleAt(simTime() + 0.4, rmbuffer);
 }
 
 void RegroupAppl::regroup(std::vector<int>& p, int l){
-    Enter_Method_Silent();
-    positionHelper->setPlatoonFormation(p);
-    positionHelper->setLeaderId(l);
-    positionHelper->setPlatoonId(l);
+    if(myId == 1){
+        int x = 0;
+    }
+    if(l == 1){
+        int x = 0;
+    }
+    std::vector<int> dup(p.size());
+    for(uint32_t i = 0; i < p.size(); i++) dup[i]=p[i];
+    positionHelper->setPlatoonId((l+1)*10);
+    positionHelper->setPlatoonFormation(dup);
+    //positionHelper->setLeaderId(l);
     BeliefModel pbelief("set/initial/beliefs");
     pbelief.pushInt(&l);
     pbelief.pushInt(&l);
@@ -319,7 +329,10 @@ void RegroupAppl::handleSubmitVote(const SubmitVote* msg){
 
 void RegroupAppl::handleEndOfVote(){
     Enter_Method_Silent();
-    if((regroupState == RegroupState::NONE) || (regroupState == RegroupState::AWAITING_ACK_ACCEPT))
+    if(
+            ((regroupState == RegroupState::NONE) || (regroupState == RegroupState::AWAITING_ACK_ACCEPT))
+            && !regroupDelay->isScheduled()
+       )
         scheduleAt(simTime() + 1, regroupDelay);
 }
 
@@ -332,6 +345,11 @@ void RegroupAppl::handleSelfMsg(cMessage* msg){
         manager->sendInformationToAgents(myId, &mnv);
         cycle = VoteCycle::SPEED_VOTE;
         negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
+    }else if(msg == rmbuffer){
+        handleRegroupResults(rmbuffer);
+        delete msg;
+        cancelAndDelete(rmbuffer);
+        rmbuffer = NULL;
     }else if(msg == regroupDelay){
         /*The first vote for speed has ended. The sender leader sends a request*/
         if((leaderRole == LeaderRole::SENDER) && (regroupState == RegroupState::NONE)){
