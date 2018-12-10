@@ -89,12 +89,15 @@ public class CVoterAgentManager extends AgentManager {
 
         //Create a new file output stream.
         PrintStream fileOut = null;
+        PrintStream fileErr = null;
         try {
             fileOut = new PrintStream("logs/out"+iteration+".txt");
+            fileErr = new PrintStream("logs/err"+iteration+".txt");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         System.setOut(fileOut);
+        System.setErr(fileErr);
         voteRule = rule;
         this.committee_vote_rule = committee_vote_rule;
         this.factor = factor;

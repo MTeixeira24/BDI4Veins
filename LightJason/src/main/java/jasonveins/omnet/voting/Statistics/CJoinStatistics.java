@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CJoinStatistics extends IStatistics {
 
     private ConcurrentHashMap<Integer, ArrayList<Double>> initial_final_utilities;
+    private ConcurrentHashMap<Integer, ArrayList<Integer>> platoonIds;
     private boolean rejected;
     private int platoonSize = -1;
     private String type = null;
@@ -18,6 +19,7 @@ public class CJoinStatistics extends IStatistics {
 
     public CJoinStatistics(){
         initial_final_utilities = new ConcurrentHashMap<>();
+        platoonIds = new ConcurrentHashMap<>();
         rejected = false;
     }
 
@@ -29,7 +31,7 @@ public class CJoinStatistics extends IStatistics {
             if(!f.exists() || f.isDirectory()) {
                 out = new FileWriter(f);
                 //out.write("Scenario,Rule,CommitteeRule,PlatoonSize,Iteration,Rejected,Agent,InitialUtility,FinalUtility,Difference,HammingDistance\n");
-                out.write("Scenario,Rule,CommitteeRule,PlatoonSize,Iteration,Rejected,Agent,Utility1,HammingDistance1,Utility2,HammingDistance2,Utility3,HammingDistance3\n");
+                out.write("Scenario,Rule,CommitteeRule,PlatoonSize,Iteration,Rejected,Agent,Utility1,HammingDistance1,Utility2,HammingDistance2,Utility3,HammingDistance3,Platoon1,Platoon2\n");
             }else{
                 out = new FileWriter(f, true);
             }
@@ -46,6 +48,9 @@ public class CJoinStatistics extends IStatistics {
                     out.write(head+e.getKey());
                     for(int j = 0; j < 6; j += 2){
                         out.write("," + e.getValue().get(j) + "," + e.getValue().get(j+1));
+                    }
+                    for (Integer pids : platoonIds.get(i)) {
+                        out.write("," + pids);
                     }
                     out.write("\n");
                 }
@@ -65,6 +70,11 @@ public class CJoinStatistics extends IStatistics {
         utils.add(util);
         utils.add(hamming);
         initial_final_utilities.put(id, utils);
+    }
+
+    public void storePlatoon(int id, int platoonId){
+        platoonIds.computeIfAbsent(id, k -> new ArrayList<>(Collections.nCopies(2, -1)));
+        platoonIds.get(id).set(platoonIds.get(id).indexOf(-1), platoonId);
     }
 
     public void setRejected(boolean val){

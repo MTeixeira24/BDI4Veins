@@ -161,6 +161,7 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 
 +!inplatoon(PID, LID) <-
     +inplatoon(PID, LID);
+    save/platoon(PID);
     generic/print("Agent ", MyName, " is in platoon ", PID, " whoose leader is: ", LID).
 
 

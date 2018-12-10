@@ -123,6 +123,12 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     }
 
     @IAgentActionFilter
+    @IAgentActionName(name = "save/platoon")
+    private void savePlatoon(@Nonnull Number platoonId){
+        ((CVoterAgentManager)agentManager).getStats().storePlatoon(this.id, platoonId.intValue());
+    }
+
+    @IAgentActionFilter
     @IAgentActionName( name = "utility/generate/utility" )
     private double calculateUtility(double offeredSpeed, double factor, double preferredSpeed, int currentSpeed){
 

@@ -13,6 +13,9 @@ RegroupAppl::~RegroupAppl() {
     if(regroupDelay != NULL){
         cancelAndDelete(regroupDelay);
     }
+    if(buffer != NULL){
+        delete buffer;
+    }
 }
 
 void RegroupAppl::leaderInitialBehaviour(){
@@ -161,6 +164,7 @@ void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
         handleDataExchange(de);
     }else if(MemberExchange* me = dynamic_cast<MemberExchange*>(nm)){
         handleMemberExchange(me);
+        delete me;
     }else if(RegroupMessage* rm = dynamic_cast<RegroupMessage*>(nm)){
         handleRegroupResults(rm);
         delete rm;
@@ -442,7 +446,6 @@ void RegroupAppl::handleMemberExchange(MemberExchange* me){
         regroupState = RegroupState::COMMITTEE_VOTE;
         createRegroupElection(buffer); //DEBUG STATE 5
     }
-    delete me;
 }
 
 void RegroupAppl::handleEndOfVote(){
