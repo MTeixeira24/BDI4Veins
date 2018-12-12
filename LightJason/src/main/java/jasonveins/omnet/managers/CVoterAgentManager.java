@@ -88,7 +88,7 @@ public class CVoterAgentManager extends AgentManager {
         getStats().setSimParams(platoonSize,iteration,rule,type,committee_vote_rule);
 
         //Create a new file output stream.
-        PrintStream fileOut = null;
+        /*PrintStream fileOut = null;
         PrintStream fileErr = null;
         try {
             fileOut = new PrintStream("logs/out"+iteration+".txt");
@@ -97,7 +97,7 @@ public class CVoterAgentManager extends AgentManager {
             e.printStackTrace();
         }
         System.setOut(fileOut);
-        System.setErr(fileErr);
+        System.setErr(fileErr);*/
         voteRule = rule;
         this.committee_vote_rule = committee_vote_rule;
         this.factor = factor;

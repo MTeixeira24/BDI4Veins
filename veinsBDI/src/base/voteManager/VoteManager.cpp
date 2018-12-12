@@ -10,17 +10,12 @@
 Define_Module(VoteManager);
 
 void VoteManager::finish(){
-    double maxTime = -1;
+    double maxTime;
     //Get the highest time
     if(endOfVoteTimeStamps.size() > 0){
-        for(int i = endOfVoteTimeStamps.size() - 1; i >= 0; i--){
-            if(endOfVoteTimeStamps[i] > maxTime) maxTime = endOfVoteTimeStamps[i];
-        }
+        maxTime = endOfVoteTimeStamps[endOfVoteTimeStamps.size() - 1];
         double timeToConsensus = maxTime - startOfVoteTimeStamp;
-        maxTime = -1;
-        for(int i = endOfRouteVoteTimeStamps.size() - 1; i >= 0; i--){
-            if(endOfRouteVoteTimeStamps[i] > maxTime) maxTime = endOfRouteVoteTimeStamps[i];
-        }
+        maxTime = endOfRouteVoteTimeStamps[endOfRouteVoteTimeStamps.size() - 1];
         double timeToRouteConsensus = maxTime - startOfRouteVoteTimeStamp;
         recordScalar("#timeToSpeedConsensus", timeToConsensus);
         recordScalar("#timeToRouteConsensus", timeToRouteConsensus);
@@ -31,7 +26,8 @@ void VoteManager::finish(){
 void VoteManager::initialize(int stage){
     LightJasonManager::initialize(stage);
     if(stage == 0){
-
+        endOfVoteTimeStamps.reserve(50);
+        endOfRouteVoteTimeStamps.reserve(50);
         std::string platoonType = par("platoon_type").stdstringValue();
         int platoonSize = par("platoon_size").intValue();
         int iteration = par("iteration").intValue();

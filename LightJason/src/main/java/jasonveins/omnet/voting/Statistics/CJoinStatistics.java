@@ -49,6 +49,7 @@ public class CJoinStatistics extends IStatistics {
                     for(int j = 0; j < 6; j += 2){
                         out.write("," + e.getValue().get(j) + "," + e.getValue().get(j+1));
                     }
+                    platoonIds.computeIfAbsent(i, k -> new ArrayList<>(Collections.nCopies(2, -1)));
                     for (Integer pids : platoonIds.get(i)) {
                         out.write("," + pids);
                     }

@@ -51,6 +51,7 @@ void RegroupAppl::createRegroupElection(MemberExchange* me){
         fullContext.insert(fullContext.end(), myPrefSpeeds.begin(), myPrefSpeeds.end());
         fullContext.insert(fullContext.end(), context.begin(), context.end());
     }else{
+        ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_START);
         fullCandidates.insert(fullCandidates.end(), candidates.begin(), candidates.end());
         fullCandidates.insert(fullCandidates.end(), myCandidates.begin(), myCandidates.end());
         fullContext.insert(fullContext.end(), context.begin(), context.end());
@@ -175,6 +176,7 @@ void RegroupAppl::delegateNegotiationMessage(NegotiationMessage* nm){
 
 void RegroupAppl::handleRegroupResults(RegroupMessage* msg){
     Enter_Method_Silent();
+    ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_END);
     if(leaderRole == LeaderRole::SENDER && regroupState == RegroupState::AWAITING_WINNER_DETERMINATION){
         //ASSERT(regroupState == RegroupState::AWAITING_WINNER_DETERMINATION);
         cancelEvent(voteTimer);
