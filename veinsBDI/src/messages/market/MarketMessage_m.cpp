@@ -183,6 +183,8 @@ MarketMessage::MarketMessage(const char *name, short kind) : ::NegotiationMessag
 {
     this->platoonId = 0;
     this->forWholePlatoon = false;
+    this->messageId = 0;
+    this->replyMessageId = 0;
 }
 
 MarketMessage::MarketMessage(const MarketMessage& other) : ::NegotiationMessage(other)
@@ -207,6 +209,8 @@ void MarketMessage::copy(const MarketMessage& other)
     this->platoonId = other.platoonId;
     this->targets = other.targets;
     this->forWholePlatoon = other.forWholePlatoon;
+    this->messageId = other.messageId;
+    this->replyMessageId = other.replyMessageId;
 }
 
 void MarketMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -215,6 +219,8 @@ void MarketMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->platoonId);
     doParsimPacking(b,this->targets);
     doParsimPacking(b,this->forWholePlatoon);
+    doParsimPacking(b,this->messageId);
+    doParsimPacking(b,this->replyMessageId);
 }
 
 void MarketMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -223,6 +229,8 @@ void MarketMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->platoonId);
     doParsimUnpacking(b,this->targets);
     doParsimUnpacking(b,this->forWholePlatoon);
+    doParsimUnpacking(b,this->messageId);
+    doParsimUnpacking(b,this->replyMessageId);
 }
 
 int MarketMessage::getPlatoonId() const
@@ -253,6 +261,26 @@ bool MarketMessage::getForWholePlatoon() const
 void MarketMessage::setForWholePlatoon(bool forWholePlatoon)
 {
     this->forWholePlatoon = forWholePlatoon;
+}
+
+int MarketMessage::getMessageId() const
+{
+    return this->messageId;
+}
+
+void MarketMessage::setMessageId(int messageId)
+{
+    this->messageId = messageId;
+}
+
+int MarketMessage::getReplyMessageId() const
+{
+    return this->replyMessageId;
+}
+
+void MarketMessage::setReplyMessageId(int replyMessageId)
+{
+    this->replyMessageId = replyMessageId;
 }
 
 class MarketMessageDescriptor : public omnetpp::cClassDescriptor
@@ -320,7 +348,7 @@ const char *MarketMessageDescriptor::getProperty(const char *propertyname) const
 int MarketMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
 unsigned int MarketMessageDescriptor::getFieldTypeFlags(int field) const
@@ -335,8 +363,10 @@ unsigned int MarketMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISCOMPOUND,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *MarketMessageDescriptor::getFieldName(int field) const
@@ -351,8 +381,10 @@ const char *MarketMessageDescriptor::getFieldName(int field) const
         "platoonId",
         "targets",
         "forWholePlatoon",
+        "messageId",
+        "replyMessageId",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
 }
 
 int MarketMessageDescriptor::findField(const char *fieldName) const
@@ -362,6 +394,8 @@ int MarketMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+0;
     if (fieldName[0]=='t' && strcmp(fieldName, "targets")==0) return base+1;
     if (fieldName[0]=='f' && strcmp(fieldName, "forWholePlatoon")==0) return base+2;
+    if (fieldName[0]=='m' && strcmp(fieldName, "messageId")==0) return base+3;
+    if (fieldName[0]=='r' && strcmp(fieldName, "replyMessageId")==0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -377,8 +411,10 @@ const char *MarketMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "IntSet",
         "bool",
+        "int",
+        "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **MarketMessageDescriptor::getFieldPropertyNames(int field) const
@@ -448,6 +484,8 @@ std::string MarketMessageDescriptor::getFieldValueAsString(void *object, int fie
         case 0: return long2string(pp->getPlatoonId());
         case 1: {std::stringstream out; out << pp->getTargets(); return out.str();}
         case 2: return bool2string(pp->getForWholePlatoon());
+        case 3: return long2string(pp->getMessageId());
+        case 4: return long2string(pp->getReplyMessageId());
         default: return "";
     }
 }
@@ -464,6 +502,8 @@ bool MarketMessageDescriptor::setFieldValueAsString(void *object, int field, int
     switch (field) {
         case 0: pp->setPlatoonId(string2long(value)); return true;
         case 2: pp->setForWholePlatoon(string2bool(value)); return true;
+        case 3: pp->setMessageId(string2long(value)); return true;
+        case 4: pp->setReplyMessageId(string2long(value)); return true;
         default: return false;
     }
 }

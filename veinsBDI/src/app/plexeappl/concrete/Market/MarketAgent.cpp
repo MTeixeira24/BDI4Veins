@@ -9,12 +9,14 @@
 Define_Module(MarketAgent)
 
 MarketAgent::~MarketAgent() {
-    //Delete messages
+    if(debugTimer != NULL)
+        cancelAndDelete(debugTimer);
 }
 
 void MarketAgent::initialize(int stage){
     GeneralPlexeAgentAppl::initialize(stage);
     if (stage == 1){
+        srand(time(NULL));
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
                 gate("lowerControlIn"), gate("lowerControlOut"));
         if(getPlatoonRole() == PlatoonRole::NONE){
@@ -25,23 +27,43 @@ void MarketAgent::initialize(int stage){
             //General platoon knowledge
             if (getPlatoonRole() == PlatoonRole::LEADER){
                 //Leader specific knowledge
+                debugTimer = new cMessage("debugTimerLeader");
+                scheduleAt(simTime() + 1, debugTimer);
             }
         }
     }
 }
 
 void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int targetId, bool forWholePlatoon){
+    long msgId = rand();
+    msg->setMessageId(msgId);
     msg->setDestinationId(targetId);
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(originId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
-    msg->setForWholePlatoon(forWholePlatoon);//msg->setTargets(targets);
+    msg->setForWholePlatoon(forWholePlatoon);
 }
 
 void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
         bool forWholePlatoon, std::unordered_set<int>& targets){
     fillNegotiationMessage(msg, originId, targetId, forWholePlatoon);
-    msg->setForWholePlatoon(forWholePlatoon);//msg->setTargets(targets);
+    msg->setForWholePlatoon(forWholePlatoon);
+    msg->setTargets(targets);
+}
+
+void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
+        bool forWholePlatoon, int idOfOriginMessage){
+    msg->setReplyMessageId(idOfOriginMessage);
+    std::unordered_set<int> setTarget({targetId});
+    fillNegotiationMessage(msg, originId, targetId, forWholePlatoon, setTarget);
+}
+
+bool MarketAgent::isReceiver(MarketMessage* msg){
+    if(msg->getForWholePlatoon() && positionHelper->getPlatoonId() == msg->getPlatoonId())
+        return true;
+    if(msg->getTargets().find(myId) != msg->getTargets().end())
+        return true;
+    return false;
 }
 
 void MarketAgent::handleLowerMsg(cMessage* msg){
@@ -62,27 +84,20 @@ void MarketAgent::handleLowerMsg(cMessage* msg){
 }
 
 void MarketAgent::delegateNegotiationMessage(NegotiationMessage* nm){
-    /*if (RequestJoinPlatoonMessage* msg = dynamic_cast<RequestJoinPlatoonMessage*>(nm)) {
-        handleRequestToJoinNegotiation(msg);
-        delete msg;
-    }else if (SubmitVote* msg = dynamic_cast<SubmitVote*>(nm)) {
-        handleSubmitVote(msg);
-        delete msg;
-    }else if (NotifyResults* msg = dynamic_cast<NotifyResults*>(nm)) {
-        handleNotificationOfResults(msg);
-        delete msg;
-    }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
-        if((msg->getDestinationId() == -1) || (msg->getDestinationId() == myId)){
-            handleNotifyVote(msg);
+    if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
+        if(isReceiver(msg)){
+            std::cout << "Got the message!" << std::endl;
+            if(myId != 0){
+                MarketMessage* testMsg = new MarketMessage("Reply");
+                fillNegotiationMessage(testMsg, myId, msg->getVehicleId(), false, msg->getMessageId());
+                sendUnicast(testMsg, msg->getVehicleId());
+            }else{
+                std::cout << "Got a reply!" << std::endl;
+                messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
+            }
         }
         delete msg;
-    }else if(RequestResults* msg = dynamic_cast<RequestResults*>(nm)) {
-        handleRequestResults(msg);
-        delete msg;
-    } else if (Ack* msg = dynamic_cast<Ack*>(nm)) {
-        handleAck(msg);
-        delete msg;
-    }*/
+    }
 }
 
 void MarketAgent::handleSelfMsg(cMessage* msg){
@@ -91,16 +106,33 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
         if(messageCache.allResponded(msgId)){
             delete at;
         }else{
-            resendMessage(msgId);
+            resendMessage(msgId, at);
         }
-    }else {
+    }else if(msg == debugTimer){
+        testFunction();
+    }else{
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
 }
 
-void MarketAgent::resendMessage(long msgId){
+void MarketAgent::testFunction(){
+    MarketMessage* testMsg = new MarketMessage("Test");
+    fillNegotiationMessage(testMsg, myId, -1, true);
+    sendMessageWithAck(testMsg, positionHelper->getPlatoonFormation());
+}
+
+void MarketAgent::sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets){
+    messageCache.insertEntry(msg->getMessageId(), msg->dup(), targets);
+    AckTimer* at = new AckTimer("AckTimer");
+    at->setMessageId(msg->getMessageId());
+    scheduleAt(simTime() + ackTime, at);
+    sendUnicast(msg, -1);
+}
+
+void MarketAgent::resendMessage(long msgId, AckTimer* at){
     MarketMessage* resend = messageCache.getMessageReference(msgId);
     resend->setForWholePlatoon(false);
     resend->setTargets(messageCache.getRemainerIds(msgId));
+    scheduleAt(simTime() + ackTime, at);
     sendUnicast(resend->dup(), -1);
 }

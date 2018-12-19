@@ -18,8 +18,9 @@
 struct MessageStatus{
     MarketMessage* message_backup;
     std::vector<int> receiverIds;
-    std::vector<bool> receiverStatus;
+    std::unordered_map<int, bool> receiverStatus;
     std::unordered_set<int> remainders;
+    ~MessageStatus(){delete message_backup;}
 };
 
 typedef std::unordered_map<long, MessageStatus*> MessageCacheMap;
@@ -33,13 +34,16 @@ public:
     virtual ~MessageCache();
 private:
     MessageCacheMap messageCacheMap;
+    int senderId;
 public:
     bool allResponded(long msgId);
     std::unordered_set<int>& getRemainerIds(long msgId){return messageCacheMap[msgId]->remainders;};
-    void insertEntry(long msgId, MarketMessage* msgPointer, std::vector<int>& ids);
+    void insertEntry(long msgId, MarketMessage* msgPointer, const std::vector<int>& ids);
     void deleteEntry(long msgId);
     bool existsEntry(long msgId);
     MarketMessage* getMessageReference(long msgId);
+    void markReceived(long msgId, int id);
+    void setSenderId(int _senderId){senderId = _senderId;}
 };
 
 #endif /* MESSAGES_MESSAGECACHE_H_ */

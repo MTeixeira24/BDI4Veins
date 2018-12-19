@@ -17,22 +17,24 @@ bool MessageCache::allResponded(long msgId){
     if(existsEntry(msgId)){
         MessageStatus* ms = messageCacheMap[msgId];
         ms->remainders.clear();
-        for(unsigned int i = 0; i < ms->receiverStatus.size(); i++){
-            if(!ms->receiverStatus[i]) ms->remainders.insert(ms->receiverIds[i]);
+        for(unsigned int i = 0; i < ms->receiverIds.size(); i++){
+            if(!ms->receiverStatus[ms->receiverIds[i]]) ms->remainders.insert(ms->receiverIds[i]);
             status &= ms->receiverStatus[i];
         }
     }
     return status;
 }
 
-void MessageCache::insertEntry(long msgId, MarketMessage* msgPointer, std::vector<int>& ids){
+void MessageCache::insertEntry(long msgId, MarketMessage* msgPointer, const std::vector<int>& ids){
     deleteEntry(msgId);
     MessageStatus* ms = new MessageStatus;
     ms->message_backup = msgPointer;
     ms->receiverIds = std::vector<int>(ids);
-    ms->receiverStatus = std::vector<bool>(ids.size());
+    ms->receiverStatus = std::unordered_map<int, bool>();
     for(unsigned int i = 0; i < ids.size(); i++)
         ms->receiverStatus[i] = false;
+    if(ms->receiverStatus.find(senderId) != ms->receiverStatus.end())
+        ms->receiverStatus[senderId] = true; //We don't expect the sender to send a reply to itself
     messageCacheMap[msgId] = ms;
 }
 
@@ -47,4 +49,8 @@ bool MessageCache::existsEntry(long msgId){
 MarketMessage* MessageCache::getMessageReference(long msgId){
     if(existsEntry(msgId)) return messageCacheMap[msgId]->message_backup;
     return NULL;
+}
+
+void MessageCache::markReceived(long msgId, int id){
+    messageCacheMap[msgId]->receiverStatus[id] = true;
 }

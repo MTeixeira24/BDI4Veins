@@ -21,7 +21,9 @@
 
 class MarketAgent : public GeneralPlexeAgentAppl {
 public:
-    MarketAgent(){};
+    MarketAgent(){
+        messageCache.setSenderId(myId);
+    };
     virtual ~MarketAgent();
 
     /** override from GeneralPlexeAgentAppl */
@@ -42,6 +44,8 @@ protected:
             bool forWholePlatoon=true);
     void fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
             bool forWholePlatoon, std::unordered_set<int>& targets);
+    void fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
+            bool forWholePlatoon, int idOfOriginMessage);
     /**
      * Handle messages sent to self
      */
@@ -49,12 +53,29 @@ protected:
     /**
      * Resends a message from cache
      */
-    void resendMessage(long msgId);
+    void resendMessage(long msgId, AckTimer* at);
+    /*
+     * Send message with ack control
+     */
+    void sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets);
+    /*
+     * Check if this vehicle is the intended target of a message
+     */
+    bool isReceiver(MarketMessage* msg);
+    /*
+     * Seconds to wait for ack messages
+     */
+    const double ackTime = 0.2;
 private:
     /*
      * Manage the messages that are sent
      */
     MessageCache messageCache;
+    /*
+     * Timers
+     */
+    cMessage* debugTimer = NULL;
+    void testFunction();
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_MARKET_MARKETAGENT_H_ */

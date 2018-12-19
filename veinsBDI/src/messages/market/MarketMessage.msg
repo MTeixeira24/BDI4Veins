@@ -27,5 +27,9 @@ packet MarketMessage extends NegotiationMessage {
     IntSet targets;
     //Is this message meant for the entire platoon or a select few?
     bool forWholePlatoon;
+    //Identifier of the message
+    int messageId;
+    //Identifier of the message it is replying to
+    int replyMessageId;
     
 }

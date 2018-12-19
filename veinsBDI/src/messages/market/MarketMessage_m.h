@@ -36,6 +36,10 @@ typedef std::unordered_set<int> IntSet;
  *     IntSet targets;
  *     //Is this message meant for the entire platoon or a select few?
  *     bool forWholePlatoon;
+ *     //Identifier of the message
+ *     int messageId;
+ *     //Identifier of the message it is replying to
+ *     int replyMessageId;
  * 
  * }
  * </pre>
@@ -46,6 +50,8 @@ class MarketMessage : public ::NegotiationMessage
     int platoonId;
     IntSet targets;
     bool forWholePlatoon;
+    int messageId;
+    int replyMessageId;
 
   private:
     void copy(const MarketMessage& other);
@@ -71,6 +77,10 @@ class MarketMessage : public ::NegotiationMessage
     virtual void setTargets(const IntSet& targets);
     virtual bool getForWholePlatoon() const;
     virtual void setForWholePlatoon(bool forWholePlatoon);
+    virtual int getMessageId() const;
+    virtual void setMessageId(int messageId);
+    virtual int getReplyMessageId() const;
+    virtual void setReplyMessageId(int replyMessageId);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const MarketMessage& obj) {obj.parsimPack(b);}
