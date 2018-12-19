@@ -20,4 +20,8 @@ import veinsbdi.base.manager.LightJasonManager;
 simple marketManager extends LightJasonManager{
     parameters:
         @class(MarketManager);
+        string platoon_type = default("Unstable");
+        int platoon_size = default(4);
+        double factor = default(0.7);
+		string utilityFunction = default("distribution");
 }

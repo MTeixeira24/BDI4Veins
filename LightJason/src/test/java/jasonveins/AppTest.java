@@ -1,8 +1,10 @@
 package jasonveins;
 
+import jasonveins.omnet.agent.CMarketAgent;
 import jasonveins.omnet.agent.CRegroupVoter;
 import jasonveins.omnet.agent.CRouterAgent;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
+import jasonveins.omnet.managers.CMarketAgentManager;
 import jasonveins.omnet.managers.CRouterManager;
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -48,70 +50,11 @@ public class AppTest
     /**
      * Rigourous Test :-)
      */
-    public void testApp()
-    {
-        String l_aslpath = "src/main/resources/asl/iterativeVoter.asl";
-        Set<IAgent<?>> l_agents;
-        try
-                (
-                        final FileInputStream l_stream = new FileInputStream( l_aslpath )
-                )
-        {
-            final int l_agentNumber = 1;
-            l_agents =
-                    new CVoterAgentGenerator( l_stream,
-                            new CRouterManager("iterativeVoter.asl", null) )
-                            .generatemultiple( l_agentNumber, 0, "vVoter",
-                                    "Approval", 0.05, "khan", "Minimax" )
-                            .collect( Collectors.toSet()
-
-                            );
-        }
-        catch ( final Exception l_exception )
-        {
-            l_exception.printStackTrace();
-            fail();
-            return;
-        }
-        IntStream
-                // define cycle range, i.e. number of cycles to run sequentially
-                .range( 0,20 )
-                .forEach( j ->
-                {
-                    //System.out.println( "Global cycle: " + j );
-                    l_agents.parallelStream().forEach( i ->
-                    {
-                        try
-                        {
-                            i.call();
-                            /*if(j == 5){
-                                ArrayList<Double> can = new ArrayList<>();
-                                IntStream.range(1,4).forEach(d -> can.add((double)d));
-                                ArrayList<Double> con = new ArrayList<>();
-                                con.add(120.0);con.add(130.0); con.add(140.0);
-                                final ITrigger l_trigger = CTrigger.from(
-                                        ITrigger.EType.ADDGOAL,
-                                        CLiteral.from(
-                                                "start/vote/regroup",
-                                                CRawTerm.from(can),
-                                                CRawTerm.from(con)
-                                        )
-                                );
-                                i.trigger( l_trigger );
-                            }*/
-                        }
-                        catch ( final Exception l_exception )
-                        {
-                            l_exception.printStackTrace();
-                            fail();
-                            throw new RuntimeException();
-                        }
-                    } );
-                } );
+    public void testApp() {
     }
 
-    /*public void testRouter(){
-        String l_aslpath = "src/main/resources/asl/router.asl";
+    public void testMarketActions(){
+        String l_aslpath = "src/main/resources/asl/marketAgent.asl";
         Set<IAgent<?>> l_agents;
         try
                 (
@@ -120,38 +63,122 @@ public class AppTest
         {
             final int l_agentNumber = 1;
             l_agents =
-                    new CRouterAgent.CRouterAgentGenerator( l_stream,
-                            new CRouterManager("router.asl", null) )
-                            .generatemultiple( l_agentNumber, 0, "vRouter" )
+                    new CMarketAgent.CMarketAgentGenerator( l_stream,
+                            new CMarketAgentManager("marketAgent.asl", null) )
+                            .generatemultiple( l_agentNumber, 0, "vMarket")
                             .collect( Collectors.toSet()
-
                             );
         }
-        catch ( final Exception l_exception )
-        {
+        catch ( final Exception l_exception ) {
             l_exception.printStackTrace();
             fail();
             return;
         }
         IntStream
-                // define cycle range, i.e. number of cycles to run sequentially
-                .range( 0,20 )
-                .forEach( j ->
+        .range( 0,20 )
+        .forEach( j ->
+        l_agents.parallelStream().forEach( i ->{
+                try{
+                    i.call();
+                    switch (j){
+                        case 3:{
+                            testReceiveAlertOfAuction((CMarketAgent)i);
+                            break;
+                        }
+                        case 6:{
+                            testStartAuction((CMarketAgent)i);
+                            break;
+                        }
+                        case 9:{
+                            testReceiveBid((CMarketAgent)i);
+                            break;
+                        }
+                        case 12:{
+                            testReceiveRoundResult((CMarketAgent)i);
+                            break;
+                        } case 15:{
+                            testReceiveAuctionResult((CMarketAgent)i);
+                            break;
+                        }
+                        default:{
+                            break;
+                        }
+                    }
+                }
+                catch ( final Exception l_exception )
                 {
-                    //System.out.println( "Global cycle: " + j );
-                    l_agents.parallelStream().forEach( i ->
-                    {
-                        try
-                        {
-                            i.call();
-                        }
-                        catch ( final Exception l_exception )
-                        {
-                            l_exception.printStackTrace();
-                            fail();
-                            throw new RuntimeException();
-                        }
-                    } );
-                } );
-    }*/
+                    l_exception.printStackTrace();
+                    fail();
+                    throw new RuntimeException();
+                }
+            } )
+         );
+    }
+
+    private void testReceiveAlertOfAuction(CMarketAgent agent){
+        final ITrigger l_trigger = CTrigger.from(
+                ITrigger.EType.ADDGOAL,
+                CLiteral.from(
+                        "receive/auction"
+                )
+        );
+        agent.trigger( l_trigger );
+    }
+
+    private void testStartAuction(CMarketAgent agent){
+        final ITrigger l_trigger = CTrigger.from(
+                ITrigger.EType.ADDGOAL,
+                CLiteral.from(
+                        "start/auction"
+                )
+        );
+        agent.trigger( l_trigger );
+    }
+
+    private void testReceiveBid(CMarketAgent agent){
+        final ITrigger l_trigger = CTrigger.from(
+                ITrigger.EType.ADDGOAL,
+                CLiteral.from(
+                        "receive/bid"
+                )
+        );
+        agent.trigger( l_trigger );
+    }
+
+    private void testReceiveRoundResult(CMarketAgent agent){
+        final ITrigger l_trigger = CTrigger.from(
+                ITrigger.EType.ADDGOAL,
+                CLiteral.from(
+                        "receive/round/result"
+                )
+        );
+        agent.trigger( l_trigger );
+    }
+
+    private void testReceiveAuctionResult(CMarketAgent agent){
+        final ITrigger l_trigger = CTrigger.from(
+                ITrigger.EType.ADDGOAL,
+                CLiteral.from(
+                        "receive/result"
+                )
+        );
+        agent.trigger( l_trigger );
+    }
 }
+
+
+/*if(j == 5){
+    ArrayList<Double> can = new ArrayList<>();
+    IntStream.range(1,4).forEach(d -> can.add((double)d));
+    ArrayList<Double> con = new ArrayList<>();
+    con.add(120.0);con.add(130.0); con.add(140.0);
+    final ITrigger l_trigger = CTrigger.from(
+            ITrigger.EType.ADDGOAL,
+            CLiteral.from(
+                    "start/vote/regroup",
+                    CRawTerm.from(can),
+                    CRawTerm.from(con)
+            )
+    );
+    i.trigger( l_trigger );
+}*/

@@ -3,7 +3,7 @@ package jasonveins.omnet.managers;
 import jasonveins.omnet.agent.CRouterAgent;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
-import jasonveins.omnet.voting.Statistics.CBaseStatistics;
+import jasonveins.omnet.statistics.CBaseStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;

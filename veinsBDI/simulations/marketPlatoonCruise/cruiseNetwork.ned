@@ -16,7 +16,7 @@
 package veinsbdi.simulations.marketPlatoonCruise;
 
 import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.voteManager.voteManager;
+import veinsbdi.base.MarketManager.marketManager;
 import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
 
 network MarketPlatoonCruise extends Scenario
@@ -24,7 +24,7 @@ network MarketPlatoonCruise extends Scenario
     parameters:
         string traffic_type;
     submodules:
-        ljmanager: voteManager;
+        ljmanager: marketManager;
         traffic: <traffic_type> like TraCIBaseTrafficManager {
             parameters:
                 @display("p=200,200");

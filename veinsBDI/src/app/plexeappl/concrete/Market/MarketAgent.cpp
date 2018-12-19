@@ -15,14 +15,33 @@ MarketAgent::~MarketAgent() {
 void MarketAgent::initialize(int stage){
     GeneralPlexeAgentAppl::initialize(stage);
     if (stage == 1){
+        protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
+                gate("lowerControlIn"), gate("lowerControlOut"));
+        if(getPlatoonRole() == PlatoonRole::NONE){
+            if(par("engageNegotiations").boolValue()){
+                //What should the non platoon elements do to interact?
+            }
+        }else{
+            //General platoon knowledge
+            if (getPlatoonRole() == PlatoonRole::LEADER){
+                //Leader specific knowledge
+            }
+        }
     }
 }
 
-void MarketAgent::fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId){
+void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int targetId, bool forWholePlatoon){
     msg->setDestinationId(targetId);
     msg->setKind(NEGOTIATION_TYPE);
     msg->setVehicleId(originId);
     msg->setExternalId(positionHelper->getExternalId().c_str());
+    msg->setForWholePlatoon(forWholePlatoon);//msg->setTargets(targets);
+}
+
+void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
+        bool forWholePlatoon, std::unordered_set<int>& targets){
+    fillNegotiationMessage(msg, originId, targetId, forWholePlatoon);
+    msg->setForWholePlatoon(forWholePlatoon);//msg->setTargets(targets);
 }
 
 void MarketAgent::handleLowerMsg(cMessage* msg){

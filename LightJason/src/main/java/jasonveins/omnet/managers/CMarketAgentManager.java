@@ -1,6 +1,9 @@
 package jasonveins.omnet.managers;
 
+import jasonveins.omnet.agent.CMarketAgent;
 import jasonveins.omnet.agent.IVehicleAgent;
+import jasonveins.omnet.environment.dijkstra.Graph;
+import jasonveins.omnet.statistics.CMarketStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
@@ -10,6 +13,10 @@ import java.nio.ByteBuffer;
  * Manager class for market based agents
  */
 public class CMarketAgentManager extends AgentManager {
+
+    private double factor;
+    private String utility;
+    private Graph scenarioRoute;
     /**
      * Class constructor
      *
@@ -33,6 +40,14 @@ public class CMarketAgentManager extends AgentManager {
         IVehicleAgent<?> l_ag = null;
         try {
             switch(vType){
+                case "vMarket":{
+                    if(p_aslFile.equals(resourceFolder+"asl/marketAgent.asl")){
+                        l_ag = new CMarketAgent.CMarketAgentGenerator(p_stream, this).generatesingle(p_id, vType);
+                    }else{
+                        throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected marketAgent.asl");
+                    }
+                    break;
+                }
                 default:
                     throw new RuntimeException("Unknown vType for class: CMarketAgentManager");
             }
@@ -48,5 +63,26 @@ public class CMarketAgentManager extends AgentManager {
      */
     @Override
     public void setSimParams(ByteBuffer params) {
+        String statsType = CByteUtils.extractString(params);
+        switch (statsType){
+            case "CMarketStatistics":{
+                stats = new CMarketStatistics();
+                break;
+            }
+            default:
+                throw new RuntimeException("VoterAgentManager: Unknown stats type");
+        }
+        int platoonSize = params.getInt();
+        String type = CByteUtils.extractString(params);
+        int iteration = params.getInt();
+        double factor = params.getDouble();
+        String utility = CByteUtils.extractString(params);
+        getStats().setSimParams(platoonSize,iteration,type);
+        this.factor = factor;
+        this.utility = utility;
+    }
+
+    public CMarketStatistics getStats(){
+        return (CMarketStatistics) stats;
     }
 }

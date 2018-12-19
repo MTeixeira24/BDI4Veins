@@ -1,14 +1,12 @@
 package jasonveins.omnet.managers;
 
 import com.google.common.collect.Sets;
-import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.decision.DecisionDataModel;
 import jasonveins.omnet.decision.InstructionModel;
-import jasonveins.omnet.voting.Statistics.CJoinStatistics;
-import jasonveins.omnet.voting.Statistics.IStatistics;
+import jasonveins.omnet.statistics.IStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;

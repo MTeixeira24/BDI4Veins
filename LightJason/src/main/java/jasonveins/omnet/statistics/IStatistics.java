@@ -1,4 +1,4 @@
-package jasonveins.omnet.voting.Statistics;
+package jasonveins.omnet.statistics;
 
 public abstract class IStatistics {
 

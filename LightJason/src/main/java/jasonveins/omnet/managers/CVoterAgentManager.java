@@ -4,8 +4,8 @@ import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.environment.dijkstra.Graph;
-import jasonveins.omnet.voting.Statistics.CBaseStatistics;
-import jasonveins.omnet.voting.Statistics.CJoinStatistics;
+import jasonveins.omnet.statistics.CBaseStatistics;
+import jasonveins.omnet.statistics.CJoinStatistics;
 
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;

@@ -45,6 +45,16 @@ public:
      * Increments the retransmission counts
      */
     void incrementRetransmission(){retransmissions++;}
+    /**
+     * Data structure to hold information from lightjason messages
+     */
+    struct JasonMessage{
+        uint16_t commandId;
+        uint16_t type;
+        uint32_t agentMessageLength;
+        uint32_t agentId;
+        uint32_t agentAction;
+    };
 
 protected:
     void parseResponse(uint32_t msgLength) override;
@@ -53,6 +63,11 @@ protected:
      */
     virtual void setLightJasonParameters() override;
 private:
+    /**
+     * Timestamps
+     */
+    std::vector<int> endOfVoteTimeStamps;
+    std::vector<int> endOfRouteVoteTimeStamps;
     /**
      * Retransmissions
      */

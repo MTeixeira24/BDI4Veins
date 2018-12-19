@@ -179,6 +179,9 @@ public final class ConnectionManager extends Thread {
                     case "CRouterManager":
                         am = new CRouterManager("router.asl", this);
                         break;
+                    case "CMarketAgentManager":
+                        am = new CMarketAgentManager("marketAgent.asl", this);
+                        break;
                     default:
                         throw new RuntimeException("ConnectionManager: Invalid manager specified!");
                 }

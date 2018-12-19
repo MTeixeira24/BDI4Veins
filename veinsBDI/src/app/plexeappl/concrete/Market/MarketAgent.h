@@ -38,7 +38,10 @@ protected:
     /**
      * Fill a negotiation message with the standard information
      */
-    void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId);
+    void fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
+            bool forWholePlatoon=true);
+    void fillNegotiationMessage(MarketMessage* msg, int originId, int targetId,
+            bool forWholePlatoon, std::unordered_set<int>& targets);
     /**
      * Handle messages sent to self
      */
