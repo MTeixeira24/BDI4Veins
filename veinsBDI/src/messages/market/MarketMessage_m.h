@@ -40,7 +40,8 @@ typedef std::unordered_set<int> IntSet;
  *     int messageId;
  *     //Identifier of the message it is replying to
  *     int replyMessageId;
- * 
+ *     //Specifies what type of message this is. e.g. BID, ACK, OK, etc..
+ *     int messageType;
  * }
  * </pre>
  */
@@ -52,6 +53,7 @@ class MarketMessage : public ::NegotiationMessage
     bool forWholePlatoon;
     int messageId;
     int replyMessageId;
+    int messageType;
 
   private:
     void copy(const MarketMessage& other);
@@ -81,6 +83,8 @@ class MarketMessage : public ::NegotiationMessage
     virtual void setMessageId(int messageId);
     virtual int getReplyMessageId() const;
     virtual void setReplyMessageId(int replyMessageId);
+    virtual int getMessageType() const;
+    virtual void setMessageType(int messageType);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const MarketMessage& obj) {obj.parsimPack(b);}

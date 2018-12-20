@@ -34,6 +34,7 @@ public:
     virtual ~MessageCache();
 private:
     MessageCacheMap messageCacheMap;
+    std::unordered_set<long> receivedMessages;
     int senderId;
 public:
     bool allResponded(long msgId);
@@ -44,6 +45,8 @@ public:
     MarketMessage* getMessageReference(long msgId);
     void markReceived(long msgId, int id);
     void setSenderId(int _senderId){senderId = _senderId;}
+    void saveReceived(long id){receivedMessages.insert(id);}
+    bool hasReceived(long id){return receivedMessages.find(id) != receivedMessages.end();}
 };
 
 #endif /* MESSAGES_MESSAGECACHE_H_ */

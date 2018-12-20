@@ -31,5 +31,6 @@ packet MarketMessage extends NegotiationMessage {
     int messageId;
     //Identifier of the message it is replying to
     int replyMessageId;
-    
+    //Specifies what type of message this is. e.g. BID, ACK, OK, etc..
+    int messageType;
 }

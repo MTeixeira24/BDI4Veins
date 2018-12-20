@@ -21,13 +21,18 @@
 
 class MarketAgent : public GeneralPlexeAgentAppl {
 public:
-    MarketAgent(){
-        messageCache.setSenderId(myId);
-    };
+    MarketAgent(){};
     virtual ~MarketAgent();
 
     /** override from GeneralPlexeAgentAppl */
     virtual void initialize(int stage) override;
+
+    enum class MessageType{
+        NONE,
+        ACK,
+        OK,
+        HELLO
+    };
 protected:
     /**
      *
@@ -58,6 +63,7 @@ protected:
      * Send message with ack control
      */
     void sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets);
+    void sendMessageWithAck(MarketMessage* msg, int target);
     /*
      * Check if this vehicle is the intended target of a message
      */

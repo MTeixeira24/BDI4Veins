@@ -185,6 +185,7 @@ MarketMessage::MarketMessage(const char *name, short kind) : ::NegotiationMessag
     this->forWholePlatoon = false;
     this->messageId = 0;
     this->replyMessageId = 0;
+    this->messageType = 0;
 }
 
 MarketMessage::MarketMessage(const MarketMessage& other) : ::NegotiationMessage(other)
@@ -211,6 +212,7 @@ void MarketMessage::copy(const MarketMessage& other)
     this->forWholePlatoon = other.forWholePlatoon;
     this->messageId = other.messageId;
     this->replyMessageId = other.replyMessageId;
+    this->messageType = other.messageType;
 }
 
 void MarketMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -221,6 +223,7 @@ void MarketMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->forWholePlatoon);
     doParsimPacking(b,this->messageId);
     doParsimPacking(b,this->replyMessageId);
+    doParsimPacking(b,this->messageType);
 }
 
 void MarketMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -231,6 +234,7 @@ void MarketMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->forWholePlatoon);
     doParsimUnpacking(b,this->messageId);
     doParsimUnpacking(b,this->replyMessageId);
+    doParsimUnpacking(b,this->messageType);
 }
 
 int MarketMessage::getPlatoonId() const
@@ -281,6 +285,16 @@ int MarketMessage::getReplyMessageId() const
 void MarketMessage::setReplyMessageId(int replyMessageId)
 {
     this->replyMessageId = replyMessageId;
+}
+
+int MarketMessage::getMessageType() const
+{
+    return this->messageType;
+}
+
+void MarketMessage::setMessageType(int messageType)
+{
+    this->messageType = messageType;
 }
 
 class MarketMessageDescriptor : public omnetpp::cClassDescriptor
@@ -348,7 +362,7 @@ const char *MarketMessageDescriptor::getProperty(const char *propertyname) const
 int MarketMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount() : 5;
+    return basedesc ? 6+basedesc->getFieldCount() : 6;
 }
 
 unsigned int MarketMessageDescriptor::getFieldTypeFlags(int field) const
@@ -365,8 +379,9 @@ unsigned int MarketMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<6) ? fieldTypeFlags[field] : 0;
 }
 
 const char *MarketMessageDescriptor::getFieldName(int field) const
@@ -383,8 +398,9 @@ const char *MarketMessageDescriptor::getFieldName(int field) const
         "forWholePlatoon",
         "messageId",
         "replyMessageId",
+        "messageType",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<6) ? fieldNames[field] : nullptr;
 }
 
 int MarketMessageDescriptor::findField(const char *fieldName) const
@@ -396,6 +412,7 @@ int MarketMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='f' && strcmp(fieldName, "forWholePlatoon")==0) return base+2;
     if (fieldName[0]=='m' && strcmp(fieldName, "messageId")==0) return base+3;
     if (fieldName[0]=='r' && strcmp(fieldName, "replyMessageId")==0) return base+4;
+    if (fieldName[0]=='m' && strcmp(fieldName, "messageType")==0) return base+5;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -413,8 +430,9 @@ const char *MarketMessageDescriptor::getFieldTypeString(int field) const
         "bool",
         "int",
         "int",
+        "int",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<6) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **MarketMessageDescriptor::getFieldPropertyNames(int field) const
@@ -486,6 +504,7 @@ std::string MarketMessageDescriptor::getFieldValueAsString(void *object, int fie
         case 2: return bool2string(pp->getForWholePlatoon());
         case 3: return long2string(pp->getMessageId());
         case 4: return long2string(pp->getReplyMessageId());
+        case 5: return long2string(pp->getMessageType());
         default: return "";
     }
 }
@@ -504,6 +523,7 @@ bool MarketMessageDescriptor::setFieldValueAsString(void *object, int field, int
         case 2: pp->setForWholePlatoon(string2bool(value)); return true;
         case 3: pp->setMessageId(string2long(value)); return true;
         case 4: pp->setReplyMessageId(string2long(value)); return true;
+        case 5: pp->setMessageType(string2long(value)); return true;
         default: return false;
     }
 }
