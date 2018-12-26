@@ -1,10 +1,11 @@
 package jasonveins.omnet.managers;
 
+import jasonveins.omnet.managers.constants.Constants;
+
 import javax.annotation.Nonnull;
 import java.net.*;
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 
 public final class ConnectionManager extends Thread {

@@ -1,7 +1,12 @@
 package jasonveins.omnet.agent;
 
+import jasonveins.omnet.agent.utilityFunctions.CGaussianUtility;
+import jasonveins.omnet.agent.utilityFunctions.IUtilityFunction;
 import jasonveins.omnet.constants.CVariableBuilder;
 import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.market.CFirstPrice;
+import jasonveins.omnet.market.CStochasticLocalSearch;
+import jasonveins.omnet.market.IAuctionModule;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
@@ -25,6 +30,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     //PROPERTIES//
     //##########//
 
+    IAuctionModule auctionModule;
+    IUtilityFunction utilityFunction;
 
     //###########//
     //CONSTRUCTOR//
@@ -37,8 +44,33 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
      * @param m_id Identifier for this agent (must match omnet agent id)
      * @param m_vType The type of vehicle as specified in omnet .rou.xml file.
      */
-    public CMarketAgent(@Nonnull IAgentConfiguration<CMarketAgent> p_configuration, @Nonnull AgentManager m_am, int m_id, @Nonnull String m_vType) {
+    public CMarketAgent(@Nonnull IAgentConfiguration<CMarketAgent> p_configuration, @Nonnull AgentManager m_am,
+                        int m_id, @Nonnull String m_vType, String utilityFunction, String auctionModule) {
         super(p_configuration, m_am, m_id, m_vType);
+        switch (utilityFunction){
+            case "distribution":{
+                throw new RuntimeException("CMarketAgent: Unknown utility function type!");
+            }case "khan":{
+                throw new RuntimeException("CMarketAgent: Unknown utility function type!");
+            }case "gaussian":{
+                this.utilityFunction = new CGaussianUtility();
+                break;
+            }default:{
+                throw new RuntimeException("CMarketAgent: Unknown utility function type!");
+            }
+        }
+
+        switch (auctionModule){
+            case "FirstPrice":{
+                this.auctionModule = new CFirstPrice();
+                break;
+            }case "StochasticSearch":{
+                this.auctionModule = new CStochasticLocalSearch();
+                break;
+            }default:{
+                throw new RuntimeException("CMarketAgent: Unknown utility function type!");
+            }
+        }
     }
 
     //#######################//
@@ -60,6 +92,14 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName( name = "send/bid")
     public void sendBid(){
         System.out.println("Called send bid");
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "set/market/parameters")
+    public void setMarketParameters(Number wtp, Number endowment){
+        auctionModule.setEndowment(endowment.intValue());
+        auctionModule.setWtp(wtp.intValue());
+        System.out.println("Received auction parameters: WTP:" + wtp.intValue() + " Money:" + endowment.intValue());
     }
 
     @IAgentActionFilter
@@ -99,8 +139,9 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         @Override
         public final CMarketAgent generatesingle( final Object... p_data )
         {
-            return new CMarketAgent( m_configuration, agentManager,(int)p_data[0],(String)p_data[1]);
-
+            //Inputs: utility function and auction module
+            return new CMarketAgent( m_configuration, agentManager,(int)p_data[0],(String)p_data[1],
+                    (String)p_data[2], (String)p_data[3]);
         }
     }
 

@@ -24,4 +24,5 @@ simple marketManager extends LightJasonManager{
         int platoon_size = default(4);
         double factor = default(0.7);
 		string utilityFunction = default("distribution");
+		string auctionModule = default("FirstPrice");
 }

@@ -4,6 +4,7 @@ public class CMarketStatistics extends IStatistics {
 
     private int platoonSize;
     private String type;
+    private String auctionModule;
 
     public CMarketStatistics(){
     }
@@ -12,9 +13,10 @@ public class CMarketStatistics extends IStatistics {
 
     }
 
-    public void setSimParams(int platoonSize, int iteration, String type){
+    public void setSimParams(int platoonSize, int iteration, String type, String auctionModule){
         this.platoonSize = platoonSize;
         this.type = type;
         this.iteration = iteration;
+        this.auctionModule = auctionModule;
     }
 }

@@ -3,7 +3,7 @@ package jasonveins.omnet.agent;
 import jasonveins.omnet.constants.CVariableBuilder;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
-import jasonveins.omnet.managers.VoteConstants;
+import jasonveins.omnet.managers.constants.VoteConstants;
 import jasonveins.omnet.voting.CContext;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;

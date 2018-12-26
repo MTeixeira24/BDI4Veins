@@ -6,6 +6,7 @@ import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
 import jasonveins.omnet.decision.DecisionDataModel;
 import jasonveins.omnet.decision.InstructionModel;
+import jasonveins.omnet.managers.constants.Constants;
 import jasonveins.omnet.statistics.IStatistics;
 import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;

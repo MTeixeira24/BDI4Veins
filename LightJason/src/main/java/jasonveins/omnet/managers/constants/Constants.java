@@ -1,4 +1,4 @@
-package jasonveins.omnet.managers;
+package jasonveins.omnet.managers.constants;
 
 
 /**

@@ -1,7 +1,6 @@
 package jasonveins.omnet.agent;
 
 import jasonveins.omnet.managers.AgentManager;
-import jasonveins.omnet.managers.Constants;
 import jasonveins.omnet.decision.InstructionModel;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;

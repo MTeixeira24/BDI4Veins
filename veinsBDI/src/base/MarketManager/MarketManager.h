@@ -44,6 +44,14 @@ public:
     /*
      * Increments the retransmission counts
      */
+    /*
+     *
+     */
+    int getEndowment(int agentId){return endowments[agentId];}
+    /*
+     *
+     */
+    int getWTP(int agentId){return wtp[agentId];}
     void incrementRetransmission(){retransmissions++;}
     /**
      * Data structure to hold information from lightjason messages
@@ -80,6 +88,11 @@ private:
      * Store the preferred paths of the agents
      */
     std::vector<std::vector<int>> preferredPaths;
+    /**
+     *
+     */
+    std::vector<int> endowments;
+    std::vector<int> wtp;
 };
 
 #endif /* BASE_MARKETMANAGER_MARKETMANAGER_H_ */

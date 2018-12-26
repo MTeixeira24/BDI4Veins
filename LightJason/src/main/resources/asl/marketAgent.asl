@@ -23,6 +23,15 @@
     generic/print(MyName, ": market agent started")
 .
 
+//Initialize beliefs
++!setup/beliefs(PID, LID, PSPEED, MANAGER, MEMBERS, WTP, ENDOWMENT) : true <-
+    +platoonId(PID);
+    +leaderId(LID);
+    +platoonSpeed(PSPEED);
+    +members(MEMBERS);
+    +isManager(MANAGER);
+    set/market/parameters(WTP, ENDOWMENT)
+.
 //Environmental triggers
 
 +!start/auction() : true <-

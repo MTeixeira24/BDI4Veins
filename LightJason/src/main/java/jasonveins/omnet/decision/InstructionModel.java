@@ -4,7 +4,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static jasonveins.omnet.managers.Constants.*;
+import static jasonveins.omnet.managers.constants.Constants.*;
 
 public class InstructionModel {
     private int size;

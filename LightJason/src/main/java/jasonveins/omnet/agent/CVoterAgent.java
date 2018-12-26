@@ -6,7 +6,7 @@ import jasonveins.omnet.environment.dijkstra.Graph;
 import jasonveins.omnet.environment.dijkstra.Vertex;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CVoterAgentManager;
-import jasonveins.omnet.managers.Constants;
+import jasonveins.omnet.managers.constants.Constants;
 import jasonveins.omnet.voting.CContext;
 import jasonveins.omnet.voting.CUtilityPair;
 import jasonveins.omnet.voting.rule.*;
@@ -22,7 +22,7 @@ import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 import javax.annotation.Nonnull;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
-import jasonveins.omnet.managers.VoteConstants;
+import jasonveins.omnet.managers.constants.VoteConstants;
 
 @IAgentAction
 public class CVoterAgent extends IVehicleAgent<CVoterAgent> {

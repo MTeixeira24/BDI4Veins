@@ -1,8 +1,5 @@
 package jasonveins.omnet.decision;
 
-import java.util.ArrayList;
-import static jasonveins.omnet.managers.Constants.*;
-
 public class ByteData{
     private short valueType;
     private byte[] value;

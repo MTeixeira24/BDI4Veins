@@ -1,4 +1,4 @@
-package jasonveins.omnet.managers;
+package jasonveins.omnet.managers.constants;
 
 public class VoteConstants extends Constants {
     public static final short CONTEXT_SPEED = 0;

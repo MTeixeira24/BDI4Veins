@@ -45,6 +45,18 @@ void MarketManager::initialize(int stage){
             }
             preferredPaths.push_back(speeds);
         }
+
+
+        json j2;
+        std::ifstream jsonFile2 ("marketParameters.json");
+        jsonFile2 >> j2;
+        endowments.reserve(platoonSize + 5);
+        wtp.reserve(platoonSize + 5);
+        for(uint32_t i = 0; i < j2[std::to_string(platoonSize)][std::to_string(iteration)].size(); i++){
+            endowments.push_back(j2[std::to_string(platoonSize)][std::to_string(iteration)][i]["endowment"].get<int>());
+            wtp.push_back(j2[std::to_string(platoonSize)][std::to_string(iteration)][i]["wtp"].get<int>());
+        }
+
         retransmissions = 0;
     }
 }
@@ -94,6 +106,7 @@ void MarketManager::setLightJasonParameters() {
     jp.setSimParameters<int>(buff, par("iteration").intValue());
     jp.setSimParameters<double>(buff, par("factor").doubleValue());
     jp.setSimParameters<std::string>(buff, par("utilityFunction").stdstringValue());
+    jp.setSimParameters<std::string>(buff, par("auctionModule").stdstringValue());
     writeToSocket(buff.getBuffer());
 }
 

@@ -17,6 +17,7 @@ public class CMarketAgentManager extends AgentManager {
     private double factor;
     private String utility;
     private Graph scenarioRoute;
+    private String auctionModule;
     /**
      * Class constructor
      *
@@ -25,6 +26,7 @@ public class CMarketAgentManager extends AgentManager {
      */
     public CMarketAgentManager(String m_aslpath, ConnectionManager m_cm) {
         super(m_aslpath, m_cm);
+        scenarioRoute = new Graph(resourceFolder + "json/routeJoin.json");
     }
 
     /**
@@ -42,7 +44,8 @@ public class CMarketAgentManager extends AgentManager {
             switch(vType){
                 case "vMarket":{
                     if(p_aslFile.equals(resourceFolder+"asl/marketAgent.asl")){
-                        l_ag = new CMarketAgent.CMarketAgentGenerator(p_stream, this).generatesingle(p_id, vType);
+                        l_ag = new CMarketAgent.CMarketAgentGenerator(p_stream, this).generatesingle(p_id, vType,
+                                this.utility, this.auctionModule, this.factor);
                     }else{
                         throw new RuntimeException("Invalid asl file specified for vehicle type " + vType +". Got " + p_aslFile + "expected marketAgent.asl");
                     }
@@ -77,7 +80,8 @@ public class CMarketAgentManager extends AgentManager {
         int iteration = params.getInt();
         double factor = params.getDouble();
         String utility = CByteUtils.extractString(params);
-        getStats().setSimParams(platoonSize,iteration,type);
+        this.auctionModule = CByteUtils.extractString(params);
+        getStats().setSimParams(platoonSize,iteration,type,this.auctionModule);
         this.factor = factor;
         this.utility = utility;
     }
@@ -85,4 +89,6 @@ public class CMarketAgentManager extends AgentManager {
     public CMarketStatistics getStats(){
         return (CMarketStatistics) stats;
     }
+
+    public Graph getRoute(){return this.scenarioRoute;}
 }
