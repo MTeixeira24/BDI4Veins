@@ -4,6 +4,10 @@ import java.util.List;
 
 public class CStochasticLocalSearch extends IAuctionModule {
 
+    public CStochasticLocalSearch(int agentId) {
+        super(agentId);
+    }
+
     @Override
     public int determineWinner() {
         return 0;

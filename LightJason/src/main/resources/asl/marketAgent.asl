@@ -34,21 +34,27 @@
 .
 //Environmental triggers
 
-+!start/auction() : true <-
++!start/auction(CONTEXT) : true <-
     generic/print(MyName, ": starting an auction");
-    send/resources()
+    >>members(MEMBERS);
+    setup/auction(CONTEXT, MEMBERS)
 .
 
 //Message triggers
 
-+!receive/auction() : true <-
++!receive/auction(AUCTIONID, CONTEXT, MANAGERID) : true <-
     generic/print(MyName, ": got notified of an auction");
-    send/bid()
+    setup/bidder(AUCTIONID, CONTEXT, MANAGERID)
 .
 
 +!receive/bid() : true <-
     generic/print(MyName, ": received a bid message");
     store/bid()
+.
+
++!receive/bids(BIDLIST) : true <-
+    generic/print(MyName, ": received a list of <id,bid> tuples");
+    store/bid/list(BIDLIST)
 .
 
 +!receive/round/result() : true <-

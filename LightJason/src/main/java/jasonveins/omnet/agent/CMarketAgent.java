@@ -3,7 +3,9 @@ package jasonveins.omnet.agent;
 import jasonveins.omnet.agent.utilityFunctions.CGaussianUtility;
 import jasonveins.omnet.agent.utilityFunctions.IUtilityFunction;
 import jasonveins.omnet.constants.CVariableBuilder;
+import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.managers.constants.MarketConstants;
 import jasonveins.omnet.market.CFirstPrice;
 import jasonveins.omnet.market.CStochasticLocalSearch;
 import jasonveins.omnet.market.IAuctionModule;
@@ -16,6 +18,7 @@ import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -62,10 +65,10 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
 
         switch (auctionModule){
             case "FirstPrice":{
-                this.auctionModule = new CFirstPrice();
+                this.auctionModule = new CFirstPrice(this.id);
                 break;
             }case "StochasticSearch":{
-                this.auctionModule = new CStochasticLocalSearch();
+                this.auctionModule = new CStochasticLocalSearch(this.id);
                 break;
             }default:{
                 throw new RuntimeException("CMarketAgent: Unknown utility function type!");
@@ -76,16 +79,30 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     //#######################//
     //AGENT ACTION DEFINITION//
     //#######################//
+
     @IAgentActionFilter
     @IAgentActionName( name = "setup/auction")
-    public void setupAuction(){
-        System.out.println("Called setup Action");
+    public void setupAuction(Number auctionContext, List<Integer> members){
+        System.out.println("Called send resources for context " + auctionContext.intValue() +
+                " with member list: " + members);
+        InstructionModel iOb = auctionModule.setupAuction(auctionContext.intValue(), members);
+        auctionModule.setManagerId(this.id);
+        //Cast the managers bid
+        auctionModule.addBid(this.id, auctionModule.castBid(MarketConstants.AUCTION_START));
+        //Send the instruction over to the controller
+        agentManager.addInstruction(iOb);
     }
 
     @IAgentActionFilter
-    @IAgentActionName( name = "send/resources")
-    public void sendResources(){
-        System.out.println("Called send resources");
+    @IAgentActionName( name = "setup/bidder")
+    public void setupBidder(Number auctionId, Number context, Number managerId){
+        System.out.println("Called to setup as a bidder for auctionId: " +
+                auctionId.intValue() + " with context: " + context.intValue() +
+                " for manager with id: " + managerId.intValue());
+
+        auctionModule.setManagerId(managerId.intValue());
+        auctionModule.setAuctionId(auctionId.intValue());
+        agentManager.addInstruction(auctionModule.createBidInstruction(MarketConstants.AUCTION_START));
     }
 
     @IAgentActionFilter
@@ -106,6 +123,16 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName( name = "store/bid")
     public void storeBid(){
         System.out.println("Called store bid");
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "store/bid/list")
+    public void storeBidList(List<Integer> idBidTuples){
+        System.out.println("Storing a set of bids: " + idBidTuples);
+        for(int i = 0; i < idBidTuples.size(); i+=2)
+            auctionModule.addBid(idBidTuples.get(i), idBidTuples.get(i+1));
+
+        agentManager.addInstruction(auctionModule.createWinnerInstruction());
     }
 
     //###############//

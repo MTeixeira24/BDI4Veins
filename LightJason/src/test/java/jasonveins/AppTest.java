@@ -7,6 +7,7 @@ import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.utilityFunctions.CGaussianUtility;
 import jasonveins.omnet.managers.CMarketAgentManager;
 import jasonveins.omnet.managers.CRouterManager;
+import jasonveins.omnet.managers.constants.MarketConstants;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -113,11 +114,44 @@ public class AppTest
         }
     }
 
+    public void testBid(){
+        String l_aslpath = "src/main/resources/asl/marketAgent.asl";
+        CMarketAgent agent;
+        try
+                (
+                        final FileInputStream l_stream = new FileInputStream( l_aslpath )
+                )
+        {
+            agent = new CMarketAgent.CMarketAgentGenerator( l_stream,
+                    new CMarketAgentManager("marketAgent.asl", null) )
+                    .generatesingle(0, "vMarket", "gaussian","FirstPrice");
+        }
+        catch ( final Exception l_exception ) {
+            l_exception.printStackTrace();
+            fail();
+            return;
+        }
+
+        try {
+            agent.call();
+            testSetBeliefs(agent);
+            agent.call();
+            testReceiveAlertOfAuction(agent);
+            agent.call();
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail();
+        }
+    }
+
     private void testReceiveAlertOfAuction(CMarketAgent agent){
         final ITrigger l_trigger = CTrigger.from(
                 ITrigger.EType.ADDGOAL,
                 CLiteral.from(
-                        "receive/auction"
+                        "receive/auction",
+                        CRawTerm.from(2),
+                        CRawTerm.from(MarketConstants.CONTEXT_SPEED),
+                        CRawTerm.from(1)
                 )
         );
         agent.trigger( l_trigger );
@@ -127,7 +161,8 @@ public class AppTest
         final ITrigger l_trigger = CTrigger.from(
                 ITrigger.EType.ADDGOAL,
                 CLiteral.from(
-                        "start/auction"
+                        "start/auction",
+                        CRawTerm.from(MarketConstants.CONTEXT_SPEED)
                 )
         );
         agent.trigger( l_trigger );

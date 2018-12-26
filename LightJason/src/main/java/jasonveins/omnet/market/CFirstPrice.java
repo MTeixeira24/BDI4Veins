@@ -6,6 +6,10 @@ public class CFirstPrice extends IAuctionModule {
 
     private int highestAmount = -1;
 
+    public CFirstPrice(int agentId) {
+        super(agentId);
+    }
+
     @Override
     public void addBid(int agentId, int amount){
         bidSet.put(agentId, amount);
