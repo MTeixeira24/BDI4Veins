@@ -14,7 +14,8 @@ public class CStochasticLocalSearch extends IAuctionModule {
     }
 
     @Override
-    public List<Integer> determineWinnerSet() {
-        return null;
+    public boolean endOfAuction() {
+        return false;
     }
+
 }

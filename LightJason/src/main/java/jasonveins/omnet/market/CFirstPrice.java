@@ -20,12 +20,13 @@ public class CFirstPrice extends IAuctionModule {
     }
 
     @Override
+    public boolean endOfAuction(){
+        return (getAuctionIteration() == 4) || (withdrawCount >= getBidders().size() - 1);
+    }
+
+    @Override
     public int determineWinner() {
         return winner;
     }
 
-    @Override
-    public List<Integer> determineWinnerSet() {
-        return null;
-    }
 }

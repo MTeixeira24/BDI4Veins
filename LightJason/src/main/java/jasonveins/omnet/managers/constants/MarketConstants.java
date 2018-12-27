@@ -14,4 +14,6 @@ public class MarketConstants extends Constants {
     public static final short SEND_AUCTION_RESULTS = 10;
     public static final short NOTIFY_START_AUCTION = 12;
     public static final short HANDLE_END_OF_AUCTION = 13;
+    public static final short SEND_PAY = 14;
+    public static final short DISTRIBUTE_PAY = 15;
 }

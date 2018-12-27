@@ -11,15 +11,17 @@ public abstract class IAuctionModule {
     private int endowment;
     private int wtp;
     private LinkedList<Integer> bidders;
-    private ArrayList<Integer> winnerSet;
     HashMap<Integer, Integer> bidSet;
     protected int winner;
     private int auctionId;
     private int auctionIteration;
     private Random rd;
     private int currentBid;
+    int withdrawCount;
+    private int context;
+    private int wtpSum;
 
-    public IAuctionModule(int agentId, int _endowment, int _wtp, int _auctionId){
+    IAuctionModule(int agentId, int _endowment, int _wtp, int _auctionId){
         rd = new Random();
         endowment = _endowment;
         wtp = _wtp;
@@ -28,7 +30,7 @@ public abstract class IAuctionModule {
         this.agentId = agentId;
     }
 
-    public IAuctionModule(int agentId){
+    IAuctionModule(int agentId){
         this(agentId, 100, 80, 0);
     }
 
@@ -37,7 +39,19 @@ public abstract class IAuctionModule {
         System.out.println("Bidding with a price of " + value);
         InstructionModel iOb = new InstructionModel(agentId, MarketConstants.SUBMIT_BID);
         iOb.pushInt(auctionId);
-        iOb.pushShort(MarketConstants.CONTEXT_SPEED);
+        iOb.pushShort((short)context);
+        iOb.pushInt(value);
+        iOb.pushInt(managerId);
+        return iOb;
+    }
+
+    public InstructionModel createPayInstruction(){
+        int value = currentBid;
+        endowment -= currentBid;
+        System.out.println("Paying a price of " + value);
+        InstructionModel iOb = new InstructionModel(agentId, MarketConstants.SEND_PAY);
+        iOb.pushInt(auctionId);
+        iOb.pushShort((short)context);
         iOb.pushInt(value);
         iOb.pushInt(managerId);
         return iOb;
@@ -49,7 +63,7 @@ public abstract class IAuctionModule {
             case MarketConstants.AUCTION_START:{
                 //Pull a random bid from a normal distribution of mean wtp/2 and variance 10
                 bid = (int)Math.floor(
-                        rd.nextGaussian()*10 + (wtp/2)
+                        rd.nextGaussian()*10 + ((double)wtp/2)
                 );
                 break;
             }
@@ -57,7 +71,7 @@ public abstract class IAuctionModule {
             case MarketConstants.DECOMMITTED:{
                 //Increment the bid by steps of 25% the wtp, until a value equal to wpt is reached
                 if(bid == wtp) return -1;
-                bid = currentBid + (int)Math.floor(wtp/4);
+                bid = currentBid + (int)Math.floor((double)wtp/4);
                 if(bid > wtp) bid = wtp;
                 break;
             }
@@ -71,9 +85,10 @@ public abstract class IAuctionModule {
         return bid;
     }
     public abstract int determineWinner();
-    public abstract List<Integer> determineWinnerSet();
+    public abstract boolean endOfAuction();
 
     public InstructionModel setupAuction(int context, List<Integer> participants){
+        withdrawCount = 0;
         switch (context){
             case MarketConstants.CONTEXT_SPEED:{
                 bidders = new LinkedList<>(participants);
@@ -94,10 +109,14 @@ public abstract class IAuctionModule {
     public InstructionModel createWinnerInstruction(){
         InstructionModel iOb = new InstructionModel(agentId, MarketConstants.SEND_AUCTION_RESULTS);
         iOb.pushInt(auctionId);
-        auctionIteration++;
         iOb.pushInt(auctionIteration);
         iOb.pushInt(determineWinner());
         return iOb;
+    }
+
+    public void startNewIteration(){
+        auctionIteration++;
+        withdrawCount = 0;
     }
 
     /*
@@ -105,7 +124,7 @@ public abstract class IAuctionModule {
      */
 
     public int getWinner(){return winner;}
-    public List<Integer> getWinnerSet(){return winnerSet;}
+
     public int getEndowment() {
         return endowment;
     }
@@ -134,7 +153,7 @@ public abstract class IAuctionModule {
         this.bidders = bidders;
     }
 
-    public double getAuctionId() {
+    public int getAuctionId() {
         return auctionId;
     }
 
@@ -153,4 +172,22 @@ public abstract class IAuctionModule {
     public void setManagerId(int managerId) {
         this.managerId = managerId;
     }
+
+    public int getContext() {
+        return context;
+    }
+
+    public void setContext(int context) {
+        this.context = context;
+    }
+
+    public void setWtpSum(List<Integer> wtps){
+        wtpSum = 0;
+        wtps.forEach( j -> wtpSum += j);
+    }
+    public int getWtpSum(){
+        return wtpSum;
+    }
+
+    public int getCurrentBid(){return  currentBid;}
 }

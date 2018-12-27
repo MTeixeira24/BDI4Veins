@@ -201,6 +201,8 @@ public class AppTest
     private void testSetBeliefs(CMarketAgent agent){
         ArrayList<Integer> members =  new ArrayList<>();
         IntStream.range(0,5).forEach(i -> members.add(i,i));
+        ArrayList<Integer> route =  new ArrayList<>();
+        route.add(2); route.add(4); route.add(7); route.add(8);
         final ITrigger l_trigger = CTrigger.from(
                 ITrigger.EType.ADDGOAL,
                 CLiteral.from(
@@ -211,7 +213,9 @@ public class AppTest
                         CRawTerm.from(0),
                         CRawTerm.from(members),
                         CRawTerm.from(75),
-                        CRawTerm.from(200)
+                        CRawTerm.from(200),
+                        CRawTerm.from(route),
+                        CRawTerm.from(100)
                 )
         );
         agent.trigger( l_trigger );

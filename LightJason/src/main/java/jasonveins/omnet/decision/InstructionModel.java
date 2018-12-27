@@ -33,6 +33,10 @@ public class InstructionModel {
         return agentAction;
     }
 
+    public void setAgentAction(int _agentAction) {
+        agentAction = _agentAction;
+    }
+
     public void pushChar(char _value){
         short type = VALUE_CHAR;
         values.add(new ByteData(type, ByteBuffer.allocate(1).putChar(_value).array()));

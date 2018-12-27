@@ -12,4 +12,7 @@ public interface IUtilityFunction {
 
     void setPreferredSpeed(int speed);
     void setPreferredRoute(List<Integer> route);
+
+    int getPreferredSpeed();
+    List<Integer> getPreferredRoute();
 }

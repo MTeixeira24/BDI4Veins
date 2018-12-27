@@ -69,4 +69,14 @@ public class CGaussianUtility implements IUtilityFunction {
     public void setPreferredRoute(List<Integer> route) {
         preferredRoute = route;
     }
+
+    @Override
+    public int getPreferredSpeed() {
+        return preferredSpeed;
+    }
+
+    @Override
+    public List<Integer> getPreferredRoute() {
+        return preferredRoute;
+    }
 }

@@ -24,13 +24,15 @@
 .
 
 //Initialize beliefs
-+!setup/beliefs(PID, LID, PSPEED, MANAGER, MEMBERS, WTP, ENDOWMENT) : true <-
++!setup/beliefs(PID, LID, PSPEED, MANAGER, MEMBERS, WTP, ENDOWMENT, PREFERREDSPEED, PREFERREDNODES) : true <-
     +platoonId(PID);
     +leaderId(LID);
     +platoonSpeed(PSPEED);
     +members(MEMBERS);
     +isManager(MANAGER);
-    set/market/parameters(WTP, ENDOWMENT)
+    +preferredPath(PREFERREDNODES);
+    +preferredSpeed(PREFERREDSPEED);
+    set/market/parameters(WTP, ENDOWMENT, PREFERREDSPEED, PREFERREDNODES)
 .
 //Environmental triggers
 
@@ -57,10 +59,25 @@
     store/bid/list(BIDLIST)
 .
 
-+!receive/round/result() : true <-
-    generic/print(MyName, ": received results of round")
++!receive/round/result(STATUS) : true <-
+    generic/print(MyName, ": received results of round");
+    send/bid(STATUS)
 .
 
-+!receive/result() : true <-
-    generic/print(MyName, ": received auction results")
++!receive/result(STATUS) : true 
+    <- STATUS == 1; generic/print(MyName; "Won the auction"); >>preferredPath(P); >>preferredSpeed(S); send/pay(P,S)
+    <- STATUS != 1; generic/print(MyName; "Lost the auction")
+.
+
++!receive/pay(PAY, PROPERTY) : true <-
+    generic/print(MyName, "Got pay");
+    finalize/auction(PAY, PROPERTY)
+.
+
++!distribute/pay(PAY, PROPERTY) : true <-
+    distribute/payment(PAY, PROPERTY)
+.
+
++!receive/wtp(WTPLIST) : true <-
+    store/wtp(WPTLIST)
 .

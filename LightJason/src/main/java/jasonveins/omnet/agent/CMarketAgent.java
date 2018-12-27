@@ -5,6 +5,7 @@ import jasonveins.omnet.agent.utilityFunctions.IUtilityFunction;
 import jasonveins.omnet.constants.CVariableBuilder;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.managers.CMarketAgentManager;
 import jasonveins.omnet.managers.constants.MarketConstants;
 import jasonveins.omnet.market.CFirstPrice;
 import jasonveins.omnet.market.CStochasticLocalSearch;
@@ -33,8 +34,9 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     //PROPERTIES//
     //##########//
 
-    IAuctionModule auctionModule;
-    IUtilityFunction utilityFunction;
+    private IAuctionModule auctionModule;
+    private IUtilityFunction utilityFunction;
+    private CMarketAgentManager marketManager;
 
     //###########//
     //CONSTRUCTOR//
@@ -74,6 +76,31 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
                 throw new RuntimeException("CMarketAgent: Unknown utility function type!");
             }
         }
+        marketManager = (CMarketAgentManager)agentManager;
+    }
+    //###############//
+    //UTILITY METHODS//
+    //###############//
+
+    double amortizedUtilitySpeed(int pay, int result){
+        double satisfaction = utilityFunction.computeUtilitySpeed(result);
+        return amortizeUtility(pay, satisfaction);
+    }
+
+    double amortizedUtilityRoute(int pay, List<Integer> result){
+        double satisfaction = utilityFunction.computeUtilityRoute(result, ((CMarketAgentManager)agentManager).getRoute());
+        return amortizeUtility(pay, satisfaction);
+    }
+
+    double amortizeUtility(int pay, double utility){
+        double dissatisfaction = 1 - utility;
+        return utility + sfunction(pay)*dissatisfaction;
+    }
+
+    double sfunction(int pay){
+        double x = (double)pay/(double)auctionModule.getWtp();
+        if(x > 1) x = 1;
+        return x;
     }
 
     //#######################//
@@ -87,6 +114,7 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
                 " with member list: " + members);
         InstructionModel iOb = auctionModule.setupAuction(auctionContext.intValue(), members);
         auctionModule.setManagerId(this.id);
+        auctionModule.setContext(auctionContext.intValue());
         //Cast the managers bid
         auctionModule.addBid(this.id, auctionModule.castBid(MarketConstants.AUCTION_START));
         //Send the instruction over to the controller
@@ -102,20 +130,31 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
 
         auctionModule.setManagerId(managerId.intValue());
         auctionModule.setAuctionId(auctionId.intValue());
+        auctionModule.setContext(context.intValue());
         agentManager.addInstruction(auctionModule.createBidInstruction(MarketConstants.AUCTION_START));
     }
 
     @IAgentActionFilter
+    @IAgentActionName( name = "store/wtp")
+    public void storeWtp(List<Integer> wtpList){
+        auctionModule.setWtpSum(wtpList);
+    }
+
+    @IAgentActionFilter
     @IAgentActionName( name = "send/bid")
-    public void sendBid(){
+    public void sendBid(Number auctionStatus){
         System.out.println("Called send bid");
+        //Send a bid based on the previous result
+        agentManager.addInstruction(auctionModule.createBidInstruction(auctionStatus.intValue()));
     }
 
     @IAgentActionFilter
     @IAgentActionName( name = "set/market/parameters")
-    public void setMarketParameters(Number wtp, Number endowment){
+    public void setMarketParameters(Number wtp, Number endowment, Number preferredSpeed, List<Integer> preferredRoute){
         auctionModule.setEndowment(endowment.intValue());
         auctionModule.setWtp(wtp.intValue());
+        utilityFunction.setPreferredRoute(preferredRoute);
+        utilityFunction.setPreferredSpeed(preferredSpeed.intValue());
         System.out.println("Received auction parameters: WTP:" + wtp.intValue() + " Money:" + endowment.intValue());
     }
 
@@ -129,12 +168,108 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName( name = "store/bid/list")
     public void storeBidList(List<Integer> idBidTuples){
         System.out.println("Storing a set of bids: " + idBidTuples);
+        //Add all the bids
         for(int i = 0; i < idBidTuples.size(); i+=2)
             auctionModule.addBid(idBidTuples.get(i), idBidTuples.get(i+1));
+        //This trigger is called with all possible bids, determine winner
+        InstructionModel iOb = auctionModule.createWinnerInstruction();
+        //Are all requirements met for the end of auction?
+        if(auctionModule.endOfAuction()){
+            iOb.setAgentAction(MarketConstants.HANDLE_END_OF_AUCTION);
+            //If the manager is the one that jump straight to payment distribution
+            if(this.id == auctionModule.getWinner()){
+                iOb.pushInt(auctionModule.getCurrentBid());
+                iOb.pushInt(auctionModule.getWtpSum());
+                iOb.pushInt(auctionModule.getContext());
+                switch (auctionModule.getContext()){
+                    case MarketConstants.CONTEXT_SPEED:
+                        iOb.pushInt(utilityFunction.getPreferredSpeed());
+                        break;
+                    case MarketConstants.CONTEXT_PATH:
+                        iOb.pushIntArray(utilityFunction.getPreferredRoute());
+                        break;
+                    default:
+                        break;
+                }
+                auctionModule.setEndowment(auctionModule.getEndowment() - auctionModule.getCurrentBid());
 
-        agentManager.addInstruction(auctionModule.createWinnerInstruction());
+            }
+        }else{
+            //Start a new iteration and add the managers bid
+            auctionModule.startNewIteration();
+            int auctionStatus = auctionModule.getWinner() == this.id ? MarketConstants.CONFIRMED : MarketConstants.REJECTED;
+            auctionModule.addBid(this.id, auctionModule.castBid(auctionStatus ));
+        }
+        agentManager.addInstruction(iOb);
     }
 
+    @IAgentActionFilter
+    @IAgentActionName( name = "send/pay")
+    public void sendPay(List<Integer> preferredPath, Number preferredSpeed){
+        InstructionModel iOb = auctionModule.createPayInstruction();
+        switch (auctionModule.getContext()){
+            case MarketConstants.CONTEXT_SPEED:{
+                iOb.pushInt(preferredSpeed.intValue());
+                break;
+            }
+            case MarketConstants.CONTEXT_PATH:{
+                iOb.pushIntArray(preferredPath);
+                break;
+            }
+            default:
+                throw new RuntimeException("sendPay: Unknown context");
+        }
+        agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "distribute/payment")
+    public void distributePayment(Number payment, Object property){
+        InstructionModel iOb = new InstructionModel(this.id, MarketConstants.DISTRIBUTE_PAY);
+        iOb.pushInt(auctionModule.getAuctionId());
+        iOb.pushInt(auctionModule.getAuctionIteration());
+        iOb.pushInt(auctionModule.getWinner());
+        iOb.pushInt(payment.intValue());
+        iOb.pushInt(auctionModule.getWtpSum());
+        switch (auctionModule.getContext()){
+            case MarketConstants.CONTEXT_SPEED:{
+                Integer speed = (Integer)property;
+                iOb.pushInt(speed);
+                break;
+            }
+            case MarketConstants.CONTEXT_PATH:{
+                List<Integer> route = (List<Integer>)property;
+                iOb.pushIntArray(route);
+                break;
+            }
+            default:
+                throw new RuntimeException("sendPay: Unknown context");
+        }
+        agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName(name = "finalize/auction")
+    public void finalizeAuction(int payment, Object property){
+        auctionModule.setEndowment(payment+auctionModule.getEndowment());
+        double util;
+        switch (auctionModule.getContext()){
+            case MarketConstants.CONTEXT_SPEED:{
+                Integer speed = (Integer)property;
+                util = amortizedUtilitySpeed(payment, speed);
+                break;
+            }
+            case MarketConstants.CONTEXT_PATH:{
+                List<Integer> route = (List<Integer>)property;
+                util = amortizedUtilityRoute(payment, route);
+                break;
+            }
+            default:
+                throw new RuntimeException("sendPay: Unknown context");
+        }
+        System.out.println("Total utility: " + util);
+        //TODO: Update statistics
+    }
     //###############//
     //AGENT GENERATOR//
     //###############//
