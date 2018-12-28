@@ -65,8 +65,8 @@
 .
 
 +!receive/result(STATUS) : true 
-    <- STATUS == 1; generic/print(MyName; "Won the auction"); >>preferredPath(P); >>preferredSpeed(S); send/pay(P,S)
-    <- STATUS != 1; generic/print(MyName; "Lost the auction")
+    <- STATUS == 1; generic/print(MyName, "Won the auction"); >>preferredPath(P); >>preferredSpeed(S); send/pay(P,S)
+    <- STATUS != 1; generic/print(MyName, "Lost the auction")
 .
 
 +!receive/pay(PAY, PROPERTY) : true <-

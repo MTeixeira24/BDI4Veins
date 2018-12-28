@@ -82,22 +82,22 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     //UTILITY METHODS//
     //###############//
 
-    double amortizedUtilitySpeed(int pay, int result){
+    private double amortizedUtilitySpeed(int pay, int result){
         double satisfaction = utilityFunction.computeUtilitySpeed(result);
         return amortizeUtility(pay, satisfaction);
     }
 
-    double amortizedUtilityRoute(int pay, List<Integer> result){
+    private double amortizedUtilityRoute(int pay, List<Integer> result){
         double satisfaction = utilityFunction.computeUtilityRoute(result, ((CMarketAgentManager)agentManager).getRoute());
         return amortizeUtility(pay, satisfaction);
     }
 
-    double amortizeUtility(int pay, double utility){
+    private double amortizeUtility(int pay, double utility){
         double dissatisfaction = 1 - utility;
         return utility + sfunction(pay)*dissatisfaction;
     }
 
-    double sfunction(int pay){
+    private double sfunction(int pay){
         double x = (double)pay/(double)auctionModule.getWtp();
         if(x > 1) x = 1;
         return x;
@@ -106,6 +106,18 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     //#######################//
     //AGENT ACTION DEFINITION//
     //#######################//
+
+    //#-------Setups----------#
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "set/market/parameters")
+    public void setMarketParameters(Number wtp, Number endowment, Number preferredSpeed, List<Integer> preferredRoute){
+        auctionModule.setEndowment(endowment.intValue());
+        auctionModule.setWtp(wtp.intValue());
+        utilityFunction.setPreferredRoute(preferredRoute);
+        utilityFunction.setPreferredSpeed(preferredSpeed.intValue());
+        System.out.println("Received auction parameters: WTP:" + wtp.intValue() + " Money:" + endowment.intValue());
+    }
 
     @IAgentActionFilter
     @IAgentActionName( name = "setup/auction")
@@ -140,22 +152,14 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         auctionModule.setWtpSum(wtpList);
     }
 
+    //#-------Bid process----------#
+
     @IAgentActionFilter
     @IAgentActionName( name = "send/bid")
     public void sendBid(Number auctionStatus){
         System.out.println("Called send bid");
         //Send a bid based on the previous result
         agentManager.addInstruction(auctionModule.createBidInstruction(auctionStatus.intValue()));
-    }
-
-    @IAgentActionFilter
-    @IAgentActionName( name = "set/market/parameters")
-    public void setMarketParameters(Number wtp, Number endowment, Number preferredSpeed, List<Integer> preferredRoute){
-        auctionModule.setEndowment(endowment.intValue());
-        auctionModule.setWtp(wtp.intValue());
-        utilityFunction.setPreferredRoute(preferredRoute);
-        utilityFunction.setPreferredSpeed(preferredSpeed.intValue());
-        System.out.println("Received auction parameters: WTP:" + wtp.intValue() + " Money:" + endowment.intValue());
     }
 
     @IAgentActionFilter
@@ -192,7 +196,6 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
                         break;
                 }
                 auctionModule.setEndowment(auctionModule.getEndowment() - auctionModule.getCurrentBid());
-
             }
         }else{
             //Start a new iteration and add the managers bid
@@ -245,6 +248,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             default:
                 throw new RuntimeException("sendPay: Unknown context");
         }
+        finalizeAuction( payment.intValue() * (auctionModule.getWtp() / auctionModule.getWtpSum()),
+                property);
         agentManager.addInstruction(iOb);
     }
 

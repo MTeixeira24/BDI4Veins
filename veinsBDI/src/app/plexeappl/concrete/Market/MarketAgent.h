@@ -72,6 +72,24 @@ protected:
      * Seconds to wait for ack messages
      */
     const double ackTime = 0.2;
+public:
+    /*
+     * Methods to send messages
+     */
+    void sendBid(int auctionId, int context, int bidValue, int managerId);
+
+    void sendAuctionResults(int auctionId, int auctionIteration, int winnerId);
+
+    void sendNotificationOfAuction(int auctionId, int context);
+
+    void handleEndOfAuction(int auctionId, int auctionIteration, int winnerId);
+    void handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context);
+
+    void sendPay(int auctionId, int context, int pay, int managerId, int speed);
+    void sendPay(int auctionId, int context, int pay, int managerId, std::vector<int> route);
+
+    void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed);
+    void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route);
 private:
     /*
      * Manage the messages that are sent

@@ -87,6 +87,97 @@ void MarketManager::parseResponse(uint32_t msgLength) {
             rbf >> jm.agentId;
             rbf >> jm.agentAction;
             switch (jm.agentAction){
+            case SUBMIT_BID:{
+                assertType(rbf, VALUE_INT);
+                int auctionId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int context = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int bidValue = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int managerId = extractData<int>(rbf);
+                ((MarketAgent*)(vehicles[jm.agentId]))->sendBid(auctionId,context,bidValue,managerId);
+                break;
+            }
+            case SEND_AUCTION_RESULTS:{
+                assertType(rbf, VALUE_INT);
+                int auctionId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int auctionIteration = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int winnerId = extractData<int>(rbf);
+                ((MarketAgent*)(vehicles[jm.agentId]))->sendAuctionResults(auctionId, auctionIteration, winnerId);
+                break;
+            }
+            case NOTIFY_START_AUCTION:{
+                assertType(rbf, VALUE_INT);
+                int auctionId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int context = extractData<int>(rbf);
+                ((MarketAgent*)(vehicles[jm.agentId]))->sendNotificationOfAuction(auctionId, context);
+                break;
+            }
+            case HANDLE_END_OF_AUCTION:{
+                assertType(rbf, VALUE_INT);
+                int auctionId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int auctionIteration = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                uint32_t winnerId = extractData<int>(rbf);
+                if (winnerId == jm.agentId){
+                    assertType(rbf, VALUE_INT);
+                    int pay = extractData<int>(rbf);
+                    assertType(rbf, VALUE_INT);
+                    int wtpSum = extractData<int>(rbf);
+                    assertType(rbf, VALUE_INT);
+                    int context = extractData<int>(rbf);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->handleEndOfAuction(auctionId, auctionIteration, winnerId,
+                            pay, wtpSum, context);
+                }else{
+                    ((MarketAgent*)(vehicles[jm.agentId]))->handleEndOfAuction(auctionId, auctionIteration, winnerId);
+                }
+                break;
+            }
+            case SEND_PAY:{
+                assertType(rbf, VALUE_INT);
+                int auctionId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int context = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int pay = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int managerId = extractData<int>(rbf);
+                rbf >> jm.type;
+                if(jm.type == VALUE_ARRAY){
+                    std::vector<int> route = parseArrayMessage(rbf);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->sendPay(auctionId, context, pay, managerId, route);
+                }else if(jm.type == VALUE_INT){
+                    int speed = extractData<int>(rbf);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->sendPay(auctionId, context, pay, managerId, speed);
+                }
+                break;
+            }
+            case DISTRIBUTE_PAY:{
+                assertType(rbf, VALUE_INT);
+                int auctionId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int auctionIteration = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int winnerId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int payment = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int wtpSum = extractData<int>(rbf);
+                rbf >> jm.type;
+                if(jm.type == VALUE_ARRAY){
+                    std::vector<int> route = parseArrayMessage(rbf);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->distributePay(auctionId, auctionIteration, winnerId, payment, wtpSum, route);
+                }else if(jm.type == VALUE_INT){
+                    int speed = extractData<int>(rbf);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->distributePay(auctionId, auctionIteration, winnerId, payment, wtpSum, speed);
+                }
+                break;
+            }
             default:
                 break;
             }
@@ -110,3 +201,8 @@ void MarketManager::setLightJasonParameters() {
     writeToSocket(buff.getBuffer());
 }
 
+void MarketManager::assertType(LightJasonBuffer& buf, int value){
+    uint16_t type;
+    buf >> type;
+    ASSERT(type == value);
+}

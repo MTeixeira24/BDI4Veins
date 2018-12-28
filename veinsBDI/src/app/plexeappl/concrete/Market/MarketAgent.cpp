@@ -84,6 +84,46 @@ void MarketAgent::handleLowerMsg(cMessage* msg){
     }
 }
 
+/*======================
+ * Send message methods
+ ======================*/
+
+void MarketAgent::sendBid(int auctionId, int context, int bidValue, int managerId){
+
+}
+
+void MarketAgent::sendAuctionResults(int auctionId, int auctionIteration, int winnerId){
+
+}
+
+
+void MarketAgent::sendNotificationOfAuction(int auctionId, int context){
+
+}
+
+
+void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId){
+
+}
+void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context){
+
+}
+
+void MarketAgent::sendPay(int auctionId, int context, int pay, int managerId, int speed){
+
+}
+void MarketAgent::sendPay(int auctionId, int context, int pay, int managerId, std::vector<int> route){
+
+}
+
+void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed){
+
+}
+void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route){
+
+}
+
+
 void MarketAgent::delegateNegotiationMessage(NegotiationMessage* nm){
     if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
         if(isReceiver(msg)){

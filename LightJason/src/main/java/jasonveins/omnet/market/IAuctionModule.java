@@ -39,7 +39,7 @@ public abstract class IAuctionModule {
         System.out.println("Bidding with a price of " + value);
         InstructionModel iOb = new InstructionModel(agentId, MarketConstants.SUBMIT_BID);
         iOb.pushInt(auctionId);
-        iOb.pushShort((short)context);
+        iOb.pushInt(context);
         iOb.pushInt(value);
         iOb.pushInt(managerId);
         return iOb;
@@ -51,7 +51,7 @@ public abstract class IAuctionModule {
         System.out.println("Paying a price of " + value);
         InstructionModel iOb = new InstructionModel(agentId, MarketConstants.SEND_PAY);
         iOb.pushInt(auctionId);
-        iOb.pushShort((short)context);
+        iOb.pushInt(context);
         iOb.pushInt(value);
         iOb.pushInt(managerId);
         return iOb;

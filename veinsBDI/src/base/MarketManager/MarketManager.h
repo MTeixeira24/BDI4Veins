@@ -17,6 +17,8 @@
 #define BASE_MARKETMANAGER_MARKETMANAGER_H_
 
 #include "../manager/LightJasonManager.h"
+#include "../../app/plexeappl/concrete/Market/MarketAgent.h"
+#include "../manager/constants/MarketConstants.h"
 
 #include <unistd.h>
 #include "../../utilities/json.hpp"
@@ -70,6 +72,15 @@ protected:
      * Define the parameters to send to the java agent manager
      */
     virtual void setLightJasonParameters() override;
+
+    void assertType(LightJasonBuffer& buf, int value);
+
+    template <class T>
+    T extractData(LightJasonBuffer& buf){
+        T value;
+        buf >> value;
+        return value;
+    }
 private:
     /**
      * Timestamps

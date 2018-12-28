@@ -13,6 +13,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.apache.commons.lang.math.IntRange;
 import org.lightjason.agentspeak.agent.IAgent;
+import org.lightjason.agentspeak.agent.IBaseAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
@@ -53,6 +54,30 @@ public class AppTest
     /**
      * Rigourous Test :-)
      */
+
+    private ArrayList<CMarketAgent> createAgentList(){
+        String l_aslpath = "src/main/resources/asl/marketAgent.asl";
+        ArrayList<CMarketAgent> agents = new ArrayList<>(5);
+        CMarketAgentManager am = new CMarketAgentManager("marketAgent.asl", null);
+        for(int i = 0; i < 5; i++){
+            try(
+                final FileInputStream l_stream = new FileInputStream( l_aslpath )
+            ){
+                agents.add(new CMarketAgent.CMarketAgentGenerator( l_stream,am)
+                        .generatesingle(i, "vMarket", "gaussian","FirstPrice"));
+
+            }catch ( final Exception l_exception ) {
+                l_exception.printStackTrace();
+                fail();
+            }
+        }
+        return agents;
+    }
+
+    private void setAgentsBeliefs(ArrayList<CMarketAgent> agents){
+
+    }
+
     public void testApp() {
     }
 
@@ -67,80 +92,19 @@ public class AppTest
         assertTrue(value3 > 0.26 && value3 < 0.27);
     }
 
-    public void testMarketActions(){
-        String l_aslpath = "src/main/resources/asl/marketAgent.asl";
-        //Set<IAgent<?>> l_agents;
-        CMarketAgent agent;
-        try
-                (
-                        final FileInputStream l_stream = new FileInputStream( l_aslpath )
-                )
-        {
-            agent = new CMarketAgent.CMarketAgentGenerator( l_stream,
-                    new CMarketAgentManager("marketAgent.asl", null) )
-                    .generatesingle(0, "vMarket", "gaussian","FirstPrice");
-            final int l_agentNumber = 1;
-            /*l_agents =
-                    new CMarketAgent.CMarketAgentGenerator( l_stream,
-                            new CMarketAgentManager("marketAgent.asl", null) )
-                            .generatemultiple( l_agentNumber, 0, "vMarket", "gaussian","FirstPrice")
-                            .collect( Collectors.toSet()
-                            );*/
-        }
-        catch ( final Exception l_exception ) {
-            l_exception.printStackTrace();
-            fail();
-            return;
-        }
+    public void testStartAuction(){
+        ArrayList<CMarketAgent> agents = createAgentList();
 
         try {
-            agent.call();
-            testSetBeliefs(agent);
-            agent.call();
-            testStartAuction(agent);
-            agent.call();
-            testReceiveAlertOfAuction(agent);
-            agent.call();
-            testReceiveBid(agent);
-            agent.call();
-            testReceiveRoundResult(agent);
-            agent.call();
-            testReceiveAuctionResult(agent);
-            agent.call();
+            agents.get(0).call();
+            agents.forEach(a -> testSetBeliefs(a, a.id()));
+            agents.get(0).call();
+            testStartAuction(agents.get(0));
+            agents.get(0).call();
         } catch (Exception e) {
             e.printStackTrace();
             fail();
             throw new RuntimeException();
-        }
-    }
-
-    public void testBid(){
-        String l_aslpath = "src/main/resources/asl/marketAgent.asl";
-        CMarketAgent agent;
-        try
-                (
-                        final FileInputStream l_stream = new FileInputStream( l_aslpath )
-                )
-        {
-            agent = new CMarketAgent.CMarketAgentGenerator( l_stream,
-                    new CMarketAgentManager("marketAgent.asl", null) )
-                    .generatesingle(0, "vMarket", "gaussian","FirstPrice");
-        }
-        catch ( final Exception l_exception ) {
-            l_exception.printStackTrace();
-            fail();
-            return;
-        }
-
-        try {
-            agent.call();
-            testSetBeliefs(agent);
-            agent.call();
-            testReceiveAlertOfAuction(agent);
-            agent.call();
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail();
         }
     }
 
@@ -198,7 +162,7 @@ public class AppTest
         agent.trigger( l_trigger );
     }
 
-    private void testSetBeliefs(CMarketAgent agent){
+    private void testSetBeliefs(CMarketAgent agent, int id){
         ArrayList<Integer> members =  new ArrayList<>();
         IntStream.range(0,5).forEach(i -> members.add(i,i));
         ArrayList<Integer> route =  new ArrayList<>();
@@ -212,73 +176,12 @@ public class AppTest
                         CRawTerm.from(100),
                         CRawTerm.from(0),
                         CRawTerm.from(members),
-                        CRawTerm.from(75),
+                        CRawTerm.from(40 + 5*id),
                         CRawTerm.from(200),
                         CRawTerm.from(route),
-                        CRawTerm.from(100)
+                        CRawTerm.from(80+5*id)
                 )
         );
         agent.trigger( l_trigger );
     }
 }
-
-
-/*if(j == 5){
-    ArrayList<Double> can = new ArrayList<>();
-    IntStream.range(1,4).forEach(d -> can.add((double)d));
-    ArrayList<Double> con = new ArrayList<>();
-    con.add(120.0);con.add(130.0); con.add(140.0);
-    final ITrigger l_trigger = CTrigger.from(
-            ITrigger.EType.ADDGOAL,
-            CLiteral.from(
-                    "start/vote/regroup",
-                    CRawTerm.from(can),
-                    CRawTerm.from(con)
-            )
-    );
-    i.trigger( l_trigger );
-}*/
-/*
-IntStream
-        .range( 0,20 )
-        .forEach( j ->
-        l_agents.parallelStream().forEach( i ->{
-                try{
-                    i.call();
-                    switch (j){
-                        case 3:{
-                            testReceiveAlertOfAuction((CMarketAgent)i);
-                            break;
-                        }
-                        case 6:{
-                            testStartAuction((CMarketAgent)i);
-                            break;
-                        }
-                        case 9:{
-                            testReceiveBid((CMarketAgent)i);
-                            break;
-                        }
-                        case 12:{
-                            testReceiveRoundResult((CMarketAgent)i);
-                            break;
-                        } case 15:{
-                            testReceiveAuctionResult((CMarketAgent)i);
-                            break;
-                        }case 16:{
-                            testSetBeliefs((CMarketAgent)i);
-                            break;
-                        }
-                        default:{
-                            break;
-                        }
-                    }
-                }
-                catch ( final Exception l_exception )
-                {
-                    l_exception.printStackTrace();
-                    fail();
-                    throw new RuntimeException();
-                }
-            } )
-         );
- */
