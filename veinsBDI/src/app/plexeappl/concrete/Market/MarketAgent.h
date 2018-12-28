@@ -17,6 +17,9 @@
 #include "../../../../utilities/LeaderPositionHelper.h"
 #include "../../../../messages/AckTimer_m.h"
 #include "../../../../messages/utility/MessageCache.h"
+#include "../../../../base/MarketManager/MarketManager.h"
+#include "../../../../messages/market/AuctionStatusMessage_m.h"
+#include "../../../../messages/market/BidMessage_m.h"
 
 
 class MarketAgent : public GeneralPlexeAgentAppl {
@@ -31,7 +34,13 @@ public:
         NONE,
         ACK,
         OK,
-        HELLO
+        HELLO,
+        NOTIFY_AUCTION,
+        BID
+    };
+
+    struct AuctionTriggerContext{
+        int context;
     };
 protected:
     /**
@@ -72,6 +81,16 @@ protected:
      * Seconds to wait for ack messages
      */
     const double ackTime = 0.2;
+    virtual void joinerBehaviour();
+    virtual void leaderBehaviour();
+    virtual void memberBehaviour();
+    AuctionTriggerContext atc;
+    cMessage* auctionTrigger = NULL;
+    int willingnessToPay;
+    /**
+     * Message handlers
+     */
+    void handleAuctionStatusMessage(AuctionStatusMessage* msg);
 public:
     /*
      * Methods to send messages

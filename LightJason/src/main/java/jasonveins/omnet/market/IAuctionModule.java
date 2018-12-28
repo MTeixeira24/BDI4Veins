@@ -88,6 +88,7 @@ public abstract class IAuctionModule {
     public abstract boolean endOfAuction();
 
     public InstructionModel setupAuction(int context, List<Integer> participants){
+        bidSet = new HashMap<>();
         withdrawCount = 0;
         switch (context){
             case MarketConstants.CONTEXT_SPEED:{
@@ -102,7 +103,7 @@ public abstract class IAuctionModule {
         auctionIteration = 0;
         InstructionModel iOb = new InstructionModel(agentId, MarketConstants.NOTIFY_START_AUCTION);
         iOb.pushInt(auctionId);
-        iOb.pushShort(MarketConstants.CONTEXT_SPEED);
+        iOb.pushInt(context);
         return iOb;
     }
 

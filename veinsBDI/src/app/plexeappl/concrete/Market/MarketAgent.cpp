@@ -11,6 +11,8 @@ Define_Module(MarketAgent)
 MarketAgent::~MarketAgent() {
     if(debugTimer != NULL)
         cancelAndDelete(debugTimer);
+    if(auctionTrigger != NULL)
+        cancelAndDelete(auctionTrigger);
 }
 
 void MarketAgent::initialize(int stage){
@@ -20,19 +22,63 @@ void MarketAgent::initialize(int stage){
         srand(time(NULL));
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
                 gate("lowerControlIn"), gate("lowerControlOut"));
+        //Setup beliefs
+        BeliefModel beliefs("setup/beliefs");
+        int isManager = false;
+        int platoonId, leaderId, platoonSpeed;
+        int wtp = ((MarketManager*)manager)->getWTP(myId), endowment = ((MarketManager*)manager)->getEndowment(myId);
+        int preferredSpeed = ((MarketManager*)manager)->getPreferredSpeed(myId);
+        std::vector<int> members, preferredPath = ((MarketManager*)manager)->getPreferredPath(myId);
+        willingnessToPay = wtp;
         if(getPlatoonRole() == PlatoonRole::NONE){
+            platoonId = -1;
+            leaderId = -1;
+            platoonSpeed = -1;
+            members.push_back(myId);
             if(par("engageNegotiations").boolValue()){
                 //What should the non platoon elements do to interact?
+                joinerBehaviour();
             }
         }else{
+            platoonId = positionHelper->getPlatoonId();
+            leaderId = positionHelper->getLeaderId();
+            platoonSpeed = (int)positionHelper->getPlatoonSpeed();
+            members = positionHelper->getPlatoonFormation();
             //General platoon knowledge
             if (getPlatoonRole() == PlatoonRole::LEADER){
+                isManager = true;
                 //Leader specific knowledge
-                debugTimer = new cMessage("debugTimerLeader");
-                scheduleAt(simTime() + 1, debugTimer);
+                leaderBehaviour();
+            }else{
+                //Member specific knowledge
+                memberBehaviour();
             }
         }
+        //Add to belief object
+        beliefs.pushInt(&platoonId);
+        beliefs.pushInt(&leaderId);
+        beliefs.pushInt(&platoonSpeed);
+        beliefs.pushInt(&isManager);
+        beliefs.pushIntArray(members);
+        beliefs.pushInt(&wtp);
+        beliefs.pushInt(&endowment);
+        beliefs.pushInt(&preferredSpeed);
+        beliefs.pushIntArray(preferredPath);
+        manager->sendInformationToAgents(myId, &beliefs);
     }
+}
+
+
+void MarketAgent::joinerBehaviour(){
+
+}
+void MarketAgent::leaderBehaviour(){
+    auctionTrigger = new cMessage("auctionTriggerSpeed");
+    scheduleAt(simTime() + 1, auctionTrigger);
+    atc.context = CONTEXT_SPEED;
+}
+void MarketAgent::memberBehaviour(){
+
 }
 
 void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int targetId, bool forWholePlatoon){
@@ -89,43 +135,78 @@ void MarketAgent::handleLowerMsg(cMessage* msg){
  ======================*/
 
 void MarketAgent::sendBid(int auctionId, int context, int bidValue, int managerId){
-
+    Enter_Method_Silent();
+    BidMessage* bid = new BidMessage("bid");
+    fillNegotiationMessage(bid, myId, managerId, false);
+    bid->setMessageType((int)MessageType::BID);
+    bid->setAuctionId(auctionId);
+    bid->setContext(context);
+    bid->setBidValue(bidValue);
+    bid->setWtp(willingnessToPay);
+    sendMessageWithAck(bid, managerId);
 }
 
 void MarketAgent::sendAuctionResults(int auctionId, int auctionIteration, int winnerId){
-
+    Enter_Method_Silent();
 }
 
 
 void MarketAgent::sendNotificationOfAuction(int auctionId, int context){
-
+    Enter_Method_Silent();
+    AuctionStatusMessage* notifyAuction = new AuctionStatusMessage("NotifyAuction");
+    fillNegotiationMessage(notifyAuction, myId, -1, true);
+    notifyAuction->setMessageType((int)MessageType::NOTIFY_AUCTION);
+    notifyAuction->setAuctionId(auctionId);
+    notifyAuction->setContext(context);
+    notifyAuction->setManagerId(myId);
+    sendMessageWithAck(notifyAuction, positionHelper->getPlatoonFormation());
 }
-
+void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
+    if(msg->getMessageType() == (int)MessageType::NOTIFY_AUCTION){
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            std::cout << myId <<": Got notified of auction!" << std::endl;
+            messageCache.saveReceived(msg->getMessageId());
+            BeliefModel notify("receive/auction");
+            int auctionId = msg->getAuctionId(), context = msg->getContext(), auctionManager = msg->getManagerId();
+            notify.pushInt(&auctionId); notify.pushInt(&context); notify.pushInt(&auctionManager);
+            manager->sendInformationToAgents(myId, &notify);
+        }
+        AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendUnicast(reply, -1);
+    }else if (msg->getMessageType() == (int)MessageType::ACK){
+        messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
+    }
+}
 
 void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId){
-
+    Enter_Method_Silent();
 }
 void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context){
-
+    Enter_Method_Silent();
 }
 
 void MarketAgent::sendPay(int auctionId, int context, int pay, int managerId, int speed){
-
+    Enter_Method_Silent();
 }
 void MarketAgent::sendPay(int auctionId, int context, int pay, int managerId, std::vector<int> route){
-
+    Enter_Method_Silent();
 }
 
 void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed){
-
+    Enter_Method_Silent();
 }
 void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route){
-
+    Enter_Method_Silent();
 }
 
 
 void MarketAgent::delegateNegotiationMessage(NegotiationMessage* nm){
-    if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
+    if(AuctionStatusMessage* msg = dynamic_cast<AuctionStatusMessage*>(nm)){
+        if(isReceiver(msg)) handleAuctionStatusMessage(msg);
+        delete msg;
+    }/*else if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
         if(isReceiver(msg)){
             if(myId != 0){
                 if(msg->getMessageType() == (int)MessageType::HELLO){
@@ -151,7 +232,7 @@ void MarketAgent::delegateNegotiationMessage(NegotiationMessage* nm){
             }
         }
         delete msg;
-    }
+    }*/
 }
 
 void MarketAgent::handleSelfMsg(cMessage* msg){
@@ -164,6 +245,10 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
         }
     }else if(msg == debugTimer){
         testFunction();
+    }else if(msg == auctionTrigger){
+        BeliefModel startAuction("start/auction");
+        startAuction.pushInt(&(atc.context));
+        manager->sendInformationToAgents(myId, &startAuction);
     }else{
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
