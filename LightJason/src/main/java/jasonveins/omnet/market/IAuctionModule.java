@@ -70,7 +70,7 @@ public abstract class IAuctionModule {
             case MarketConstants.REJECTED:
             case MarketConstants.DECOMMITTED:{
                 //Increment the bid by steps of 25% the wtp, until a value equal to wpt is reached
-                if(bid == wtp) return -1;
+                if(currentBid == wtp) return -1;
                 bid = currentBid + (int)Math.floor((double)wtp/4);
                 if(bid > wtp) bid = wtp;
                 break;

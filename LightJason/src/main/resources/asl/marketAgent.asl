@@ -79,5 +79,5 @@
 .
 
 +!receive/wtp(WTPLIST) : true <-
-    store/wtp(WPTLIST)
+    store/wtp(WTPLIST)
 .

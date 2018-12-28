@@ -31,6 +31,8 @@
  *     int auctionId;
  *     int context;
  *     int managerId;
+ *     int winnerId;
+ *     int auctionIteration;
  * }
  * </pre>
  */
@@ -40,6 +42,8 @@ class AuctionStatusMessage : public ::MarketMessage
     int auctionId;
     int context;
     int managerId;
+    int winnerId;
+    int auctionIteration;
 
   private:
     void copy(const AuctionStatusMessage& other);
@@ -64,6 +68,10 @@ class AuctionStatusMessage : public ::MarketMessage
     virtual void setContext(int context);
     virtual int getManagerId() const;
     virtual void setManagerId(int managerId);
+    virtual int getWinnerId() const;
+    virtual void setWinnerId(int winnerId);
+    virtual int getAuctionIteration() const;
+    virtual void setAuctionIteration(int auctionIteration);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const AuctionStatusMessage& obj) {obj.parsimPack(b);}

@@ -21,4 +21,6 @@ packet AuctionStatusMessage extends MarketMessage {
     int auctionId;
     int context;
     int managerId;
+    int winnerId;
+    int auctionIteration;
 }

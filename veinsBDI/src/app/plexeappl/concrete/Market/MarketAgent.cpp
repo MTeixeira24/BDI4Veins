@@ -76,6 +76,12 @@ void MarketAgent::leaderBehaviour(){
     auctionTrigger = new cMessage("auctionTriggerSpeed");
     scheduleAt(simTime() + 1, auctionTrigger);
     atc.context = CONTEXT_SPEED;
+    auctionSize = positionHelper->getPlatoonSize() - 1;
+    agentBidTuples.reserve(auctionSize*2);
+    wtpList.reserve(positionHelper->getPlatoonSize());
+    std::vector<int> members = positionHelper->getPlatoonFormation();
+    for(uint32_t i = 0; i < members.size(); i++)
+        wtpList.push_back(((MarketManager*)manager)->getWTP(members[i]));
 }
 void MarketAgent::memberBehaviour(){
 
@@ -145,9 +151,37 @@ void MarketAgent::sendBid(int auctionId, int context, int bidValue, int managerI
     bid->setWtp(willingnessToPay);
     sendMessageWithAck(bid, managerId);
 }
+void MarketAgent::handleBidMessage(BidMessage* msg){
+    if(msg->getMessageType() == (int)MessageType::BID){
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            std::cout << myId <<": Got a bid from:" << msg->getVehicleId() <<  std::endl;
+            messageCache.saveReceived(msg->getMessageId());
+            agentBidTuples.push_back(msg->getVehicleId());
+            agentBidTuples.push_back(msg->getBidValue());
+            if(agentBidTuples.size() == auctionSize*2){
+                BeliefModel bids("receive/bids");
+                bids.pushIntArray(agentBidTuples);
+                manager->sendInformationToAgents(myId, &bids);
+            }
+        }
+        BidMessage* reply = new BidMessage("BidAck");
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendUnicast(reply, -1);
+    }else if (msg->getMessageType() == (int)MessageType::ACK){
+        messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
+    }
+}
 
 void MarketAgent::sendAuctionResults(int auctionId, int auctionIteration, int winnerId){
     Enter_Method_Silent();
+    AuctionStatusMessage* auctionStatus = new AuctionStatusMessage("IterationResults");
+    fillNegotiationMessage(auctionStatus, myId, -1, true);
+    auctionStatus->setMessageType((int)MessageType::ITERATION_RESULTS);
+    auctionStatus->setAuctionId(auctionId);
+    auctionStatus->setAuctionIteration(auctionIteration);
+    auctionStatus->setWinnerId(winnerId);
+    sendMessageWithAck(auctionStatus, positionHelper->getPlatoonFormation());
 }
 
 
@@ -177,6 +211,20 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         sendUnicast(reply, -1);
     }else if (msg->getMessageType() == (int)MessageType::ACK){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
+    }else if (msg->getMessageType() == (int)MessageType::ITERATION_RESULTS){
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            std::cout << myId <<": Got results of an iteration!" << std::endl;
+            messageCache.saveReceived(msg->getMessageId());
+            BeliefModel iterationResult("receive/round/result");
+            int status = msg->getWinnerId() == myId ? CONFIRMED : REJECTED;
+            iterationResult.pushInt(&status);
+            manager->sendInformationToAgents(myId, &iterationResult);
+        }
+        AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendUnicast(reply, -1);
+
     }
 }
 
@@ -206,7 +254,12 @@ void MarketAgent::delegateNegotiationMessage(NegotiationMessage* nm){
     if(AuctionStatusMessage* msg = dynamic_cast<AuctionStatusMessage*>(nm)){
         if(isReceiver(msg)) handleAuctionStatusMessage(msg);
         delete msg;
-    }/*else if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
+    }else if(BidMessage* msg = dynamic_cast<BidMessage*>(nm)){
+        if(isReceiver(msg)) handleBidMessage(msg);
+        delete msg;
+    }
+    /*else if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
+    }
         if(isReceiver(msg)){
             if(myId != 0){
                 if(msg->getMessageType() == (int)MessageType::HELLO){
@@ -249,6 +302,9 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
         BeliefModel startAuction("start/auction");
         startAuction.pushInt(&(atc.context));
         manager->sendInformationToAgents(myId, &startAuction);
+        BeliefModel wtp("receive/wtp");
+        wtp.pushIntArray(wtpList);
+        manager->sendInformationToAgents(myId, &wtp);
     }else{
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }

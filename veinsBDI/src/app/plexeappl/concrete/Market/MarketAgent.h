@@ -36,7 +36,8 @@ public:
         OK,
         HELLO,
         NOTIFY_AUCTION,
-        BID
+        BID,
+        ITERATION_RESULTS
     };
 
     struct AuctionTriggerContext{
@@ -87,10 +88,14 @@ protected:
     AuctionTriggerContext atc;
     cMessage* auctionTrigger = NULL;
     int willingnessToPay;
+    std::vector<int> agentBidTuples;
+    std::vector<int> wtpList;
+    uint32_t auctionSize;
     /**
      * Message handlers
      */
     void handleAuctionStatusMessage(AuctionStatusMessage* msg);
+    void handleBidMessage(BidMessage* msg);
 public:
     /*
      * Methods to send messages

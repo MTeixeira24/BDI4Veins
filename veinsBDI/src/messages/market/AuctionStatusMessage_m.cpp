@@ -184,6 +184,8 @@ AuctionStatusMessage::AuctionStatusMessage(const char *name, short kind) : ::Mar
     this->auctionId = 0;
     this->context = 0;
     this->managerId = 0;
+    this->winnerId = 0;
+    this->auctionIteration = 0;
 }
 
 AuctionStatusMessage::AuctionStatusMessage(const AuctionStatusMessage& other) : ::MarketMessage(other)
@@ -208,6 +210,8 @@ void AuctionStatusMessage::copy(const AuctionStatusMessage& other)
     this->auctionId = other.auctionId;
     this->context = other.context;
     this->managerId = other.managerId;
+    this->winnerId = other.winnerId;
+    this->auctionIteration = other.auctionIteration;
 }
 
 void AuctionStatusMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -216,6 +220,8 @@ void AuctionStatusMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->auctionId);
     doParsimPacking(b,this->context);
     doParsimPacking(b,this->managerId);
+    doParsimPacking(b,this->winnerId);
+    doParsimPacking(b,this->auctionIteration);
 }
 
 void AuctionStatusMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -224,6 +230,8 @@ void AuctionStatusMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->auctionId);
     doParsimUnpacking(b,this->context);
     doParsimUnpacking(b,this->managerId);
+    doParsimUnpacking(b,this->winnerId);
+    doParsimUnpacking(b,this->auctionIteration);
 }
 
 int AuctionStatusMessage::getAuctionId() const
@@ -254,6 +262,26 @@ int AuctionStatusMessage::getManagerId() const
 void AuctionStatusMessage::setManagerId(int managerId)
 {
     this->managerId = managerId;
+}
+
+int AuctionStatusMessage::getWinnerId() const
+{
+    return this->winnerId;
+}
+
+void AuctionStatusMessage::setWinnerId(int winnerId)
+{
+    this->winnerId = winnerId;
+}
+
+int AuctionStatusMessage::getAuctionIteration() const
+{
+    return this->auctionIteration;
+}
+
+void AuctionStatusMessage::setAuctionIteration(int auctionIteration)
+{
+    this->auctionIteration = auctionIteration;
 }
 
 class AuctionStatusMessageDescriptor : public omnetpp::cClassDescriptor
@@ -321,7 +349,7 @@ const char *AuctionStatusMessageDescriptor::getProperty(const char *propertyname
 int AuctionStatusMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 5+basedesc->getFieldCount() : 5;
 }
 
 unsigned int AuctionStatusMessageDescriptor::getFieldTypeFlags(int field) const
@@ -336,8 +364,10 @@ unsigned int AuctionStatusMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
 }
 
 const char *AuctionStatusMessageDescriptor::getFieldName(int field) const
@@ -352,8 +382,10 @@ const char *AuctionStatusMessageDescriptor::getFieldName(int field) const
         "auctionId",
         "context",
         "managerId",
+        "winnerId",
+        "auctionIteration",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
 }
 
 int AuctionStatusMessageDescriptor::findField(const char *fieldName) const
@@ -363,6 +395,8 @@ int AuctionStatusMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='a' && strcmp(fieldName, "auctionId")==0) return base+0;
     if (fieldName[0]=='c' && strcmp(fieldName, "context")==0) return base+1;
     if (fieldName[0]=='m' && strcmp(fieldName, "managerId")==0) return base+2;
+    if (fieldName[0]=='w' && strcmp(fieldName, "winnerId")==0) return base+3;
+    if (fieldName[0]=='a' && strcmp(fieldName, "auctionIteration")==0) return base+4;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -378,8 +412,10 @@ const char *AuctionStatusMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **AuctionStatusMessageDescriptor::getFieldPropertyNames(int field) const
@@ -449,6 +485,8 @@ std::string AuctionStatusMessageDescriptor::getFieldValueAsString(void *object, 
         case 0: return long2string(pp->getAuctionId());
         case 1: return long2string(pp->getContext());
         case 2: return long2string(pp->getManagerId());
+        case 3: return long2string(pp->getWinnerId());
+        case 4: return long2string(pp->getAuctionIteration());
         default: return "";
     }
 }
@@ -466,6 +504,8 @@ bool AuctionStatusMessageDescriptor::setFieldValueAsString(void *object, int fie
         case 0: pp->setAuctionId(string2long(value)); return true;
         case 1: pp->setContext(string2long(value)); return true;
         case 2: pp->setManagerId(string2long(value)); return true;
+        case 3: pp->setWinnerId(string2long(value)); return true;
+        case 4: pp->setAuctionIteration(string2long(value)); return true;
         default: return false;
     }
 }
