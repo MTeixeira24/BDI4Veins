@@ -74,6 +74,7 @@ protected:
      */
     void sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets);
     void sendMessageWithAck(MarketMessage* msg, int target);
+    void sendMessageWithAckDelayed(MarketMessage* msg, int target);
     /*
      * Check if this vehicle is the intended target of a message
      */

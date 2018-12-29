@@ -116,6 +116,8 @@ bool MarketAgent::isReceiver(MarketMessage* msg){
         return true;
     if(msg->getTargets().find(myId) != msg->getTargets().end())
         return true;
+    if(msg->getDestinationId() == myId)
+        return true;
     return false;
 }
 
@@ -149,7 +151,15 @@ void MarketAgent::sendBid(int auctionId, int context, int bidValue, int managerI
     bid->setContext(context);
     bid->setBidValue(bidValue);
     bid->setWtp(willingnessToPay);
-    sendMessageWithAck(bid, managerId);
+    /*Must use the delayed sending when it is expected
+    * for multiple nodes to send a message at the same
+    * time. If it is not randomly delayed, the target
+    * of the message will receive all at the same time
+    * and may cause a cascade of dropped packets.
+    * If this occurs the time taken to reach consensus
+    * is greatly increased (~.5s -> 7s).
+    */
+    sendMessageWithAckDelayed(bid, managerId);
 }
 void MarketAgent::handleBidMessage(BidMessage* msg){
     if(msg->getMessageType() == (int)MessageType::BID){
@@ -162,12 +172,13 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
                 BeliefModel bids("receive/bids");
                 bids.pushIntArray(agentBidTuples);
                 manager->sendInformationToAgents(myId, &bids);
+                agentBidTuples.clear();
             }
         }
         BidMessage* reply = new BidMessage("BidAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, -1);
+        sendUnicast(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ACK){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
     }
@@ -208,7 +219,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, -1);
+        sendUnicast(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ACK){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ITERATION_RESULTS){
@@ -223,8 +234,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, -1);
-
+        sendUnicast(reply, msg->getVehicleId());
     }
 }
 
@@ -305,6 +315,8 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
         BeliefModel wtp("receive/wtp");
         wtp.pushIntArray(wtpList);
         manager->sendInformationToAgents(myId, &wtp);
+    }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
+        sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
     }else{
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
@@ -328,6 +340,13 @@ void MarketAgent::sendMessageWithAck(MarketMessage* msg, const std::vector<int>&
 void MarketAgent::sendMessageWithAck(MarketMessage* msg, int target){
     std::vector<int> v_target({target});
     sendMessageWithAck(msg, v_target);
+}
+void MarketAgent::sendMessageWithAckDelayed(MarketMessage* msg, int target){
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<double> distribution(25,3.0);
+    double delay = std::abs(distribution(gen) * 0.001);
+    scheduleAt(simTime() + delay, msg);
 }
 
 void MarketAgent::resendMessage(long msgId, AckTimer* at){
