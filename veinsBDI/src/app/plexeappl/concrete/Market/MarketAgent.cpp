@@ -157,7 +157,7 @@ void MarketAgent::sendBid(int auctionId, int context, int bidValue, int managerI
     * of the message will receive all at the same time
     * and may cause a cascade of dropped packets.
     * If this occurs the time taken to reach consensus
-    * is greatly increased (~.5s -> 7s).
+    * is greatly increased ([.1,.6]s -> [4,inf)s).
     */
     sendMessageWithAckDelayed(bid, managerId);
 }
@@ -181,6 +181,27 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
         sendUnicast(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ACK){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
+    }else if (msg->getMessageType() == (int)MessageType::PAYMENT){
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            std::cout << myId <<": Got a payment from:" << msg->getVehicleId() <<  std::endl;
+            messageCache.saveReceived(msg->getMessageId());
+            BeliefModel payment("distribute/pay");
+            int pay = msg->getBidValue(), speed;
+            std::vector<int> path;
+            payment.pushInt(&pay);
+            if(msg->getContext() == CONTEXT_SPEED){
+                speed = msg->getProperty();
+                payment.pushInt(&speed);
+            }else if(msg->getContext() == CONTEXT_PATH){
+                path = msg->getPropertyList();
+                payment.pushIntArray(path);
+            }
+            manager->sendInformationToAgents(myId, &payment);
+        }
+        BidMessage* reply = new BidMessage("PaymentAck");
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendUnicast(reply, msg->getVehicleId());
     }
 }
 
@@ -235,28 +256,117 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
         sendUnicast(reply, msg->getVehicleId());
+    }else if (msg->getMessageType() == (int)MessageType::AUCTION_END){
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            std::cout << myId <<": Got results of the auction!" << std::endl;
+            messageCache.saveReceived(msg->getMessageId());
+            BeliefModel auctionResult("receive/result");
+            int status = msg->getWinnerId() == myId ? CONFIRMED : REJECTED;
+            auctionResult.pushInt(&status);
+            manager->sendInformationToAgents(myId, &auctionResult);
+        }
+        AuctionStatusMessage* reply = new AuctionStatusMessage("AuctionEndAck");
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendUnicast(reply, msg->getVehicleId());
+    }else if (msg->getMessageType() == (int)MessageType::DISTRIBUTION){
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            std::cout << myId <<": Got results the payment of auction!" << std::endl;
+            messageCache.saveReceived(msg->getMessageId());
+            BeliefModel auctionResult("receive/pay");
+            double percentage = (double)willingnessToPay / msg->getWtpsum();
+            int pay = (int)(msg->getPayment() * percentage);
+            int speed;
+            std::vector<int> path;
+            auctionResult.pushInt(&pay);
+            if(msg->getContext() == CONTEXT_SPEED){
+                speed = msg->getProperty();
+                auctionResult.pushInt(&speed);
+            }else if(msg->getContext() == CONTEXT_PATH){
+                path = msg->getPropertyList();
+                auctionResult.pushIntArray(path);
+            }
+            manager->sendInformationToAgents(myId, &auctionResult);
+        }
+        AuctionStatusMessage* reply = new AuctionStatusMessage("DistributionAck");
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendUnicast(reply, msg->getVehicleId());
     }
 }
 
 void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId){
     Enter_Method_Silent();
+    AuctionStatusMessage* endAuction = new AuctionStatusMessage("EndOfAuction");
+    fillNegotiationMessage(endAuction, myId, -1, true);
+    endAuction->setMessageType((int)MessageType::AUCTION_END);
+    endAuction->setAuctionId(auctionId);
+    endAuction->setManagerId(myId);
+    endAuction->setWinnerId(winnerId);
+    endAuction->setAuctionIteration(auctionIteration);
+    sendMessageWithAck(endAuction, positionHelper->getPlatoonFormation());
 }
 void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context){
     Enter_Method_Silent();
+    if(context == CONTEXT_SPEED){
+        distributePay(auctionId, auctionIteration, winnerId, pay, wtpSum, ((MarketManager*)manager)->getPreferredSpeed(myId));
+    }else if(context == CONTEXT_PATH){
+        distributePay(auctionId, auctionIteration, winnerId, pay, wtpSum, ((MarketManager*)manager)->getPreferredPath(myId));
+    }
 }
 
 void MarketAgent::sendPay(int auctionId, int context, int pay, int managerId, int speed){
     Enter_Method_Silent();
+    BidMessage* payment = new BidMessage("payment");
+    fillNegotiationMessage(payment, myId, managerId, false);
+    payment->setMessageType((int)MessageType::PAYMENT);
+    payment->setAuctionId(auctionId);
+    payment->setContext(context);
+    payment->setBidValue(pay);
+    payment->setWtp(willingnessToPay);
+    payment->setProperty(((MarketManager*)manager)->getPreferredSpeed(myId));
+    sendMessageWithAck(payment, managerId);
 }
 void MarketAgent::sendPay(int auctionId, int context, int pay, int managerId, std::vector<int> route){
     Enter_Method_Silent();
+    BidMessage* payment = new BidMessage("payment");
+    fillNegotiationMessage(payment, myId, managerId, false);
+    payment->setMessageType((int)MessageType::PAYMENT);
+    payment->setAuctionId(auctionId);
+    payment->setContext(context);
+    payment->setBidValue(pay);
+    payment->setWtp(willingnessToPay);
+    payment->setPropertyList(((MarketManager*)manager)->getPreferredPath(myId));
+    sendMessageWithAck(payment, managerId);
 }
 
 void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed){
     Enter_Method_Silent();
+    AuctionStatusMessage* distributePay = new AuctionStatusMessage("distributePay");
+    fillNegotiationMessage(distributePay, myId, -1, true);
+    distributePay->setMessageType((int)MessageType::DISTRIBUTION);
+    distributePay->setAuctionId(auctionId);
+    distributePay->setManagerId(myId);
+    distributePay->setWinnerId(winnerId);
+    distributePay->setAuctionIteration(auctionIteration);
+    distributePay->setWtpsum(wtpSum);
+    distributePay->setPayment(payment);
+    distributePay->setProperty(speed);
+    sendMessageWithAck(distributePay, positionHelper->getPlatoonFormation());
 }
 void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route){
     Enter_Method_Silent();
+    AuctionStatusMessage* distributePay = new AuctionStatusMessage("distributePay");
+    fillNegotiationMessage(distributePay, myId, -1, true);
+    distributePay->setMessageType((int)MessageType::DISTRIBUTION);
+    distributePay->setAuctionId(auctionId);
+    distributePay->setManagerId(myId);
+    distributePay->setWinnerId(winnerId);
+    distributePay->setAuctionIteration(auctionIteration);
+    distributePay->setWtpsum(wtpSum);
+    distributePay->setPayment(payment);
+    distributePay->setPropertyList(route);
+    sendMessageWithAck(distributePay, positionHelper->getPlatoonFormation());
 }
 
 

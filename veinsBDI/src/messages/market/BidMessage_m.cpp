@@ -185,6 +185,7 @@ BidMessage::BidMessage(const char *name, short kind) : ::MarketMessage(name,kind
     this->context = 0;
     this->bidValue = 0;
     this->wtp = 0;
+    this->property = 0;
 }
 
 BidMessage::BidMessage(const BidMessage& other) : ::MarketMessage(other)
@@ -210,6 +211,8 @@ void BidMessage::copy(const BidMessage& other)
     this->context = other.context;
     this->bidValue = other.bidValue;
     this->wtp = other.wtp;
+    this->property = other.property;
+    this->propertyList = other.propertyList;
 }
 
 void BidMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -219,6 +222,8 @@ void BidMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->context);
     doParsimPacking(b,this->bidValue);
     doParsimPacking(b,this->wtp);
+    doParsimPacking(b,this->property);
+    doParsimPacking(b,this->propertyList);
 }
 
 void BidMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -228,6 +233,8 @@ void BidMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->context);
     doParsimUnpacking(b,this->bidValue);
     doParsimUnpacking(b,this->wtp);
+    doParsimUnpacking(b,this->property);
+    doParsimUnpacking(b,this->propertyList);
 }
 
 int BidMessage::getAuctionId() const
@@ -268,6 +275,26 @@ int BidMessage::getWtp() const
 void BidMessage::setWtp(int wtp)
 {
     this->wtp = wtp;
+}
+
+int BidMessage::getProperty() const
+{
+    return this->property;
+}
+
+void BidMessage::setProperty(int property)
+{
+    this->property = property;
+}
+
+IntList& BidMessage::getPropertyList()
+{
+    return this->propertyList;
+}
+
+void BidMessage::setPropertyList(const IntList& propertyList)
+{
+    this->propertyList = propertyList;
 }
 
 class BidMessageDescriptor : public omnetpp::cClassDescriptor
@@ -335,7 +362,7 @@ const char *BidMessageDescriptor::getProperty(const char *propertyname) const
 int BidMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 4+basedesc->getFieldCount() : 4;
+    return basedesc ? 6+basedesc->getFieldCount() : 6;
 }
 
 unsigned int BidMessageDescriptor::getFieldTypeFlags(int field) const
@@ -351,8 +378,10 @@ unsigned int BidMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISCOMPOUND,
     };
-    return (field>=0 && field<4) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<6) ? fieldTypeFlags[field] : 0;
 }
 
 const char *BidMessageDescriptor::getFieldName(int field) const
@@ -368,8 +397,10 @@ const char *BidMessageDescriptor::getFieldName(int field) const
         "context",
         "bidValue",
         "wtp",
+        "property",
+        "propertyList",
     };
-    return (field>=0 && field<4) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<6) ? fieldNames[field] : nullptr;
 }
 
 int BidMessageDescriptor::findField(const char *fieldName) const
@@ -380,6 +411,8 @@ int BidMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='c' && strcmp(fieldName, "context")==0) return base+1;
     if (fieldName[0]=='b' && strcmp(fieldName, "bidValue")==0) return base+2;
     if (fieldName[0]=='w' && strcmp(fieldName, "wtp")==0) return base+3;
+    if (fieldName[0]=='p' && strcmp(fieldName, "property")==0) return base+4;
+    if (fieldName[0]=='p' && strcmp(fieldName, "propertyList")==0) return base+5;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -396,8 +429,10 @@ const char *BidMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "int",
+        "IntList",
     };
-    return (field>=0 && field<4) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<6) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **BidMessageDescriptor::getFieldPropertyNames(int field) const
@@ -468,6 +503,8 @@ std::string BidMessageDescriptor::getFieldValueAsString(void *object, int field,
         case 1: return long2string(pp->getContext());
         case 2: return long2string(pp->getBidValue());
         case 3: return long2string(pp->getWtp());
+        case 4: return long2string(pp->getProperty());
+        case 5: {std::stringstream out; out << pp->getPropertyList(); return out.str();}
         default: return "";
     }
 }
@@ -486,6 +523,7 @@ bool BidMessageDescriptor::setFieldValueAsString(void *object, int field, int i,
         case 1: pp->setContext(string2long(value)); return true;
         case 2: pp->setBidValue(string2long(value)); return true;
         case 3: pp->setWtp(string2long(value)); return true;
+        case 4: pp->setProperty(string2long(value)); return true;
         default: return false;
     }
 }
@@ -499,6 +537,7 @@ const char *BidMessageDescriptor::getFieldStructName(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case 5: return omnetpp::opp_typename(typeid(IntList));
         default: return nullptr;
     };
 }
@@ -513,6 +552,7 @@ void *BidMessageDescriptor::getFieldStructValuePointer(void *object, int field, 
     }
     BidMessage *pp = (BidMessage *)object; (void)pp;
     switch (field) {
+        case 5: return (void *)(&pp->getPropertyList()); break;
         default: return nullptr;
     }
 }

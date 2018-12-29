@@ -20,10 +20,11 @@
 
 // cplusplus {{
 #include "MarketMessage_m.h"
+typedef std::vector<int> IntList;
 // }}
 
 /**
- * Class generated from <tt>messages/market/AuctionStatusMessage.msg:20</tt> by nedtool.
+ * Class generated from <tt>messages/market/AuctionStatusMessage.msg:22</tt> by nedtool.
  * <pre>
  * //Base message for market applications
  * packet AuctionStatusMessage extends MarketMessage
@@ -33,6 +34,12 @@
  *     int managerId;
  *     int winnerId;
  *     int auctionIteration;
+ *     //
+ *     int payment;
+ *     int wtpsum;
+ *     int property;
+ *     IntList propertyList;
+ * 
  * }
  * </pre>
  */
@@ -44,6 +51,10 @@ class AuctionStatusMessage : public ::MarketMessage
     int managerId;
     int winnerId;
     int auctionIteration;
+    int payment;
+    int wtpsum;
+    int property;
+    IntList propertyList;
 
   private:
     void copy(const AuctionStatusMessage& other);
@@ -72,6 +83,15 @@ class AuctionStatusMessage : public ::MarketMessage
     virtual void setWinnerId(int winnerId);
     virtual int getAuctionIteration() const;
     virtual void setAuctionIteration(int auctionIteration);
+    virtual int getPayment() const;
+    virtual void setPayment(int payment);
+    virtual int getWtpsum() const;
+    virtual void setWtpsum(int wtpsum);
+    virtual int getProperty() const;
+    virtual void setProperty(int property);
+    virtual IntList& getPropertyList();
+    virtual const IntList& getPropertyList() const {return const_cast<AuctionStatusMessage*>(this)->getPropertyList();}
+    virtual void setPropertyList(const IntList& propertyList);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const AuctionStatusMessage& obj) {obj.parsimPack(b);}

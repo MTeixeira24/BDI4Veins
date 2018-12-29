@@ -186,6 +186,9 @@ AuctionStatusMessage::AuctionStatusMessage(const char *name, short kind) : ::Mar
     this->managerId = 0;
     this->winnerId = 0;
     this->auctionIteration = 0;
+    this->payment = 0;
+    this->wtpsum = 0;
+    this->property = 0;
 }
 
 AuctionStatusMessage::AuctionStatusMessage(const AuctionStatusMessage& other) : ::MarketMessage(other)
@@ -212,6 +215,10 @@ void AuctionStatusMessage::copy(const AuctionStatusMessage& other)
     this->managerId = other.managerId;
     this->winnerId = other.winnerId;
     this->auctionIteration = other.auctionIteration;
+    this->payment = other.payment;
+    this->wtpsum = other.wtpsum;
+    this->property = other.property;
+    this->propertyList = other.propertyList;
 }
 
 void AuctionStatusMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -222,6 +229,10 @@ void AuctionStatusMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->managerId);
     doParsimPacking(b,this->winnerId);
     doParsimPacking(b,this->auctionIteration);
+    doParsimPacking(b,this->payment);
+    doParsimPacking(b,this->wtpsum);
+    doParsimPacking(b,this->property);
+    doParsimPacking(b,this->propertyList);
 }
 
 void AuctionStatusMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -232,6 +243,10 @@ void AuctionStatusMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->managerId);
     doParsimUnpacking(b,this->winnerId);
     doParsimUnpacking(b,this->auctionIteration);
+    doParsimUnpacking(b,this->payment);
+    doParsimUnpacking(b,this->wtpsum);
+    doParsimUnpacking(b,this->property);
+    doParsimUnpacking(b,this->propertyList);
 }
 
 int AuctionStatusMessage::getAuctionId() const
@@ -282,6 +297,46 @@ int AuctionStatusMessage::getAuctionIteration() const
 void AuctionStatusMessage::setAuctionIteration(int auctionIteration)
 {
     this->auctionIteration = auctionIteration;
+}
+
+int AuctionStatusMessage::getPayment() const
+{
+    return this->payment;
+}
+
+void AuctionStatusMessage::setPayment(int payment)
+{
+    this->payment = payment;
+}
+
+int AuctionStatusMessage::getWtpsum() const
+{
+    return this->wtpsum;
+}
+
+void AuctionStatusMessage::setWtpsum(int wtpsum)
+{
+    this->wtpsum = wtpsum;
+}
+
+int AuctionStatusMessage::getProperty() const
+{
+    return this->property;
+}
+
+void AuctionStatusMessage::setProperty(int property)
+{
+    this->property = property;
+}
+
+IntList& AuctionStatusMessage::getPropertyList()
+{
+    return this->propertyList;
+}
+
+void AuctionStatusMessage::setPropertyList(const IntList& propertyList)
+{
+    this->propertyList = propertyList;
 }
 
 class AuctionStatusMessageDescriptor : public omnetpp::cClassDescriptor
@@ -349,7 +404,7 @@ const char *AuctionStatusMessageDescriptor::getProperty(const char *propertyname
 int AuctionStatusMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 5+basedesc->getFieldCount() : 5;
+    return basedesc ? 9+basedesc->getFieldCount() : 9;
 }
 
 unsigned int AuctionStatusMessageDescriptor::getFieldTypeFlags(int field) const
@@ -366,8 +421,12 @@ unsigned int AuctionStatusMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISCOMPOUND,
     };
-    return (field>=0 && field<5) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
 }
 
 const char *AuctionStatusMessageDescriptor::getFieldName(int field) const
@@ -384,8 +443,12 @@ const char *AuctionStatusMessageDescriptor::getFieldName(int field) const
         "managerId",
         "winnerId",
         "auctionIteration",
+        "payment",
+        "wtpsum",
+        "property",
+        "propertyList",
     };
-    return (field>=0 && field<5) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<9) ? fieldNames[field] : nullptr;
 }
 
 int AuctionStatusMessageDescriptor::findField(const char *fieldName) const
@@ -397,6 +460,10 @@ int AuctionStatusMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='m' && strcmp(fieldName, "managerId")==0) return base+2;
     if (fieldName[0]=='w' && strcmp(fieldName, "winnerId")==0) return base+3;
     if (fieldName[0]=='a' && strcmp(fieldName, "auctionIteration")==0) return base+4;
+    if (fieldName[0]=='p' && strcmp(fieldName, "payment")==0) return base+5;
+    if (fieldName[0]=='w' && strcmp(fieldName, "wtpsum")==0) return base+6;
+    if (fieldName[0]=='p' && strcmp(fieldName, "property")==0) return base+7;
+    if (fieldName[0]=='p' && strcmp(fieldName, "propertyList")==0) return base+8;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -414,8 +481,12 @@ const char *AuctionStatusMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "int",
+        "int",
+        "int",
+        "IntList",
     };
-    return (field>=0 && field<5) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<9) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **AuctionStatusMessageDescriptor::getFieldPropertyNames(int field) const
@@ -487,6 +558,10 @@ std::string AuctionStatusMessageDescriptor::getFieldValueAsString(void *object, 
         case 2: return long2string(pp->getManagerId());
         case 3: return long2string(pp->getWinnerId());
         case 4: return long2string(pp->getAuctionIteration());
+        case 5: return long2string(pp->getPayment());
+        case 6: return long2string(pp->getWtpsum());
+        case 7: return long2string(pp->getProperty());
+        case 8: {std::stringstream out; out << pp->getPropertyList(); return out.str();}
         default: return "";
     }
 }
@@ -506,6 +581,9 @@ bool AuctionStatusMessageDescriptor::setFieldValueAsString(void *object, int fie
         case 2: pp->setManagerId(string2long(value)); return true;
         case 3: pp->setWinnerId(string2long(value)); return true;
         case 4: pp->setAuctionIteration(string2long(value)); return true;
+        case 5: pp->setPayment(string2long(value)); return true;
+        case 6: pp->setWtpsum(string2long(value)); return true;
+        case 7: pp->setProperty(string2long(value)); return true;
         default: return false;
     }
 }
@@ -519,6 +597,7 @@ const char *AuctionStatusMessageDescriptor::getFieldStructName(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case 8: return omnetpp::opp_typename(typeid(IntList));
         default: return nullptr;
     };
 }
@@ -533,6 +612,7 @@ void *AuctionStatusMessageDescriptor::getFieldStructValuePointer(void *object, i
     }
     AuctionStatusMessage *pp = (AuctionStatusMessage *)object; (void)pp;
     switch (field) {
+        case 8: return (void *)(&pp->getPropertyList()); break;
         default: return nullptr;
     }
 }

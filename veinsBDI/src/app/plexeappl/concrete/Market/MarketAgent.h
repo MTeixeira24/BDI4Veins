@@ -37,7 +37,10 @@ public:
         HELLO,
         NOTIFY_AUCTION,
         BID,
-        ITERATION_RESULTS
+        ITERATION_RESULTS,
+        AUCTION_END,
+        PAYMENT,
+        DISTRIBUTION
     };
 
     struct AuctionTriggerContext{

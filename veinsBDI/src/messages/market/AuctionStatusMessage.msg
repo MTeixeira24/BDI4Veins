@@ -14,8 +14,10 @@
 //
 cplusplus {{
 #include "MarketMessage_m.h"
+typedef std::vector<int> IntList;
 }}
 packet MarketMessage;
+class noncobject IntList;
 //Base message for market applications
 packet AuctionStatusMessage extends MarketMessage {
     int auctionId;
@@ -23,4 +25,10 @@ packet AuctionStatusMessage extends MarketMessage {
     int managerId;
     int winnerId;
     int auctionIteration;
+    //
+    int payment;
+    int wtpsum;
+    int property;
+    IntList propertyList;
+    
 }

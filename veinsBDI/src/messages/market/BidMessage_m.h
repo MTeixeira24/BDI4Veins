@@ -20,10 +20,11 @@
 
 // cplusplus {{
 #include "MarketMessage_m.h"
+typedef std::vector<int> IntList;
 // }}
 
 /**
- * Class generated from <tt>messages/market/BidMessage.msg:20</tt> by nedtool.
+ * Class generated from <tt>messages/market/BidMessage.msg:22</tt> by nedtool.
  * <pre>
  * //Base message for market applications
  * packet BidMessage extends MarketMessage
@@ -32,6 +33,8 @@
  *     int context;
  *     int bidValue;
  *     int wtp;
+ *     int property;
+ *     IntList propertyList;
  * }
  * </pre>
  */
@@ -42,6 +45,8 @@ class BidMessage : public ::MarketMessage
     int context;
     int bidValue;
     int wtp;
+    int property;
+    IntList propertyList;
 
   private:
     void copy(const BidMessage& other);
@@ -68,6 +73,11 @@ class BidMessage : public ::MarketMessage
     virtual void setBidValue(int bidValue);
     virtual int getWtp() const;
     virtual void setWtp(int wtp);
+    virtual int getProperty() const;
+    virtual void setProperty(int property);
+    virtual IntList& getPropertyList();
+    virtual const IntList& getPropertyList() const {return const_cast<BidMessage*>(this)->getPropertyList();}
+    virtual void setPropertyList(const IntList& propertyList);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const BidMessage& obj) {obj.parsimPack(b);}
