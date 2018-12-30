@@ -86,9 +86,16 @@ protected:
      * Seconds to wait for ack messages
      */
     const double ackTime = 0.2;
+    /*
+     * Initial behaviours
+     */
     virtual void joinerBehaviour();
     virtual void leaderBehaviour();
     virtual void memberBehaviour();
+    /*
+     * end of auction trigger
+     */
+    virtual void endOfAuctionTrigger();
     AuctionTriggerContext atc;
     cMessage* auctionTrigger = NULL;
     int willingnessToPay;

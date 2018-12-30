@@ -21,7 +21,9 @@ public class CFirstPrice extends IAuctionModule {
 
     @Override
     public boolean endOfAuction(){
-        return (getAuctionIteration() == 4) || (withdrawCount >= getBidders().size() - 1);
+        if((getAuctionIteration() == 4) || (withdrawCount >= getBidders().size() - 1))
+                hasEnded = true;
+        return hasEnded;
     }
 
     @Override

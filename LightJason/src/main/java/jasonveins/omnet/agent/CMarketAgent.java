@@ -124,6 +124,9 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     public void setupAuction(Number auctionContext, List<Integer> members){
         System.out.println("Called send resources for context " + auctionContext.intValue() +
                 " with member list: " + members);
+        if(auctionModule.hasEnded()){
+            restartAuction();
+        }
         InstructionModel iOb = auctionModule.setupAuction(auctionContext.intValue(), members);
         auctionModule.setManagerId(this.id);
         auctionModule.setContext(auctionContext.intValue());
@@ -139,7 +142,9 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         System.out.println("Called to setup as a bidder for auctionId: " +
                 auctionId.intValue() + " with context: " + context.intValue() +
                 " for manager with id: " + managerId.intValue());
-
+        if(auctionModule.hasEnded()){
+            restartAuction();
+        }
         auctionModule.setManagerId(managerId.intValue());
         auctionModule.setAuctionId(auctionId.intValue());
         auctionModule.setContext(context.intValue());
@@ -248,8 +253,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             default:
                 throw new RuntimeException("sendPay: Unknown context");
         }
-        finalizeAuction( payment.intValue() * (auctionModule.getWtp() / auctionModule.getWtpSum()),
-                property);
+        int cut = (int)(payment.intValue() * ((double)auctionModule.getWtp() / auctionModule.getWtpSum()));
+        finalizeAuction( cut, property);
         agentManager.addInstruction(iOb);
     }
 
@@ -274,6 +279,16 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         }
         System.out.println("Total utility: " + util);
         //TODO: Update statistics
+    }
+
+    private void restartAuction(){
+        CFirstPrice newAuction = new CFirstPrice(this.id);
+
+        newAuction.setEndowment(auctionModule.getEndowment());
+        newAuction.setWtp(auctionModule.getWtp());
+        newAuction.setWtpSum(auctionModule.getWtpSum());
+
+        auctionModule = newAuction;
     }
     //###############//
     //AGENT GENERATOR//

@@ -352,7 +352,9 @@ void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerI
     distributePay->setWtpsum(wtpSum);
     distributePay->setPayment(payment);
     distributePay->setProperty(speed);
+    distributePay->setContext(CONTEXT_SPEED);
     sendMessageWithAck(distributePay, positionHelper->getPlatoonFormation());
+    endOfAuctionTrigger();
 }
 void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route){
     Enter_Method_Silent();
@@ -366,7 +368,9 @@ void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerI
     distributePay->setWtpsum(wtpSum);
     distributePay->setPayment(payment);
     distributePay->setPropertyList(route);
+    distributePay->setContext(CONTEXT_PATH);
     sendMessageWithAck(distributePay, positionHelper->getPlatoonFormation());
+    endOfAuctionTrigger();
 }
 
 
@@ -420,11 +424,13 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
         testFunction();
     }else if(msg == auctionTrigger){
         BeliefModel startAuction("start/auction");
+        if(atc.context == CONTEXT_SPEED){
+            BeliefModel wtp("receive/wtp");
+            wtp.pushIntArray(wtpList);
+            manager->sendInformationToAgents(myId, &wtp);
+        }
         startAuction.pushInt(&(atc.context));
         manager->sendInformationToAgents(myId, &startAuction);
-        BeliefModel wtp("receive/wtp");
-        wtp.pushIntArray(wtpList);
-        manager->sendInformationToAgents(myId, &wtp);
     }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
         sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
     }else{
@@ -437,6 +443,15 @@ void MarketAgent::testFunction(){
     fillNegotiationMessage(testMsg, myId, -1, true);
     testMsg->setMessageType((int)MessageType::HELLO);
     sendMessageWithAck(testMsg, positionHelper->getPlatoonFormation());
+}
+
+void MarketAgent::endOfAuctionTrigger(){
+    if(atc.context == CONTEXT_SPEED){
+        delete auctionTrigger;
+        auctionTrigger = new cMessage("auctionTriggerAuction");
+        scheduleAt(simTime() + 1, auctionTrigger);
+        atc.context = CONTEXT_PATH;
+    }
 }
 
 void MarketAgent::sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets){

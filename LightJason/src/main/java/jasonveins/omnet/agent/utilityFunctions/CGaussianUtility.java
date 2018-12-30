@@ -36,8 +36,9 @@ public class CGaussianUtility implements IUtilityFunction {
 
     @Override
     public int getHammingDistance(List<Integer> evalArray, Graph route) {
-        ArrayList<Integer> preferredVector = new ArrayList<>(Collections.nCopies(evalArray.size(), 0));
         Set<Integer> vertexes = route.getVertexesMap().keySet();
+        ArrayList<Integer> preferredVector = new ArrayList<>(Collections.nCopies(vertexes.size(), 0));
+        ArrayList<Integer> evalBit = new ArrayList<>(Collections.nCopies(vertexes.size(), 0));
         Iterator<Integer> it = vertexes.iterator();
         int position = 0;
         while(it.hasNext()){
@@ -46,15 +47,23 @@ public class CGaussianUtility implements IUtilityFunction {
                 preferredVector.set(position, 1);
             position++;
         }
+        it = vertexes.iterator();
+        position = 0;
+        while(it.hasNext()){
+            int node = it.next();
+            if(evalArray.contains(node))
+                evalBit.set(position, 1);
+            position++;
+        }
         /*
         [1,1,0,0,1,1,1]
         [2,4,7,8]
         [0,0,0,0,0,0,0]
          */
         //get hamming distance, inverted in order to work with preexisting plans
-        int hammingDistance = evalArray.size();
+        int hammingDistance = preferredVector.size();
         for(int i = 0; i < evalArray.size(); i++){
-            if(!evalArray.get(i).equals(preferredVector.get(i))) hammingDistance--;
+            if(!evalBit.get(i).equals(preferredVector.get(i))) hammingDistance--;
         }
         //this.hammingDistance = hammingDistance;
         return hammingDistance;

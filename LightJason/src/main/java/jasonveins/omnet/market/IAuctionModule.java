@@ -20,6 +20,7 @@ public abstract class IAuctionModule {
     int withdrawCount;
     private int context;
     private int wtpSum;
+    boolean hasEnded;
 
     IAuctionModule(int agentId, int _endowment, int _wtp, int _auctionId){
         rd = new Random();
@@ -28,6 +29,7 @@ public abstract class IAuctionModule {
         auctionId  = _auctionId;
         auctionIteration = 0;
         this.agentId = agentId;
+        hasEnded = false;
     }
 
     IAuctionModule(int agentId){
@@ -91,6 +93,7 @@ public abstract class IAuctionModule {
         bidSet = new HashMap<>();
         withdrawCount = 0;
         switch (context){
+            case MarketConstants.CONTEXT_PATH:
             case MarketConstants.CONTEXT_SPEED:{
                 bidders = new LinkedList<>(participants);
                 break;
@@ -191,4 +194,10 @@ public abstract class IAuctionModule {
     }
 
     public int getCurrentBid(){return  currentBid;}
+
+    public boolean hasEnded(){return  hasEnded;}
+
+    public void setWtpSum(int wtpSum) {
+        this.wtpSum = wtpSum;
+    }
 }
