@@ -131,7 +131,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         auctionModule.setManagerId(this.id);
         auctionModule.setContext(auctionContext.intValue());
         //Cast the managers bid
-        auctionModule.addBid(this.id, auctionModule.castBid(MarketConstants.AUCTION_START));
+        if(auctionContext.intValue() != MarketConstants.CONTEXT_JOIN)
+            auctionModule.addBid(this.id, auctionModule.castBid(MarketConstants.AUCTION_START));
         //Send the instruction over to the controller
         agentManager.addInstruction(iOb);
     }
@@ -205,8 +206,10 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         }else{
             //Start a new iteration and add the managers bid
             auctionModule.startNewIteration();
-            int auctionStatus = auctionModule.getWinner() == this.id ? MarketConstants.CONFIRMED : MarketConstants.REJECTED;
-            auctionModule.addBid(this.id, auctionModule.castBid(auctionStatus ));
+            if(auctionModule.getContext() != MarketConstants.CONTEXT_JOIN){
+                int auctionStatus = auctionModule.getWinner() == this.id ? MarketConstants.CONFIRMED : MarketConstants.REJECTED;
+                auctionModule.addBid(this.id, auctionModule.castBid(auctionStatus ));
+            }
         }
         agentManager.addInstruction(iOb);
     }
@@ -222,6 +225,10 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             }
             case MarketConstants.CONTEXT_PATH:{
                 iOb.pushIntArray(preferredPath);
+                break;
+            }
+            case MarketConstants.CONTEXT_JOIN:{
+                iOb.pushInt(id);
                 break;
             }
             default:
@@ -250,6 +257,10 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
                 iOb.pushIntArray(route);
                 break;
             }
+            case MarketConstants.CONTEXT_JOIN:{
+                iOb.pushInt(auctionModule.getWinner());
+                break;
+            }
             default:
                 throw new RuntimeException("sendPay: Unknown context");
         }
@@ -262,7 +273,7 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName(name = "finalize/auction")
     public void finalizeAuction(int payment, Object property){
         auctionModule.setEndowment(payment+auctionModule.getEndowment());
-        double util;
+        double util = 0;
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 Integer speed = (Integer)property;
@@ -272,6 +283,9 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             case MarketConstants.CONTEXT_PATH:{
                 List<Integer> route = (List<Integer>)property;
                 util = amortizedUtilityRoute(payment, route);
+                break;
+            }
+            case MarketConstants.CONTEXT_JOIN:{
                 break;
             }
             default:

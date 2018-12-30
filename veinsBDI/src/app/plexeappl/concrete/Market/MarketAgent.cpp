@@ -80,6 +80,7 @@ void MarketAgent::leaderBehaviour(){
     agentBidTuples.reserve(auctionSize*2);
     wtpList.reserve(positionHelper->getPlatoonSize());
     std::vector<int> members = positionHelper->getPlatoonFormation();
+    auctionMembers.insert(auctionMembers.begin(), members.begin(), members.end());
     for(uint32_t i = 0; i < members.size(); i++)
         wtpList.push_back(((MarketManager*)manager)->getWTP(members[i]));
 }
@@ -353,8 +354,8 @@ void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerI
     distributePay->setPayment(payment);
     distributePay->setProperty(speed);
     distributePay->setContext(CONTEXT_SPEED);
-    sendMessageWithAck(distributePay, positionHelper->getPlatoonFormation());
-    endOfAuctionTrigger();
+    sendMessageWithAck(distributePay, auctionMembers);
+    endOfAuctionTrigger(winnerId);
 }
 void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route){
     Enter_Method_Silent();
@@ -369,8 +370,8 @@ void MarketAgent::distributePay(int auctionId, int auctionIteration, int winnerI
     distributePay->setPayment(payment);
     distributePay->setPropertyList(route);
     distributePay->setContext(CONTEXT_PATH);
-    sendMessageWithAck(distributePay, positionHelper->getPlatoonFormation());
-    endOfAuctionTrigger();
+    sendMessageWithAck(distributePay, auctionMembers);
+    endOfAuctionTrigger(winnerId);
 }
 
 
@@ -382,34 +383,6 @@ void MarketAgent::delegateNegotiationMessage(NegotiationMessage* nm){
         if(isReceiver(msg)) handleBidMessage(msg);
         delete msg;
     }
-    /*else if(MarketMessage* msg = dynamic_cast<MarketMessage*>(nm)){
-    }
-        if(isReceiver(msg)){
-            if(myId != 0){
-                if(msg->getMessageType() == (int)MessageType::HELLO){
-                    if(!messageCache.hasReceived(msg->getMessageId())){
-                        std::cout << "Got an hello!" << std::endl;
-                        messageCache.saveReceived(msg->getMessageId());
-                        MarketMessage* testMsg = new MarketMessage("Reply");
-                        fillNegotiationMessage(testMsg, myId, msg->getVehicleId(), false, msg->getMessageId());
-                        testMsg->setMessageType((int)MessageType::ACK);
-                        sendMessageWithAck(testMsg, msg->getVehicleId());
-                    }
-                }else{
-                    std::cout << "Got an ok!" << std::endl;
-                    messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
-                }
-            }else{
-                std::cout << "Got a reply!" << std::endl;
-                messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
-                MarketMessage* testMsg = new MarketMessage("Reply");
-                fillNegotiationMessage(testMsg, myId, msg->getVehicleId(), false, msg->getMessageId());
-                testMsg->setMessageType((int)MessageType::OK);
-                sendUnicast(testMsg, -1);
-            }
-        }
-        delete msg;
-    }*/
 }
 
 void MarketAgent::handleSelfMsg(cMessage* msg){
@@ -442,10 +415,10 @@ void MarketAgent::testFunction(){
     MarketMessage* testMsg = new MarketMessage("Test");
     fillNegotiationMessage(testMsg, myId, -1, true);
     testMsg->setMessageType((int)MessageType::HELLO);
-    sendMessageWithAck(testMsg, positionHelper->getPlatoonFormation());
+    sendMessageWithAck(testMsg, auctionMembers);
 }
 
-void MarketAgent::endOfAuctionTrigger(){
+void MarketAgent::endOfAuctionTrigger(int winnerId){
     if(atc.context == CONTEXT_SPEED){
         delete auctionTrigger;
         auctionTrigger = new cMessage("auctionTriggerAuction");

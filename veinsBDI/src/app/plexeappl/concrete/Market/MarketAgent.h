@@ -95,13 +95,14 @@ protected:
     /*
      * end of auction trigger
      */
-    virtual void endOfAuctionTrigger();
+    virtual void endOfAuctionTrigger(int winnerId);
     AuctionTriggerContext atc;
     cMessage* auctionTrigger = NULL;
     int willingnessToPay;
     std::vector<int> agentBidTuples;
     std::vector<int> wtpList;
     uint32_t auctionSize;
+    std::vector<int> auctionMembers;
     /**
      * Message handlers
      */
@@ -123,7 +124,7 @@ public:
     void sendPay(int auctionId, int context, int pay, int managerId, int speed);
     void sendPay(int auctionId, int context, int pay, int managerId, std::vector<int> route);
 
-    void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed);
+    virtual void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed);
     void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route);
 private:
     /*
