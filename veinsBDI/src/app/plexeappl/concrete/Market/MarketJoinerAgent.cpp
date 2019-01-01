@@ -19,11 +19,11 @@ void MarketJoinerAgent::leaderBehaviour(){
 }
 
 void MarketJoinerAgent::endOfAuctionTrigger(int winnerId){
-    MarketAgent::endOfAuctionTrigger(winnerId);
-    if(!hasJoinEnded){
+    if(atc.context == CONTEXT_SPEED){
+        MarketAgent::endOfAuctionTrigger(winnerId);
+    }else if(!hasJoinEnded){
         if(atc.context == CONTEXT_PATH){
-            delete auctionTrigger;
-            auctionTrigger = new cMessage("auctionTriggerAuction");
+            cancelEvent(auctionTrigger);
             scheduleAt(simTime() + 1, auctionTrigger);
             atc.context = CONTEXT_JOIN;
             //We only care about three
@@ -37,12 +37,19 @@ void MarketJoinerAgent::endOfAuctionTrigger(int winnerId){
                 auctionMembers.push_back(i);
             }
         }else if(atc.context == CONTEXT_JOIN){
-            delete auctionTrigger;
+            scheduleAt(simTime() + 1, auctionTrigger);
+            atc.context = CONTEXT_SPEED;
             auctionMembers.clear();
             wtpList.clear();
-            MarketAgent::leaderBehaviour();
-            wtpList.push_back(((MarketManager*)manager)->getWTP(winnerId));
-            auctionMembers.push_back(winnerId);
+            auctionSize = positionHelper->getPlatoonSize();
+            agentBidTuples.reserve(auctionSize*2);
+            wtpList.reserve(positionHelper->getPlatoonSize() + 1);
+            std::vector<int> members = positionHelper->getPlatoonFormation();
+            members.push_back(winnerId);
+            auctionMembers.insert(auctionMembers.begin(), members.begin(), members.end());
+            for(uint32_t i = 0; i < members.size(); i++)
+                wtpList.push_back(((MarketManager*)manager)->getWTP(members[i]));
+            hasJoinEnded = true;
         }
     }
 }
@@ -62,8 +69,16 @@ void MarketJoinerAgent::distributePay(int auctionId, int auctionIteration, int w
         distributePay->setProperty(speed);
         distributePay->setContext(CONTEXT_JOIN);
         sendMessageWithAck(distributePay, auctionMembers);
+        endOfAuctionTrigger(winnerId);
     }else{
         MarketAgent::distributePay(auctionId, auctionIteration, winnerId, payment, wtpSum, speed);
     }
-    endOfAuctionTrigger(winnerId);
+}
+
+bool MarketJoinerAgent::isReceiver(MarketMessage* msg){
+    if(msg->getTargets().find(myId) != msg->getTargets().end())
+        return true;
+    if(msg->getDestinationId() == myId)
+        return true;
+    return false;
 }

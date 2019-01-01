@@ -36,11 +36,17 @@
 .
 //Environmental triggers
 
-+!start/auction(CONTEXT) : true <-
++!start/auction(CONTEXT, MEMBERS) : true <-
     generic/print(MyName, ": starting an auction");
-    >>members(MEMBERS);
     setup/auction(CONTEXT, MEMBERS)
 .
+
+
+//+!start/auction(CONTEXT) : true <-
+//    generic/print(MyName, ": starting an auction");
+//    >>members(MEMBERS);
+//    setup/auction(CONTEXT, MEMBERS)
+//.
 
 //Message triggers
 

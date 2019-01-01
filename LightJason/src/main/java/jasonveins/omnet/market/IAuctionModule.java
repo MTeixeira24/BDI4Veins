@@ -94,7 +94,8 @@ public abstract class IAuctionModule {
         withdrawCount = 0;
         switch (context){
             case MarketConstants.CONTEXT_PATH:
-            case MarketConstants.CONTEXT_SPEED:{
+            case MarketConstants.CONTEXT_SPEED:
+            case MarketConstants.CONTEXT_JOIN:{
                 bidders = new LinkedList<>(participants);
                 break;
             }

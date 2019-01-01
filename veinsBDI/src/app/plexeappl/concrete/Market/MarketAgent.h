@@ -81,7 +81,7 @@ protected:
     /*
      * Check if this vehicle is the intended target of a message
      */
-    bool isReceiver(MarketMessage* msg);
+    virtual bool isReceiver(MarketMessage* msg);
     /*
      * Seconds to wait for ack messages
      */

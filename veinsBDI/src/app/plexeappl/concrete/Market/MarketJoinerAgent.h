@@ -25,6 +25,8 @@ protected:
     virtual void endOfAuctionTrigger(int winnerId) override;
 
     virtual void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed) override;
+
+    virtual bool isReceiver(MarketMessage* msg) override;
 private:
     bool hasJoinEnded;
 };

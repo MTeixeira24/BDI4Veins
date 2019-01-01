@@ -190,12 +190,12 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
             int pay = msg->getBidValue(), speed;
             std::vector<int> path;
             payment.pushInt(&pay);
-            if(msg->getContext() == CONTEXT_SPEED){
-                speed = msg->getProperty();
-                payment.pushInt(&speed);
-            }else if(msg->getContext() == CONTEXT_PATH){
+            if(msg->getContext() == CONTEXT_PATH){
                 path = msg->getPropertyList();
                 payment.pushIntArray(path);
+            }else{
+                speed = msg->getProperty();
+                payment.pushInt(&speed);
             }
             manager->sendInformationToAgents(myId, &payment);
         }
@@ -214,7 +214,7 @@ void MarketAgent::sendAuctionResults(int auctionId, int auctionIteration, int wi
     auctionStatus->setAuctionId(auctionId);
     auctionStatus->setAuctionIteration(auctionIteration);
     auctionStatus->setWinnerId(winnerId);
-    sendMessageWithAck(auctionStatus, positionHelper->getPlatoonFormation());
+    sendMessageWithAck(auctionStatus, auctionMembers);
 }
 
 
@@ -226,7 +226,7 @@ void MarketAgent::sendNotificationOfAuction(int auctionId, int context){
     notifyAuction->setAuctionId(auctionId);
     notifyAuction->setContext(context);
     notifyAuction->setManagerId(myId);
-    sendMessageWithAck(notifyAuction, positionHelper->getPlatoonFormation());
+    sendMessageWithAck(notifyAuction, auctionMembers);
 }
 void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
     if(msg->getMessageType() == (int)MessageType::NOTIFY_AUCTION){
@@ -305,7 +305,7 @@ void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int wi
     endAuction->setManagerId(myId);
     endAuction->setWinnerId(winnerId);
     endAuction->setAuctionIteration(auctionIteration);
-    sendMessageWithAck(endAuction, positionHelper->getPlatoonFormation());
+    sendMessageWithAck(endAuction, auctionMembers);
 }
 void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context){
     Enter_Method_Silent();
@@ -397,12 +397,13 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
         testFunction();
     }else if(msg == auctionTrigger){
         BeliefModel startAuction("start/auction");
+        startAuction.pushInt(&(atc.context));
         if(atc.context == CONTEXT_SPEED){
             BeliefModel wtp("receive/wtp");
             wtp.pushIntArray(wtpList);
             manager->sendInformationToAgents(myId, &wtp);
         }
-        startAuction.pushInt(&(atc.context));
+        startAuction.pushIntArray(auctionMembers);
         manager->sendInformationToAgents(myId, &startAuction);
     }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
         sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
@@ -420,8 +421,6 @@ void MarketAgent::testFunction(){
 
 void MarketAgent::endOfAuctionTrigger(int winnerId){
     if(atc.context == CONTEXT_SPEED){
-        delete auctionTrigger;
-        auctionTrigger = new cMessage("auctionTriggerAuction");
         scheduleAt(simTime() + 1, auctionTrigger);
         atc.context = CONTEXT_PATH;
     }
