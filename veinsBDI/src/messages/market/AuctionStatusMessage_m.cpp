@@ -189,6 +189,7 @@ AuctionStatusMessage::AuctionStatusMessage(const char *name, short kind) : ::Mar
     this->payment = 0;
     this->wtpsum = 0;
     this->property = 0;
+    this->duePayment = 0;
 }
 
 AuctionStatusMessage::AuctionStatusMessage(const AuctionStatusMessage& other) : ::MarketMessage(other)
@@ -219,6 +220,7 @@ void AuctionStatusMessage::copy(const AuctionStatusMessage& other)
     this->wtpsum = other.wtpsum;
     this->property = other.property;
     this->propertyList = other.propertyList;
+    this->duePayment = other.duePayment;
 }
 
 void AuctionStatusMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -233,6 +235,7 @@ void AuctionStatusMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->wtpsum);
     doParsimPacking(b,this->property);
     doParsimPacking(b,this->propertyList);
+    doParsimPacking(b,this->duePayment);
 }
 
 void AuctionStatusMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -247,6 +250,7 @@ void AuctionStatusMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->wtpsum);
     doParsimUnpacking(b,this->property);
     doParsimUnpacking(b,this->propertyList);
+    doParsimUnpacking(b,this->duePayment);
 }
 
 int AuctionStatusMessage::getAuctionId() const
@@ -339,6 +343,16 @@ void AuctionStatusMessage::setPropertyList(const IntList& propertyList)
     this->propertyList = propertyList;
 }
 
+int AuctionStatusMessage::getDuePayment() const
+{
+    return this->duePayment;
+}
+
+void AuctionStatusMessage::setDuePayment(int duePayment)
+{
+    this->duePayment = duePayment;
+}
+
 class AuctionStatusMessageDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -404,7 +418,7 @@ const char *AuctionStatusMessageDescriptor::getProperty(const char *propertyname
 int AuctionStatusMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 9+basedesc->getFieldCount() : 9;
+    return basedesc ? 10+basedesc->getFieldCount() : 10;
 }
 
 unsigned int AuctionStatusMessageDescriptor::getFieldTypeFlags(int field) const
@@ -425,8 +439,9 @@ unsigned int AuctionStatusMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISCOMPOUND,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<10) ? fieldTypeFlags[field] : 0;
 }
 
 const char *AuctionStatusMessageDescriptor::getFieldName(int field) const
@@ -447,8 +462,9 @@ const char *AuctionStatusMessageDescriptor::getFieldName(int field) const
         "wtpsum",
         "property",
         "propertyList",
+        "duePayment",
     };
-    return (field>=0 && field<9) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<10) ? fieldNames[field] : nullptr;
 }
 
 int AuctionStatusMessageDescriptor::findField(const char *fieldName) const
@@ -464,6 +480,7 @@ int AuctionStatusMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='w' && strcmp(fieldName, "wtpsum")==0) return base+6;
     if (fieldName[0]=='p' && strcmp(fieldName, "property")==0) return base+7;
     if (fieldName[0]=='p' && strcmp(fieldName, "propertyList")==0) return base+8;
+    if (fieldName[0]=='d' && strcmp(fieldName, "duePayment")==0) return base+9;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -485,8 +502,9 @@ const char *AuctionStatusMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "IntList",
+        "int",
     };
-    return (field>=0 && field<9) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<10) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **AuctionStatusMessageDescriptor::getFieldPropertyNames(int field) const
@@ -562,6 +580,7 @@ std::string AuctionStatusMessageDescriptor::getFieldValueAsString(void *object, 
         case 6: return long2string(pp->getWtpsum());
         case 7: return long2string(pp->getProperty());
         case 8: {std::stringstream out; out << pp->getPropertyList(); return out.str();}
+        case 9: return long2string(pp->getDuePayment());
         default: return "";
     }
 }
@@ -584,6 +603,7 @@ bool AuctionStatusMessageDescriptor::setFieldValueAsString(void *object, int fie
         case 5: pp->setPayment(string2long(value)); return true;
         case 6: pp->setWtpsum(string2long(value)); return true;
         case 7: pp->setProperty(string2long(value)); return true;
+        case 9: pp->setDuePayment(string2long(value)); return true;
         default: return false;
     }
 }

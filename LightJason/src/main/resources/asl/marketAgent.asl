@@ -70,8 +70,8 @@
     send/bid(STATUS)
 .
 
-+!receive/result(STATUS) : true 
-    <- STATUS == 2; generic/print(MyName, "Won the auction"); >>preferredPath(P); >>preferredSpeed(S); send/pay(P,S)
++!receive/result(STATUS, DUEPAY) : true 
+    <- STATUS == 2; generic/print(MyName, "Won the auction"); >>preferredPath(P); >>preferredSpeed(S); send/pay(P,S, DUEPAY)
     <- STATUS != 2; generic/print(MyName, "Lost the auction")
 .
 

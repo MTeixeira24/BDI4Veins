@@ -225,6 +225,10 @@ void MarketAgent::sendNotificationOfAuction(int auctionId, int context){
     notifyAuction->setMessageType((int)MessageType::NOTIFY_AUCTION);
     notifyAuction->setAuctionId(auctionId);
     notifyAuction->setContext(context);
+    if(context == CONTEXT_SPEED)
+        ((MarketManager*)manager)->startTimeStampSpeed(simTime().dbl() * 1000);
+    if(context == CONTEXT_PATH)
+        ((MarketManager*)manager)->startTimeStampRoute(simTime().dbl() * 1000);
     notifyAuction->setManagerId(myId);
     sendMessageWithAck(notifyAuction, auctionMembers);
 }
@@ -263,7 +267,9 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
             messageCache.saveReceived(msg->getMessageId());
             BeliefModel auctionResult("receive/result");
             int status = msg->getWinnerId() == myId ? CONFIRMED : REJECTED;
+            int duePayment = msg->getDuePayment();
             auctionResult.pushInt(&status);
+            auctionResult.pushInt(&duePayment);
             manager->sendInformationToAgents(myId, &auctionResult);
         }
         AuctionStatusMessage* reply = new AuctionStatusMessage("AuctionEndAck");
@@ -283,9 +289,11 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
             if(msg->getContext() == CONTEXT_SPEED){
                 speed = msg->getProperty();
                 auctionResult.pushInt(&speed);
+                ((MarketManager*)manager)->timeStampSpeed(simTime().dbl() * 1000);
             }else if(msg->getContext() == CONTEXT_PATH){
                 path = msg->getPropertyList();
                 auctionResult.pushIntArray(path);
+                ((MarketManager*)manager)->timeStampRoute(simTime().dbl() * 1000);
             }
             manager->sendInformationToAgents(myId, &auctionResult);
         }
@@ -296,7 +304,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
     }
 }
 
-void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId){
+void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int duePayment){
     Enter_Method_Silent();
     AuctionStatusMessage* endAuction = new AuctionStatusMessage("EndOfAuction");
     fillNegotiationMessage(endAuction, myId, -1, true);
@@ -305,6 +313,7 @@ void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int wi
     endAuction->setManagerId(myId);
     endAuction->setWinnerId(winnerId);
     endAuction->setAuctionIteration(auctionIteration);
+    endAuction->setDuePayment(duePayment);
     sendMessageWithAck(endAuction, auctionMembers);
 }
 void MarketAgent::handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context){
@@ -392,6 +401,7 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
             delete at;
         }else{
             resendMessage(msgId, at);
+            ((MarketManager*)manager)->incrementRetransmission();
         }
     }else if(msg == debugTimer){
         testFunction();

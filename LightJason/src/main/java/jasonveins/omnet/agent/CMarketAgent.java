@@ -8,6 +8,7 @@ import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CMarketAgentManager;
 import jasonveins.omnet.managers.constants.MarketConstants;
 import jasonveins.omnet.market.CFirstPrice;
+import jasonveins.omnet.market.CSecondPrice;
 import jasonveins.omnet.market.CStochasticLocalSearch;
 import jasonveins.omnet.market.IAuctionModule;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
@@ -72,7 +73,11 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             }case "StochasticSearch":{
                 this.auctionModule = new CStochasticLocalSearch(this.id);
                 break;
-            }default:{
+            }case "SecondPrice":{
+                this.auctionModule = new CSecondPrice(this.id);
+                break;
+            }
+            default:{
                 throw new RuntimeException("CMarketAgent: Unknown utility function type!");
             }
         }
@@ -146,6 +151,11 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         if(auctionModule.hasEnded()){
             restartAuction();
         }
+        if(context.intValue() == MarketConstants.CONTEXT_JOIN){
+            marketManager.getStats().storeUtil(this.id, 0);
+            marketManager.getStats().storeHammingUtil(this.id, 0);
+            marketManager.getStats().storeHamming(this.id, 0);
+        }
         auctionModule.setManagerId(managerId.intValue());
         auctionModule.setAuctionId(auctionId.intValue());
         auctionModule.setContext(context.intValue());
@@ -187,21 +197,11 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         if(auctionModule.endOfAuction()){
             iOb.setAgentAction(MarketConstants.HANDLE_END_OF_AUCTION);
             //If the manager is the one that jump straight to payment distribution
+            iOb.pushInt(auctionModule.getDuePayment());
             if(this.id == auctionModule.getWinner()){
-                iOb.pushInt(auctionModule.getCurrentBid());
                 iOb.pushInt(auctionModule.getWtpSum());
                 iOb.pushInt(auctionModule.getContext());
-                switch (auctionModule.getContext()){
-                    case MarketConstants.CONTEXT_SPEED:
-                        iOb.pushInt(utilityFunction.getPreferredSpeed());
-                        break;
-                    case MarketConstants.CONTEXT_PATH:
-                        iOb.pushIntArray(utilityFunction.getPreferredRoute());
-                        break;
-                    default:
-                        break;
-                }
-                auctionModule.setEndowment(auctionModule.getEndowment() - auctionModule.getCurrentBid());
+                auctionModule.setEndowment(auctionModule.getEndowment() - auctionModule.getDuePayment());
             }
         }else{
             //Start a new iteration and add the managers bid
@@ -216,8 +216,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
 
     @IAgentActionFilter
     @IAgentActionName( name = "send/pay")
-    public void sendPay(List<Integer> preferredPath, Number preferredSpeed){
-        InstructionModel iOb = auctionModule.createPayInstruction();
+    public void sendPay(List<Integer> preferredPath, Number preferredSpeed, Number DuePay){
+        InstructionModel iOb = auctionModule.createPayInstruction(DuePay.intValue());
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 iOb.pushInt(preferredSpeed.intValue());
@@ -278,11 +278,14 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             case MarketConstants.CONTEXT_SPEED:{
                 Integer speed = (Integer)property;
                 util = amortizedUtilitySpeed(payment, speed);
+                marketManager.getStats().storeUtil(this.id, util);
                 break;
             }
             case MarketConstants.CONTEXT_PATH:{
                 List<Integer> route = (List<Integer>)property;
                 util = amortizedUtilityRoute(payment, route);
+                marketManager.getStats().storeHammingUtil(this.id, util);
+                marketManager.getStats().storeHamming(this.id, utilityFunction.getHammingDistance());
                 break;
             }
             case MarketConstants.CONTEXT_JOIN:{

@@ -18,4 +18,9 @@ public class CStochasticLocalSearch extends IAuctionModule {
         return false;
     }
 
+    @Override
+    public int getDuePayment() {
+        return 0;
+    }
+
 }

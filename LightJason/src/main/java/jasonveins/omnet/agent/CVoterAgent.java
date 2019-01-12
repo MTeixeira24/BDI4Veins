@@ -139,6 +139,9 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             case "distribution":{
                 return normalUtility(1.1, offeredSpeed, factor, preferredSpeed);
             }
+            case "gaussian":{
+                return gaussianUtility(offeredSpeed, preferredSpeed);
+            }
             default:
                 return -1;
         }
@@ -188,6 +191,11 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         return  result;
     }
 
+
+    public double gaussianUtility(double offeredSpeed, double desiredSpeed) {
+        double exponent = -1*(Math.pow((offeredSpeed - desiredSpeed),2) / 300);
+        return Math.pow(Math.E, exponent);
+    }
 
 
     @IAgentActionFilter

@@ -9,7 +9,12 @@
 
 MessageCache::MessageCache() {}
 
-MessageCache::~MessageCache() {}
+MessageCache::~MessageCache() {
+    for ( auto it = messageCacheMap.begin(); it != messageCacheMap.end(); ++it ){
+        delete it->second->message_backup;
+        delete it->second;
+    }
+}
 
 
 bool MessageCache::allResponded(long msgId){

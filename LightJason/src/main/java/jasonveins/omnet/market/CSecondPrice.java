@@ -1,10 +1,11 @@
 package jasonveins.omnet.market;
 
-public class CFirstPrice extends IAuctionModule {
+public class CSecondPrice extends IAuctionModule {
 
     private int highestAmount = -1;
+    private int secondHighestAmount = -2;
 
-    public CFirstPrice(int agentId) {
+    public CSecondPrice(int agentId) {
         super(agentId);
     }
 
@@ -13,6 +14,7 @@ public class CFirstPrice extends IAuctionModule {
         bidSet.put(agentId, amount);
         if(amount > highestAmount){
             winner = agentId;
+            secondHighestAmount = highestAmount;
             highestAmount = amount;
         }
     }
@@ -20,7 +22,7 @@ public class CFirstPrice extends IAuctionModule {
     @Override
     public boolean endOfAuction(){
         if((getAuctionIteration() == 4) || (withdrawCount >= getBidders().size() - 1))
-                hasEnded = true;
+            hasEnded = true;
         return hasEnded;
     }
 
@@ -31,7 +33,7 @@ public class CFirstPrice extends IAuctionModule {
 
     @Override
     public int getDuePayment(){
-        return highestAmount;
+        return secondHighestAmount;
     }
 
 }

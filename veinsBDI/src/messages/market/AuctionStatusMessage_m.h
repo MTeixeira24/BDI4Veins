@@ -39,6 +39,8 @@ typedef std::vector<int> IntList;
  *     int wtpsum;
  *     int property;
  *     IntList propertyList;
+ *     //
+ *     int duePayment;
  * 
  * }
  * </pre>
@@ -55,6 +57,7 @@ class AuctionStatusMessage : public ::MarketMessage
     int wtpsum;
     int property;
     IntList propertyList;
+    int duePayment;
 
   private:
     void copy(const AuctionStatusMessage& other);
@@ -92,6 +95,8 @@ class AuctionStatusMessage : public ::MarketMessage
     virtual IntList& getPropertyList();
     virtual const IntList& getPropertyList() const {return const_cast<AuctionStatusMessage*>(this)->getPropertyList();}
     virtual void setPropertyList(const IntList& propertyList);
+    virtual int getDuePayment() const;
+    virtual void setDuePayment(int duePayment);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const AuctionStatusMessage& obj) {obj.parsimPack(b);}

@@ -20,7 +20,6 @@ struct MessageStatus{
     std::vector<int> receiverIds;
     std::unordered_map<int, bool> receiverStatus;
     std::unordered_set<int> remainders;
-    ~MessageStatus(){delete message_backup;}
 };
 
 typedef std::unordered_map<long, MessageStatus*> MessageCacheMap;

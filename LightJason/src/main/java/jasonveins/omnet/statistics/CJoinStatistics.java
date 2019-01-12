@@ -24,7 +24,6 @@ public class CJoinStatistics extends IStatistics {
     }
 
     public void dumpCSV(){
-
         try {
             FileWriter out;
             File f = new File("testResults/JoinResults.csv");

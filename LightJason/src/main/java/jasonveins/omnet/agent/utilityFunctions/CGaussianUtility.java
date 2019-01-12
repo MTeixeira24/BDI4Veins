@@ -10,6 +10,7 @@ public class CGaussianUtility implements IUtilityFunction {
     private int speedTolerance;
     private List <Integer> preferredRoute;
     private int preferredSpeed;
+    private int hammingBuffer;
 
     public CGaussianUtility(){
         this(300, 7);
@@ -65,8 +66,13 @@ public class CGaussianUtility implements IUtilityFunction {
         for(int i = 0; i < evalArray.size(); i++){
             if(!evalBit.get(i).equals(preferredVector.get(i))) hammingDistance--;
         }
-        //this.hammingDistance = hammingDistance;
+        hammingBuffer = hammingDistance;
         return hammingDistance;
+    }
+
+
+    public int getHammingDistance() {
+        return hammingBuffer;
     }
 
     @Override

@@ -65,6 +65,10 @@ public:
         uint32_t agentId;
         uint32_t agentAction;
     };
+    void timeStampSpeed(double time);
+    void timeStampRoute(double time);
+    void startTimeStampRoute(double time);
+    void startTimeStampSpeed(double time);
 
 protected:
     void parseResponse(uint32_t msgLength) override;
@@ -79,6 +83,7 @@ protected:
     T extractData(LightJasonBuffer& buf){
         T value;
         buf >> value;
+        std::cout << value << " ";
         return value;
     }
 private:
@@ -87,6 +92,8 @@ private:
      */
     std::vector<int> endOfVoteTimeStamps;
     std::vector<int> endOfRouteVoteTimeStamps;
+    double startOfRouteVoteTimeStamp;
+    double startOfVoteTimeStamp;
     /**
      * Retransmissions
      */

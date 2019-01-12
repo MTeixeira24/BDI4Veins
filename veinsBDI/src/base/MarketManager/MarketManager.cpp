@@ -61,8 +61,36 @@ void MarketManager::initialize(int stage){
     }
 }
 void MarketManager::finish() {
-
+    double maxTime;
+    //Get the highest time
+    if(endOfVoteTimeStamps.size() > 0){
+        maxTime = endOfVoteTimeStamps[endOfVoteTimeStamps.size() - 1];
+        double timeToConsensus = maxTime - startOfVoteTimeStamp;
+        maxTime = endOfRouteVoteTimeStamps[endOfRouteVoteTimeStamps.size() - 1];
+        double timeToRouteConsensus = maxTime - startOfRouteVoteTimeStamp;
+        recordScalar("#timeToSpeedConsensus", timeToConsensus);
+        recordScalar("#timeToRouteConsensus", timeToRouteConsensus);
+        recordScalar("#retransmissions", retransmissions);
+    }
 }
+
+void MarketManager::timeStampSpeed(double time){
+    endOfVoteTimeStamps.push_back(time);
+}
+
+void MarketManager::timeStampRoute(double time){
+    endOfRouteVoteTimeStamps.push_back(time);
+}
+
+void MarketManager::startTimeStampRoute(double time){
+    startOfRouteVoteTimeStamp = time;
+}
+
+
+void MarketManager::startTimeStampSpeed(double time){
+    startOfVoteTimeStamp = time;
+}
+
 
 std::vector<int> MarketManager::getElementsPreferredSpeed(const std::vector<int>& elementList){
     std::vector<int> preferredSpeeds(elementList.size());
@@ -88,6 +116,7 @@ void MarketManager::parseResponse(uint32_t msgLength) {
             rbf >> jm.agentAction;
             switch (jm.agentAction){
             case SUBMIT_BID:{
+                std::cout << "SUBMIT_BID ";
                 assertType(rbf, VALUE_INT);
                 int auctionId = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
@@ -97,9 +126,11 @@ void MarketManager::parseResponse(uint32_t msgLength) {
                 assertType(rbf, VALUE_INT);
                 int managerId = extractData<int>(rbf);
                 ((MarketAgent*)(vehicles[jm.agentId]))->sendBid(auctionId,context,bidValue,managerId);
+                std::cout << std::endl;
                 break;
             }
             case SEND_AUCTION_RESULTS:{
+                std::cout << "SEND_AUCTION_RESULTS ";
                 assertType(rbf, VALUE_INT);
                 int auctionId = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
@@ -110,35 +141,40 @@ void MarketManager::parseResponse(uint32_t msgLength) {
                 break;
             }
             case NOTIFY_START_AUCTION:{
+                std::cout << "NOTIFY_START_AUCTION ";
                 assertType(rbf, VALUE_INT);
                 int auctionId = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
                 int context = extractData<int>(rbf);
+                std::cout << std::endl;
                 ((MarketAgent*)(vehicles[jm.agentId]))->sendNotificationOfAuction(auctionId, context);
                 break;
             }
             case HANDLE_END_OF_AUCTION:{
+                std::cout << "HANDLE_END_OF_AUCTION ";
                 assertType(rbf, VALUE_INT);
                 int auctionId = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
                 int auctionIteration = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
                 uint32_t winnerId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int pay = extractData<int>(rbf);
                 if (winnerId == jm.agentId){
-                    assertType(rbf, VALUE_INT);
-                    int pay = extractData<int>(rbf);
                     assertType(rbf, VALUE_INT);
                     int wtpSum = extractData<int>(rbf);
                     assertType(rbf, VALUE_INT);
                     int context = extractData<int>(rbf);
-                    ((MarketAgent*)(vehicles[jm.agentId]))->handleEndOfAuction(auctionId, auctionIteration, winnerId,
-                            pay, wtpSum, context);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->handleEndOfAuction(auctionId, auctionIteration, winnerId, pay,
+                            wtpSum, context);
                 }else{
-                    ((MarketAgent*)(vehicles[jm.agentId]))->handleEndOfAuction(auctionId, auctionIteration, winnerId);
+                    ((MarketAgent*)(vehicles[jm.agentId]))->handleEndOfAuction(auctionId, auctionIteration, winnerId, pay);
                 }
+                std::cout << std::endl;
                 break;
             }
             case SEND_PAY:{
+                std::cout << "SEND_PAY ";
                 assertType(rbf, VALUE_INT);
                 int auctionId = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
@@ -155,9 +191,11 @@ void MarketManager::parseResponse(uint32_t msgLength) {
                     int speed = extractData<int>(rbf);
                     ((MarketAgent*)(vehicles[jm.agentId]))->sendPay(auctionId, context, pay, managerId, speed);
                 }
+                std::cout << std::endl;
                 break;
             }
             case DISTRIBUTE_PAY:{
+                std::cout << "DISTRIBUTE_PAY ";
                 assertType(rbf, VALUE_INT);
                 int auctionId = extractData<int>(rbf);
                 assertType(rbf, VALUE_INT);
@@ -176,6 +214,7 @@ void MarketManager::parseResponse(uint32_t msgLength) {
                     int speed = extractData<int>(rbf);
                     ((MarketAgent*)(vehicles[jm.agentId]))->distributePay(auctionId, auctionIteration, winnerId, payment, wtpSum, speed);
                 }
+                std::cout << std::endl;
                 break;
             }
             default:

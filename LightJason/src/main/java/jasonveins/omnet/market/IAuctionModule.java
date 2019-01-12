@@ -47,14 +47,13 @@ public abstract class IAuctionModule {
         return iOb;
     }
 
-    public InstructionModel createPayInstruction(){
-        int value = currentBid;
-        endowment -= currentBid;
-        System.out.println("Paying a price of " + value);
+    public InstructionModel createPayInstruction(int duePay){
+        endowment -= duePay;
+        System.out.println("Paying a price of " + duePay);
         InstructionModel iOb = new InstructionModel(agentId, MarketConstants.SEND_PAY);
         iOb.pushInt(auctionId);
         iOb.pushInt(context);
-        iOb.pushInt(value);
+        iOb.pushInt(duePay);
         iOb.pushInt(managerId);
         return iOb;
     }
@@ -88,6 +87,7 @@ public abstract class IAuctionModule {
     }
     public abstract int determineWinner();
     public abstract boolean endOfAuction();
+    public abstract int getDuePayment();
 
     public InstructionModel setupAuction(int context, List<Integer> participants){
         bidSet = new HashMap<>();

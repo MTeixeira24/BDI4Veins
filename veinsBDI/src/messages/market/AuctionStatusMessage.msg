@@ -30,5 +30,7 @@ packet AuctionStatusMessage extends MarketMessage {
     int wtpsum;
     int property;
     IntList propertyList;
+    //
+    int duePayment;
     
 }

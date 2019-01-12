@@ -118,7 +118,7 @@ public:
 
     void sendNotificationOfAuction(int auctionId, int context);
 
-    void handleEndOfAuction(int auctionId, int auctionIteration, int winnerId);
+    void handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int duePayment);
     void handleEndOfAuction(int auctionId, int auctionIteration, int winnerId, int pay, int wtpSum, int context);
 
     void sendPay(int auctionId, int context, int pay, int managerId, int speed);
