@@ -13,15 +13,18 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.traffic;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+package veinsbdi.app.pdr;
+import org.car2x.veins.modules.application.platooning.apps.BaseApp;
 
-network PDRTrafficManager like TraCIBaseTrafficManager{
-    parameters:
-        @class(PDRTrafficManager);
-        //distance between vehicles, -1 to add no vehicle
-        int separation @unit("m") = default(100m);
-        string vehicleVType;
-        int flow;
-        string noiseVType;
+simple PDRApp like BaseApp 
+{
+parameters:
+    int headerLength @unit("bit") = default(0 bit);
+    @display("i=block/app2");
+    @class(PDRApp);
+gates:
+    input lowerLayerIn;
+    output lowerLayerOut;
+    input lowerControlIn;
+    output lowerControlOut;
 }

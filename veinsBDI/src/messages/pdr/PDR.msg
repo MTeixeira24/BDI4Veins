@@ -11,17 +11,20 @@
 // 
 // You should have received a copy of the GNU Lesser General Public License
 // along with this program.  If not, see http://www.gnu.org/licenses/.
-// 
+//
 
-package veinsbdi.traffic;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+cplusplus {{
+    /** message type for pdr messages */
+    static const int MANEUVER_TYPE = 22345;
+}}
 
-network PDRTrafficManager like TraCIBaseTrafficManager{
-    parameters:
-        @class(PDRTrafficManager);
-        //distance between vehicles, -1 to add no vehicle
-        int separation @unit("m") = default(100m);
-        string vehicleVType;
-        int flow;
-        string noiseVType;
+// General message for an arbitrary maneuver to holds common information.
+// Only children of this message should be initialized.
+packet PDRMessage {
+    // id of the originator of this message
+    int vehicleId;
+    // id of the destination of this message
+    int destinationId;
+    // sumo external id of the sender
+    string externalId;
 }

@@ -12,6 +12,8 @@ link('n5', 'n7', 1).
 link('n6', 'n7', 1).
 //what is our current route
 currentRoute(['n0','n1','n3','n6','n7']).
+//have we reached the target? 0 == no, 1 == yes
+reachedDestination(0).
 //Initial goal
 !main.
 
@@ -74,6 +76,8 @@ setnodes(Origin, Route)
     generic/print("I have reached node", N, "current route size", S); 
     !!set/next/target(S, L)
     : bool/equal(N, 'n7') <-
+    -reachedDestination(0)
+    +reachedDestination(1)
     generic/print("Target reached")  
 .
 
@@ -89,10 +93,8 @@ setnodes(Origin, Route)
 
 //A link that we wanted to cross is closed
 +!link/closed(N1, N2) <-
-    generic/print("TEST:", N1, N2);
     -link(N1, N2, _);
     +link(N1, N2, 0);
-    >>(link(T1, T2, 1), T1 == N1); //Get an alternative link
     $findroute('n0',R);
     -currentRoute(_);
     +currentRoute(R);

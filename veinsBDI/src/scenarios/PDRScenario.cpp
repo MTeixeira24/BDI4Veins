@@ -6,16 +6,14 @@
  */
 
 #include "PDRScenario.h"
+#include "veins/modules/application/platooning/utilities/DynamicPositionManager.h"
 
 Define_Module(PDRScenario);
 
 PDRScenario::PDRScenario() {
-    // TODO Auto-generated constructor stub
-
 }
 
 PDRScenario::~PDRScenario() {
-    // TODO Auto-generated destructor stub
 }
 
 void PDRScenario::initialize(int stage){
