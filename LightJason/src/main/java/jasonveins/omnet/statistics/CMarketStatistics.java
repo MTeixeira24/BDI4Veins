@@ -45,9 +45,9 @@ public class CMarketStatistics extends IStatistics {
                 int id = e.getKey();
                 try{
                     if(e.getValue().size() < 2){
-                        for(int n = e.getValue().size(); n < 2; n++) e.getValue().add(0.0);
-                        for(int n = hamming.get(id).size(); n < 2; n++) hamming.get(id).add(0.0);
-                        for(int n = hammingUtilities.get(id).size(); n < 2; n++) hammingUtilities.get(id).add(0.0);
+                        for(int n = e.getValue().size(); n <= 2; n++) e.getValue().add(0.0);
+                        for(int n = hamming.get(id).size(); n <= 2; n++) hamming.get(id).add(0.0);
+                        for(int n = hammingUtilities.get(id).size(); n <= 2; n++) hammingUtilities.get(id).add(0.0);
                     }
                 }catch (NullPointerException t){
                     t.printStackTrace();
@@ -77,17 +77,17 @@ public class CMarketStatistics extends IStatistics {
         ArrayList<Double> utils = this.hamming.get(id);
         if(utils == null){
             utils = new ArrayList<>(6);
+            this.hamming.putIfAbsent(id, utils);
         }
-        utils.add(hamming);
-        this.hamming.put(id, utils);
+        this.hamming.get(id).add(hamming);
     }
     public void storeHammingUtil(int id, double hamming){
         ArrayList<Double> utils = hammingUtilities.get(id);
         if(utils == null){
             utils = new ArrayList<>(6);
+            hammingUtilities.putIfAbsent(id, utils);
         }
-        utils.add(hamming);
-        hammingUtilities.put(id, utils);
+        hammingUtilities.get(id).add(hamming);
     }
 
     public void storePlatoon(int id, int platoonId){

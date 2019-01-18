@@ -69,6 +69,8 @@ public:
     void timeStampRoute(double time);
     void startTimeStampRoute(double time);
     void startTimeStampSpeed(double time);
+    void startTimeStampJoin(double time){startJoinTimeStamp = time;}
+    void endTimeStampJoin(double time){endJoinTimeStamp = time;}
 
 protected:
     void parseResponse(uint32_t msgLength) override;
@@ -92,6 +94,8 @@ private:
      */
     std::vector<int> endOfVoteTimeStamps;
     std::vector<int> endOfRouteVoteTimeStamps;
+    double endJoinTimeStamp = 0;
+    double startJoinTimeStamp = 0;
     double startOfRouteVoteTimeStamp;
     double startOfVoteTimeStamp;
     /**

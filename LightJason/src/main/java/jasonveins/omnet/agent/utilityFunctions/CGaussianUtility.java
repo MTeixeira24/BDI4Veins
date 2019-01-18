@@ -30,7 +30,7 @@ public class CGaussianUtility implements IUtilityFunction {
     @Override
     public double computeUtilityRoute(List<Integer> route, Graph routeGraph) {
         int inverseHammming = getHammingDistance(route, routeGraph);
-        int maxHamming = route.size();
+        int maxHamming = routeGraph.getVertexes().size();
         double exponent = -1*(Math.pow((inverseHammming - maxHamming),2) / committeeTolerance);
         return Math.pow(Math.E, exponent);
     }

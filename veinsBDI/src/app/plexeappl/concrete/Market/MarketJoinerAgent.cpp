@@ -50,6 +50,7 @@ void MarketJoinerAgent::endOfAuctionTrigger(int winnerId){
             for(uint32_t i = 0; i < members.size(); i++)
                 wtpList.push_back(((MarketManager*)manager)->getWTP(members[i]));
             hasJoinEnded = true;
+            ((MarketManager*)manager)->endTimeStampJoin(simTime().dbl() * 1000);
         }
     }
 }

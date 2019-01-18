@@ -160,7 +160,7 @@ void MarketAgent::sendBid(int auctionId, int context, int bidValue, int managerI
     * If this occurs the time taken to reach consensus
     * is greatly increased ([.1,.6]s -> [4,inf)s).
     */
-    sendMessageWithAckDelayed(bid, managerId);
+    sendMessageDelayed(bid, managerId);
 }
 void MarketAgent::handleBidMessage(BidMessage* msg){
     if(msg->getMessageType() == (int)MessageType::BID){
@@ -179,7 +179,7 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
         BidMessage* reply = new BidMessage("BidAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, msg->getVehicleId());
+        sendMessageDelayed(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ACK){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::PAYMENT){
@@ -202,7 +202,7 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
         BidMessage* reply = new BidMessage("PaymentAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, msg->getVehicleId());
+        sendMessageDelayed(reply, msg->getVehicleId());
     }
 }
 
@@ -245,7 +245,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, msg->getVehicleId());
+        sendMessageDelayed(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ACK){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::ITERATION_RESULTS){
@@ -260,7 +260,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, msg->getVehicleId());
+        sendMessageDelayed(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::AUCTION_END){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got results of the auction!" << std::endl;
@@ -275,7 +275,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         AuctionStatusMessage* reply = new AuctionStatusMessage("AuctionEndAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, msg->getVehicleId());
+        sendMessageDelayed(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::DISTRIBUTION){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got results the payment of auction!" << std::endl;
@@ -300,7 +300,7 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         AuctionStatusMessage* reply = new AuctionStatusMessage("DistributionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
         reply->setMessageType((int)MessageType::ACK);
-        sendUnicast(reply, msg->getVehicleId());
+        sendMessageDelayed(reply, msg->getVehicleId());
     }
 }
 
@@ -412,11 +412,20 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
             BeliefModel wtp("receive/wtp");
             wtp.pushIntArray(wtpList);
             manager->sendInformationToAgents(myId, &wtp);
+        }else if(atc.context == CONTEXT_JOIN){
+            ((MarketManager*)manager)->startTimeStampJoin(simTime().dbl() * 1000);
         }
         startAuction.pushIntArray(auctionMembers);
         manager->sendInformationToAgents(myId, &startAuction);
     }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
-        sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
+        switch(delayMessage->getMessageType()){
+        case (int)MessageType::ACK:
+            sendUnicast(delayMessage, delayMessage->getDestinationId());
+            break;
+        default:
+            sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
+            break;
+        }
     }else{
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
@@ -440,7 +449,7 @@ void MarketAgent::sendMessageWithAck(MarketMessage* msg, const std::vector<int>&
     messageCache.insertEntry(msg->getMessageId(), msg->dup(), targets);
     AckTimer* at = new AckTimer("AckTimer");
     at->setMessageId(msg->getMessageId());
-    scheduleAt(simTime() + ackTime, at);
+    scheduleAt(simTime() + ackTime + randomOffset(), at);
     sendUnicast(msg, -1);
 }
 
@@ -448,18 +457,25 @@ void MarketAgent::sendMessageWithAck(MarketMessage* msg, int target){
     std::vector<int> v_target({target});
     sendMessageWithAck(msg, v_target);
 }
-void MarketAgent::sendMessageWithAckDelayed(MarketMessage* msg, int target){
+void MarketAgent::sendMessageDelayed(MarketMessage* msg, int target){
     std::random_device rd{};
     std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,3.0);
+    std::normal_distribution<double> distribution(25,5.0);
     double delay = std::abs(distribution(gen) * 0.001);
     scheduleAt(simTime() + delay, msg);
+}
+
+double MarketAgent::randomOffset(){
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<double> distribution(25,5.0);
+    return std::abs(distribution(gen) * 0.001);
 }
 
 void MarketAgent::resendMessage(long msgId, AckTimer* at){
     MarketMessage* resend = messageCache.getMessageReference(msgId);
     resend->setForWholePlatoon(false);
     resend->setTargets(messageCache.getRemainerIds(msgId));
-    scheduleAt(simTime() + ackTime, at);
+    scheduleAt(simTime() + ackTime + randomOffset(), at);
     sendUnicast(resend->dup(), -1);
 }

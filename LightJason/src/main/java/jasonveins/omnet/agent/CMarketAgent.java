@@ -199,6 +199,12 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             //If the manager is the one that jump straight to payment distribution
             iOb.pushInt(auctionModule.getDuePayment());
             if(this.id == auctionModule.getWinner()){
+                if(auctionModule.getContext() == MarketConstants.CONTEXT_PATH){
+                    marketManager.getStats().storeHammingUtil(this.id, 1.0);
+                    marketManager.getStats().storeHamming(this.id, 9);
+                }else if(auctionModule.getContext() == MarketConstants.CONTEXT_SPEED){
+                    marketManager.getStats().storeUtil(this.id, 1.0);
+                }
                 iOb.pushInt(auctionModule.getWtpSum());
                 iOb.pushInt(auctionModule.getContext());
                 auctionModule.setEndowment(auctionModule.getEndowment() - auctionModule.getDuePayment());
@@ -218,13 +224,19 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName( name = "send/pay")
     public void sendPay(List<Integer> preferredPath, Number preferredSpeed, Number DuePay){
         InstructionModel iOb = auctionModule.createPayInstruction(DuePay.intValue());
+        double util;
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 iOb.pushInt(preferredSpeed.intValue());
+                util = amortizedUtilitySpeed(0, preferredSpeed.intValue());
+                marketManager.getStats().storeUtil(this.id, util);
                 break;
             }
             case MarketConstants.CONTEXT_PATH:{
                 iOb.pushIntArray(preferredPath);
+                util = amortizedUtilityRoute(0, preferredPath);
+                marketManager.getStats().storeHammingUtil(this.id, util);
+                marketManager.getStats().storeHamming(this.id, utilityFunction.getHammingDistance());
                 break;
             }
             case MarketConstants.CONTEXT_JOIN:{
@@ -274,6 +286,9 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     public void finalizeAuction(int payment, Object property){
         auctionModule.setEndowment(payment+auctionModule.getEndowment());
         double util = 0;
+        if(id == 3){
+            int stop = 0;
+        }
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 Integer speed = (Integer)property;

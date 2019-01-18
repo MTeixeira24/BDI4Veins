@@ -71,6 +71,9 @@ void MarketManager::finish() {
         recordScalar("#timeToSpeedConsensus", timeToConsensus);
         recordScalar("#timeToRouteConsensus", timeToRouteConsensus);
         recordScalar("#retransmissions", retransmissions);
+        if(startJoinTimeStamp > 0){
+            recordScalar("#timeToJoinConsensus", endJoinTimeStamp - startJoinTimeStamp);
+        }
     }
 }
 
