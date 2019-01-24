@@ -169,7 +169,7 @@ void VotingAppl::sendRequestToJoin(int targetPlatooId, int destinationId, double
     sendUnicast(msg, destinationId);
     //Wait half a second to request ack if no response is heard
     cancelEvent(awaitAckTimer);
-    scheduleAt(simTime() + 0.3, awaitAckTimer);
+    scheduleAt(simTime() + ackTimeOut, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
@@ -195,7 +195,7 @@ void VotingAppl::sendVoteSubmition(std::vector<int>& votes){
     negotiationState = VoteState::AWAITING_ACK_SUBMIT;
     cancelEvent(awaitAckTimer);
     //Reschedule to re-send 500ms from now if no ack is received
-    scheduleAt(simTime() + 0.5, awaitAckTimer);
+    scheduleAt(simTime() + ackTimeOut, awaitAckTimer);
 }
 
 void VotingAppl::sendVoteResults(int winnerValue, int joinerId){
@@ -245,7 +245,7 @@ void VotingAppl::sendResultRequest(int originId, int targetId){
     sendUnicast(msg, targetId);
     cancelEvent(awaitAckTimer);
     //Reschedule to re-send 500ms from now if no ack is received
-    scheduleAt(simTime() + 0.1, awaitAckTimer);
+    scheduleAt(simTime() + ackTimeOut, awaitAckTimer);
 }
 
 void VotingAppl::fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId){
@@ -402,7 +402,7 @@ void VotingAppl::handleAck(const Ack* msg){
         std::normal_distribution<double> distribution(50,2.0);
         double delay = distribution(gen) * 0.01;
         cancelEvent(awaitAckTimer);
-        scheduleAt(simTime() + delay, awaitAckTimer);
+        scheduleAt(simTime() + ackTimeOut + delay, awaitAckTimer);
     }
 }
 

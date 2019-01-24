@@ -251,13 +251,13 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
 
     @IAgentActionFilter
     @IAgentActionName( name = "distribute/payment")
-    public void distributePayment(Number payment, Object property){
+    public void distributePayment(Number payment, Object property, Number wtpWinner){
         InstructionModel iOb = new InstructionModel(this.id, MarketConstants.DISTRIBUTE_PAY);
         iOb.pushInt(auctionModule.getAuctionId());
         iOb.pushInt(auctionModule.getAuctionIteration());
         iOb.pushInt(auctionModule.getWinner());
         iOb.pushInt(payment.intValue());
-        iOb.pushInt(auctionModule.getWtpSum());
+        iOb.pushInt(auctionModule.getWtpSum() - wtpWinner.intValue());
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 Integer speed = (Integer)property;
@@ -276,7 +276,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             default:
                 throw new RuntimeException("sendPay: Unknown context");
         }
-        int cut = (int)(payment.intValue() * ((double)auctionModule.getWtp() / auctionModule.getWtpSum()));
+        int cut = (int)(payment.intValue() * ((double)auctionModule.getWtp() /
+                (auctionModule.getWtpSum()-wtpWinner.intValue())));
         finalizeAuction( cut, property);
         agentManager.addInstruction(iOb);
     }

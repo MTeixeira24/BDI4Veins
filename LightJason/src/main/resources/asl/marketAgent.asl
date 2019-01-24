@@ -80,8 +80,8 @@
     finalize/auction(PAY, PROPERTY)
 .
 
-+!distribute/pay(PAY, PROPERTY) : true <-
-    distribute/payment(PAY, PROPERTY)
++!distribute/pay(PAY, PROPERTY, WINNERWTP) : true <-
+    distribute/payment(PAY, PROPERTY, WINNERWTP)
 .
 
 +!receive/wtp(WTPLIST) : true <-

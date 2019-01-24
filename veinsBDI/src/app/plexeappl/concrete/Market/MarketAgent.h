@@ -86,7 +86,7 @@ protected:
     /*
      * Seconds to wait for ack messages
      */
-    const double ackTime = 0.2;
+    const double ackTime = 0.05;
     /*
      * Initial behaviours
      */

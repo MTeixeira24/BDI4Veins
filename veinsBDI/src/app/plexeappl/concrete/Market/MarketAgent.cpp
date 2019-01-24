@@ -185,9 +185,8 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
     }else if (msg->getMessageType() == (int)MessageType::PAYMENT){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got a payment from:" << msg->getVehicleId() <<  std::endl;
-            messageCache.saveReceived(msg->getMessageId());
             BeliefModel payment("distribute/pay");
-            int pay = msg->getBidValue(), speed;
+            int pay = msg->getBidValue(), speed, winnerWtp = msg->getWtp();
             std::vector<int> path;
             payment.pushInt(&pay);
             if(msg->getContext() == CONTEXT_PATH){
@@ -197,6 +196,7 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
                 speed = msg->getProperty();
                 payment.pushInt(&speed);
             }
+            payment.pushInt(&winnerWtp);
             manager->sendInformationToAgents(myId, &payment);
         }
         BidMessage* reply = new BidMessage("PaymentAck");
@@ -278,24 +278,26 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         sendMessageDelayed(reply, msg->getVehicleId());
     }else if (msg->getMessageType() == (int)MessageType::DISTRIBUTION){
         if(!messageCache.hasReceived(msg->getMessageId())){
-            std::cout << myId <<": Got results the payment of auction!" << std::endl;
             messageCache.saveReceived(msg->getMessageId());
-            BeliefModel auctionResult("receive/pay");
-            double percentage = (double)willingnessToPay / msg->getWtpsum();
-            int pay = (int)(msg->getPayment() * percentage);
-            int speed;
-            std::vector<int> path;
-            auctionResult.pushInt(&pay);
-            if(msg->getContext() == CONTEXT_SPEED){
-                speed = msg->getProperty();
-                auctionResult.pushInt(&speed);
-                ((MarketManager*)manager)->timeStampSpeed(simTime().dbl() * 1000);
-            }else if(msg->getContext() == CONTEXT_PATH){
-                path = msg->getPropertyList();
-                auctionResult.pushIntArray(path);
-                ((MarketManager*)manager)->timeStampRoute(simTime().dbl() * 1000);
+            if(myId != msg->getWinnerId()){
+                std::cout << myId <<": Got results the payment of auction!" << std::endl;
+                BeliefModel auctionResult("receive/pay");
+                double percentage = (double)willingnessToPay / msg->getWtpsum();
+                int pay = (int)(msg->getPayment() * percentage);
+                int speed;
+                std::vector<int> path;
+                auctionResult.pushInt(&pay);
+                if(msg->getContext() == CONTEXT_SPEED){
+                    speed = msg->getProperty();
+                    auctionResult.pushInt(&speed);
+                    ((MarketManager*)manager)->timeStampSpeed(simTime().dbl() * 1000);
+                }else if(msg->getContext() == CONTEXT_PATH){
+                    path = msg->getPropertyList();
+                    auctionResult.pushIntArray(path);
+                    ((MarketManager*)manager)->timeStampRoute(simTime().dbl() * 1000);
+                }
+                manager->sendInformationToAgents(myId, &auctionResult);
             }
-            manager->sendInformationToAgents(myId, &auctionResult);
         }
         AuctionStatusMessage* reply = new AuctionStatusMessage("DistributionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());

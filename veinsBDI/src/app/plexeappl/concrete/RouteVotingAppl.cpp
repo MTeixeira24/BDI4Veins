@@ -218,7 +218,7 @@ void RouteVotingAppl::handleAck(const Ack* msg){
         std::mt19937 gen{rd()};
         std::normal_distribution<double> distribution(50,2.0);
         double delay = distribution(gen) * 0.01;
-        scheduleAt(simTime() + delay, awaitAckTimer);
+        scheduleAt(simTime() + delay + ackTimeOut, awaitAckTimer);
     }else{
         VotingAppl::handleAck(msg);
     }
@@ -234,7 +234,7 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
         case VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST:{
             RequestJoinPlatoonMessage* resend = dynamic_cast<RequestJoinPlatoonMessage*>(copy->dup());
             sendUnicast(resend, resend->getDestinationId());
-            scheduleAt(simTime() + 0.1, awaitAckTimer);
+            scheduleAt(simTime() + ackTimeOut, awaitAckTimer);
             ((VoteManager*)manager)->incrementRetransmission();
             break;
         }
