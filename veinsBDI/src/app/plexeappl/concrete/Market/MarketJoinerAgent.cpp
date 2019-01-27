@@ -66,10 +66,16 @@ void MarketJoinerAgent::distributePay(int auctionId, int auctionIteration, int w
         distributePay->setWinnerId(winnerId);
         distributePay->setAuctionIteration(auctionIteration);
         distributePay->setWtpsum(wtpSum);
-        distributePay->setPayment(0);
+        distributePay->setPayment(payment);
         distributePay->setProperty(speed);
         distributePay->setContext(CONTEXT_JOIN);
-        sendMessageWithAck(distributePay, auctionMembers);
+        distributePay->setPlatoonId(positionHelper->getPlatoonId());
+
+        std::vector<int> targets = auctionMembers;
+        std::vector<int> platoons = positionHelper->getPlatoonFormation();
+        targets.insert(targets.end(), platoons.begin() + 1, platoons.end());
+
+        sendMessageWithAck(distributePay, targets);
         endOfAuctionTrigger(winnerId);
     }else{
         MarketAgent::distributePay(auctionId, auctionIteration, winnerId, payment, wtpSum, speed);

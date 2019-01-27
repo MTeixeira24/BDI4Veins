@@ -38,6 +38,7 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     private IAuctionModule auctionModule;
     private IUtilityFunction utilityFunction;
     private CMarketAgentManager marketManager;
+    private int transactionCount = 0;
 
     //###########//
     //CONSTRUCTOR//
@@ -121,6 +122,7 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         auctionModule.setWtp(wtp.intValue());
         utilityFunction.setPreferredRoute(preferredRoute);
         utilityFunction.setPreferredSpeed(preferredSpeed.intValue());
+        marketManager.getStats().addTransaction(endowment.intValue(), 0, id, transactionCount++);
         System.out.println("Received auction parameters: WTP:" + wtp.intValue() + " Money:" + endowment.intValue());
     }
 
@@ -208,6 +210,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
                 iOb.pushInt(auctionModule.getWtpSum());
                 iOb.pushInt(auctionModule.getContext());
                 auctionModule.setEndowment(auctionModule.getEndowment() - auctionModule.getDuePayment());
+                marketManager.getStats().addTransaction(auctionModule.getEndowment(), -1*auctionModule.getDuePayment(),
+                        id, transactionCount++);
             }
         }else{
             //Start a new iteration and add the managers bid
@@ -224,6 +228,7 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName( name = "send/pay")
     public void sendPay(List<Integer> preferredPath, Number preferredSpeed, Number DuePay){
         InstructionModel iOb = auctionModule.createPayInstruction(DuePay.intValue());
+        auctionModule.setEndowment(auctionModule.getEndowment() - DuePay.intValue());
         double util;
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
@@ -246,6 +251,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
             default:
                 throw new RuntimeException("sendPay: Unknown context");
         }
+        marketManager.getStats().addTransaction(auctionModule.getEndowment(), -1*DuePay.intValue(),
+                id, transactionCount++);
         agentManager.addInstruction(iOb);
     }
 
@@ -258,26 +265,30 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
         iOb.pushInt(auctionModule.getWinner());
         iOb.pushInt(payment.intValue());
         iOb.pushInt(auctionModule.getWtpSum() - wtpWinner.intValue());
+        int cut = 0;
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 Integer speed = (Integer)property;
                 iOb.pushInt(speed);
+                cut = (int)(payment.intValue() * ((double)auctionModule.getWtp() /
+                        (auctionModule.getWtpSum()-wtpWinner.intValue())));
                 break;
             }
             case MarketConstants.CONTEXT_PATH:{
                 List<Integer> route = (List<Integer>)property;
                 iOb.pushIntArray(route);
+                cut = (int)(payment.intValue() * ((double)auctionModule.getWtp() /
+                        (auctionModule.getWtpSum()-wtpWinner.intValue())));
                 break;
             }
             case MarketConstants.CONTEXT_JOIN:{
                 iOb.pushInt(auctionModule.getWinner());
+                cut = (int)(payment.intValue() / 2.0);
                 break;
             }
             default:
                 throw new RuntimeException("sendPay: Unknown context");
         }
-        int cut = (int)(payment.intValue() * ((double)auctionModule.getWtp() /
-                (auctionModule.getWtpSum()-wtpWinner.intValue())));
         finalizeAuction( cut, property);
         agentManager.addInstruction(iOb);
     }
@@ -286,10 +297,8 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
     @IAgentActionName(name = "finalize/auction")
     public void finalizeAuction(int payment, Object property){
         auctionModule.setEndowment(payment+auctionModule.getEndowment());
+        marketManager.getStats().addTransaction(auctionModule.getEndowment(), payment, id, transactionCount++);
         double util = 0;
-        if(id == 3){
-            int stop = 0;
-        }
         switch (auctionModule.getContext()){
             case MarketConstants.CONTEXT_SPEED:{
                 Integer speed = (Integer)property;
@@ -304,14 +313,12 @@ public class CMarketAgent extends IVehicleAgent<CMarketAgent> {
                 marketManager.getStats().storeHamming(this.id, utilityFunction.getHammingDistance());
                 break;
             }
-            case MarketConstants.CONTEXT_JOIN:{
+            default:{
                 break;
             }
-            default:
-                throw new RuntimeException("sendPay: Unknown context");
         }
+        auctionModule.setContext(-1);
         System.out.println("Total utility: " + util);
-        //TODO: Update statistics
     }
 
     private void restartAuction(){

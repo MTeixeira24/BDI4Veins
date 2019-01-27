@@ -282,8 +282,25 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
             if(myId != msg->getWinnerId()){
                 std::cout << myId <<": Got results the payment of auction!" << std::endl;
                 BeliefModel auctionResult("receive/pay");
-                double percentage = (double)willingnessToPay / msg->getWtpsum();
-                int pay = (int)(msg->getPayment() * percentage);
+                double percentage;
+                int pay;
+                if(msg->getContext() == CONTEXT_JOIN){
+                    if(msg->getPlatoonId() == positionHelper->getPlatoonId()){
+                        int platoonPosition = ((DynamicPositionHelper*)positionHelper)->getPosition();
+                        if(platoonPosition == 0)
+                            percentage = 2;
+                        else if(platoonPosition == 1)
+                            percentage = 4;
+                        else
+                            percentage = 4*(positionHelper->getPlatoonSize() - 2);
+                        pay = (int)(msg->getPayment() / percentage);
+                    }else{
+                        pay = 0;
+                    }
+                }else{
+                    percentage = (double)willingnessToPay / msg->getWtpsum();
+                    pay = (int)(msg->getPayment() * percentage);
+                }
                 int speed;
                 std::vector<int> path;
                 auctionResult.pushInt(&pay);
@@ -295,6 +312,9 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
                     path = msg->getPropertyList();
                     auctionResult.pushIntArray(path);
                     ((MarketManager*)manager)->timeStampRoute(simTime().dbl() * 1000);
+                }else{
+                    speed = msg->getProperty();
+                    auctionResult.pushInt(&speed);
                 }
                 manager->sendInformationToAgents(myId, &auctionResult);
             }

@@ -18,6 +18,7 @@ public class CMarketAgentManager extends AgentManager {
     private String utility;
     private Graph scenarioRoute;
     private String auctionModule;
+    int movementCounter;
     /**
      * Class constructor
      *
