@@ -1,6 +1,6 @@
 #!/bin/bash
 
-RUN=0
+RUN=237
 
 while [ $RUN -lt 500  ]
 do

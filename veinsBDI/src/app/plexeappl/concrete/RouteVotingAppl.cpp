@@ -118,6 +118,8 @@ void RouteVotingAppl::sendJoinProposal(){
 
 
 void RouteVotingAppl::sendVoteResults(int winnerValue, int joinerId){
+    SimTime x = simTime().inUnit(SimTimeUnit::SIMTIME_MS);
+    double y = x.dbl();
     VotingAppl::sendVoteResults(winnerValue, joinerId);
 }
 
