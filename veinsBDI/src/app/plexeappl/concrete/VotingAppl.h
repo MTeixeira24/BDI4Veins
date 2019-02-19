@@ -180,7 +180,7 @@ protected:
     cMessage* searchTimer = NULL;
 
     cMessage* awaitAckTimer = NULL;
-    double ackTimeOut = 0.05;
+    double ackTimeOut = 0.3;
     /**
      * Self message of the leader to verify if all votes are received
      */

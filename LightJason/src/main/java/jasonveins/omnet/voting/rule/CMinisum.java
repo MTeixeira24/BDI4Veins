@@ -1,6 +1,5 @@
 package jasonveins.omnet.voting.rule;
 
-import org.apache.commons.math3.analysis.function.Max;
 
 import java.util.*;
 

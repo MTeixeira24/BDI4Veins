@@ -35,26 +35,9 @@ final class App
      *
      * @param p_args command-line arguments
      */
-    public static void main( final String[] p_args ) throws FileNotFoundException {
-
-
-        /*// Create a new file output stream.
-        PrintStream fileOut = new PrintStream("./out.txt");
-        // Create a new file error stream.
-        PrintStream fileErr = new PrintStream("./err.txt");
-
-        // Redirect standard out to file.
-        System.setOut(fileOut);
-        // Redirect standard err to file.
-        System.setErr(fileErr);*/
+    public static void main( final String[] p_args ) {
 
         ConnectionManager cm = new ConnectionManager();
-        //AgentManager am = new AgentManager(/*"manager.asl"*/"laneMergeVehicle.asl", cm);
-        //CVoterAgentManager cam = new CVoterAgentManager("voter.asl", cm, voteRule);
-        //cm.setAgentManager(am);
-        //cm.setAgentManager(cam);
         cm.start();
-        //am.loop();
-        //cam.loop();
     }
 }
