@@ -1,3 +1,7 @@
+veinsBDI/Makefile 
+veinsBDI/.metadata/ 
+veinsBDI/.settings/*
+
 #Log files
 LightJason/logs/*
 #Omnet files
