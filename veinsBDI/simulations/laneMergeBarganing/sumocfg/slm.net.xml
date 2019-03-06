@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on qua 27 fev 2019 10:06:51 WET by Eclipse SUMO netedit Version UNKNOWN
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/netconvertConfiguration.xsd">
+
+    <input>
+        <sumo-net-file value="/home/miguel/Documents/BDI4Veins/veinsBDI/simulations/laneMergeBarganing/sumocfg/slm.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/miguel/Documents/BDI4Veins/veinsBDI/simulations/laneMergeBarganing/sumocfg/slm.net.xml"/>
+    </output>
+
+    <processing>
+        <no-internal-links value="true"/>
+        <no-turnarounds value="true"/>
+        <offset.disable-normalization value="true"/>
+        <lefthand value="false"/>
+        <junctions.corner-detail value="0"/>
+        <rectangular-lane-cut value="false"/>
+        <walkingareas value="false"/>
+    </processing>
+
+</configuration>
+-->
+
+<net version="0.27" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-1150.00,280.00,-400.00,280.00" origBoundary="-10000000000.00,-10000000000.00,10000000000.00,10000000000.00" projParameter="!"/>
+
+    <edge id="01" from="n0" to="n1" priority="1">
+        <lane id="01_0" index="0" speed="13.89" length="350.00" shape="-1150.00,275.20 -801.50,275.20"/>
+        <lane id="01_1" index="1" speed="13.89" length="350.00" shape="-1150.00,278.40 -801.50,278.40"/>
+    </edge>
+    <edge id="12" from="n1" to="n2" priority="1">
+        <lane id="12_0" index="0" speed="13.89" length="400.00" shape="-798.50,278.40 -400.00,278.40"/>
+    </edge>
+
+    <junction id="n0" type="dead_end" x="-1150.00" y="280.00" incLanes="" intLanes="" shape="-1150.00,280.00 -1150.00,273.60"/>
+    <junction id="n1" type="priority" x="-800.00" y="280.00" incLanes="01_0 01_1" intLanes="" shape="-798.50,280.00 -798.50,276.80 -801.50,273.60 -801.50,280.00">
+        <request index="0" response="0" foes="0"/>
+    </junction>
+    <junction id="n2" type="dead_end" x="-400.00" y="280.00" incLanes="12_0" intLanes="" shape="-400.00,276.80 -400.00,280.00"/>
+
+    <connection from="01" to="12" fromLane="1" toLane="0" dir="s" state="M"/>
+
+</net>

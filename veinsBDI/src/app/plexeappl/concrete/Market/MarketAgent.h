@@ -53,7 +53,7 @@ protected:
      */
     virtual void delegateNegotiationMessage(NegotiationMessage* nm);
     /**
-     * Extend from GeneralPlexeAgentAppl to handle messages related to voting
+     * Extend from GeneralPlexeAgentAppl to handle messages related to market
      */
     virtual void handleLowerMsg(cMessage* msg) override;
     /**
