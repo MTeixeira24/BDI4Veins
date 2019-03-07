@@ -2,6 +2,8 @@ veinsBDI/Makefile
 veinsBDI/.metadata/ 
 veinsBDI/.settings/*
 
+veinsBDI/.settings/language.settings.xml
+
 #Log files
 LightJason/logs/*
 #Omnet files
