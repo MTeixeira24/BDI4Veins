@@ -183,6 +183,9 @@ public final class ConnectionManager extends Thread {
                     case "CMarketAgentManager":
                         am = new CMarketAgentManager("marketAgent.asl", this);
                         break;
+                    case "CBargainAgentManager":
+                        am = new CBargainAgentManager("bargainAgent.asl", this);
+                        break;
                     default:
                         throw new RuntimeException("ConnectionManager: Invalid manager specified!");
                 }
