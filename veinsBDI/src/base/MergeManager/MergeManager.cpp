@@ -39,6 +39,30 @@ void MergeManager::parseResponse(uint32_t msgLength) {
             rbf >> jm.agentId;
             rbf >> jm.agentAction;
             switch (jm.agentAction){
+            case SEND_OFFER:{
+                assertType(rbf, VALUE_INT);
+                int targetVehicleId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int offer = extractData<int>(rbf);
+                ((LaneMergeAgent*)(vehicles[jm.agentId]))->sendOffer(targetVehicleId, offer);
+                break;
+            }
+            case SEND_DECISION:{
+                assertType(rbf, VALUE_INT);
+                int targetVehicleId = extractData<int>(rbf);
+                assertType(rbf, VALUE_SHORT);
+                short decision = extractData<short>(rbf);
+                ((LaneMergeAgent*)(vehicles[jm.agentId]))->sendDecision(targetVehicleId, decision);
+                break;
+            }
+            case SEND_PAYOUT:{
+                assertType(rbf, VALUE_INT);
+                int targetVehicleId = extractData<int>(rbf);
+                assertType(rbf, VALUE_INT);
+                int payout = extractData<int>(rbf);
+                ((LaneMergeAgent*)(vehicles[jm.agentId]))->sendPayout(targetVehicleId, payout);
+                break;
+            }
             default:
                 break;
             }

@@ -9,6 +9,8 @@
 #define BASE_MERGEMANAGER_MERGEMANAGER_H_
 
 #include "../manager/LightJasonManager.h"
+#include "../manager/constants/BargainConstants.h"
+#include "../../app/plexeappl/concrete/laneMerge/LaneMergeAgent.h"
 
 #include <unistd.h>
 #include "../../utilities/json.hpp"
