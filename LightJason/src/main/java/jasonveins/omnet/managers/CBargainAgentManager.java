@@ -32,7 +32,7 @@ public class CBargainAgentManager extends AgentManager {
         IVehicleAgent<?> l_ag = null;
         try {
             if ("vBargain".equals(vType)) {
-                if (p_aslFile.equals(resourceFolder + "asl/marketAgent.asl")) {
+                if (p_aslFile.equals(resourceFolder + "asl/bargainAgent.asl")) {
                     l_ag = new CBargainAgent.CBargainAgentGenerator(p_stream, this).generatesingle(p_id, vType);
                 } else {
                     throw new RuntimeException("Invalid asl file specified for vehicle type " + vType + ". Got " + p_aslFile + "expected marketAgent.asl");

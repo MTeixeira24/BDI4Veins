@@ -47,19 +47,19 @@ void LaneTrafficManager::injectInitialPairs(){
     int vehTypeId = findVehicleTypeIndex(vType);
     struct Vehicle automated;
 
-    int totalLength = (10*vPairs) * (6*2) + 10;
+    int totalLength = (vPairs * 22) + 10;
     for(int i = 0; i < vPairs; i++){
         //for each lane pair, generate a pair
         for(int j = 0; j < lanePairs; j++){
-            for(int z = 0; j < 2; j++){
+            for(int z = 0; z < 2; z++){
                 automated.id = vehTypeId;
                 automated.speed = travelSpeed;
                 automated.position = totalLength;
                 automated.lane = 2*j + z;
-                totalLength -= 4;
+                totalLength -= 6;
                 addVehicleToQueue(0, automated);
             }
-            totalLength -= 4;
+            totalLength -= 10;
         }
     }
     if(continuousInjection)
