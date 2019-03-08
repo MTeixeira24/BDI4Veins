@@ -2,7 +2,7 @@
 # OMNeT++/OMNEST Makefile for veinsBDI
 #
 # This file was generated with the command:
-#  opp_makemake --nolink -f --deep -O out -KPLEXE_VEINS_PROJ=/home/miguel/Projects/PlexeSrc/plexe-veins -I$$\(PLEXE_VEINS_PROJ\) -I. -I$$\(PLEXE_VEINS_PROJ\)/src -L$$\(PLEXE_VEINS_PROJ\)/src -lveins$$\(D\) -X.
+#  opp_makemake --nolink -f --deep -O out -KPLEXE_VEINS_PROJ=/home/miguel/Projects/PlexeSrc/plexe-veins -I$$\(PLEXE_VEINS_PROJ\) -I. -I$$\(PLEXE_VEINS_PROJ\)/src -L$$\(PLEXE_VEINS_PROJ\)/src -Lout/$$\(CONFIGNAME\)/src -lveins$$\(D\) -d src -X.
 #
 
 # Output directory
@@ -56,19 +56,28 @@ ifeq ($(TOOLCHAIN_NAME),clangc2)
 	$(Q)-$(LN) $(<:%.dll=%.lib) $(@:%.dll=%.lib)
 endif
 
-all:   Makefile $(CONFIGFILE)
+all:  submakedirs Makefile $(CONFIGFILE)
 	@# Do nothing
 
-.PHONY: all clean cleanall depend msgheaders smheaders
+submakedirs:  src_dir
+
+.PHONY: all clean cleanall depend msgheaders smheaders  src
+src: src_dir
+
+src_dir:
+	cd src && $(MAKE) all
 
 msgheaders:
+	$(Q)cd src && $(MAKE) msgheaders
 
 smheaders:
+	$(Q)cd src && $(MAKE) smheaders
 
 clean:
 	$(qecho) Cleaning $(TARGET)
 	$(Q)-rm -rf $O
 	$(Q)-rm -f $(call opp_rwildcard, . , *_m.cc *_m.h *_sm.cc *_sm.h)
+	-$(Q)cd src && $(MAKE) clean
 
 cleanall:
 	$(Q)$(MAKE) -s clean MODE=release

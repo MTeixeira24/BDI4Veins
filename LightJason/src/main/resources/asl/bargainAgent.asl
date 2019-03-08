@@ -20,5 +20,5 @@
 
 //Entry point plan
 +!main : true <-
-    generic/print(MyName, ": market agent started")
+    generic/print(MyName, ": bargain agent started")
 .

@@ -17,7 +17,7 @@ package veinsbdi.app.plexeappl.concrete.laneMerge;
 
 import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
 
-simple MarketAgent extends GeneralPlexeAgentAppl{
+simple LaneMergeAgent extends GeneralPlexeAgentAppl{
     parameters:
         bool engageNegotiations = default(true);
         @class(LaneMergeAgent);

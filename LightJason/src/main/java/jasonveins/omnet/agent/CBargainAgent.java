@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
 
 
+    private static final long serialVersionUID = -6952902911423402449L;
     private int acceptThreshold;
     private int startingOffer;
 

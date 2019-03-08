@@ -9,7 +9,6 @@
 Define_Module(MergeManager);
 
 MergeManager::MergeManager() {
-
 }
 
 MergeManager::~MergeManager() {
@@ -22,6 +21,7 @@ void MergeManager::initialize(int stage){
 }
 
 void MergeManager::finish() {
+    LightJasonManager::finish();
 }
 
 void MergeManager::parseResponse(uint32_t msgLength) {
@@ -51,9 +51,9 @@ void MergeManager::parseResponse(uint32_t msgLength) {
 void MergeManager::setLightJasonParameters() {
     LightJasonBuffer buff;
     jp.initializeParamsBuffer(buff);
-    /*jp.setSimParameters(buff, par("agentManager").stdstringValue());
+    jp.setSimParameters(buff, par("agentManager").stdstringValue());
     jp.setSimParameters(buff, par("statisticsCollector").stdstringValue());
-    jp.setSimParameters<int>(buff, par("platoon_size").intValue());
+    /*jp.setSimParameters<int>(buff, par("platoon_size").intValue());
     jp.setSimParameters(buff, par("platoon_type").stdstringValue());
     jp.setSimParameters<int>(buff, par("iteration").intValue());
     jp.setSimParameters<double>(buff, par("factor").doubleValue());

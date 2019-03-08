@@ -27,14 +27,6 @@ public:
 protected:
     virtual void handleLowerMsg(cMessage* msg) override;
     void handleSelfMsg(cMessage* msg) override;
-    void resendMessage(long msgId, AckTimer* at);
-    void sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets);
-    void sendMessageWithAck(MarketMessage* msg, int target);
-    void sendMessageDelayed(MarketMessage* msg, int target);
-    /*
-     * Check if this vehicle is the intended target of a message
-     */
-    virtual bool isReceiver(MarketMessage* msg);
     /*
      * Seconds to wait for ack messages
      */

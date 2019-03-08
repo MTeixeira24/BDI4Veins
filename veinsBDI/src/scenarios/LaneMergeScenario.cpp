@@ -21,81 +21,14 @@ LaneMergeScenario::LaneMergeScenario() {
 
 }
 
-void LaneMergeScenario::initialize(int stage)
-{
-
-    BaseScenario::initialize(stage);
-
-    if (stage == 1) {
-        app = FindModule<GeneralPlatooningApp*>::findSubModule(getParentModule());
-        prepareCars(0);
-    }
-}
-
-void LaneMergeScenario::setupFormation()
-{
-    std::vector<int> formation;
-    for (int i = 0; i < 4; i++) formation.push_back(i);
-    positionHelper->setPlatoonFormation(formation);
-}
-
-void LaneMergeScenario::prepareCars(int platoonLane)
-{
-
-    switch (positionHelper->getId()) {
-
-    case 0: {
-        if(traciVehicle->getVType().compare("vtypeauto") == 0){
-            // this is the leader
-            traciVehicle->setCruiseControlDesiredSpeed(100.0 / 3.6);
-            traciVehicle->setActiveController(Plexe::ACC);
-            traciVehicle->setFixedLane(platoonLane);
-
-            positionHelper->setIsLeader(true);
-            positionHelper->setPlatoonLane(platoonLane);
-            positionHelper->setPlatoonSpeed(100 / 3.6);
-            positionHelper->setPlatoonId(positionHelper->getId());
-            setupFormation();
-        }else{
-            //this is the arterial vehicle
-        }
-
-        break;
-    }
-
-    case 1:
-    case 2:
-    case 3:{
-        // these are the followers which are already in the platoon
-        traciVehicle->setCruiseControlDesiredSpeed(130.0 / 3.6);
-        traciVehicle->setActiveController(Plexe::CACC);
-        traciVehicle->setFixedLane(platoonLane);
-
-        positionHelper->setIsLeader(false);
-        positionHelper->setPlatoonLane(platoonLane);
-        positionHelper->setPlatoonSpeed(100 / 3.6);
-        positionHelper->setPlatoonId(positionHelper->getLeaderId());
-        setupFormation();
-
-        break;
-    }
-
-    case 4: {
-        // Arterial car
-
-        traciVehicle->setCruiseControlDesiredSpeed(100 / 3.6);
-        traciVehicle->setFixedLane(0);
-        traciVehicle->setActiveController(Plexe::ACC);
-
-        positionHelper->setPlatoonId(-1);
-        positionHelper->setIsLeader(false);
-        positionHelper->setPlatoonLane(-1);
-        break;
-    }
-  }
-}
 
 LaneMergeScenario::~LaneMergeScenario() {
+}
+
+
+void LaneMergeScenario::initialize(int stage)
+{
+    BaseScenario::initialize(stage);
 }
 
 

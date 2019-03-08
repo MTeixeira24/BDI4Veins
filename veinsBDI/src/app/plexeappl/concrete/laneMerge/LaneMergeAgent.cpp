@@ -10,11 +10,25 @@
 Define_Module(LaneMergeAgent);
 
 LaneMergeAgent::LaneMergeAgent() {
-    // TODO Auto-generated constructor stub
-
 }
 
 LaneMergeAgent::~LaneMergeAgent() {
-    // TODO Auto-generated destructor stub
 }
 
+void LaneMergeAgent::initialize(int stage){
+    GeneralPlexeAgentAppl::initialize(stage);
+}
+
+void LaneMergeAgent::handleLowerMsg(cMessage* msg){
+
+    UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
+
+    cPacket* enc = unicast->getEncapsulatedPacket();
+    ASSERT2(enc, "received a UnicastMessage with nothing inside");
+
+    GeneralPlexeAgentAppl::handleLowerMsg(msg);
+}
+
+void LaneMergeAgent::handleSelfMsg(cMessage* msg){
+    GeneralPlexeAgentAppl::handleSelfMsg(msg);
+}

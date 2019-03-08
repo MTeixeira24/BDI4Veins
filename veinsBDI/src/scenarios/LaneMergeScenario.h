@@ -26,10 +26,6 @@ public:
     LaneMergeScenario();
     virtual ~LaneMergeScenario();
     virtual void initialize(int stage) override;
-protected:
-    void setupFormation();
-    GeneralPlatooningApp* app;
-    void prepareCars(int platoonLane);
 
 };
 
