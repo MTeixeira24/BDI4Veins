@@ -24,7 +24,7 @@ bool MessageCache::allResponded(long msgId){
         ms->remainders.clear();
         for(unsigned int i = 0; i < ms->receiverIds.size(); i++){
             if(!ms->receiverStatus[ms->receiverIds[i]]) ms->remainders.insert(ms->receiverIds[i]);
-            status &= ms->receiverStatus[i];
+            status &= ms->receiverStatus[ms->receiverIds[i]];
         }
     }
     return status;
@@ -37,7 +37,7 @@ void MessageCache::insertEntry(long msgId, MarketMessage* msgPointer, const std:
     ms->receiverIds = std::vector<int>(ids);
     ms->receiverStatus = std::unordered_map<int, bool>();
     for(unsigned int i = 0; i < ids.size(); i++)
-        ms->receiverStatus[i] = false;
+        ms->receiverStatus[ids[i]] = false;
     if(ms->receiverStatus.find(senderId) != ms->receiverStatus.end())
         ms->receiverStatus[senderId] = true; //We don't expect the sender to send a reply to itself
     messageCacheMap[msgId] = ms;
@@ -57,5 +57,7 @@ MarketMessage* MessageCache::getMessageReference(long msgId){
 }
 
 void MessageCache::markReceived(long msgId, int id){
-    messageCacheMap[msgId]->receiverStatus[id] = true;
+    MessageStatus* aux = messageCacheMap[msgId];
+    aux->receiverStatus[id] = true;
+    //messageCacheMap[msgId]->receiverStatus[id] = true;
 }

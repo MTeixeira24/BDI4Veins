@@ -65,7 +65,8 @@ private:
         OFFER,
         DECISION,
         PAYOUT,
-        ACK
+        ACK,
+        ACK_PAYOUT
     };
     /*
      * Manage the messages that are sent
@@ -75,6 +76,8 @@ private:
      * Timers
      */
     cMessage* debugTimer = NULL;
+    cMessage* startMergeTimer = NULL;
+
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_LANEMERGE_LANEMERGEAGENT_H_ */
