@@ -25,7 +25,13 @@ void LaneMergeAgent::initialize(int stage){
         BeliefModel beliefs("setup/beliefs");
         int isMerger = myId % 2 == 0 ? true : false;
         beliefs.pushInt(&isMerger);
+//        if(isMerger){
+//            debugTimer = new cMessage("debugTimer");
+//            scheduleAt(simTime()+1, debugTimer);
+//        }
         manager->sendInformationToAgents(myId, &beliefs);
+        traciVehicle->setSpeed(mobility->getSpeed());
+        traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), false);
     }
 
 }
@@ -104,31 +110,85 @@ void LaneMergeAgent::handleLowerMsg(cMessage* msg){
 
 void LaneMergeAgent::delegateNegotiationMessage(NegotiationMessage* nm){
     if(BargainMessage* msg = dynamic_cast<BargainMessage*>(nm)){
-        //if(isReceiver(msg)) handleBargainMessage(msg);
+        if(isReceiver(msg)) handleBargainMessage(msg);
         delete msg;
     }
 }
 
 void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
+    const char *msgName;
+
     switch(msg->getMessageType()){
     case (int)MessageType::OFFER:{
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            msgName = "OfferAck";
+        }
         break;
     }
     case (int)MessageType::DECISION:{
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            msgName = "DecisionAck";
+        }
         break;
     }
     case (int)MessageType::PAYOUT:{
+        if(!messageCache.hasReceived(msg->getMessageId())){
+            msgName = "PayoutAck";
+        }
+        break;
+    }
+    case (int)MessageType::ACK:{
+        messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
         break;
     }
     default:
+        msgName = "0";
         break;
     }
-    BargainMessage* reply = new BargainMessage("ack");
-    fillNegotiationMessage(reply, myId, msg->getVehicleId(), msg->getMessageId());
-    reply->setMessageType((int)MessageType::ACK);
-    //sendMessageDelayed(reply, msg->getVehicleId());
+
+    if(msg->getMessageType() != (int)MessageType::ACK){
+        BargainMessage* reply = new BargainMessage(msgName);
+        fillNegotiationMessage(reply, myId, msg->getVehicleId(), msg->getMessageId());
+        reply->setMessageType((int)MessageType::ACK);
+        sendMessageDelayed(reply, msg->getVehicleId());
+    }
 }
 
 void LaneMergeAgent::handleSelfMsg(cMessage* msg){
-    GeneralPlexeAgentAppl::handleSelfMsg(msg);
+    if (AckTimer* at = dynamic_cast<AckTimer*>(msg)){
+    long msgId = at->getMessageId();
+        if(messageCache.allResponded(msgId)){
+            delete at;
+        }else{
+            resendMessage(msgId, at);
+        }
+    }else if(msg == debugTimer){
+        traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
+    } else{
+        GeneralPlexeAgentAppl::handleSelfMsg(msg);
+    }
+}
+
+bool LaneMergeAgent::isReceiver(MarketMessage* msg){
+    if(msg->getDestinationId() == myId)
+        return true;
+    if(msg->getTargets().find(myId) != msg->getTargets().end())
+        return true;
+    return false;
+}
+
+void LaneMergeAgent::sendMessageDelayed(MarketMessage* msg, int target){
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<double> distribution(25,5.0);
+    double delay = std::abs(distribution(gen) * 0.001);
+    scheduleAt(simTime() + delay, msg);
+}
+
+void LaneMergeAgent::resendMessage(long msgId, AckTimer* at){
+    MarketMessage* resend = messageCache.getMessageReference(msgId);
+    resend->setForWholePlatoon(false);
+    resend->setTargets(messageCache.getRemainerIds(msgId));
+    scheduleAt(simTime() + ackTime + randomOffset(), at);
+    sendUnicast(resend->dup(), -1);
 }

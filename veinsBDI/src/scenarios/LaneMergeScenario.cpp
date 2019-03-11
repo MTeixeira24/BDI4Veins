@@ -29,8 +29,19 @@ LaneMergeScenario::~LaneMergeScenario() {
 void LaneMergeScenario::initialize(int stage)
 {
     BaseScenario::initialize(stage);
+
+    if(stage == 0){
+        app = FindModule<LaneMergeAgent*>::findSubModule(getParentModule());
+    }
+    if(stage == 1){
+    }
+
 }
 
+void LaneMergeScenario::setup(){
+    app->getTraciVehicle()->setSpeed(app->getMobility()->getSpeed());
+    app->getTraciVehicle()->setFixedLane(app->getTraciVehicle()->getLaneIndex(), false);
+}
 
 
 /*

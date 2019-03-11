@@ -2,6 +2,7 @@ package jasonveins.omnet.managers;
 
 import jasonveins.omnet.agent.CBargainAgent;
 import jasonveins.omnet.agent.IVehicleAgent;
+import jasonveins.omnet.statistics.CBaseStatistics;
 import jasonveins.omnet.statistics.CMarketStatistics;
 
 import javax.annotation.Nonnull;
@@ -52,6 +53,9 @@ public class CBargainAgentManager extends AgentManager {
      */
     @Override
     public void setSimParams(ByteBuffer params) {
-
+        String statisticsCollector = CByteUtils.extractString(params);
+        int iteration = params.getInt();
+        stats = new CBaseStatistics();
+        stats.setSimParams(iteration);
     }
 }

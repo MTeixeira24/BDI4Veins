@@ -17,15 +17,18 @@
 #define SCENARIOS_LANEMERGESCENARIO_H_
 
 #include "veins/modules/application/platooning/scenarios/BaseScenario.h"
-#include "veins/modules/application/platooning/apps/GeneralPlatooningApp.h"
+#include "../app/plexeappl/concrete/laneMerge/LaneMergeAgent.h"
 
-#include "veins/modules/application/platooning/messages/ManeuverMessage_m.h"
 
 class LaneMergeScenario : public BaseScenario {
 public:
     LaneMergeScenario();
     virtual ~LaneMergeScenario();
     virtual void initialize(int stage) override;
+protected:
+    void setup();
+private:
+    LaneMergeAgent* app;
 
 };
 

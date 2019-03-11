@@ -54,13 +54,12 @@ void LaneTrafficManager::injectInitialPairs(){
             for(int z = 0; z < 2; z++){
                 automated.id = vehTypeId;
                 automated.speed = travelSpeed;
-                automated.position = totalLength;
+                automated.position = totalLength - 6*z;
                 automated.lane = 2*j + z;
-                totalLength -= 6;
                 addVehicleToQueue(0, automated);
             }
-            totalLength -= 10;
         }
+        totalLength -= 22;
     }
     if(continuousInjection)
         scheduleAt(simTime() + injectionTimeHeadway, injectTimer);

@@ -17,6 +17,7 @@
 #include "../../../../messages/utility/MessageCache.h"
 #include "../../../../base/MergeManager/MergeManager.h"
 #include "../../../../messages/bargain/bargain_m.h"
+#include "../../../../messages/AckTimer_m.h"
 
 class LaneMergeAgent : public GeneralPlexeAgentAppl {
 public:
@@ -51,6 +52,12 @@ protected:
     void sendMessageWithAck(MarketMessage* msg, int target);
 
     double randomOffset();
+
+    bool isReceiver(MarketMessage* msg);
+
+    void sendMessageDelayed(MarketMessage* msg, int target);
+
+    void resendMessage(long msgId, AckTimer* at);
 
 private:
     enum class MessageType{

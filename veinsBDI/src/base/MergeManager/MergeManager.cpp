@@ -77,9 +77,9 @@ void MergeManager::setLightJasonParameters() {
     jp.initializeParamsBuffer(buff);
     jp.setSimParameters(buff, par("agentManager").stdstringValue());
     jp.setSimParameters(buff, par("statisticsCollector").stdstringValue());
+    jp.setSimParameters<int>(buff, par("iteration").intValue());
     /*jp.setSimParameters<int>(buff, par("platoon_size").intValue());
     jp.setSimParameters(buff, par("platoon_type").stdstringValue());
-    jp.setSimParameters<int>(buff, par("iteration").intValue());
     jp.setSimParameters<double>(buff, par("factor").doubleValue());
     jp.setSimParameters<std::string>(buff, par("utilityFunction").stdstringValue());
     jp.setSimParameters<std::string>(buff, par("auctionModule").stdstringValue());*/

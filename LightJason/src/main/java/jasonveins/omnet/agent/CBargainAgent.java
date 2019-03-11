@@ -119,7 +119,7 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
                     p_stream,
                     Stream.concat(
                             CCommon.actionsFromPackage(),
-                            CCommon.actionsFromAgentClass( CMarketAgent.class )
+                            CCommon.actionsFromAgentClass( CBargainAgent.class )
                     ).collect(Collectors.toSet()),
                     new CVariableBuilder()
             );
