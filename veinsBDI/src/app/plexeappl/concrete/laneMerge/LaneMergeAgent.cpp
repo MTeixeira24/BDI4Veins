@@ -164,7 +164,8 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
     }
     case (int)MessageType::ACK_PAYOUT:{
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
-        traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
+        if(traciVehicle->getLaneIndex() % 2 == 0)
+            traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
         break;
     }
     default:
