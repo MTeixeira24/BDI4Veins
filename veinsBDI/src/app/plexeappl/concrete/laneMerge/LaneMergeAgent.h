@@ -59,6 +59,8 @@ protected:
 
     void resendMessage(long msgId, AckTimer* at);
 
+    virtual void setInitialBeliefs() override;
+
 private:
     enum class MessageType{
         NONE,

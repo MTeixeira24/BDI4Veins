@@ -19,23 +19,26 @@ LaneMergeAgent::~LaneMergeAgent() {
 
 void LaneMergeAgent::initialize(int stage){
     GeneralPlexeAgentAppl::initialize(stage);
-    if(stage == 1){
+    if(stage == 2){
         messageCache.setSenderId(myId);
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
                         gate("lowerControlIn"), gate("lowerControlOut"));
-        //Setup beliefs
-        BeliefModel beliefs("setup/beliefs");
-        int isMerger = myId % 2 == 0 ? true : false;
-        beliefs.pushInt(&isMerger);
-        if(isMerger){
-            startMergeTimer = new cMessage("startMergeTimer");
-            scheduleAt(simTime()+1, startMergeTimer);
-        }
-        manager->sendInformationToAgents(myId, &beliefs);
         traciVehicle->setSpeed(mobility->getSpeed());
         traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), false);
     }
 
+}
+
+void LaneMergeAgent::setInitialBeliefs(){
+    //Setup beliefs
+    BeliefModel beliefs("setup/beliefs");
+    int isMerger = myId % 2 == 0 ? true : false;
+    beliefs.pushInt(&isMerger);
+    if(isMerger){
+        startMergeTimer = new cMessage("startMergeTimer");
+        scheduleAt(simTime()+1, startMergeTimer);
+    }
+    manager->sendInformationToAgents(myId, &beliefs);
 }
 
 void LaneMergeAgent::fillNegotiationMessage(BargainMessage* msg, int originId, int targetId){

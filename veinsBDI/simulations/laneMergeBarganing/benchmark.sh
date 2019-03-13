@@ -8,7 +8,9 @@ do
     -n ..:../../src:../../../../PlexeSrc/plexe-veins/examples/veins:../../../../PlexeSrc/plexe-veins/src/veins\
     --image-path=../../../../PlexeSrc/plexe-veins/images -l ../../src/veinsBDI\
     -l ../../../../PlexeSrc/plexe-veins/src/veins omnetpp.ini\
-    && cat tempfile.txt | grep real | echo $RUN,$(cut -d ' ' -f 2) >> timeresults2.csv
+    && cat tempfile.txt | grep real | echo $RUN,$(cut -d ' ' -f 2),$1 >> timeresults.csv
 
     ((RUN++))
 done
+
+rm tempfile.txt

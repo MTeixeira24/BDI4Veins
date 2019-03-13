@@ -24,4 +24,5 @@ simple LightJasonManager{
         int iteration = default(1);
         string statisticsCollector = default("CJoinStatistics");
         string agentManager = default("AgentManager");
+        bool useBulkAgentCreation = default(false);
 }

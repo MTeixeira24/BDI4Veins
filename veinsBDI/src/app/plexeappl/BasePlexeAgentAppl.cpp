@@ -154,9 +154,10 @@ void BasePlexeAgentAppl::handleSelfMsg(cMessage* msg)
         logVehicleData(traciVehicle->isCrashed());
         // re-schedule next event
         scheduleAt(simTime() + SimTime(100, SIMTIME_MS), recordData);
-    }
-    if (msg == stopSimulation) {
+    }else if (msg == stopSimulation) {
         endSimulation();
+    }else{
+        BaseAgentAppl::handleSelfMsg(msg);
     }
 }
 

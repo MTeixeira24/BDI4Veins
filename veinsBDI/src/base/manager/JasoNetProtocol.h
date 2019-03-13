@@ -28,6 +28,9 @@ public:
     LightJasonBuffer connectionRequest();
     /*Build a request to create a new agent and associate it*/
     LightJasonBuffer subscriptionRequest(uint32_t, std::string, std::string);
+    LightJasonBuffer initializeBulkSubscriptionRequest();
+    void addToBulkSubscriptionRequest(LightJasonBuffer& buffer, uint32_t id,std::string vType, std::string aslFile);
+    void terminateBulkSubscriptionRequest(LightJasonBuffer& buffer);
     /*Build a request to remove the specified agent*/
     LightJasonBuffer removeRequest(uint32_t);
     /*Build a request to terminate communications*/

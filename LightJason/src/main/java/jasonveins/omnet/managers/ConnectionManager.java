@@ -46,6 +46,7 @@ public final class ConnectionManager extends Thread {
     }
 
     private void startServer() throws IOException {
+        int bufferSize = 1024*4;
         //***************************************/
         while(true){
             //am = new CVoterAgentManager("iterativeVoter.asl", this);
@@ -58,12 +59,12 @@ public final class ConnectionManager extends Thread {
                 out = new PrintWriter(clientSocket.getOutputStream(), true);
 
                 OutputStream byteStream = clientSocket.getOutputStream();
-                byte b[] = new byte[1024];
+                byte b[] = new byte[bufferSize];
                 InputStream stream = clientSocket.getInputStream();
 
                 while ( true ) {
 
-                    if( stream.read(b, 0, 1024) != -1){
+                    if( stream.read(b, 0, bufferSize) != -1){
                         //int size = ByteBuffer.wrap(b).getInt();
                         byteStream.write(processInput(b));
                         if(state == State.FINISH) break;
@@ -130,6 +131,15 @@ public final class ConnectionManager extends Thread {
         switch (buffer.getShort()){
             case Constants.CONNECTION_ACK:
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x01, 0x01};
+                break;
+            case Constants.BULK_AGENT_ADD:
+                am.bulkCreateAgents(buffer.slice());
+                if(state == State.WAITINGFORAGENT){
+                    //am.toggleAgentLoop(false, true);
+                    state = State.RUNNINGLOOP;
+                    am_latch.countDown();
+                }
+                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x08, 0x01};
                 break;
             case Constants.AGENT_ADD:
                 id = buffer.getInt();

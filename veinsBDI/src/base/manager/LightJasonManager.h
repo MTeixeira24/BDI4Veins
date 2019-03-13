@@ -53,6 +53,8 @@ public:
     void unsubscribeVehicle(int id);
     /**/
     BaseAgentAppl* getVehicle(int id);
+    /*Increase stage count in order to perform bulk add*/
+    //virtual int numInitStages() const override {return 3;}
 protected:
     /*
      * Define the parameters to send to the java agent manager
@@ -105,6 +107,10 @@ protected:
     virtual void finish() override;
 private:
     //Timer timer;
+    LightJasonBuffer bulkAddInstruction;
+    bool bulkAddInitialized;
+    bool bulkAddSent;
+    bool useBulkInsert;
 };
 
 

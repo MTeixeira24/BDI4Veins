@@ -20,6 +20,7 @@ class LightJasonManager;
 class BaseAgentAppl : public Veins::BaseApplLayer/*BaseWaveApplLayer*/ {
 public:
     virtual void initialize(int stage) override;
+    virtual int numInitStages()const override{return 3;}
     virtual void finish();
     virtual void receiveSignal(cComponent* source, simsignal_t signalID, cObject* obj, cObject* details){};
     virtual void sendMessage(uint8_t message_type, const void* args);
@@ -38,8 +39,11 @@ protected:
         BaseApplLayer::handlePositionUpdate(obj);
     }*/
     virtual void handleLowerMsg(cMessage* msg){}
-    virtual void handleSelfMsg(cMessage* msg){}
+    virtual void handleSelfMsg(cMessage* msg);
     virtual void handleLowerControl(cMessage* msg){}
+    virtual void setInitialBeliefs(){}
+private:
+    cMessage* triggerInitialBeliefs;
 };
 
 #endif /* BASEAGENTAPPL_H_ */

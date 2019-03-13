@@ -115,6 +115,20 @@ LightJasonBuffer JasoNetProtocol::subscriptionRequest(uint32_t id, std::string v
     return LightJasonBuffer() << size << action << id << vType << aslFile;
 }
 
+LightJasonBuffer JasoNetProtocol::initializeBulkSubscriptionRequest(){
+    uint32_t size = 32;
+    uint16_t action = BULK_AGENT_ADD;
+    return LightJasonBuffer() << size << action;
+}
+
+void JasoNetProtocol::addToBulkSubscriptionRequest(LightJasonBuffer& buffer, uint32_t id, std::string vType, std::string aslFile){
+    buffer << id << vType << aslFile;
+}
+
+void JasoNetProtocol::terminateBulkSubscriptionRequest(LightJasonBuffer& buffer){
+    buffer << 0xFFFF;
+}
+
 LightJasonBuffer JasoNetProtocol::removeRequest(uint32_t id){
     uint32_t size = 32;
     uint16_t action = REMOVE_AGENT;

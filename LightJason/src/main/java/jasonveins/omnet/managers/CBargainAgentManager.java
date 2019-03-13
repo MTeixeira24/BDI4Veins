@@ -8,6 +8,8 @@ import jasonveins.omnet.statistics.CMarketStatistics;
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CBargainAgentManager extends AgentManager {
     /**
@@ -45,6 +47,18 @@ public class CBargainAgentManager extends AgentManager {
             e.printStackTrace();
         }
         return l_ag;
+    }
+
+    @Override
+    public Set<IVehicleAgent<?>> buildAgentBulk(@Nonnull FileInputStream p_stream, @Nonnull  CAgentCreationQueue p_queue){
+
+        Set<IVehicleAgent<?> > newAgents = null;
+        try{
+            newAgents = new CBargainAgent.CBargainAgentGenerator(p_stream, this, p_queue).generatemultiple(p_queue.size()).collect(Collectors.toSet());
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return newAgents;
     }
 
     /**

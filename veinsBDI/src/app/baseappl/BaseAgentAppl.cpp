@@ -17,6 +17,8 @@ const simsignalwrap_t BaseAgentAppl::mobilityStateChangedSignal = simsignalwrap_
          myId = getParentModule()->getId();
          //findHost()->subscribe(mobilityStateChangedSignal, this);
          //findHost()->subscribe(parkingStateChangedSignal, this);
+         triggerInitialBeliefs = new cMessage("triggerInitialBeliefs");
+         scheduleAt(simTime() + 0.001, triggerInitialBeliefs);
      }
 
 }
@@ -27,4 +29,12 @@ void BaseAgentAppl::sendMessage(uint8_t message_type, const void* args){
 
 void BaseAgentAppl::finish(){
     manager->unsubscribeVehicle(myId);
+}
+
+
+void BaseAgentAppl::handleSelfMsg(cMessage* msg){
+    if(msg == triggerInitialBeliefs){
+        delete triggerInitialBeliefs;
+        setInitialBeliefs();
+    }
 }

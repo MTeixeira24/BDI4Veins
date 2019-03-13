@@ -3,6 +3,7 @@ package jasonveins.omnet.agent;
 import jasonveins.omnet.constants.CVariableBuilder;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.AgentManager;
+import jasonveins.omnet.managers.CAgentCreationQueue;
 import jasonveins.omnet.managers.constants.BargainConstants;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
@@ -14,7 +15,9 @@ import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @IAgentAction
@@ -108,11 +111,17 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
     public static class CBargainAgentGenerator extends IBaseAgentGenerator<CBargainAgent> {
 
         private AgentManager agentManager;
+        private CAgentCreationQueue insertionQueue;
         /**
          * @param p_stream ASL code as any stream e.g. FileInputStream
          * @param p_am Reference to agent manager
          */
         public CBargainAgentGenerator(@Nonnull final InputStream p_stream, AgentManager p_am) throws Exception
+        {
+            this(p_stream, p_am, null);
+        }
+
+        public CBargainAgentGenerator(@Nonnull final InputStream p_stream, AgentManager p_am, CAgentCreationQueue p_insertionQueue) throws Exception
         {
             super(
                     // input ASL stream
@@ -124,13 +133,20 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
                     new CVariableBuilder()
             );
             agentManager = p_am;
+            insertionQueue = p_insertionQueue;
         }
 
         @Nullable
         @Override
         public CBargainAgent generatesingle(@Nullable Object... p_data) {
             assert p_data != null;
-            return new CBargainAgent(m_configuration, agentManager,(int)p_data[0],(String)p_data[1]);
+            if(insertionQueue != null){
+                CAgentCreationQueue.CAgentData agentData = insertionQueue.popAgent();
+                final CBargainAgent agent = new CBargainAgent(m_configuration, agentManager, agentData.getId(), agentData.getvType());
+                agentManager.addAgentToMap(agent);
+                return agent;
+            }else
+                return new CBargainAgent(m_configuration, agentManager,(int)p_data[0],(String)p_data[1]);
         }
     }
 }

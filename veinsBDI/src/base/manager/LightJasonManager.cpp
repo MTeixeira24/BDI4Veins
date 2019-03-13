@@ -10,6 +10,8 @@
 Define_Module(LightJasonManager)
 
 LightJasonManager::LightJasonManager(){
+    bulkAddInitialized = false;
+    bulkAddSent = false;
 }
 
 LightJasonManager::~LightJasonManager(){
@@ -24,6 +26,7 @@ void LightJasonManager::finish(){
 void LightJasonManager::initialize(int stage){
     cSimpleModule::initialize(stage);
     if(stage == 0){
+        useBulkInsert = par("useBulkAgentCreation").boolValue();
         updateInterval = par("updateInterval");
         connSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (connSocket == INVALID_SOCKET)
@@ -124,10 +127,20 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
 }
 
 uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile){
-    vehicles[id] = vehicle;
-    std::string debug = jp.subscriptionRequest(id, vType, aslFile).getBuffer();
-    LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id, vType, aslFile).getBuffer());
-    return 0;
+    if(useBulkInsert){
+        if(!bulkAddInitialized){
+            bulkAddInstruction = jp.initializeBulkSubscriptionRequest();
+            bulkAddInitialized = true;
+        }
+        vehicles[id] = vehicle;
+        jp.addToBulkSubscriptionRequest(bulkAddInstruction, id, vType, aslFile);
+        return 0;
+    }else{
+        vehicles[id] = vehicle;
+        std::string debug = jp.subscriptionRequest(id, vType, aslFile).getBuffer();
+        LightJasonBuffer result = writeToSocket(jp.subscriptionRequest(id, vType, aslFile).getBuffer());
+        return 0;
+    }
 }
 
 void LightJasonManager::unsubscribeVehicle(int id){
@@ -135,7 +148,15 @@ void LightJasonManager::unsubscribeVehicle(int id){
     vehicles.erase(id);
 }
 
-uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){//(int id, std::string belief, double value){
+uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){
+
+    if(!bulkAddSent && useBulkInsert){
+        jp.terminateBulkSubscriptionRequest(bulkAddInstruction);
+        LightJasonBuffer result = writeToSocket(bulkAddInstruction.getBuffer());
+        bulkAddInitialized = false;
+        bulkAddSent = true;
+    }
+
     LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
     int n = int((unsigned char)result.getBuffer()[0]);
     EV << n << "\n"; //DEBUG

@@ -107,6 +107,57 @@ public class AgentManager extends Thread {
         }
     }
 
+    public void addAgentToMap(IVehicleAgent<?> ag){
+        agentMap.putIfAbsent(ag.id(), ag);
+        agentCount.incrementAndGet();
+    }
+
+    public void bulkCreateAgents(ByteBuffer buffer){
+        int terminateIndex = 600;//buffer.toString().indexOf('\uFFFF');
+        CAgentCreationQueue insertionQueue = new CAgentCreationQueue();
+
+        int id;
+        String vType;
+        String aslFile;
+
+        while((id = buffer.getInt()) != Character.MAX_VALUE){
+            vType = CByteUtils.extractString(buffer);
+            aslFile = resourceFolder + "asl/" + CByteUtils.extractString(buffer);
+            insertionQueue.pushAgent(id, aslFile, vType);
+        }
+
+        try
+                (
+                        final FileInputStream l_stream = new FileInputStream(insertionQueue.peekAgent().getAslFile())
+                ){
+            if(!execute.compareAndSet(true, false)){ //Halt execution of the agent loop
+                throw new RuntimeException();
+            }
+            while(!cycleEnd.get()){
+                Thread.sleep(10);
+            }
+            l_agents.addAll(buildAgentBulk(l_stream, insertionQueue));
+
+
+            if(!execute.compareAndSet(false, true)){ //Restart execution of the agent loop
+                throw new RuntimeException();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public Set<IVehicleAgent<?>> buildAgentBulk(@Nonnull FileInputStream p_stream, @Nonnull  CAgentCreationQueue p_queue){
+        Set<IVehicleAgent<?> > newAgents = null;
+        try{
+            newAgents = new NormalVehicleGenerator(p_stream, this, p_queue).generatemultiple(p_queue.size()).collect(Collectors.toSet());
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        return newAgents;
+    }
+
     /**
      * Method called by createNewAgent to build an agent to add to the runtime. It is recommended to override this
      * method if new vehicle to behaviour associations are to be made.

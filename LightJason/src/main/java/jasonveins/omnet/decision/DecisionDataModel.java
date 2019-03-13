@@ -66,7 +66,7 @@ public class DecisionDataModel {
         bb.putInt(0, messageLength);
 
         byte[] byteArray = new byte[messageLength];
-        System.arraycopy(bb.array(), 0, byteArray, 0, messageLength - 1);
+        System.arraycopy(bb.array(), 0, byteArray, 0, messageLength);
 
         //for(InstructionModel im : toSend){
         //    messageLength += im.getSize();
@@ -83,6 +83,7 @@ public class DecisionDataModel {
     }
 
     public boolean isEmpty() {
-        return instructionsList.isEmpty();
+        return instructionsQueue.isEmpty();
+        //return instructionsList.isEmpty();
     }
 }
