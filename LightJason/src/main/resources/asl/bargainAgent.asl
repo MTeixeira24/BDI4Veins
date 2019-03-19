@@ -25,7 +25,7 @@
 
 //Initialize beliefs
 +!setup/beliefs(ISMERGER) : true <-
-    generic/print(MyName, ": merger status: ", ISMERGER);
+    //generic/print(MyName, ": merger status: ", ISMERGER);
     +isMerger(ISMERGER)
 .
 

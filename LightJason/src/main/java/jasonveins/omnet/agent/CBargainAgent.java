@@ -104,7 +104,7 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
     @IAgentActionName(name = "offer/receive")
     public void receiveOfferPayout(Number senderVehicleId, Number payout){
         amountReceived = payout.intValue();
-        System.out.println("Received " + amountReceived + " monetary units from agent " + senderVehicleId.intValue());
+        //System.out.println("Received " + amountReceived + " monetary units from agent " + senderVehicleId.intValue());
     }
 
 

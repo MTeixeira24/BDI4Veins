@@ -49,6 +49,8 @@ public class AgentManager extends Thread {
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
 
+    protected HashMap<Integer, String> planMap;
+
     protected IStatistics stats;
 
     /**

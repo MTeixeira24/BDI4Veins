@@ -46,7 +46,7 @@ public final class ConnectionManager extends Thread {
     }
 
     private void startServer() throws IOException {
-        int bufferSize = 1024*4;
+        int bufferSize = 1024*1024;
         //***************************************/
         while(true){
             //am = new CVoterAgentManager("iterativeVoter.asl", this);
