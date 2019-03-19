@@ -133,13 +133,12 @@ public final class ConnectionManager extends Thread {
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x01, 0x01};
                 break;
             case Constants.BULK_AGENT_ADD:
-                am.bulkCreateAgents(buffer.slice());
+                response = am.bulkCreateAgents(buffer.slice());
                 if(state == State.WAITINGFORAGENT){
                     //am.toggleAgentLoop(false, true);
                     state = State.RUNNINGLOOP;
                     am_latch.countDown();
                 }
-                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x08, 0x01};
                 break;
             case Constants.AGENT_ADD:
                 id = buffer.getInt();

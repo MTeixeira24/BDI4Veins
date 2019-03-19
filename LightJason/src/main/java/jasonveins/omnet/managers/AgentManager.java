@@ -12,6 +12,7 @@ import org.lightjason.agentspeak.agent.IAgent;
 import org.lightjason.agentspeak.language.CLiteral;
 import org.lightjason.agentspeak.language.CRawTerm;
 import org.lightjason.agentspeak.language.ITerm;
+import org.lightjason.agentspeak.language.instantiable.plan.IPlan;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.CTrigger;
 import org.lightjason.agentspeak.language.instantiable.plan.trigger.ITrigger;
 
@@ -49,6 +50,7 @@ public class AgentManager extends Thread {
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
 
+    private int planCount;
     protected HashMap<Integer, String> planMap;
 
     protected IStatistics stats;
@@ -66,6 +68,8 @@ public class AgentManager extends Thread {
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
         l_agents =  Sets.newConcurrentHashSet();
+        planMap = new HashMap<>();
+        planCount = 0;
     }
 
     @Override
@@ -114,8 +118,7 @@ public class AgentManager extends Thread {
         agentCount.incrementAndGet();
     }
 
-    public void bulkCreateAgents(ByteBuffer buffer){
-        int terminateIndex = 600;//buffer.toString().indexOf('\uFFFF');
+    byte[] bulkCreateAgents(ByteBuffer buffer){
         CAgentCreationQueue insertionQueue = new CAgentCreationQueue();
 
         int id;
@@ -146,8 +149,29 @@ public class AgentManager extends Thread {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            System.exit(2);
         }
 
+        ByteBuffer buff = ByteBuffer.allocate(64*planCount);
+        buff.putInt(4);
+        int messageLength = 4;
+        for (int i = 0; i < planCount; i++){
+            String belief = planMap.get(i);
+            messageLength += 4 + belief.length();
+            //Put the identifier
+            buff.putInt(i);
+            //Put the string length
+            buff.putInt(belief.length());
+            //Put the string
+            buff.put(belief.getBytes());
+        }
+        //Update message length
+        buff.putInt(0, buff.position());
+        return buff.array();
+    }
+
+    void setupPlanMap(Set<IPlan> p_plans){
+        p_plans.forEach(p -> planMap.put(planCount++, p.trigger().literal().toString().split("\\[")[0]));
     }
 
     public Set<IVehicleAgent<?>> buildAgentBulk(@Nonnull FileInputStream p_stream, @Nonnull  CAgentCreationQueue p_queue){

@@ -25,4 +25,5 @@ simple LightJasonManager{
         string statisticsCollector = default("CJoinStatistics");
         string agentManager = default("AgentManager");
         bool useBulkAgentCreation = default(false);
+        int vehicleCount;
 }

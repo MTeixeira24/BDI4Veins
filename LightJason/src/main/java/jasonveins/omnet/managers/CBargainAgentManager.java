@@ -54,9 +54,13 @@ public class CBargainAgentManager extends AgentManager {
 
         Set<IVehicleAgent<?> > newAgents = null;
         try{
-            newAgents = new CBargainAgent.CBargainAgentGenerator(p_stream, this, p_queue).generatemultiple(p_queue.size()).collect(Collectors.toSet());
+            CBargainAgent.CBargainAgentGenerator gen = new CBargainAgent.CBargainAgentGenerator(p_stream, this, p_queue);
+            newAgents = gen.generatemultiple(p_queue.size()).collect(Collectors.toSet());
+
+            setupPlanMap(gen.getPlans());
         } catch (Exception e){
             e.printStackTrace();
+            System.exit(2);
         }
         return newAgents;
     }

@@ -11,13 +11,13 @@ import org.lightjason.agentspeak.action.binding.IAgentActionName;
 import org.lightjason.agentspeak.common.CCommon;
 import org.lightjason.agentspeak.configuration.IAgentConfiguration;
 import org.lightjason.agentspeak.generator.IBaseAgentGenerator;
+import org.lightjason.agentspeak.language.instantiable.plan.IPlan;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
-import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @IAgentAction
@@ -147,6 +147,10 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
                 return agent;
             }else
                 return new CBargainAgent(m_configuration, agentManager,(int)p_data[0],(String)p_data[1]);
+        }
+
+        public Set<IPlan> getPlans(){
+            return m_configuration.plans();
         }
     }
 }

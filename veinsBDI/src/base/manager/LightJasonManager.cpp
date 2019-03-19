@@ -12,6 +12,7 @@ Define_Module(LightJasonManager)
 LightJasonManager::LightJasonManager(){
     bulkAddInitialized = false;
     bulkAddSent = false;
+    vehiclesAwaitingSubscription = 0;
 }
 
 LightJasonManager::~LightJasonManager(){
@@ -28,6 +29,7 @@ void LightJasonManager::initialize(int stage){
     if(stage == 0){
         useBulkInsert = par("useBulkAgentCreation").boolValue();
         updateInterval = par("updateInterval");
+        vehicleCount = par("vehicleCount").intValue();
         connSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (connSocket == INVALID_SOCKET)
                 throw cRuntimeError("LightJasonManager: cannot create socket");
@@ -126,6 +128,16 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
     }
 }
 
+void LightJasonManager::initializeTriggerMap(LightJasonBuffer &data){
+    int triggerId;
+    std::string triggerName;
+    while(!data.eof()){
+        data >> triggerId;
+        data >> triggerName;
+        triggerMap[triggerName] = triggerId;
+    }
+}
+
 uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile){
     if(useBulkInsert){
         if(!bulkAddInitialized){
@@ -133,7 +145,15 @@ uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id,
             bulkAddInitialized = true;
         }
         vehicles[id] = vehicle;
+        ++vehiclesAwaitingSubscription;
         jp.addToBulkSubscriptionRequest(bulkAddInstruction, id, vType, aslFile);
+        if(vehiclesAwaitingSubscription == vehicleCount){
+            jp.terminateBulkSubscriptionRequest(bulkAddInstruction);
+            LightJasonBuffer result = writeToSocket(bulkAddInstruction.getBuffer());
+            bulkAddInitialized = false;
+            bulkAddSent = true;
+            initializeTriggerMap(result);
+        }
         return 0;
     }else{
         vehicles[id] = vehicle;
@@ -149,14 +169,6 @@ void LightJasonManager::unsubscribeVehicle(int id){
 }
 
 uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){
-
-    if(!bulkAddSent && useBulkInsert){
-        jp.terminateBulkSubscriptionRequest(bulkAddInstruction);
-        LightJasonBuffer result = writeToSocket(bulkAddInstruction.getBuffer());
-        bulkAddInitialized = false;
-        bulkAddSent = true;
-    }
-
     LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
     int n = int((unsigned char)result.getBuffer()[0]);
     EV << n << "\n"; //DEBUG

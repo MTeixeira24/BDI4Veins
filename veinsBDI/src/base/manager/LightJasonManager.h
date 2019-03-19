@@ -20,6 +20,7 @@
 #include <string.h>
 #include <omnetpp.h>
 #include <map>
+#include <unordered_map>
 
 #include "../../app/baseappl/BaseAgentAppl.h"
 #include "../../utilities/Timer.h"
@@ -105,12 +106,17 @@ protected:
     virtual std::vector<double> parseDoubleArrayMessage(LightJasonBuffer& buffer);
 
     virtual void finish() override;
+
+    void initializeTriggerMap(LightJasonBuffer &data);
 private:
     //Timer timer;
     LightJasonBuffer bulkAddInstruction;
     bool bulkAddInitialized;
     bool bulkAddSent;
     bool useBulkInsert;
+    uint32_t vehicleCount;
+    uint32_t vehiclesAwaitingSubscription;
+    std::unordered_map<std::string, int> triggerMap;
 };
 
 
