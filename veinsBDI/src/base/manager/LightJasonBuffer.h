@@ -27,6 +27,9 @@ public:
     virtual ~LightJasonBuffer();
     bool eof() const;
     bool isBigEndian();
+    void reserve(uint32_t);
+    void clear();
+    bool isEmpty(){return buf.empty();}
 
 
     template <typename T>

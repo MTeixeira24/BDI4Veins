@@ -25,7 +25,7 @@
 #include "../../app/baseappl/BaseAgentAppl.h"
 #include "../../utilities/Timer.h"
 #include "JasoNetProtocol.h"
-#include "LightJasonBuffer.h"
+#include "Trigger/Trigger.h"
 using namespace omnetpp;
 using namespace Jason;
 
@@ -46,8 +46,6 @@ public:
     virtual uint8_t subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile);
     /*Update belief base of the associated agent*/
     uint8_t sendInformationToAgents(int, const void*);//(int id, std::string belief, double value);
-    /*DEPRECATED: delegate decisions to agents*/
-    void notifyNodes(uint32_t id, std::string action, std::string data);
     /*Perform initialization and establish connection with LightJason server*/
     virtual void initialize(int stage) override;
     /*Remove vehicle from subscription and request agent deletion on server*/
@@ -56,6 +54,12 @@ public:
     BaseAgentAppl* getVehicle(int id);
     /*Increase stage count in order to perform bulk add*/
     //virtual int numInitStages() const override {return 3;}
+
+    uint8_t getBeliefId(std::string key);
+
+    void QueueTrigger(Trigger trigger);
+    void sendTriggers();
+
 protected:
     /*
      * Define the parameters to send to the java agent manager
@@ -117,6 +121,7 @@ private:
     uint32_t vehicleCount;
     uint32_t vehiclesAwaitingSubscription;
     std::unordered_map<std::string, int> triggerMap;
+    LightJasonBuffer triggerQueue;
 };
 
 

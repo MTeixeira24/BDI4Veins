@@ -58,14 +58,16 @@ void LaneMergeAgent::initialize(int stage){
 
 void LaneMergeAgent::setInitialBeliefs(){
     //Setup beliefs
-    BeliefModel beliefs("setup/beliefs");
     int isMerger = myId % 2 == 0 ? true : false;
-    beliefs.pushInt(&isMerger);
+    Trigger beliefs(Belief("setup/beliefs"), isMerger);
+//    BeliefModel beliefs("setup/beliefs");
+//    beliefs.pushInt(&isMerger);
     if(isMerger){
         startMergeTimer = new cMessage("startMergeTimer");
         scheduleAt(simTime()+1, startMergeTimer);
     }
-    manager->sendInformationToAgents(myId, &beliefs);
+    manager->QueueTrigger(beliefs);
+    //manager->sendInformationToAgents(myId, &beliefs);
 }
 
 void LaneMergeAgent::fillNegotiationMessage(BargainMessage* msg, int originId, int targetId){
@@ -89,7 +91,7 @@ void LaneMergeAgent::sendOffer(int targetId, int amount){
     fillNegotiationMessage(msg, myId, targetId);
     msg->setMessageType((int)MessageType::OFFER);
     msg->setData(amount);
-    sendMessageWithAck(msg, targetId);
+    sendMessageDelayed(msg, targetId);
 }
 
 void LaneMergeAgent::sendDecision(int targetId, short decision){
@@ -102,7 +104,7 @@ void LaneMergeAgent::sendDecision(int targetId, short decision){
     auto deltaTime = std::chrono::steady_clock::now() - startTime1;
     double ms = std::chrono::duration <double, std::milli> (deltaTime).count();
     deltaTimeStack.push_back(ms);
-    sendMessageWithAck(msg, targetId);
+    sendMessageDelayed(msg, targetId);
 }
 
 void LaneMergeAgent::sendPayout(int targetId, int payout){
@@ -111,7 +113,7 @@ void LaneMergeAgent::sendPayout(int targetId, int payout){
     fillNegotiationMessage(msg, myId, targetId);
     msg->setMessageType((int)MessageType::PAYOUT);
     msg->setData(payout);
-    sendMessageWithAck(msg, targetId);
+    sendMessageDelayed(msg, targetId);
 }
 
 void LaneMergeAgent::sendMessageWithAck(MarketMessage* msg, int target){
@@ -174,12 +176,14 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
                 startTimer = true;
             }
 
-
-            BeliefModel offerReceived("bargain/receive");
-            offerReceived.pushInt(&targetId);
-            offerReceived.pushInt(&amount);
             startTime1 = std::chrono::steady_clock::now();
-            manager->sendInformationToAgents(myId, &offerReceived);
+            Trigger offerReceived(Belief("bargain/receive"),targetId);
+            offerReceived.appendInt(amount);
+            manager->QueueTrigger(offerReceived);
+//            BeliefModel offerReceived("bargain/receive");
+//            offerReceived.pushInt(&targetId);
+//            offerReceived.pushInt(&amount);
+//            manager->sendInformationToAgents(myId, &offerReceived);
         }
         break;
     }
@@ -204,10 +208,14 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
                 startTimer = true;
             }
             startTimeMessageReceived = std::chrono::steady_clock::now();
-            BeliefModel decisionReceived("bargain/receive/result");
-            decisionReceived.pushInt(&targetId);
-            decisionReceived.pushInt(&amount);
-            manager->sendInformationToAgents(myId, &decisionReceived);
+
+            Trigger decisionReceived(Belief("bargain/receive/result"),targetId);
+            decisionReceived.appendInt(amount);
+            manager->QueueTrigger(decisionReceived);
+//            BeliefModel decisionReceived("bargain/receive/result");
+//            decisionReceived.pushInt(&targetId);
+//            decisionReceived.pushInt(&amount);
+//            manager->sendInformationToAgents(myId, &decisionReceived);
         }
         break;
     }
@@ -215,10 +223,14 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
         if(!messageCache.hasReceived(msg->getMessageId())){
             messageCache.saveReceived(msg->getMessageId());
             msgName = "PayoutAck";
-            BeliefModel payReceived("bargain/receive/payout");
-            payReceived.pushInt(&targetId);
-            payReceived.pushInt(&amount);
-            manager->sendInformationToAgents(myId, &payReceived);
+
+            Trigger payReceived(Belief("bargain/receive/payout"),targetId);
+            payReceived.appendInt(amount);
+            manager->QueueTrigger(payReceived);
+//            BeliefModel payReceived("bargain/receive/payout");
+//            payReceived.pushInt(&targetId);
+//            payReceived.pushInt(&amount);
+//            manager->sendInformationToAgents(myId, &payReceived);
         }
         break;
     }
@@ -259,10 +271,12 @@ void LaneMergeAgent::handleSelfMsg(cMessage* msg){
     }else if(msg == startMergeTimer){
         delete msg;
         //traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
-        BeliefModel beliefs("bargain/start");
-        int targetVehicle = myId + 1;
-        beliefs.pushInt(&targetVehicle);
-        manager->sendInformationToAgents(myId, &beliefs);
+        Trigger beliefs(Belief("bargain/start"), myId + 1);
+        manager->QueueTrigger(beliefs);
+//        BeliefModel beliefs("bargain/start");
+//        int targetVehicle = myId + 1;
+//        beliefs.pushInt(&targetVehicle);
+//        manager->sendInformationToAgents(myId, &beliefs);
     }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
         switch(delayMessage->getMessageType()){
         case (int)MessageType::ACK_PAYOUT:

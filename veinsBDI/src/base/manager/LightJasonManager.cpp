@@ -13,6 +13,7 @@ LightJasonManager::LightJasonManager(){
     bulkAddInitialized = false;
     bulkAddSent = false;
     vehiclesAwaitingSubscription = 0;
+    triggerQueue.reserve(1024*1024);
 }
 
 LightJasonManager::~LightJasonManager(){
@@ -76,18 +77,21 @@ void LightJasonManager::setLightJasonParameters(){
 
 void LightJasonManager::handleMessage(cMessage* msg){
     if (msg == queryMsg){
-        delete queryMsg;
-        int n = write(connSocket,jp.query().getBuffer().c_str(),255);
-        if (n < 0){
-            throw new cRuntimeError("LightJasonManager: handleMessage write error");
-        }
-        uint32_t msgLength = getMessageLength();
-        if(msgLength > 0){
-            parseResponse(msgLength);
-        }else{
-            queryMsg = new cMessage("query");
-            scheduleAt(simTime() + updateInterval, queryMsg);
-        }
+
+        sendTriggers();
+
+        scheduleAt(simTime() + updateInterval, queryMsg);
+
+//        int n = write(connSocket,jp.query().getBuffer().c_str(),255);
+//        if (n < 0){
+//            throw new cRuntimeError("LightJasonManager: handleMessage write error");
+//        }
+//        uint32_t msgLength = getMessageLength();
+//        if(msgLength > 0){
+//            parseResponse(msgLength);
+//        }else{
+//            scheduleAt(simTime() + updateInterval, queryMsg);
+//        }
     }
 }
 
@@ -95,15 +99,9 @@ BaseAgentAppl* LightJasonManager::getVehicle(int id){
     return vehicles[id];
 }
 
-void LightJasonManager::notifyNodes(uint32_t id, std::string action, std::string data){
-    if(action.compare("none") != 0){
-    }
-}
-
 void LightJasonManager::parseResponse(uint32_t msgLength){
     msgLength -= sizeof(uint32_t);
     LightJasonBuffer rbf = receiveMessage(msgLength);
-    uint16_t type;
     uint16_t commandId;
     rbf >> commandId;
     ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);
@@ -128,6 +126,27 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
     }
 }
 
+void LightJasonManager::QueueTrigger(Trigger trigger){
+    if(triggerQueue.isEmpty()){
+        //append the message type
+        triggerQueue << SET_BELIEF;
+    }
+    trigger.convertToMessage(triggerQueue);
+
+//    LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
+//    int n = int((unsigned char)result.getBuffer()[0]);
+//    EV << n << "\n"; //DEBUG
+//    return 0;
+}
+
+void LightJasonManager::sendTriggers(){
+    //append the end of message identifier
+    triggerQueue << 0xFFFF;
+    //send the message
+    LightJasonBuffer result = writeToSocket(triggerQueue.getBuffer());
+    triggerQueue.clear();
+}
+
 void LightJasonManager::initializeTriggerMap(LightJasonBuffer &data){
     int triggerId;
     std::string triggerName;
@@ -136,6 +155,12 @@ void LightJasonManager::initializeTriggerMap(LightJasonBuffer &data){
         data >> triggerName;
         triggerMap[triggerName] = triggerId;
     }
+}
+
+uint8_t LightJasonManager::getBeliefId(std::string key){
+    if(triggerMap.find(key) != triggerMap.end())
+        return triggerMap[key];
+    else return 0xFF;
 }
 
 uint8_t LightJasonManager::subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile){

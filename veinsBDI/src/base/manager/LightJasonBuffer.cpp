@@ -29,6 +29,14 @@ bool LightJasonBuffer::isBigEndian()
     return (p_a[0] == 0x01);
 }
 
+void LightJasonBuffer::reserve(uint32_t size){
+    buf.reserve(size);
+}
+
+void LightJasonBuffer::clear(){
+    buf.clear();
+}
+
 template <>
 void LightJasonBuffer::write(std::string inv)
 {

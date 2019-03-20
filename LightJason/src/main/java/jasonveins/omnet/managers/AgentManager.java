@@ -214,6 +214,18 @@ public class AgentManager extends Thread {
         return l_ag;
     }
 
+    public void bulkTrigger(ByteBuffer buffer){
+        short messageSeparator;
+        do{
+            ArrayList<CRawTerm<?>> terms = new ArrayList<>();
+            int agentId = buffer.getInt();
+            String triggerName = planMap.get(buffer.getInt());
+
+            messageSeparator = buffer.getShort();
+        }while(messageSeparator != 0xFF);
+
+    }
+
     /**
      * Value agnostic goal insertion method. Does not support nested predicates values.
      * @param id Identifier of the agent
@@ -223,31 +235,6 @@ public class AgentManager extends Thread {
      */
     public void updateGoals(int id, @Nonnull String belief,@Nonnull ByteBuffer values, int p_size){
         ArrayList<CRawTerm<?>> terms = new ArrayList<>();
-        /**
-         * From the debug below, it is guaranteed that this is not the issue
-         * The agent themselves can receive the beliefs just fine.
-         * Problem may be in omnet transmission, socket or trigger overload.
-         * e.g.
-         *Reset debug counter: 0
-         * Agent   0    got notification to vote on a join:    [80, 85, 90, 95, 100, 105, 110, 115, 120]
-         * [0, 0, 1, 1, 1, 1, 1, 1, 1]
-         * Agent   0   Im the chair so no need to pass through omnet
-         * Got vote   [0, 0, 1, 1, 1, 1, 1, 1, 1]
-         * Agent   1    got notification to vote on a join:    [80, 85, 90, 95, 100, 105, 110, 115, 120]
-         * [0, 0, 1, 1, 1, 1, 1, 1, 0]
-         * Agent   1   Sending the vote down omnet
-         * LIGHTJASON MANAGER: Got vote number: 1
-         * Got vote   [0, 0, 1, 1, 1, 1, 1, 1, 0]
-         * No more agents in simulation. Terminating
-         */
-        /*if(belief.equals("handle/submit/vote")){
-            debugger++;
-            System.out.println("LIGHTJASON MANAGER: Got vote number: " + debugger);
-        }
-        if(belief.equals("maneuver/complete")){
-            debugger = 0;
-            System.out.println("Reset debug counter: " + debugger);
-        }*/
         int size = p_size;
         while(size > 0){
             short data_type = values.getShort();

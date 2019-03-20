@@ -10,23 +10,6 @@
 Define_Module(DissatisfactionAppl);
 
 DissatisfactionAppl::~DissatisfactionAppl() {
-    if(myId == 0){
-        if(stage != Stage::ENVIRONMENTAL){
-            switch(stage){
-            case Stage::INITIAL:
-                throw cRuntimeError("INVALID END STATE - INITIAL");
-                break;
-            case Stage::JOINERS:
-                throw cRuntimeError("INVALID END STATE - JOINERS");
-                break;
-            case Stage::NONE:
-                throw cRuntimeError("INVALID END STATE- NONE");
-                break;
-            }
-        }
-        if(ballotsFinished < 3)
-            throw cRuntimeError("INVALID BALLOT COUNT");
-    }
     if(startInitialVote != NULL)
         cancelAndDelete(startInitialVote);
     if(callJoinersTimer != NULL)

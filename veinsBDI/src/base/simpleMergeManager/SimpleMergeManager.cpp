@@ -22,7 +22,6 @@ void SimpleMergeManager::initialize(int stage){
 void SimpleMergeManager::parseResponse(uint32_t msgLength){
     msgLength -= sizeof(uint32_t);
     LightJasonBuffer rbf = receiveMessage(msgLength);
-    uint16_t type;
     uint16_t commandId;
     rbf >> commandId;
     ASSERT(commandId == QUERY || commandId == TERMINATE_CONNECTION);

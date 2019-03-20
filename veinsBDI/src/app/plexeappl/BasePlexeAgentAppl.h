@@ -56,6 +56,8 @@ protected:
     //Veins::TraCICommandInterface::Vehicle* traciVehicle;
 
 
+    inline uint8_t Belief(std::string key){return manager->getBeliefId(key);}
+
     // determines position and role of each vehicle
     BasePositionHelper* positionHelper;
 
