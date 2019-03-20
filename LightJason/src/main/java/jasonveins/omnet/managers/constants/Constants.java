@@ -15,6 +15,11 @@ public class Constants {
     public static final short BULK_AGENT_ADD = 8;
     public static final short CONNECTION_END = 126;
 
+    public static final short TYPE_NONE = 0;
+    public static final short TYPE_NUMBER = 1;
+    public static final short TYPE_STRING = 2;
+    public static final short TYPE_NUMBER_SEQUENCE = 3;
+
     public static final short VALUE_BOOL = 1;
 
     public static final short VALUE_CHAR = 2;

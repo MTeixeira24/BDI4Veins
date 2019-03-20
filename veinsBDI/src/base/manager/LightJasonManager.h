@@ -57,7 +57,7 @@ public:
 
     uint8_t getBeliefId(std::string key);
 
-    void QueueTrigger(Trigger trigger);
+    void QueueTrigger(Trigger& trigger);
     void sendTriggers();
 
 protected:

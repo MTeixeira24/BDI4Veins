@@ -14,10 +14,10 @@ using namespace Jason;
 
 class Trigger {
 public:
-    Trigger(uint8_t triggerId);
-    Trigger(uint8_t triggerId, int parameter);
-    Trigger(uint8_t triggerId, std::string parameter);
-    Trigger(uint8_t triggerId, std::vector<int> parameter);
+    Trigger(uint8_t triggerId, uint32_t agentId);
+    Trigger(uint8_t triggerId, uint32_t agentId, int parameter);
+    Trigger(uint8_t triggerId, uint32_t agentId, std::string parameter);
+    Trigger(uint8_t triggerId, uint32_t agentId, std::vector<int> parameter);
 
     virtual ~Trigger();
 
@@ -28,9 +28,9 @@ public:
         NUMBER_SEQUENCE
     };
 
-    Trigger(uint8_t triggerId, void* parameter, uint32_t length, DataType type);
-
 private:
+
+    void initialize(uint8_t triggerId, uint32_t agentId, const void* parameter, uint32_t length, DataType type);
 
     typedef struct _trigger_sequence{
         struct _trigger_sequence *next;
@@ -51,7 +51,7 @@ public:
     void appendString(std::string parameter);
     void appendVector(std::vector<int> parameter);
 
-    void appendParameter(void* parameter, uint32_t length, DataType type);
+    void appendParameter(uint32_t length, DataType type);
     void deleteTriggerList(TriggerSequence* trigger);
 };
 

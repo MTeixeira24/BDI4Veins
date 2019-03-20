@@ -126,10 +126,10 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
     }
 }
 
-void LightJasonManager::QueueTrigger(Trigger trigger){
+void LightJasonManager::QueueTrigger(Trigger& trigger){
     if(triggerQueue.isEmpty()){
         //append the message type
-        triggerQueue << SET_BELIEF;
+        triggerQueue << 6 << (uint16_t)SET_BELIEF;
     }
     trigger.convertToMessage(triggerQueue);
 
@@ -140,11 +140,13 @@ void LightJasonManager::QueueTrigger(Trigger trigger){
 }
 
 void LightJasonManager::sendTriggers(){
-    //append the end of message identifier
-    triggerQueue << 0xFFFF;
-    //send the message
-    LightJasonBuffer result = writeToSocket(triggerQueue.getBuffer());
-    triggerQueue.clear();
+    if(!triggerQueue.isEmpty()){
+        //append the end of message identifier
+        triggerQueue << 0xFFFF;
+        //send the message
+        LightJasonBuffer result = writeToSocket(triggerQueue.getBuffer());
+        triggerQueue.clear();
+    }
 }
 
 void LightJasonManager::initializeTriggerMap(LightJasonBuffer &data){

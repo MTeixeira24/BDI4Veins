@@ -59,7 +59,7 @@ void LaneMergeAgent::initialize(int stage){
 void LaneMergeAgent::setInitialBeliefs(){
     //Setup beliefs
     int isMerger = myId % 2 == 0 ? true : false;
-    Trigger beliefs(Belief("setup/beliefs"), isMerger);
+    Trigger beliefs(Belief("setup/beliefs"), myId, isMerger);
 //    BeliefModel beliefs("setup/beliefs");
 //    beliefs.pushInt(&isMerger);
     if(isMerger){
@@ -177,7 +177,7 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
             }
 
             startTime1 = std::chrono::steady_clock::now();
-            Trigger offerReceived(Belief("bargain/receive"),targetId);
+            Trigger offerReceived(Belief("bargain/receive"), myId,targetId);
             offerReceived.appendInt(amount);
             manager->QueueTrigger(offerReceived);
 //            BeliefModel offerReceived("bargain/receive");
@@ -209,7 +209,7 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
             }
             startTimeMessageReceived = std::chrono::steady_clock::now();
 
-            Trigger decisionReceived(Belief("bargain/receive/result"),targetId);
+            Trigger decisionReceived(Belief("bargain/receive/result"), myId,targetId);
             decisionReceived.appendInt(amount);
             manager->QueueTrigger(decisionReceived);
 //            BeliefModel decisionReceived("bargain/receive/result");
@@ -224,7 +224,7 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
             messageCache.saveReceived(msg->getMessageId());
             msgName = "PayoutAck";
 
-            Trigger payReceived(Belief("bargain/receive/payout"),targetId);
+            Trigger payReceived(Belief("bargain/receive/payout"), myId,targetId);
             payReceived.appendInt(amount);
             manager->QueueTrigger(payReceived);
 //            BeliefModel payReceived("bargain/receive/payout");
@@ -271,7 +271,7 @@ void LaneMergeAgent::handleSelfMsg(cMessage* msg){
     }else if(msg == startMergeTimer){
         delete msg;
         //traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
-        Trigger beliefs(Belief("bargain/start"), myId + 1);
+        Trigger beliefs(Belief("bargain/start"), myId, myId + 1);
         manager->QueueTrigger(beliefs);
 //        BeliefModel beliefs("bargain/start");
 //        int targetVehicle = myId + 1;

@@ -214,15 +214,53 @@ public class AgentManager extends Thread {
         return l_ag;
     }
 
-    public void bulkTrigger(ByteBuffer buffer){
-        short messageSeparator;
+     void bulkTrigger(ByteBuffer buffer){
+        int agentId = buffer.getInt();
         do{
-            ArrayList<CRawTerm<?>> terms = new ArrayList<>();
-            int agentId = buffer.getInt();
+            ArrayList<CRawTerm<?>> terms = new ArrayList<>(5);
             String triggerName = planMap.get(buffer.getInt());
+            int paramSeparator;
+            do{
+                short dataType = buffer.getShort();
+                if(dataType == Constants.TYPE_NUMBER){
+                    terms.add(CRawTerm.from(buffer.getInt()));
+                }else if(dataType == Constants.TYPE_NUMBER_SEQUENCE){
+                    int size = buffer.getInt();
+                    ArrayList<Integer> elements = new ArrayList<>(size);
+                    for (int i = 0; i < size; i++) {
+                        elements.add(buffer.getInt());
+                    }
+                    terms.add(CRawTerm.from(elements));
+                }else if(dataType == Constants.TYPE_STRING){
+                    terms.add(CRawTerm.from(CByteUtils.extractString(buffer)));
+                }else if(dataType == Constants.TYPE_NONE){
+                    break;
+                }else{
+                    throw new RuntimeException("bulkTrigger: invalid data type");
+                }
+                paramSeparator = buffer.getInt();
+            }while (paramSeparator != 0xFFFE);
 
-            messageSeparator = buffer.getShort();
-        }while(messageSeparator != 0xFF);
+            try{
+                ITrigger trigger;
+                ITerm[] arrayTerms = new ITerm[terms.size()];
+                arrayTerms = terms.toArray(arrayTerms);
+                trigger = CTrigger.from(
+                        ITrigger.EType.ADDGOAL,
+                        CLiteral.from(triggerName,
+                                Arrays.stream( arrayTerms ).collect( Collectors.toList() )
+                        )
+                );
+                IVehicleAgent<?> vehicle = agentMap.get(agentId);
+                if(vehicle == null) throw new RuntimeException();
+                vehicle.trigger(trigger);
+            }catch (Exception e){
+                e.printStackTrace();
+                System.exit(2);
+            }
+
+            agentId = buffer.getInt();
+        }while(agentId != 0xFFFF);
 
     }
 
