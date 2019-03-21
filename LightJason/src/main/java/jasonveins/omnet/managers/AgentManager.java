@@ -49,6 +49,7 @@ public class AgentManager extends Thread {
     //Used to wait for initial agent creation. Connection manager holds a reference to this and decrements when the first
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
+    private CountDownLatch decisionLatch;
 
     private int planCount;
     protected HashMap<Integer, String> planMap;
@@ -214,10 +215,15 @@ public class AgentManager extends Thread {
         return l_ag;
     }
 
-     void bulkTrigger(ByteBuffer buffer){
+     byte[] bulkTrigger(ByteBuffer buffer){
         int agentId = buffer.getInt();
+        int agentCount = 0;
+        LinkedList<Integer> agentsToWake = new LinkedList<>();
+        LinkedList<ITrigger> triggerList = new LinkedList<>();
         do{
             ArrayList<CRawTerm<?>> terms = new ArrayList<>(5);
+            agentCount++;
+            agentsToWake.add(agentId);
             String triggerName = planMap.get(buffer.getInt());
             int paramSeparator;
             do{
@@ -251,9 +257,7 @@ public class AgentManager extends Thread {
                                 Arrays.stream( arrayTerms ).collect( Collectors.toList() )
                         )
                 );
-                IVehicleAgent<?> vehicle = agentMap.get(agentId);
-                if(vehicle == null) throw new RuntimeException();
-                vehicle.trigger(trigger);
+                triggerList.add(trigger);
             }catch (Exception e){
                 e.printStackTrace();
                 System.exit(2);
@@ -261,8 +265,21 @@ public class AgentManager extends Thread {
 
             agentId = buffer.getInt();
         }while(agentId != 0xFFFF);
+        ddm.setAgentCount(agentCount);
+        decisionLatch = new CountDownLatch(1);
 
-    }
+         for (int i = 0; i < triggerList.size(); i++) {
+             agentMap.get(agentsToWake.get(i)).trigger(triggerList.get(i));
+         }
+
+         try {
+             decisionLatch.await();
+         } catch (InterruptedException e) {
+             e.printStackTrace();
+         }
+         return ddm.convertToMessage();
+
+     }
 
     /**
      * Value agnostic goal insertion method. Does not support nested predicates values.
@@ -344,7 +361,7 @@ public class AgentManager extends Thread {
             }
         }
 
-        ITrigger trigger = null;
+        ITrigger trigger;
         try{
             ITerm[] arrayTerms = new ITerm[terms.size()];
             arrayTerms = terms.toArray(arrayTerms);
@@ -354,12 +371,11 @@ public class AgentManager extends Thread {
                             Arrays.stream( arrayTerms ).collect( Collectors.toList() )
                     )
             );
+            IVehicleAgent<?> vehicle = agentMap.get(id);
+            vehicle.trigger(trigger);
         }catch (Exception e){
             e.printStackTrace();
         }
-        IVehicleAgent<?> vehicle = agentMap.get(id);
-        if(vehicle == null) throw new RuntimeException();
-        vehicle.trigger(trigger);
     }
 
     /**
@@ -367,14 +383,23 @@ public class AgentManager extends Thread {
      * @param data The data to be sent as an Instruction Model object
      */
     public void addInstruction(@Nonnull InstructionModel data){
-        ddm.addInstruction(data);
+        if(ddm.addInstruction(data)) decisionLatch.countDown();
+    }
+
+    /**
+     * Pushes unto the decision data model the decisions an agent wished to transmit to its OMNET nodes.
+     * @param code The data to be sent as an Instruction Model object
+     */
+    public void notifyOfReturn(int code){
+        if(ddm.handleReturnCode(code))
+            decisionLatch.countDown();
     }
 
     /**
      * Request the Decision Data Model to send all the agent decisions its holding in byte sequence form. WARNING: All currently held data at time of method call will be deleted
      * @return Byte sequence of all decisions made by agent ready to be sent over to OMNET
      */
-    public byte[] extractInstructions(){
+    byte[] extractInstructions(){
         return ddm.convertToMessage();
     }
 
@@ -382,11 +407,11 @@ public class AgentManager extends Thread {
      * Checks if any instructions are available in the Decision Data Model
      * @return True if the number of instructions is greater than zero, false otherwise
      */
-    public boolean existsInstructions(){
+    boolean existsInstructions(){
         return !ddm.isEmpty();
     }
 
-    public void loop(){
+    private void loop(){
         System.out.println("#################################");
         System.out.println("Agent loop: Awaiting agent input");
 
@@ -437,12 +462,14 @@ public class AgentManager extends Thread {
         return this.l_agents;
     }
 
-    public void removeAgent(int agentId) {
+    void removeAgent(int agentId) throws InterruptedException {
         if(agentMap.get(agentId) != null && agentMap.size() > 0){
             if(!execute.compareAndSet(true, false)){ //Halt execution of the agent loop
                 throw new RuntimeException();
             }
-            while(!cycleEnd.get()); //Wait until current stream is over
+            while(!cycleEnd.get()){
+                Thread.sleep(10);
+            } //Wait until current stream is over
             Predicate<IAgent<?>> removePredicate = a -> ((IVehicleAgent)a).id() == agentId;
             l_agents.removeIf(removePredicate);
             agentMap.remove(agentId);
@@ -459,21 +486,20 @@ public class AgentManager extends Thread {
 
     }
 
-    public void toggleAgentLoop(boolean expectedValue, boolean newValue) {
+    void toggleAgentLoop(boolean expectedValue, boolean newValue) {
         if( !simulate.compareAndSet(expectedValue, newValue)) throw new RuntimeException();
     }
 
-    public boolean getAgentLoopStatus(){
+    boolean getAgentLoopStatus(){
         return simulate.get();
     }
 
-    public CountDownLatch getLatch() { return this.latch; }
+    CountDownLatch getLatch() { return this.latch; }
 
     public IStatistics getStats(){
         return stats;
     }
 
     public void setSimParams(ByteBuffer params) {
-        return;
     }
 }

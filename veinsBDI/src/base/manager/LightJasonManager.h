@@ -97,6 +97,7 @@ protected:
     LightJasonBuffer receiveMessage(uint32_t);
     /*Parse response received from lightjason server*/
     virtual void parseResponse(uint32_t msgLength);
+    virtual void parseResponse(LightJasonBuffer rbf, uint32_t msgLength);
 
     //virtual void setupListener();
 
@@ -122,6 +123,7 @@ private:
     uint32_t vehiclesAwaitingSubscription;
     std::unordered_map<std::string, int> triggerMap;
     LightJasonBuffer triggerQueue;
+    char msgBuffer[USHRT_MAX];
 };
 
 

@@ -6,55 +6,49 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class DecisionDataModel {
-    protected final CopyOnWriteArrayList<InstructionModel> instructionsList = new CopyOnWriteArrayList<>();
     private final ConcurrentLinkedQueue<InstructionModel> instructionsQueue = new ConcurrentLinkedQueue<>();
-
-    //private AtomicInteger size = new AtomicInteger(6); //int for length, short for command id
+    private int agentsToReply;
+    private AtomicInteger agentsThatReplied;
 
     public DecisionDataModel(){
-        /*//Simulate an agent creating a request
-        InstructionModel iOb = new InstructionModel(8, 4);
-        iOb.pushInt(3);
-        //iOb.pushDouble(2.991);
-        //assert iOb.getSize() == 28;
-        addInstruction(iOb);*/
+        agentsToReply = -1;
+        agentsThatReplied = new AtomicInteger(0);
     }
 
-    public void addInstruction(InstructionModel iObj){
-        //instructionsList.add(iObj);
+    public boolean addInstruction(InstructionModel iObj){
         instructionsQueue.offer(iObj);
+        incrementRepliedAgents();
+        return (agentsThatReplied.get() == agentsToReply);
     }
 
-    public byte[] convertToMessage2(){
+    public boolean handleReturnCode(int code){
+        incrementRepliedAgents();
+        return (agentsThatReplied.get() == agentsToReply);
 
-        CopyOnWriteArrayList<InstructionModel> toSend = (CopyOnWriteArrayList<InstructionModel>)instructionsList.clone();
-        instructionsList.removeAll(toSend);
-        //Calculate message length from toSendList
-        int messageLength = 6;
+    }
 
-
-        for(InstructionModel im : toSend){
-            messageLength += im.getSize();
+    private void incrementRepliedAgents(){
+        while(true) {
+            int existingValue = agentsThatReplied.get();
+            int newValue = existingValue + 1;
+            if(agentsThatReplied.compareAndSet(existingValue, newValue)) {
+                return;
+            }
         }
-        ByteBuffer bb = ByteBuffer.allocate(messageLength);
-        //int messageLength = size.getAndSet(6);
-        bb.putInt(messageLength); bb.putShort((short)5);
-        for(InstructionModel io : toSend){
-            byte[] instruction = io.toByteArray();
-            bb.put(instruction);
-        }
+    }
 
-        return bb.array();
+    public void setAgentCount(int agents){
+        agentsToReply = agents;
+        agentsThatReplied.set(0);
     }
 
     public byte[] convertToMessage(){
-
-        //CopyOnWriteArrayList<InstructionModel> toSend = (CopyOnWriteArrayList<InstructionModel>)instructionsList.clone();
-        //instructionsList.removeAll(toSend);
+        int size = instructionsQueue.size();
+        if(size == 0)
+            return new byte[]{0x00, 0x00, 0x00, 0x00};
         int bufferSize = 256;
         //Calculate message length from toSendList
         int messageLength = 6;
-        int size = instructionsQueue.size();
         ByteBuffer bb = ByteBuffer.allocate(bufferSize*size);
         bb.putInt(messageLength); bb.putShort((short)5);
         for(int i = 0; i < size; i++){
@@ -68,22 +62,10 @@ public class DecisionDataModel {
         byte[] byteArray = new byte[messageLength];
         System.arraycopy(bb.array(), 0, byteArray, 0, messageLength);
 
-        //for(InstructionModel im : toSend){
-        //    messageLength += im.getSize();
-        //}
-        //int messageLength = size.getAndSet(6);
-        //ByteBuffer bb = ByteBuffer.allocate(messageLength);
-        /*bb.putInt(messageLength); bb.putShort((short)5);
-        for(InstructionModel io : toSend){
-            byte[] instruction = io.toByteArray();
-            bb.put(instruction);
-        }*/
-
         return byteArray;
     }
 
     public boolean isEmpty() {
         return instructionsQueue.isEmpty();
-        //return instructionsList.isEmpty();
     }
 }

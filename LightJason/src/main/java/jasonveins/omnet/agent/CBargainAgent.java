@@ -85,7 +85,7 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
         iOb.pushInt(targetVehicleId.intValue());
         iOb.pushInt(offer);
 
-        agentManager.addInstruction(iOb);
+        addInstruction(iOb);
     }
 
     @IAgentActionFilter
@@ -97,7 +97,7 @@ public class CBargainAgent extends IVehicleAgent<CBargainAgent> {
             iOb.pushShort(OFFER_REJECTED);
         else
             iOb.pushShort(OFFER_ACCEPTED);
-        agentManager.addInstruction(iOb);
+        addInstruction(iOb);
     }
 
     @IAgentActionFilter

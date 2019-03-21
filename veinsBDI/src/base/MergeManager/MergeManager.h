@@ -34,7 +34,7 @@ public:
         uint32_t agentAction;
     };
 protected:
-    void parseResponse(uint32_t msgLength) override;
+    void parseResponse(LightJasonBuffer rbf, uint32_t msgLength) override;
     /*
      * Define the parameters to send to the java agent manager
      */

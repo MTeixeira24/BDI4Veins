@@ -154,17 +154,22 @@ public final class ConnectionManager extends Thread {
                 break;
             case Constants.AGENT_REMOVE:
                 id = buffer.getInt();
-                am.removeAgent(id);
+                try {
+                    am.removeAgent(id);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    System.exit(2);
+                }
                 response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x03, 0x01};
                 break;
             case Constants.SET_BELIEF:
-                am.bulkTrigger(buffer.slice());
+                response = am.bulkTrigger(buffer.slice());
                 /*id = buffer.getInt();
                 size -= 4;
                 String belief = CByteUtils.extractString(buffer);
                 size -= belief.length();
                 am.updateGoals(id, belief ,buffer.slice(), size);*/
-                response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
+                //response = new byte[]{0x00, 0x00, 0x00, 0x06, 0x04, 0x01};
                 break;
             case Constants.REQUEST_DECISIONS:
                 if (am.existsInstructions()) {

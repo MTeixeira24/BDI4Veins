@@ -24,9 +24,7 @@ void MergeManager::finish() {
     LightJasonManager::finish();
 }
 
-void MergeManager::parseResponse(uint32_t msgLength) {
-    msgLength -= sizeof(uint32_t);
-    LightJasonBuffer rbf = receiveMessage(msgLength);
+void MergeManager::parseResponse(LightJasonBuffer rbf, uint32_t msgLength) {
     JasonMessage jm;
     rbf >> jm.commandId;
     ASSERT(jm.commandId == QUERY || jm.commandId == TERMINATE_CONNECTION);
@@ -67,8 +65,6 @@ void MergeManager::parseResponse(uint32_t msgLength) {
                 break;
             }
         }
-        queryMsg = new cMessage("query");
-        scheduleAt(simTime() + updateInterval, queryMsg);
     }
 }
 

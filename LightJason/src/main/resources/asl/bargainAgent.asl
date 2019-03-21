@@ -26,7 +26,8 @@
 //Initialize beliefs
 +!setup/beliefs(ISMERGER) : true <-
     //generic/print(MyName, ": merger status: ", ISMERGER);
-    +isMerger(ISMERGER)
+    +isMerger(ISMERGER);
+    return(0)
 .
 
 //Environmental triggers
@@ -43,5 +44,6 @@
 .
 
 +!bargain/receive/payout(VID, PAYOUT) : true <-
-    offer/receive(VID, PAYOUT)
+    offer/receive(VID, PAYOUT);
+    return(0)
 .

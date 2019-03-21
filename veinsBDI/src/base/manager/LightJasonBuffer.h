@@ -30,6 +30,7 @@ public:
     void reserve(uint32_t);
     void clear();
     bool isEmpty(){return buf.empty();}
+    uint32_t length(){return buf.length();}
 
 
     template <typename T>

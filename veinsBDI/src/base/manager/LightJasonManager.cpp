@@ -81,22 +81,14 @@ void LightJasonManager::handleMessage(cMessage* msg){
         sendTriggers();
 
         scheduleAt(simTime() + updateInterval, queryMsg);
-
-//        int n = write(connSocket,jp.query().getBuffer().c_str(),255);
-//        if (n < 0){
-//            throw new cRuntimeError("LightJasonManager: handleMessage write error");
-//        }
-//        uint32_t msgLength = getMessageLength();
-//        if(msgLength > 0){
-//            parseResponse(msgLength);
-//        }else{
-//            scheduleAt(simTime() + updateInterval, queryMsg);
-//        }
     }
 }
 
 BaseAgentAppl* LightJasonManager::getVehicle(int id){
     return vehicles[id];
+}
+
+void LightJasonManager::parseResponse(LightJasonBuffer rbf, uint32_t msgLength){
 }
 
 void LightJasonManager::parseResponse(uint32_t msgLength){
@@ -121,8 +113,6 @@ void LightJasonManager::parseResponse(uint32_t msgLength){
                 break;
             }
         }
-        queryMsg = new cMessage("query");
-        scheduleAt(simTime() + updateInterval, queryMsg);
     }
 }
 
@@ -144,7 +134,16 @@ void LightJasonManager::sendTriggers(){
         //append the end of message identifier
         triggerQueue << 0xFFFF;
         //send the message
-        LightJasonBuffer result = writeToSocket(triggerQueue.getBuffer());
+        //LightJasonBuffer result = writeToSocket(triggerQueue.getBuffer());
+        int n = write(connSocket,triggerQueue.getBuffer().c_str(),triggerQueue.length());
+        if (n < 0){
+            throw new cRuntimeError("LightJasonManager: handleMessage write error");
+        }
+        uint32_t msgLength = getMessageLength();
+        if(msgLength > 0){
+            msgLength -= sizeof(uint32_t);
+            parseResponse(receiveMessage(msgLength), msgLength);
+        }
         triggerQueue.clear();
     }
 }
@@ -224,8 +223,8 @@ uint32_t LightJasonManager::getMessageLength(){
 }
 
 LightJasonBuffer LightJasonManager::receiveMessage(uint32_t length){
-    char msgBuffer[length];
-    int n = recv(connSocket, msgBuffer, length,0);
+    //char msgBuffer[length];
+    int n = recv(connSocket, msgBuffer, USHRT_MAX,0);
     if (n < 0){
         throw new cRuntimeError("LightJasonManager: handleMessage recv error");
     }

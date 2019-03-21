@@ -40,6 +40,11 @@ public abstract class IVehicleAgent<T extends IAgent<?>> extends IBaseAgent<T> {
      * THEY WONT BE PARSED.
      *************************************/
 
+    protected void addInstruction(InstructionModel iOb)
+    {
+        agentManager.addInstruction(iOb);
+        //sleep(0);
+    }
     @IAgentActionFilter
     @IAgentActionName( name = "transmit/self/slow" )
     private void setControllerMaxSpeed()
@@ -47,5 +52,16 @@ public abstract class IVehicleAgent<T extends IAgent<?>> extends IBaseAgent<T> {
         InstructionModel iOb = new InstructionModel(this.id, 4);
         iOb.pushDouble(0.5);
         agentManager.addInstruction(iOb);
+    }
+
+
+    /**
+     * Passes return statuses over to the agent manager to be tallied/handled by the decision data model
+     */
+    @IAgentActionFilter
+    @IAgentActionName ( name = "return" )
+    private void returnResponse(Number value){
+        agentManager.notifyOfReturn(value.intValue());
+        //sleep(0);
     }
 }
