@@ -3,6 +3,7 @@ veinsBDI/.metadata/
 veinsBDI/.settings/*
 SumoSummary.xml
 veinsBDI/.settings/language.settings.xml
+csvResults/
 
 #Log files
 LightJason/logs/*
