@@ -19,10 +19,7 @@
 //---------------//
 
 //Entry point plan
-+!main : true <-
-    generic/print(MyName, ": bargain agent started")
-.
-
++!main.
 //Initialize beliefs
 +!setup/beliefs(ISMERGER) : true <-
     //generic/print(MyName, ": merger status: ", ISMERGER);

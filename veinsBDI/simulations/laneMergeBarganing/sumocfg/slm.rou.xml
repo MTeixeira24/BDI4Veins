@@ -3,7 +3,7 @@
       carFollowModel="CC" tauEngine="0.5" omegaN="0.2" xi="1" c1="0.5" lanesCount="4" ccAccel="1.5" ploegKp="0.2" ploegKd="0.7" ploegH="0.5" />
   
 
-  <route id="full route" edges="01 12 23 34 45"/>
+  <route id="full route" edges="01 12 23"/>
   <route id="half route" edges="01 12 23"/>
   <route id="small route" edges="01 12"/>
 

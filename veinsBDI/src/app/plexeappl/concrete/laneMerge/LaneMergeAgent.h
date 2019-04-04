@@ -81,14 +81,6 @@ private:
     cMessage* debugTimer = NULL;
     cMessage* startMergeTimer = NULL;
 
-    std::chrono::time_point<std::chrono::steady_clock> startTime1;
-    std::chrono::time_point<std::chrono::steady_clock> startTimeMessageReceived;
-    std::chrono::time_point<std::chrono::steady_clock> startTimeMessageToMessage;
-    std::vector<double> deltaTimeStack;
-    std::vector<double> deltaTimeStackMessageReceived;
-    std::vector<double> deltaTimeStackMessageToMessage;
-    bool startTimer = false;
-
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_LANEMERGE_LANEMERGEAGENT_H_ */

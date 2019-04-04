@@ -17,11 +17,23 @@ MergeManager::~MergeManager() {
 void MergeManager::initialize(int stage){
     LightJasonManager::initialize(stage);
     if(stage == 0){
+        queryCountStats.setName("queryCount");
+        responseTimes.setName("responseTimes");
     }
 }
 
 void MergeManager::finish() {
     LightJasonManager::finish();
+}
+
+
+void MergeManager::QueueTrigger(Trigger& trigger){
+    queryCount++;
+    LightJasonManager::QueueTrigger(trigger);
+}
+void MergeManager::sendTriggers(){
+    startTime = std::chrono::steady_clock::now();
+    LightJasonManager::sendTriggers();
 }
 
 void MergeManager::parseResponse(LightJasonBuffer rbf, uint32_t msgLength) {
@@ -65,6 +77,11 @@ void MergeManager::parseResponse(LightJasonBuffer rbf, uint32_t msgLength) {
                 break;
             }
         }
+        auto delta = std::chrono::steady_clock::now() - startTime;
+        double ms = std::chrono::duration <double, std::milli> (delta).count();
+        queryCountStats.record(queryCount);
+        responseTimes.record(ms);
+        queryCount = 0;
     }
 }
 

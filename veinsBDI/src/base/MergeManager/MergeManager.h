@@ -49,6 +49,14 @@ protected:
         std::cout << value << " ";
         return value;
     }
+private:
+    //Capture calls to queue and send trigger for statistical purposes
+    cOutVector queryCountStats;
+    cOutVector responseTimes;
+    std::chrono::time_point<std::chrono::steady_clock> startTime;
+    uint32_t queryCount = 0;
+    void QueueTrigger(Trigger& trigger) override;
+    void sendTriggers() override;
 };
 
 #endif /* BASE_MERGEMANAGER_MERGEMANAGER_H_ */

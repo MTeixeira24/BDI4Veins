@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -49,12 +50,15 @@ public class AgentManager extends Thread {
     //Used to wait for initial agent creation. Connection manager holds a reference to this and decrements when the first
     //agent is created
     private CountDownLatch latch = new CountDownLatch(1);
-    private CountDownLatch decisionLatch;
+    private CountDownLatch decisionLatch, loopLatch;
 
     private int planCount;
     protected HashMap<Integer, String> planMap;
+    Set<IAgent<?>> l_agents_active;
+
 
     protected IStatistics stats;
+
 
     /**
      * Class constructor
@@ -69,13 +73,129 @@ public class AgentManager extends Thread {
         cycleEnd = new AtomicBoolean(true);
         simulate = new AtomicBoolean(false);
         l_agents =  Sets.newConcurrentHashSet();
+        l_agents_active = Sets.newConcurrentHashSet();
         planMap = new HashMap<>();
         planCount = 0;
+        loopLatch = new CountDownLatch(1);
     }
 
     @Override
     public void run(){
-        this.loop();
+        this.loop2();
+    }
+
+    private void loop2(){
+        System.out.println("#################################");
+        System.out.println("Agent loop: Awaiting agent input");
+
+        try {
+            latch.await();  // wait until latch counted down to 0
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        System.out.println("Resume. Iteration number: " + stats.getIteration());
+
+        if(cmanager.isDisconnected()){
+            //Abrupt connection interruption
+            System.exit(1);
+        }
+
+        //Run setup cycles
+        IntStream.
+                range(0,10).
+                forEach( x -> l_agents.parallelStream()
+                .forEach( i ->
+                {
+                    try
+                    {
+                        i.call();
+                    }
+                    catch ( final Exception l_exception )
+                    {
+                        l_exception.printStackTrace();
+                    }
+                }));
+
+        toggleAgentLoop(false, true);
+        try {
+            loopLatch.await();
+            while(simulate.get()){
+                l_agents_active.parallelStream()
+                        .forEach( i ->
+                        {
+                            try
+                            {
+                                i.call();
+                            }
+                            catch ( final Exception l_exception )
+                            {
+                                l_exception.printStackTrace();
+                                System.out.println(i.beliefbase());
+                                System.out.println(i.plans());
+                                System.out.println(i.rules());
+                                System.out.println(i.runningplans());
+                            }
+                        } );
+                if(ddm.allReplied()){
+                    loopLatch = new CountDownLatch(1);
+                    loopLatch.await();
+                }
+            }
+        } catch (InterruptedException e) {
+                e.printStackTrace();
+        }
+
+
+        stats.dumpCSV();
+        cmanager.finish();
+    }
+
+    private void loop(){
+        System.out.println("#################################");
+        System.out.println("Agent loop: Awaiting agent input");
+
+        try {
+            latch.await();  // wait until latch counted down to 0
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        toggleAgentLoop(false, true);
+
+
+        System.out.println("Resume. Iteration number: " + stats.getIteration());
+
+        if(cmanager.isDisconnected()){
+            //Abrupt connection interruption
+            System.exit(1);
+        }
+        System.out.println("Agent loop: Starting agent loop");
+        while(true){
+            if(execute.get()){
+                cycleEnd.compareAndSet(true, false);
+                l_agents.parallelStream()
+                        .forEach( i ->
+                        {
+                            try
+                            {
+                                i.call();
+                            }
+                            catch ( final Exception l_exception )
+                            {
+                                l_exception.printStackTrace();
+                                System.out.println(i.beliefbase());
+                                System.out.println(i.plans());
+                                System.out.println(i.rules());
+                                System.out.println(i.runningplans());
+                            }
+                        } );
+                cycleEnd.compareAndSet(false, true);
+                if(!simulate.get()) break;
+            }
+        }
+        stats.dumpCSV();
+        cmanager.finish();
     }
 
     /**
@@ -126,10 +246,12 @@ public class AgentManager extends Thread {
         String vType;
         String aslFile;
 
+
         while((id = buffer.getInt()) != Character.MAX_VALUE){
             vType = CByteUtils.extractString(buffer);
             aslFile = resourceFolder + "asl/" + CByteUtils.extractString(buffer);
             insertionQueue.pushAgent(id, aslFile, vType);
+
         }
 
         try
@@ -152,6 +274,8 @@ public class AgentManager extends Thread {
             e.printStackTrace();
             System.exit(2);
         }
+
+
 
         ByteBuffer buff = ByteBuffer.allocate(64*planCount);
         buff.putInt(4);
@@ -267,12 +391,15 @@ public class AgentManager extends Thread {
         }while(agentId != 0xFFFF);
         ddm.setAgentCount(agentCount);
         decisionLatch = new CountDownLatch(1);
-
+        l_agents_active = Sets.newConcurrentHashSet();
          for (int i = 0; i < triggerList.size(); i++) {
-             agentMap.get(agentsToWake.get(i)).trigger(triggerList.get(i));
+             IVehicleAgent<?> agent = agentMap.get(agentsToWake.get(i));
+             l_agents_active.add(agent);
+             agent.trigger(triggerList.get(i));
          }
 
          try {
+             loopLatch.countDown();
              decisionLatch.await();
          } catch (InterruptedException e) {
              e.printStackTrace();
@@ -411,52 +538,6 @@ public class AgentManager extends Thread {
         return !ddm.isEmpty();
     }
 
-    private void loop(){
-        System.out.println("#################################");
-        System.out.println("Agent loop: Awaiting agent input");
-
-        try {
-            latch.await();  // wait until latch counted down to 0
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-         }
-         toggleAgentLoop(false, true);
-
-
-        System.out.println("Resume. Iteration number: " + stats.getIteration());
-
-        if(cmanager.isDisconnected()){
-            //Abrupt connection interruption
-            System.exit(1);
-        }
-        System.out.println("Agent loop: Starting agent loop");
-        while(true){
-            if(execute.get()){
-                cycleEnd.compareAndSet(true, false);
-                l_agents.parallelStream()
-                        .forEach( i ->
-                        {
-                            try
-                            {
-                                i.call();
-                            }
-                            catch ( final Exception l_exception )
-                            {
-                                l_exception.printStackTrace();
-                                System.out.println(i.beliefbase());
-                                System.out.println(i.plans());
-                                System.out.println(i.rules());
-                                System.out.println(i.runningplans());
-                                throw new RuntimeException();
-                            }
-                        } );
-                cycleEnd.compareAndSet(false, true);
-                if(!simulate.get()) break;
-            }
-        }
-        stats.dumpCSV();
-        cmanager.finish();
-    }
 
     public Set<IAgent<?>> agents(){
         return this.l_agents;
@@ -488,6 +569,7 @@ public class AgentManager extends Thread {
 
     void toggleAgentLoop(boolean expectedValue, boolean newValue) {
         if( !simulate.compareAndSet(expectedValue, newValue)) throw new RuntimeException();
+        if(loopLatch.getCount() > 0) loopLatch.countDown();
     }
 
     boolean getAgentLoopStatus(){

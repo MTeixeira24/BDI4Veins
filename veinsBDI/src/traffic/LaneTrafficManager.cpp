@@ -47,6 +47,7 @@ void LaneTrafficManager::injectInitialPairs(){
     int vehTypeId = findVehicleTypeIndex(vType);
     struct Vehicle automated;
 
+
     int totalLength = (vPairs * 22) + 10;
     for(int i = 0; i < vPairs; i++){
         //for each lane pair, generate a pair

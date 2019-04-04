@@ -37,6 +37,10 @@ public class DecisionDataModel {
         }
     }
 
+    public boolean allReplied(){
+        return (agentsThatReplied.get() == agentsToReply);
+    }
+
     public void setAgentCount(int agents){
         agentsToReply = agents;
         agentsThatReplied.set(0);

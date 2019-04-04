@@ -10,36 +10,9 @@
 Define_Module(LaneMergeAgent);
 
 LaneMergeAgent::LaneMergeAgent() {
-    deltaTimeStack.reserve(10);
-    deltaTimeStackMessageReceived.reserve(10);
-    deltaTimeStackMessageToMessage.reserve(10);
 }
 
 LaneMergeAgent::~LaneMergeAgent() {
-    double timeSum = 0;
-    double timeAverage = 0;
-    if(myId % 2 == 1){
-        for(unsigned int i = 0; i < deltaTimeStack.size(); i++){
-            timeSum += deltaTimeStack[i];
-        }
-        timeAverage = timeSum / deltaTimeStack.size();
-        recordScalar("#BeliefToDecisionAverage", timeAverage);
-        recordScalar("#BeliefToDecisionSum", timeSum);
-    }else{
-        for(unsigned int i = 0; i < deltaTimeStackMessageReceived.size(); i++){
-            timeSum += deltaTimeStackMessageReceived[i];
-        }
-        timeAverage = timeSum / deltaTimeStackMessageReceived.size();
-        recordScalar("#BeliefToMessageReceivedAverage", timeAverage);
-        recordScalar("#BeliefToMessageReceivedSum", timeSum);
-    }
-    timeSum = 0;
-    for(unsigned int i = 0; i < deltaTimeStackMessageToMessage.size(); i++){
-        timeSum += deltaTimeStackMessageToMessage[i];
-    }
-    timeAverage = timeSum / deltaTimeStackMessageToMessage.size();
-    recordScalar("#MessageToMessageReceivedAverage", timeAverage);
-    recordScalar("#MessageToMessageReceivedSum", timeSum);
     if(debugTimer != NULL)
         cancelAndDelete(debugTimer);
 }
@@ -86,7 +59,6 @@ void LaneMergeAgent::fillNegotiationMessage(BargainMessage* msg, int originId, i
 
 void LaneMergeAgent::sendOffer(int targetId, int amount){
     Enter_Method_Silent();
-    startTimeMessageToMessage = std::chrono::steady_clock::now();
     BargainMessage* msg = new BargainMessage("offer");
     fillNegotiationMessage(msg, myId, targetId);
     msg->setMessageType((int)MessageType::OFFER);
@@ -97,13 +69,9 @@ void LaneMergeAgent::sendOffer(int targetId, int amount){
 void LaneMergeAgent::sendDecision(int targetId, short decision){
     Enter_Method_Silent();
     BargainMessage* msg = new BargainMessage("decision");
-    startTimeMessageToMessage = std::chrono::steady_clock::now();
     fillNegotiationMessage(msg, myId, targetId);
     msg->setMessageType((int)MessageType::DECISION);
     msg->setData(decision);
-    auto deltaTime = std::chrono::steady_clock::now() - startTime1;
-    double ms = std::chrono::duration <double, std::milli> (deltaTime).count();
-    deltaTimeStack.push_back(ms);
     sendMessageDelayed(msg, targetId);
 }
 
@@ -166,17 +134,6 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
         if(!messageCache.hasReceived(msg->getMessageId())){
             messageCache.saveReceived(msg->getMessageId());
             msgName = "OfferAck";
-
-
-            if(startTimer){
-                auto deltaTime = std::chrono::steady_clock::now() - startTimeMessageToMessage;
-                double ms = std::chrono::duration <double, std::milli> (deltaTime).count();
-                deltaTimeStackMessageToMessage.push_back(ms);
-            }else{
-                startTimer = true;
-            }
-
-            startTime1 = std::chrono::steady_clock::now();
             Trigger offerReceived(Belief("bargain/receive"), myId,targetId);
             offerReceived.appendInt(amount);
             manager->QueueTrigger(offerReceived);
@@ -191,23 +148,6 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
         if(!messageCache.hasReceived(msg->getMessageId())){
             messageCache.saveReceived(msg->getMessageId());
             msgName = "DecisionAck";
-
-
-            {
-                auto deltaTime = std::chrono::steady_clock::now() - startTimeMessageToMessage;
-                double ms = std::chrono::duration <double, std::milli> (deltaTime).count();
-                deltaTimeStackMessageToMessage.push_back(ms);
-            }
-
-
-            if(startTimer){
-                auto deltaTime = std::chrono::steady_clock::now() - startTimeMessageReceived;
-                double ms = std::chrono::duration <double, std::milli> (deltaTime).count();
-                deltaTimeStackMessageReceived.push_back(ms);
-            }else{
-                startTimer = true;
-            }
-            startTimeMessageReceived = std::chrono::steady_clock::now();
 
             Trigger decisionReceived(Belief("bargain/receive/result"), myId,targetId);
             decisionReceived.appendInt(amount);
