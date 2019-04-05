@@ -31,44 +31,34 @@ void RouteVotingAppl::initialize(int stage){
         int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
         //Get the desired path from the config file
         std::vector<int> desiredPath = ((VoteManager*)manager)->getPreferredPath(myId);
-        BeliefModel ds("set/prefered/speed");
-        ds.pushInt(&desiredSpeed);
-        manager->sendInformationToAgents(myId, &ds);
-        BeliefModel dp("set/prefered/path");
-        dp.pushIntArray(desiredPath);
-        manager->sendInformationToAgents(myId, &dp);
-        BeliefModel us("update/speed");
-        int currentSpeed = mobility->getSpeed() * 3.6;
-        us.pushInt(&currentSpeed);
-        manager->sendInformationToAgents(myId, &us);
+        Trigger ds(Belief("set/prefered/speed"),myId,desiredSpeed);
+        manager->QueueTrigger(ds);
+        Trigger dp(Belief("set/prefered/path"), myId, desiredPath);
+        manager->QueueTrigger(dp);
+        Trigger us(Belief("update/speed"), myId, (int)(mobility->getSpeed() * 3.6));
+        manager->QueueTrigger(us);
         if(getPlatoonRole() == PlatoonRole::NONE) {
             //Fill the initial utility with placeholder values
             {
-                BeliefModel bm("save/utility");
-                double util = 0;
-                bm.pushDouble(&util);
-                manager->sendInformationToAgents(myId,&bm);
+                Trigger bm(Belief("save/utility"), myId, 0);
+                manager->QueueTrigger(bm);
             }
             //Set the belief in the agent that they are looking for platoon proposals
             if(par("engageNegotiations").boolValue()){
-                BeliefModel bm("lookforplatoon");
-                manager->sendInformationToAgents(myId,&bm);
+                Trigger bm(Belief("lookforplatoon"), myId);
+                manager->QueueTrigger(bm);
                 searchingForPlatoon = true;
             }
         }else{
             //This a vehicle belonging to a platoon
-            BeliefModel pbelief("set/initial/beliefs");
-            int platoonId = positionHelper->getPlatoonId();
-            int leaderId = positionHelper->getLeaderId();
-            pbelief.pushInt(&platoonId);
-            pbelief.pushInt(&leaderId);
-            int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-            pbelief.pushInt(&platoonSpeed);
+            Trigger pbelief(Belief("set/initial/beliefs"), myId, positionHelper->getPlatoonId());
+            pbelief.appendInt(positionHelper->getLeaderId());
+            pbelief.appendInt((int)((positionHelper->getPlatoonSpeed() * 3.6)));
             int chair = -1;
             std::vector<int> members = positionHelper->getPlatoonFormation();
             if (getPlatoonRole() == PlatoonRole::LEADER) {
                 //This is a leader, push the beliefs that allow an agent to know its role
-                chair = platoonId;
+                chair = positionHelper->getPlatoonId();
                 for (uint32_t i = 0; i < members.size(); i++){
                     received_votes[members[i]] = false;
                 }
@@ -76,9 +66,9 @@ void RouteVotingAppl::initialize(int stage){
                 voteTimer = new cMessage("VoteTimerA");
                 leaderInitialBehaviour();
             }
-            pbelief.pushInt(&chair);
-            pbelief.pushIntArray(members);
-            manager->sendInformationToAgents(myId, &pbelief);
+            pbelief.appendInt(chair);
+            pbelief.appendVector(members);
+            manager->QueueTrigger(pbelief);
         }
         updateCurrentSpeed = new cMessage("updateCurrentSpeed");
         scheduleAt(simTime() + 1, updateCurrentSpeed);
@@ -95,11 +85,9 @@ void RouteVotingAppl::leaderInitialBehaviour(){
 }
 
 void RouteVotingAppl::finalizeManeuver(int joinerId){
-    BeliefModel mnv("start/vote/node");
-    mnv.pushInt(&joinerId);
-    double args = -1;
-    mnv.pushDouble(&args);
-    manager->sendInformationToAgents(myId, &mnv);
+    Trigger mnv(Belief("start/vote/node"), myId, joinerId);
+    mnv.appendInt(-1);
+    manager->QueueTrigger(mnv);
     cycle = VoteCycle::ROUTE_VOTE;
     ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_START);
 }
@@ -150,18 +138,15 @@ void RouteVotingAppl::delegateNegotiationMessage(NegotiationMessage* nm){
         int platoonId = ((LeaderPositionHelper*)positionHelper)->isPlatoonLeader(jp->getVehicleId());
         if(searchingForPlatoon && platoonId >= 0){
             searchingForPlatoon = false;
-            BeliefModel platoonBelief;
-            platoonBelief.setBelief("pushplatoon/start");
-            platoonBelief.pushInt(&platoonId);
+            Trigger platoonBelief(Belief("pushplatoon/start"), myId, platoonId);
             double speedSum = 0;
             for(uint32_t i = 0; i < jp->getMemberSpeedsArraySize(); i++){
                 speedSum += jp->getMemberSpeeds(i);
             }
             int platoonSpeed = speedSum / jp->getMemberSpeedsArraySize();
-            platoonBelief.pushInt(&platoonSpeed);
-            int leaderId = jp->getVehicleId();
-            platoonBelief.pushInt(&leaderId);
-            manager->sendInformationToAgents(myId, &platoonBelief);
+            platoonBelief.appendInt((int)platoonSpeed);
+            platoonBelief.appendInt(jp->getVehicleId());
+            manager->QueueTrigger(platoonBelief);
             negotiationState = VoteState::JOINER_AWAITING_ACK_JOIN_REQUEST;
             std::cout << "888888888 GOT THE JOIN PROPOSAL 888888888888" << std::endl;
         }
@@ -175,12 +160,11 @@ void RouteVotingAppl::handleNotificationOfResults(const NotifyResults* msg){
         VotingAppl::handleNotificationOfResults(msg);
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_END);
     }else{
-        BeliefModel result("handle/results/committee");
         cancelEvent(awaitAckTimer);
         std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
         for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
-        result.pushIntArray(resultsVector);
-        manager->sendInformationToAgents(myId, &result);
+        Trigger result(Belief("handle/results/committee"), myId, resultsVector);
+        manager->QueueTrigger(result);
         negotiationState = VoteState::NONE;
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_ROUTE_VOTE_END);
     }
@@ -243,25 +227,18 @@ void RouteVotingAppl::handleSelfMsg(cMessage* msg){
             break;
         }
     }else if(msg == updateCurrentSpeed){
-        BeliefModel us("update/speed");
-        int speed = mobility->getSpeed() * 3.6;
-        us.pushInt(&speed);
-        manager->sendInformationToAgents(myId, &us);
+        Trigger us(Belief("update/speed"), myId, (int)(mobility->getSpeed() * 3.6));
+        manager->QueueTrigger(us);
         scheduleAt(simTime() + 1, updateCurrentSpeed);
     }else if(msg == startSpeedVoteDelay){
-        BeliefModel mnv("start/vote/speed");
-        double arg = 0;
-        mnv.pushDouble(&arg);
-        manager->sendInformationToAgents(myId, &mnv);
+        Trigger mnv(Belief("start/vote/speed"), myId, 0);
+        manager->QueueTrigger(mnv);
         cycle = VoteCycle::SPEED_VOTE;
         ((VoteManager*)manager)->storeTimeStamp(simTime().dbl() * 1000, VoteManager::TimeStampAction::TIME_OF_VOTE_START);
     }else if(msg == startInitialVote){
-        int joinerId = -1;
-        BeliefModel mnv("start/vote/node");
-        mnv.pushInt(&joinerId);
-        double args = -1;
-        mnv.pushDouble(&args);
-        manager->sendInformationToAgents(myId, &mnv);
+        Trigger mnv(Belief("start/vote/node"), myId, -1);
+        mnv.appendInt(-1);
+        manager->QueueTrigger(mnv);
         cycle = VoteCycle::ROUTE_VOTE;
         negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
     }  else{

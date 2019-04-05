@@ -329,7 +329,7 @@ void RegroupAppl::handleNotifyVote(const NotifyVote* msg){
         if (msg->getVehicleId() == altPlatoon.getLeaderId()) {
             negotiationState = VoteState::NONE;
             BeliefModel voteNotify("handle/vote/notification");
-            std::vector<double> contextArgs;
+            std::vector<int> contextArgs;
             uint32_t size = msg->getCandidatesArraySize();
             std::vector<int> candidates(size);
             for(uint32_t i = 0; i < size; i++){
@@ -337,7 +337,7 @@ void RegroupAppl::handleNotifyVote(const NotifyVote* msg){
             }
             voteNotify.pushIntArray(candidates);
             fillContextVector(msg, contextArgs);
-            voteNotify.pushDoubleArray(contextArgs);
+            voteNotify.pushIntArray(contextArgs);
             manager->sendInformationToAgents(myId, &voteNotify);
         }
     }else{

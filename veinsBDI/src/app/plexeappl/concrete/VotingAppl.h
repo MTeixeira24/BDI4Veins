@@ -167,7 +167,7 @@ protected:
      * Called when the notification of a vote start is received
      * Used to fill the context vector to send to the agent
      */
-    virtual void fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs);
+    virtual void fillContextVector(const NotifyVote* msg, std::vector<int>& contextArgs);
     /*
      * Store data about the leader
      */

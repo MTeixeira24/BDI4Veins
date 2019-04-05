@@ -29,24 +29,20 @@ void VotingAppl::initialize(int stage){
         // set initial beliefs
         //set speed from config file
         int desiredSpeed = ((VoteManager*)manager)->getPreferredSpeed(myId);
-        BeliefModel ds("set/prefered/speed");
-        ds.pushInt(&desiredSpeed);
-        manager->sendInformationToAgents(myId, &ds);
+        Trigger ds(Belief("set/prefered/speed"), myId);
+        ds.appendInt(desiredSpeed);
+        manager->QueueTrigger(ds);
         if(getPlatoonRole() == PlatoonRole::NONE) {
             //This is the joiner vehicle. Call the connection manager to add belief to join platoon to agent
             if(par("engageNegotiations").boolValue()){
-                BeliefModel bm;
                 int targetPlatoon = par("targetPlatoon").intValue();
                 if(targetPlatoon >= 0){
-                    bm.setBelief("foundplatoon");
-                    int platoonId = targetPlatoon;
-                    int leaderId = 0;
-                    bm.pushInt(&platoonId);
-                    bm.pushInt(&leaderId);
-                    manager->sendInformationToAgents(myId,&bm);
+                    Trigger bm(Belief("foundplatoon"), myId, targetPlatoon);
+                    bm.appendInt(0);;
+                    manager->QueueTrigger(bm);
                 }else{
-                    bm.setBelief("lookforplatoon");
-                    manager->sendInformationToAgents(myId,&bm);
+                    Trigger bm(Belief("lookforplatoon"), myId);
+                    manager->QueueTrigger(bm);
                     searchingForPlatoon = true;
                     searchTimer = new cMessage("searchTimer");
                     //Search for platoons for half a second
@@ -56,34 +52,23 @@ void VotingAppl::initialize(int stage){
         }else{
             //This a vehicle belonging to a platoon
             //Platoon beliefs
-            BeliefModel pbelief;
-            pbelief.setBelief("inplatoon");
-            int platoonId = positionHelper->getPlatoonId();
-            int leaderId = positionHelper->getLeaderId();
-            pbelief.pushInt(&platoonId);
-            pbelief.pushInt(&leaderId);
-            manager->sendInformationToAgents(myId, &pbelief);
+            Trigger pbelief(Belief("inplatoon"), myId, positionHelper->getPlatoonId());
+            pbelief.appendInt(positionHelper->getLeaderId());
+            manager->QueueTrigger(pbelief);
             //Beliefs about the current speed
-            BeliefModel platoonSpeedBelief("set/speed");
-            int platoonSpeed = (positionHelper->getPlatoonSpeed() * 3.6);
-            platoonSpeedBelief.pushInt(&platoonSpeed);
-            manager->sendInformationToAgents(myId, &platoonSpeedBelief);
+            Trigger platoonSpeedBelief(Belief("set/speed"), myId, (int)(positionHelper->getPlatoonSpeed() * 3.6));
+            manager->QueueTrigger(platoonSpeedBelief);
             if (getPlatoonRole() == PlatoonRole::LEADER) {
                 voteTimer = new cMessage("VoteTimerA");
                 //This is a leader, push the beliefs that allow an agent to know its role
-                BeliefModel cbelief;
-                cbelief.setBelief("ischair");
-                cbelief.pushInt(&platoonId);
-                manager->sendInformationToAgents(myId, &cbelief);
+                Trigger cbelief(Belief("ischair"), myId, positionHelper->getPlatoonId());
+                manager->QueueTrigger(cbelief);
                 std::vector<int> members = positionHelper->getPlatoonFormation();
                 for (uint32_t i = 0; i < members.size(); i++){
-                    BeliefModel mbelief;
-                    mbelief.setBelief("addmember");
-                    int member = members[i];
-                    mbelief.pushInt(&member);
-                    manager->sendInformationToAgents(myId, &mbelief);
+                    Trigger mbelief(Belief("addmember"), myId, members[i]);
+                    manager->QueueTrigger(mbelief);
                     //initiate vote list:
-                    received_votes[member] = false;
+                    received_votes[members[i]] = false;
                 }
             }
             else if (getPlatoonRole() == PlatoonRole::FOLLOWER){
@@ -330,12 +315,15 @@ void VotingAppl::handleRequestToJoinNegotiation(const RequestJoinPlatoonMessage*
     int joinerId = msg->getVehicleId();
     double joinerSpeed = msg->getPreferedSpeed();
     double joinerPreference = msg->getTolerance();
-    BeliefModel jbelief;
-    jbelief.setBelief("requestjoin");
-    jbelief.pushInt(&joinerId);
-    jbelief.pushDouble(&joinerSpeed);
-    jbelief.pushDouble(&joinerPreference);
-    manager->sendInformationToAgents(myId, &jbelief);
+    Trigger jbelief(Belief("requestjoin"), myId,joinerId);
+    jbelief.appendInt(joinerSpeed);
+    jbelief.appendInt(joinerPreference);
+//    jbelief.setBelief("requestjoin");
+//    jbelief.pushInt(&joinerId);
+//    jbelief.pushDouble(&joinerSpeed);
+//    jbelief.pushDouble(&joinerPreference);
+//    manager->sendInformationToAgents(myId, &jbelief);
+    manager->QueueTrigger(jbelief);
 }
 
 void VotingAppl::handleSubmitVote(const SubmitVote* msg){
@@ -349,10 +337,10 @@ void VotingAppl::handleSubmitVote(const SubmitVote* msg){
         for(int i = 0; i < size; i++){
             votes[i] = msg->getVotes(i);
         }
-        BeliefModel voteSubmission("handle/submit/vote");
-        voteSubmission.pushIntArray(votes);
-        voteSubmission.pushInt(&origin);
-        manager->sendInformationToAgents(myId, &voteSubmission);
+        Trigger voteSubmission(Belief("handle/submit/vote"), myId);
+        voteSubmission.appendVector(votes);
+        voteSubmission.appendInt(origin);
+        manager->QueueTrigger(voteSubmission);
         received_votes[origin] = true;
     }
     //Got the vote. Notify of successful delivery
@@ -368,26 +356,20 @@ void VotingAppl::handleNotificationOfResults(const NotifyResults* msg){
             //TODO: Handle insertion of beliefs
         }else if (myId == msg->getJoinerId()){
             cancelEvent(awaitAckTimer);
-            BeliefModel result;
             if(msg->getResult() == 1)
                 startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
             else{
-                result.setBelief("handlerejection");
-                int platoonId = msg->getPlatoonId();
-                result.pushInt(&platoonId);
-                manager->sendInformationToAgents(myId, &result);
+                Trigger result(Belief("handlerejection"), myId, msg->getPlatoonId());
+                manager->QueueTrigger(result);
             }
         }
     }else{
         if(positionHelper->getPlatoonId() != msg->getPlatoonId()) return;
         if(negotiationState != VoteState::AWAITING_RESULTS) return;
         cancelEvent(awaitAckTimer);
-        BeliefModel result;
         std::cout << "############ GOT VOTE RESULT " << myId << "############## " << msg->getResult() << std::endl;
-        result.setBelief("handle/results");
-        int speed = msg->getResult();
-        result.pushInt(&speed);
-        manager->sendInformationToAgents(myId, &result);
+        Trigger result(Belief("handle/results"), myId, msg->getResult());
+        manager->QueueTrigger(result);
         negotiationState = VoteState::NONE;
     }
 }
@@ -411,10 +393,9 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
         sendUnicast(sv, sv->getDestinationId());
         //delete msg;
     }else if(msg == searchTimer){
-        BeliefModel sendRequests;
-        sendRequests.setBelief("startrequests");
+        Trigger sendRequests(Belief("startrequests"), myId);
+        manager->QueueTrigger(sendRequests);
         searchingForPlatoon = false;
-        manager->sendInformationToAgents(myId, &sendRequests);
         delete msg;
         searchTimer = NULL;
     }else if (msg == awaitAckTimer){
@@ -451,21 +432,21 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
 void VotingAppl::handleNotifyVote(const NotifyVote* msg){
     if (positionHelper->isInSamePlatoon(msg->getVehicleId())) { // Verify that it is from this platoon
         negotiationState = VoteState::NONE;
-        BeliefModel voteNotify("handle/vote/notification");
-        std::vector<double> contextArgs;
+        Trigger voteNotify(Belief("handle/vote/notification"), myId);
+        std::vector<int> contextArgs;
         uint32_t size = msg->getCandidatesArraySize();
         std::vector<int> candidates(size);
         for(uint32_t i = 0; i < size; i++){
             candidates[i] = msg->getCandidates(i);
         }
-        voteNotify.pushIntArray(candidates);
+        voteNotify.appendVector(candidates);
         fillContextVector(msg, contextArgs);
-        voteNotify.pushDoubleArray(contextArgs);
-        manager->sendInformationToAgents(myId, &voteNotify);
+        voteNotify.appendVector(contextArgs);
+        manager->QueueTrigger(voteNotify);
     }
 }
 
-void VotingAppl::fillContextVector(const NotifyVote* msg, std::vector<double>& contextArgs){
+void VotingAppl::fillContextVector(const NotifyVote* msg, std::vector<int>& contextArgs){
     contextArgs.push_back(msg->getContextId());
     if(msg->getContextId() == CONTEXT_JOIN)
     {
