@@ -13,28 +13,34 @@ generateutility(JSPEED, JPREFERENCE, PSPEED, PredictedUtility)
 //Plan definition
 +!main <-
     Factor = utility/get/factor();
-    +factor(Factor).
+    +factor(Factor);
+    return(0).
 
 +!set/initial/beliefs(PID, LID, PSPEED, CHAIR, MEMBERS) <-
     !!inplatoon(PID, LID);
     !!set/speed(PSPEED);
     utility/storememberlist(MEMBERS);
-    !!ischair(CHAIR).
+    !!ischair(CHAIR);
+    return(0).
 
 +!set/prefered/path(LNODES) <-
     +preferedpath(LNODES);
-    generic/print(MyName, "preferred path is:", LNODES).
+    generic/print(MyName, "preferred path is:", LNODES);
+    return(0).
 
 +!set/prefered/speed(SPEED) <-
     +preferedspeed(SPEED);
-    >>factor(Factor).
+    >>factor(Factor);
+    return(0).
 
 +!lookforplatoon() <-
-    generic/print("Agent ", MyName, " have intention of searching for platoon").
+    generic/print("Agent ", MyName, " have intention of searching for platoon");
+    return(0).
 
 +!set/speed(SPEED) <-
     utility/set/platoon/speed(SPEED);
-    +platoonspeed(SPEED).
+    +platoonspeed(SPEED);
+    return(0).
 
 +!requestjoin(JID, JSPEED, JPREFERENCE) <-
     !!handlejoinrequest(JID, JSPEED, JPREFERENCE).

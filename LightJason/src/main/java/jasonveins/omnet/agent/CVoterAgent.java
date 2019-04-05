@@ -453,7 +453,6 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     agentManager.addInstruction(iOb);
                 }
             }
-
         }
     }
 
@@ -610,6 +609,8 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
             );
             this.trigger( l_trigger );
+        }else{
+            agentManager.notifyOfReturn(0);
         }
     }
 
