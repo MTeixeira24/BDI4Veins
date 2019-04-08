@@ -7,26 +7,29 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CContext {
-    private ArrayList<Integer> m_candidates;
+    private List<Integer> m_candidates;
     private int m_voteType;
     private CopyOnWriteArrayList<List<Integer>> m_votes;
     private int m_voterCount;
     private Map<String, Number> m_contextArguments;
+    private boolean m_isIterative;
 
-    public CContext(ArrayList<Integer> p_candidates, int p_voteType, int p_voterCount){
+    public CContext(List<Integer> p_candidates, int p_voteType, int p_voterCount, boolean p_isIterative){
         m_candidates = p_candidates;
         m_voteType = p_voteType;
         m_votes = new CopyOnWriteArrayList<>();
         m_voterCount = p_voterCount;
         m_contextArguments = new HashMap<>();
+        m_isIterative = p_isIterative;
     }
 
+    public boolean isIterative(){return m_isIterative;}
 
-    public ArrayList<Integer> getCandidates() {
+    public List<Integer> getCandidates() {
         return m_candidates;
     }
 
-    public void setCandidates(ArrayList<Integer> m_candidates) {
+    public void setCandidates(List<Integer> m_candidates) {
         this.m_candidates = m_candidates;
     }
 
@@ -81,4 +84,8 @@ public class CContext {
     }
 
     public int getVoterCount(){return m_voterCount;}
+
+    public boolean iterationOver() {
+        return m_candidates.size() <= 3;
+    }
 }

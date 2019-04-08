@@ -11,6 +11,7 @@ public class CGaussianUtility implements IUtilityFunction {
     private List <Integer> preferredRoute;
     private int preferredSpeed;
     private int hammingBuffer;
+    private double factor;
 
     public CGaussianUtility(){
         this(300, 7);
@@ -19,6 +20,7 @@ public class CGaussianUtility implements IUtilityFunction {
     public CGaussianUtility(int speedTolerance, int committeeTolerance){
         this.speedTolerance = speedTolerance;
         this.committeeTolerance = committeeTolerance;
+        factor = 0.05;
     }
 
     @Override

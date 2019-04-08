@@ -5,10 +5,14 @@ import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.utilityFunctions.CGaussianUtility;
 import jasonveins.omnet.agent.utilityFunctions.IUtilityFunction;
 import jasonveins.omnet.constants.CVariableBuilder;
+import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.environment.dijkstra.Graph;
 import jasonveins.omnet.environment.dijkstra.Vertex;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CAgentCreationQueue;
+import jasonveins.omnet.managers.CVoterAgentManager;
+import jasonveins.omnet.managers.constants.Constants;
+import jasonveins.omnet.managers.constants.VoteConstants;
 import jasonveins.omnet.voting.CContext;
 import jasonveins.omnet.voting.rule.CApproval;
 import jasonveins.omnet.voting.rule.IRule;
@@ -33,33 +37,229 @@ import java.util.stream.Stream;
 @IAgentAction
 public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
-    protected CContext m_context;
+    private CContext m_context;
     protected IUtilityFunction utility;
-    protected CVoteParameters votingState;
-    protected CommitteeRule committeeRule;
-    protected SingleRule singleRule;
+    private CVoteParameters votingState;
+    private CommitteeRule committeeRule;
+    private SingleRule singleRule;
 
     /**
      * ctor
      *
      * @param p_configuration agent configuration
-     * @param m_am
-     * @param m_id
-     * @param m_vType
+     * @param m_am The agent manager of this agent
+     * @param m_id The id of this agent
+     * @param m_vType The vehicle type
      */
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration,
-                       @Nonnull AgentManager m_am, @Nonnull int m_id, @Nonnull String m_vType) {
+                       @Nonnull AgentManager m_am, int m_id, @Nonnull String m_vType) {
         super(p_configuration, m_am, m_id, m_vType);
     }
 
     @IAgentActionFilter
     @IAgentActionName( name = "initialize/agent" )
-    private void initializeAgent(Number p_isLeader, String p_utilityFunct, Number p_utilityFactor,
-                                 String p_singleRule, String p_comRule, List<Integer> p_routeMap,
-                                 List<Integer> p_members){
+    private void initializeAgent(Number p_isLeader, String p_utilityFunct, Number p_platoonSpeed,
+                                 Number p_preferredSpeed, String p_singleRule, String p_comRule,
+                                 List<Integer> p_preferredRoute,List<Integer> p_members){
+        votingState = new CVoteParameters(
+                p_preferredSpeed.intValue(), ((CVoterAgentManager)agentManager).getRoute(),
+                p_platoonSpeed.intValue(), p_isLeader.intValue(), null, p_members,
+                p_preferredRoute
+        );
+        singleRule = new SingleRule(p_singleRule);
+        committeeRule = new CommitteeRule(p_comRule);
+        if(p_utilityFunct.equals("gaussian"))
+            utility = new CGaussianUtility();
+        else
+            throw new RuntimeException("Unknown utility function type");
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/open" )
+    private void openVote(Number p_voteType, List<Number> contextArgs){
+        System.out.println("Starting vote with id: " + p_voteType.shortValue());
+        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.NOTIFY_START_VOTE);
+        ArrayList<Integer> l_candidates = new ArrayList<>();
+        ArrayList<Integer> l_context = new ArrayList<>();
+        ArrayList<Integer> l_context_chair = new ArrayList<>();
+
+
+        switch (p_voteType.shortValue()){
+            case VoteConstants.CONTEXT_JOIN:
+                /*Add the necessary information for the vote*/
+                iOb.pushInt(VoteConstants.CONTEXT_JOIN);
+                /*Send speed (0) and preference(1) of joiner*/
+                l_context.add(contextArgs.get(0).intValue());
+                l_context.add(contextArgs.get(1).intValue());
+                iOb.pushIntArray(l_context);
+                /*Vote is a simple yes, no. Push those values*/
+                l_candidates.add(0);
+                l_candidates.add(1);
+                /*Define the context for future reference*/
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_JOIN,
+                        votingState.getMembers().size(), false);
+                m_context.addContextArgument("joinerSpeed", contextArgs.get(0));
+                m_context.addContextArgument("joinerPreference", contextArgs.get(1));
+                m_context.addContextArgument("joinerId", contextArgs.get(2));
+                /*Set up a data structure for the chair to cast its vote*/
+                l_context_chair.add((int)VoteConstants.CONTEXT_JOIN);
+                l_context_chair.addAll(l_context);
+                break;
+            case VoteConstants.CONTEXT_SPEED:{
+                iOb.pushInt(VoteConstants.CONTEXT_SPEED);
+                /*No context is needed*/
+                iOb.pushShort(Constants.VALUE_NULL);
+                /*Prepare a simple list of possible candidates*/
+                for(int i = 80; i <= 120; i += 5){
+                    l_candidates.add(i);
+                }//80 85 90 95 100 105 110 115 120
+                double cArg = contextArgs.get(0).intValue();
+                if( cArg == 1){
+                    //Alternate speed voting chosen. Remove the previously chosen speed
+                    //and the other alternatives around it
+                    l_candidates.removeIf(
+                            s -> s >= votingState.getPlatoonSpeed() - 5 && s < votingState.getPlatoonSpeed() + 5
+                    );
+                }
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED,
+                        votingState.getMembers().size(), true);
+                l_context_chair.add((int)VoteConstants.CONTEXT_SPEED);
+                break;
+            }//platoonSpeed
+            case VoteConstants.CONTEXT_PATH:{
+                iOb.pushInt(VoteConstants.CONTEXT_PATH);
+                //Get the environment data
+                Graph route = ((CVoterAgentManager)agentManager).getRoute();
+                if(contextArgs.get(0).intValue() == 1){
+                    //Alternate route voting chosen. Remove the previously chosen route
+                    //from the possible candidates
+                    int[] toRemove = {5,6,7,8,9};
+                    route.alterRoute(votingState.getCurrentPath(),toRemove);
+                }
+                //No special context needed
+                iOb.pushShort(Constants.VALUE_NULL);
+                //Gather all existing nodes to send to agents
+                l_candidates.addAll(route.getVertexesMap().keySet());
+                //Set up the context
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_PATH,
+                        votingState.getMembers().size(), false);
+                l_context_chair.add((int)VoteConstants.CONTEXT_PATH);
+                break;
+            }
+            case VoteConstants.CONTEXT_REGROUP:{
+                int contextStart = (contextArgs.size() / 2);
+                //First half contains the candidates
+                contextArgs.stream().limit(contextStart).forEach(
+                        dvalue -> l_candidates.add(dvalue.intValue())
+                );
+                //Second half their speeds
+                contextArgs.stream().skip(contextStart).forEach(
+                        dvalue -> l_candidates.add(dvalue.intValue())
+                );
+                //First parameter, what are the agents voting for?
+                iOb.pushInt(VoteConstants.CONTEXT_REGROUP);
+                //What information do the agents need to know about the candidates? Their preferred speed
+                iOb.pushIntArray(l_context);
+                //Save the context for later use
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_REGROUP,
+                        votingState.getMembers().size(), false);
+                for(int i = 0 ; i < l_context.size(); i++){
+                    m_context.addContextArgument(l_candidates.get(i).toString(), l_context.get(i));
+                }
+                //Create a data structure for the leader. The leader can cast its vote
+                l_context_chair.add((int)VoteConstants.CONTEXT_REGROUP);
+                l_context_chair.addAll(l_context);
+                break;
+            }
+        }
+        if( (p_voteType.shortValue() == VoteConstants.CONTEXT_JOIN)  ||
+                (p_voteType.shortValue() == VoteConstants.CONTEXT_SPEED ) )
+            iOb.pushInt(singleRule.expectedVoteSize(l_candidates.size()));
+        else
+            iOb.pushInt(committeeRule.expectedVoteSize(l_candidates.size()));
+        sendVoteSelf(l_candidates, l_context_chair);
+        agentManager.addInstruction(iOb);
+    }
+
+    @IAgentActionFilter
+    @IAgentActionName( name = "vote/send" )
+    private void sendVote(List<Integer> p_candidates, List<Integer> p_context){
+        List<Integer> votes;
+        short l_context = p_context.get(0).shortValue();
+        if (l_context == VoteConstants.CONTEXT_SPEED || l_context == VoteConstants.CONTEXT_JOIN){
+            votes = singleRule.generateVoteVector(p_candidates, utility);
+        }else{
+            votes = committeeRule.generateVoteVector(p_candidates, p_context, votingState.getPreferredPath());
+        }
+        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SUBMIT_VOTE);
+        iOb.pushIntArray(new ArrayList<>(votes));
+        agentManager.addInstruction(iOb);
 
     }
 
+    @IAgentActionFilter
+    @IAgentActionName(  name = "vote/store" )
+    private void saveVote(List<Integer> vote){
+        m_context.pushVotes(vote);
+        agentManager.notifyOfReturn(0);
+        if(m_context.allVotesSubmitted()){
+            if(m_context.isIterative()  && !m_context.iterationOver()){
+                System.out.println("PREPARING NEXT ITERATION");
+                InstructionModel iOb = new InstructionModel(this.id, VoteConstants.NOTIFY_START_VOTE);
+                List<Integer> newCandidates = singleRule.reduceCandidates(m_context);
+                LinkedList<Integer> l_context_chair = new LinkedList<>();
+                iOb.pushInt(m_context.getVoteType());
+                if(m_context.getVoteType() == VoteConstants.CONTEXT_SPEED){
+                    /*No context is needed*/
+                    iOb.pushShort(Constants.VALUE_NULL);
+                    l_context_chair.add((int)VoteConstants.CONTEXT_SPEED);
+                }
+                m_context = new CContext(newCandidates, VoteConstants.CONTEXT_SPEED,
+                        votingState.getMembers().size(), true);
+                iOb.pushIntArray(newCandidates);
+                iOb.pushInt(singleRule.expectedVoteSize(newCandidates.size()));
+                sendVoteSelf(newCandidates, l_context_chair);
+                agentManager.addInstruction(iOb);
+            }else{
+                InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SEND_VOTE_RESULTS);
+                iOb.pushInt(-1);
+                List<Integer> result;
+                if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH) {
+                    result = committeeRule.determineWinner(m_context, votingState);
+                    iOb.pushIntArray(result);
+                }else if( m_context.getVoteType() == VoteConstants.CONTEXT_REGROUP){
+                    //Scenario 3 requires all votes to be sent over
+                    iOb.pushInt(-1);
+                    iOb.pushIntArray(new ArrayList<>(committeeRule.getApprovalSum(m_context)));
+                }
+                else{
+                    int winner = singleRule.determineWinner(m_context);
+                    if(winner < 0){
+                        m_context.increaseVoterCount();
+                        m_context.pushVotes(singleRule.tieBrakeVote(m_context, utility));
+                    }
+                }
+                agentManager.addInstruction(iOb);
+            }
+        }else{
+            agentManager.notifyOfReturn(0);
+        }
+    }
+
+    private void sendVoteSelf(List<Integer> p_candidates, List<Integer> p_context){
+        //TODO: Add the vote from the chair straight to the ballot here
+        List<Integer> votes;
+        short l_context = p_context.get(0).shortValue();
+        if (l_context == VoteConstants.CONTEXT_SPEED || l_context == VoteConstants.CONTEXT_JOIN){
+            votes = singleRule.generateVoteVector(p_candidates, utility);
+        }else{
+            votes = committeeRule.generateVoteVector(p_candidates, p_context, votingState.getPreferredPath());
+        }
+        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SUBMIT_VOTE);
+        iOb.pushIntArray(new ArrayList<>(votes));
+        agentManager.addInstruction(iOb);
+
+    }
 
     public static class CVoterAgentGenerator extends IBaseAgentGenerator<CVoterAgent> {
         private AgentManager agentManager;

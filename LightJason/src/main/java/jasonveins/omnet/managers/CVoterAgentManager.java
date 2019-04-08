@@ -3,6 +3,7 @@ package jasonveins.omnet.managers;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
+import jasonveins.omnet.agent.voting.CVoterAgent;
 import jasonveins.omnet.environment.dijkstra.Graph;
 import jasonveins.omnet.statistics.CBaseStatistics;
 import jasonveins.omnet.statistics.CJoinStatistics;
@@ -10,6 +11,8 @@ import jasonveins.omnet.statistics.CJoinStatistics;
 import javax.annotation.Nonnull;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Agent Manager to handle the creation of voting agents
@@ -55,6 +58,20 @@ public class CVoterAgentManager extends AgentManager {
             e.printStackTrace();
         }
         return l_ag;
+    }
+
+    @Override
+    public Set<IVehicleAgent<?>> buildAgentBulk(@Nonnull FileInputStream p_stream, @Nonnull  CAgentCreationQueue p_queue){
+        Set<IVehicleAgent<?> > newAgents = null;
+        try{
+            CVoterAgent.CVoterAgentGenerator gen = new CVoterAgent.CVoterAgentGenerator(p_stream, this, p_queue);
+            newAgents = gen.generatemultiple(p_queue.size()).collect(Collectors.toSet());
+            setupPlanMap(gen.getPlans());
+        }catch (Exception e){
+            e.printStackTrace();
+            System.exit(2);
+        }
+        return newAgents;
     }
 
     /**

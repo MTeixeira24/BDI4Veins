@@ -252,7 +252,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 l_candidates.add(0);
                 l_candidates.add(1);
                 /*Define the context for future reference*/
-                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_JOIN, members.size());
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_JOIN, members.size(), false);
                 m_context.addContextArgument("joinerSpeed", contextArgs.get(0));
                 m_context.addContextArgument("joinerPreference", contextArgs.get(1));
                 m_context.addContextArgument("joinerId", contextArgs.get(2));
@@ -274,7 +274,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     //and the other alternatives around it
                     l_candidates.removeIf( s -> s >= (int)platoonSpeed - 5 && s < (int)platoonSpeed + 5);
                 }
-                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size());
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_SPEED, members.size(), false);
                 l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 break;
             }//platoonSpeed
@@ -293,7 +293,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 //Gather all existing nodes to send to agents
                 l_candidates.addAll(route.getVertexesMap().keySet());
                 //Set up the context
-                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_PATH, members.size());
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_PATH, members.size(), false);
                 l_context_chair.add((double)VoteConstants.CONTEXT_PATH);
                 break;
             }
@@ -312,7 +312,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 //What information do the agents need to know about the candidates? Their preferred speed
                 iOb.pushDoubleArray(l_context);
                 //Save the context for later use
-                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_REGROUP, members.size());
+                m_context = new CContext(l_candidates, VoteConstants.CONTEXT_REGROUP, members.size(), false);
                 for(int i = 0 ; i < l_context.size(); i++){
                     m_context.addContextArgument(l_candidates.get(i).toString(), l_context.get(i));
                 }
@@ -595,7 +595,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     l_context_chair.add((double)VoteConstants.CONTEXT_SPEED);
                 }
             }
-            m_context = new CContext(newCandidates, VoteConstants.CONTEXT_SPEED, members.size());
+            m_context = new CContext(newCandidates, VoteConstants.CONTEXT_SPEED, members.size(), false);
             iOb.pushIntArray(newCandidates);
             iOb.pushInt(votingRule.getExpectedVoteSize(newCandidates.size()));
             agentManager.addInstruction(iOb);

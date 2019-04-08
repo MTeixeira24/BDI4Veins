@@ -69,7 +69,7 @@ public class CRegroupVoter extends CVoterAgent {
             //What information do the agents need to know about the candidates? Their preferred speed
             iOb.pushDoubleArray(l_context);
             //Save the context for later use
-            m_context = new CContext(l_candidates, VoteConstants.CONTEXT_REGROUP, members.size());
+            m_context = new CContext(l_candidates, VoteConstants.CONTEXT_REGROUP, members.size(), false);
             for(int i = 0 ; i < l_context.size(); i++){
                 m_context.addContextArgument(l_candidates.get(i).toString(), l_context.get(i));
             }

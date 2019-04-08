@@ -99,4 +99,18 @@ public class Graph {
             }
         }
     }
+
+    public LinkedList<Vertex> updateAndComputeShortestPath(List<Integer> p_newWeights){
+        //Update node values
+        for(int i = 0; i < getVertexes().size(); i++){
+            getVertexes().get(i).setValue(p_newWeights.get(i));
+        }
+        //Update the graphs weights
+        updateWeights(Collections.max(p_newWeights));
+        //Get the route
+        Dijkstra dijkstra = new Dijkstra(this);
+        //Assume that the origin is at the beginning of the config file and the destination at the end of the config file
+        dijkstra.execute(getVertexes().get(0));
+        return dijkstra.getPath(getVertexes().get(getVertexes().size() - 1));
+    }
 }
