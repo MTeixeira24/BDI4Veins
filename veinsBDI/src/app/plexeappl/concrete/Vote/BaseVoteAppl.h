@@ -55,9 +55,11 @@ public:
             CHAIR_SEARCHING_JOINERS,
             JOINER_AWAITING_ACK_JOIN_REQUEST
      };
-    void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId);
     void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId,
-           int idOfOriginMessage);
+            int idOfOriginMessage=-1, bool forWholePlatoon=false);
+    void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId,
+            std::unordered_set<int>& targets, int idOfOriginMessage=-1,
+            bool forWholePlatoon=true);
 
     virtual void handleLowerMsg(cMessage* msg) override;
     void handleSelfMsg(cMessage* msg) override;
@@ -68,6 +70,10 @@ public:
     void sendCommitteeVoteResults(std::vector<int>& results);
     void sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs,
             std::vector<int>& candidates, int expectedVoteVector);
+
+    void handleNotifyVote(const NotifyVote* msg);
+    void handleSubmitVote(const SubmitVote* msg);
+    void handleNotificationOfResults(const NotifyResults* msg);
 protected:
     MessageCache messageCache;
     /*
@@ -75,9 +81,10 @@ protected:
      */
     const double ackTime = 0.05;
     void sendMessageWithAck(NegotiationMessage* msg, int target);
+    void sendMessageWithAck(NegotiationMessage* msg, const std::vector<int>& targets);
     double randomOffset();
-    bool isReceiver(MarketMessage* msg);
-    void sendMessageDelayed(MarketMessage* msg, int target);
+    bool isReceiver(NegotiationMessage* msg);
+    void sendMessageDelayed(NegotiationMessage* msg, int target);
     void resendMessage(long msgId, AckTimer* at);
     virtual void setInitialBeliefs() override;
     virtual void initialLeaderBehaviour();
@@ -89,6 +96,7 @@ protected:
     VoteManager* voteManager;
     VoteData election_data;
     VoteState negotiationState;
+    std::unordered_set<int> voteMembers;
 
 
 private:

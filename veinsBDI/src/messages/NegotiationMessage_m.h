@@ -50,6 +50,8 @@
  *     int replyMessageId;
  *     //Specifies what type of message this is. e.g. BID, ACK, OK, etc..
  *     int messageType;
+ *     //Specifies if this an ack type message
+ *     bool isAck = false;
  * }
  * </pre>
  */
@@ -65,6 +67,7 @@ class NegotiationMessage : public ::omnetpp::cPacket
     int messageId;
     int replyMessageId;
     int messageType;
+    bool isAck;
 
   private:
     void copy(const NegotiationMessage& other);
@@ -102,6 +105,8 @@ class NegotiationMessage : public ::omnetpp::cPacket
     virtual void setReplyMessageId(int replyMessageId);
     virtual int getMessageType() const;
     virtual void setMessageType(int messageType);
+    virtual bool getIsAck() const;
+    virtual void setIsAck(bool isAck);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const NegotiationMessage& obj) {obj.parsimPack(b);}

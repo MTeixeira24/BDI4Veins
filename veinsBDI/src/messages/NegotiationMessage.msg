@@ -41,4 +41,6 @@ packet NegotiationMessage {
     int replyMessageId;
     //Specifies what type of message this is. e.g. BID, ACK, OK, etc..
     int messageType;
+    //Specifies if this an ack type message
+    bool isAck=false;
 }

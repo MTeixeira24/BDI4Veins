@@ -188,6 +188,7 @@ NegotiationMessage::NegotiationMessage(const char *name, short kind) : ::omnetpp
     this->messageId = 0;
     this->replyMessageId = 0;
     this->messageType = 0;
+    this->isAck = false;
 }
 
 NegotiationMessage::NegotiationMessage(const NegotiationMessage& other) : ::omnetpp::cPacket(other)
@@ -218,6 +219,7 @@ void NegotiationMessage::copy(const NegotiationMessage& other)
     this->messageId = other.messageId;
     this->replyMessageId = other.replyMessageId;
     this->messageType = other.messageType;
+    this->isAck = other.isAck;
 }
 
 void NegotiationMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -232,6 +234,7 @@ void NegotiationMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->messageId);
     doParsimPacking(b,this->replyMessageId);
     doParsimPacking(b,this->messageType);
+    doParsimPacking(b,this->isAck);
 }
 
 void NegotiationMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -246,6 +249,7 @@ void NegotiationMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->messageId);
     doParsimUnpacking(b,this->replyMessageId);
     doParsimUnpacking(b,this->messageType);
+    doParsimUnpacking(b,this->isAck);
 }
 
 int NegotiationMessage::getVehicleId() const
@@ -338,6 +342,16 @@ void NegotiationMessage::setMessageType(int messageType)
     this->messageType = messageType;
 }
 
+bool NegotiationMessage::getIsAck() const
+{
+    return this->isAck;
+}
+
+void NegotiationMessage::setIsAck(bool isAck)
+{
+    this->isAck = isAck;
+}
+
 class NegotiationMessageDescriptor : public omnetpp::cClassDescriptor
 {
   private:
@@ -403,7 +417,7 @@ const char *NegotiationMessageDescriptor::getProperty(const char *propertyname) 
 int NegotiationMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 9+basedesc->getFieldCount() : 9;
+    return basedesc ? 10+basedesc->getFieldCount() : 10;
 }
 
 unsigned int NegotiationMessageDescriptor::getFieldTypeFlags(int field) const
@@ -424,8 +438,9 @@ unsigned int NegotiationMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<10) ? fieldTypeFlags[field] : 0;
 }
 
 const char *NegotiationMessageDescriptor::getFieldName(int field) const
@@ -446,8 +461,9 @@ const char *NegotiationMessageDescriptor::getFieldName(int field) const
         "messageId",
         "replyMessageId",
         "messageType",
+        "isAck",
     };
-    return (field>=0 && field<9) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<10) ? fieldNames[field] : nullptr;
 }
 
 int NegotiationMessageDescriptor::findField(const char *fieldName) const
@@ -463,6 +479,7 @@ int NegotiationMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='m' && strcmp(fieldName, "messageId")==0) return base+6;
     if (fieldName[0]=='r' && strcmp(fieldName, "replyMessageId")==0) return base+7;
     if (fieldName[0]=='m' && strcmp(fieldName, "messageType")==0) return base+8;
+    if (fieldName[0]=='i' && strcmp(fieldName, "isAck")==0) return base+9;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -484,8 +501,9 @@ const char *NegotiationMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "int",
+        "bool",
     };
-    return (field>=0 && field<9) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<10) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **NegotiationMessageDescriptor::getFieldPropertyNames(int field) const
@@ -561,6 +579,7 @@ std::string NegotiationMessageDescriptor::getFieldValueAsString(void *object, in
         case 6: return long2string(pp->getMessageId());
         case 7: return long2string(pp->getReplyMessageId());
         case 8: return long2string(pp->getMessageType());
+        case 9: return bool2string(pp->getIsAck());
         default: return "";
     }
 }
@@ -583,6 +602,7 @@ bool NegotiationMessageDescriptor::setFieldValueAsString(void *object, int field
         case 6: pp->setMessageId(string2long(value)); return true;
         case 7: pp->setReplyMessageId(string2long(value)); return true;
         case 8: pp->setMessageType(string2long(value)); return true;
+        case 9: pp->setIsAck(string2bool(value)); return true;
         default: return false;
     }
 }
