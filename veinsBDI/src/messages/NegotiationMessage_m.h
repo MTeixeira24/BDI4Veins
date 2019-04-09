@@ -20,11 +20,13 @@
 
 // cplusplus {{
     /** message type for maneuver messages */
+    #include <unordered_set>
+    typedef std::unordered_set<int> IntSet;
     static const int NEGOTIATION_TYPE = 22347;
 // }}
 
 /**
- * Class generated from <tt>messages/NegotiationMessage.msg:23</tt> by nedtool.
+ * Class generated from <tt>messages/NegotiationMessage.msg:25</tt> by nedtool.
  * <pre>
  * // General message to initiate negotiation procedures.
  * // Only children of this message should be initialized.
@@ -36,6 +38,18 @@
  *     int destinationId;
  *     // sumo external id of the sender
  *     string externalId;
+ *     //Platoon ID of sender
+ *     int platoonId;
+ *     //Set of target nodes
+ *     IntSet targets;
+ *     //Is this message meant for the entire platoon or a select few?
+ *     bool forWholePlatoon;
+ *     //Identifier of the message
+ *     int messageId;
+ *     //Identifier of the message it is replying to
+ *     int replyMessageId;
+ *     //Specifies what type of message this is. e.g. BID, ACK, OK, etc..
+ *     int messageType;
  * }
  * </pre>
  */
@@ -45,6 +59,12 @@ class NegotiationMessage : public ::omnetpp::cPacket
     int vehicleId;
     int destinationId;
     ::omnetpp::opp_string externalId;
+    int platoonId;
+    IntSet targets;
+    bool forWholePlatoon;
+    int messageId;
+    int replyMessageId;
+    int messageType;
 
   private:
     void copy(const NegotiationMessage& other);
@@ -69,6 +89,19 @@ class NegotiationMessage : public ::omnetpp::cPacket
     virtual void setDestinationId(int destinationId);
     virtual const char * getExternalId() const;
     virtual void setExternalId(const char * externalId);
+    virtual int getPlatoonId() const;
+    virtual void setPlatoonId(int platoonId);
+    virtual IntSet& getTargets();
+    virtual const IntSet& getTargets() const {return const_cast<NegotiationMessage*>(this)->getTargets();}
+    virtual void setTargets(const IntSet& targets);
+    virtual bool getForWholePlatoon() const;
+    virtual void setForWholePlatoon(bool forWholePlatoon);
+    virtual int getMessageId() const;
+    virtual void setMessageId(int messageId);
+    virtual int getReplyMessageId() const;
+    virtual void setReplyMessageId(int replyMessageId);
+    virtual int getMessageType() const;
+    virtual void setMessageType(int messageType);
 };
 
 inline void doParsimPacking(omnetpp::cCommBuffer *b, const NegotiationMessage& obj) {obj.parsimPack(b);}

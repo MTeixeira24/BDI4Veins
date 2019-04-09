@@ -495,7 +495,7 @@ double MarketAgent::randomOffset(){
 }
 
 void MarketAgent::resendMessage(long msgId, AckTimer* at){
-    MarketMessage* resend = messageCache.getMessageReference(msgId);
+    NegotiationMessage* resend = messageCache.getMessageReference(msgId);
     resend->setForWholePlatoon(false);
     resend->setTargets(messageCache.getRemainerIds(msgId));
     scheduleAt(simTime() + ackTime + randomOffset(), at);

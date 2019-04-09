@@ -15,9 +15,11 @@
 
 cplusplus {{
     /** message type for maneuver messages */
+    #include <unordered_set>
+    typedef std::unordered_set<int> IntSet;
     static const int NEGOTIATION_TYPE = 22347;
 }}
-
+class noncobject IntSet;
 // General message to initiate negotiation procedures.
 // Only children of this message should be initialized.
 packet NegotiationMessage {
@@ -27,4 +29,16 @@ packet NegotiationMessage {
     int destinationId;
     // sumo external id of the sender
     string externalId;
+    //Platoon ID of sender
+    int platoonId;
+    //Set of target nodes
+    IntSet targets;
+    //Is this message meant for the entire platoon or a select few?
+    bool forWholePlatoon;
+    //Identifier of the message
+    int messageId;
+    //Identifier of the message it is replying to
+    int replyMessageId;
+    //Specifies what type of message this is. e.g. BID, ACK, OK, etc..
+    int messageType;
 }

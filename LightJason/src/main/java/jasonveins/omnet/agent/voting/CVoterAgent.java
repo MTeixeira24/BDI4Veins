@@ -7,15 +7,12 @@ import jasonveins.omnet.agent.utilityFunctions.IUtilityFunction;
 import jasonveins.omnet.constants.CVariableBuilder;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.environment.dijkstra.Graph;
-import jasonveins.omnet.environment.dijkstra.Vertex;
 import jasonveins.omnet.managers.AgentManager;
 import jasonveins.omnet.managers.CAgentCreationQueue;
 import jasonveins.omnet.managers.CVoterAgentManager;
 import jasonveins.omnet.managers.constants.Constants;
 import jasonveins.omnet.managers.constants.VoteConstants;
 import jasonveins.omnet.voting.CContext;
-import jasonveins.omnet.voting.rule.CApproval;
-import jasonveins.omnet.voting.rule.IRule;
 import org.lightjason.agentspeak.action.binding.IAgentAction;
 import org.lightjason.agentspeak.action.binding.IAgentActionFilter;
 import org.lightjason.agentspeak.action.binding.IAgentActionName;
@@ -45,33 +42,35 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
 
     /**
      * ctor
-     *
-     * @param p_configuration agent configuration
+     *  @param p_configuration agent configuration
      * @param m_am The agent manager of this agent
      * @param m_id The id of this agent
      * @param m_vType The vehicle type
+     * @param voteRule
+     * @param utility
+     * @param committee_vote_rule
      */
     public CVoterAgent(@Nonnull IAgentConfiguration<CVoterAgent> p_configuration,
-                       @Nonnull AgentManager m_am, int m_id, @Nonnull String m_vType) {
+                       @Nonnull AgentManager m_am, int m_id, @Nonnull String m_vType, String voteRule,
+                       String utility, String committee_vote_rule) {
         super(p_configuration, m_am, m_id, m_vType);
+        singleRule = new SingleRule(voteRule);
+        committeeRule = new CommitteeRule(committee_vote_rule);
+        if(utility.equals("gaussian"))
+            this.utility = new CGaussianUtility();
+        else
+            throw new RuntimeException("Unknown utility function type");
     }
 
     @IAgentActionFilter
     @IAgentActionName( name = "initialize/agent" )
-    private void initializeAgent(Number p_isLeader, String p_utilityFunct, Number p_platoonSpeed,
-                                 Number p_preferredSpeed, String p_singleRule, String p_comRule,
+    private void initializeAgent(Number p_isLeader, Number p_platoonSpeed,Number p_preferredSpeed,
                                  List<Integer> p_preferredRoute,List<Integer> p_members){
         votingState = new CVoteParameters(
                 p_preferredSpeed.intValue(), ((CVoterAgentManager)agentManager).getRoute(),
                 p_platoonSpeed.intValue(), p_isLeader.intValue(), null, p_members,
                 p_preferredRoute
         );
-        singleRule = new SingleRule(p_singleRule);
-        committeeRule = new CommitteeRule(p_comRule);
-        if(p_utilityFunct.equals("gaussian"))
-            utility = new CGaussianUtility();
-        else
-            throw new RuntimeException("Unknown utility function type");
     }
 
     @IAgentActionFilter
@@ -264,17 +263,21 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     public static class CVoterAgentGenerator extends IBaseAgentGenerator<CVoterAgent> {
         private AgentManager agentManager;
         private CAgentCreationQueue insertionQueue;
+        private String voteRule;
+        private String utility;
+        private String committee_vote_rule;
         /**
          * @param p_stream ASL code as any stream e.g. FileInputStream
          * @param p_am Reference to agent manager
          */
         public CVoterAgentGenerator(@Nonnull final InputStream p_stream, AgentManager p_am) throws Exception
         {
-            this(p_stream, p_am, null);
+            this(p_stream, p_am, null, null, null, null);
         }
 
         public CVoterAgentGenerator(@Nonnull final InputStream p_stream, AgentManager p_am,
-                                    CAgentCreationQueue p_insertionQueue) throws Exception
+                                    CAgentCreationQueue p_insertionQueue, String voteRule, String utility,
+                                    String committee_vote_rule) throws Exception
         {
             super(
                     // input ASL stream
@@ -287,6 +290,9 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             );
             agentManager = p_am;
             insertionQueue = p_insertionQueue;
+            this.voteRule = voteRule;
+            this.utility = utility;
+            this.committee_vote_rule = committee_vote_rule;
         }
 
         @Nullable
@@ -295,11 +301,12 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             assert p_data != null;
             if(insertionQueue != null){
                 CAgentCreationQueue.CAgentData agentData = insertionQueue.popAgent();
-                final CVoterAgent agent = new CVoterAgent(m_configuration, agentManager, agentData.getId(), agentData.getvType());
+                final CVoterAgent agent = new CVoterAgent(m_configuration, agentManager, agentData.getId(),
+                        agentData.getvType(), voteRule, utility, committee_vote_rule);
                 agentManager.addAgentToMap(agent);
                 return agent;
             }else
-                return new CVoterAgent(m_configuration, agentManager,(int)p_data[0],(String)p_data[1]);
+                return new CVoterAgent(m_configuration, agentManager,(int)p_data[0],(String)p_data[1], voteRule, utility, committee_vote_rule);
         }
 
         public Set<IPlan> getPlans(){

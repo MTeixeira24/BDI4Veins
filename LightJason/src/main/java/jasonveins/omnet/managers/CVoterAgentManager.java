@@ -64,7 +64,8 @@ public class CVoterAgentManager extends AgentManager {
     public Set<IVehicleAgent<?>> buildAgentBulk(@Nonnull FileInputStream p_stream, @Nonnull  CAgentCreationQueue p_queue){
         Set<IVehicleAgent<?> > newAgents = null;
         try{
-            CVoterAgent.CVoterAgentGenerator gen = new CVoterAgent.CVoterAgentGenerator(p_stream, this, p_queue);
+            CVoterAgent.CVoterAgentGenerator gen = new CVoterAgent.CVoterAgentGenerator(
+                    p_stream, this, p_queue, voteRule, utility, committee_vote_rule);
             newAgents = gen.generatemultiple(p_queue.size()).collect(Collectors.toSet());
             setupPlanMap(gen.getPlans());
         }catch (Exception e){

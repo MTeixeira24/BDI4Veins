@@ -183,6 +183,11 @@ NegotiationMessage::NegotiationMessage(const char *name, short kind) : ::omnetpp
 {
     this->vehicleId = 0;
     this->destinationId = 0;
+    this->platoonId = 0;
+    this->forWholePlatoon = false;
+    this->messageId = 0;
+    this->replyMessageId = 0;
+    this->messageType = 0;
 }
 
 NegotiationMessage::NegotiationMessage(const NegotiationMessage& other) : ::omnetpp::cPacket(other)
@@ -207,6 +212,12 @@ void NegotiationMessage::copy(const NegotiationMessage& other)
     this->vehicleId = other.vehicleId;
     this->destinationId = other.destinationId;
     this->externalId = other.externalId;
+    this->platoonId = other.platoonId;
+    this->targets = other.targets;
+    this->forWholePlatoon = other.forWholePlatoon;
+    this->messageId = other.messageId;
+    this->replyMessageId = other.replyMessageId;
+    this->messageType = other.messageType;
 }
 
 void NegotiationMessage::parsimPack(omnetpp::cCommBuffer *b) const
@@ -215,6 +226,12 @@ void NegotiationMessage::parsimPack(omnetpp::cCommBuffer *b) const
     doParsimPacking(b,this->vehicleId);
     doParsimPacking(b,this->destinationId);
     doParsimPacking(b,this->externalId);
+    doParsimPacking(b,this->platoonId);
+    doParsimPacking(b,this->targets);
+    doParsimPacking(b,this->forWholePlatoon);
+    doParsimPacking(b,this->messageId);
+    doParsimPacking(b,this->replyMessageId);
+    doParsimPacking(b,this->messageType);
 }
 
 void NegotiationMessage::parsimUnpack(omnetpp::cCommBuffer *b)
@@ -223,6 +240,12 @@ void NegotiationMessage::parsimUnpack(omnetpp::cCommBuffer *b)
     doParsimUnpacking(b,this->vehicleId);
     doParsimUnpacking(b,this->destinationId);
     doParsimUnpacking(b,this->externalId);
+    doParsimUnpacking(b,this->platoonId);
+    doParsimUnpacking(b,this->targets);
+    doParsimUnpacking(b,this->forWholePlatoon);
+    doParsimUnpacking(b,this->messageId);
+    doParsimUnpacking(b,this->replyMessageId);
+    doParsimUnpacking(b,this->messageType);
 }
 
 int NegotiationMessage::getVehicleId() const
@@ -253,6 +276,66 @@ const char * NegotiationMessage::getExternalId() const
 void NegotiationMessage::setExternalId(const char * externalId)
 {
     this->externalId = externalId;
+}
+
+int NegotiationMessage::getPlatoonId() const
+{
+    return this->platoonId;
+}
+
+void NegotiationMessage::setPlatoonId(int platoonId)
+{
+    this->platoonId = platoonId;
+}
+
+IntSet& NegotiationMessage::getTargets()
+{
+    return this->targets;
+}
+
+void NegotiationMessage::setTargets(const IntSet& targets)
+{
+    this->targets = targets;
+}
+
+bool NegotiationMessage::getForWholePlatoon() const
+{
+    return this->forWholePlatoon;
+}
+
+void NegotiationMessage::setForWholePlatoon(bool forWholePlatoon)
+{
+    this->forWholePlatoon = forWholePlatoon;
+}
+
+int NegotiationMessage::getMessageId() const
+{
+    return this->messageId;
+}
+
+void NegotiationMessage::setMessageId(int messageId)
+{
+    this->messageId = messageId;
+}
+
+int NegotiationMessage::getReplyMessageId() const
+{
+    return this->replyMessageId;
+}
+
+void NegotiationMessage::setReplyMessageId(int replyMessageId)
+{
+    this->replyMessageId = replyMessageId;
+}
+
+int NegotiationMessage::getMessageType() const
+{
+    return this->messageType;
+}
+
+void NegotiationMessage::setMessageType(int messageType)
+{
+    this->messageType = messageType;
 }
 
 class NegotiationMessageDescriptor : public omnetpp::cClassDescriptor
@@ -320,7 +403,7 @@ const char *NegotiationMessageDescriptor::getProperty(const char *propertyname) 
 int NegotiationMessageDescriptor::getFieldCount() const
 {
     omnetpp::cClassDescriptor *basedesc = getBaseClassDescriptor();
-    return basedesc ? 3+basedesc->getFieldCount() : 3;
+    return basedesc ? 9+basedesc->getFieldCount() : 9;
 }
 
 unsigned int NegotiationMessageDescriptor::getFieldTypeFlags(int field) const
@@ -335,8 +418,14 @@ unsigned int NegotiationMessageDescriptor::getFieldTypeFlags(int field) const
         FD_ISEDITABLE,
         FD_ISEDITABLE,
         FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISCOMPOUND,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
+        FD_ISEDITABLE,
     };
-    return (field>=0 && field<3) ? fieldTypeFlags[field] : 0;
+    return (field>=0 && field<9) ? fieldTypeFlags[field] : 0;
 }
 
 const char *NegotiationMessageDescriptor::getFieldName(int field) const
@@ -351,8 +440,14 @@ const char *NegotiationMessageDescriptor::getFieldName(int field) const
         "vehicleId",
         "destinationId",
         "externalId",
+        "platoonId",
+        "targets",
+        "forWholePlatoon",
+        "messageId",
+        "replyMessageId",
+        "messageType",
     };
-    return (field>=0 && field<3) ? fieldNames[field] : nullptr;
+    return (field>=0 && field<9) ? fieldNames[field] : nullptr;
 }
 
 int NegotiationMessageDescriptor::findField(const char *fieldName) const
@@ -362,6 +457,12 @@ int NegotiationMessageDescriptor::findField(const char *fieldName) const
     if (fieldName[0]=='v' && strcmp(fieldName, "vehicleId")==0) return base+0;
     if (fieldName[0]=='d' && strcmp(fieldName, "destinationId")==0) return base+1;
     if (fieldName[0]=='e' && strcmp(fieldName, "externalId")==0) return base+2;
+    if (fieldName[0]=='p' && strcmp(fieldName, "platoonId")==0) return base+3;
+    if (fieldName[0]=='t' && strcmp(fieldName, "targets")==0) return base+4;
+    if (fieldName[0]=='f' && strcmp(fieldName, "forWholePlatoon")==0) return base+5;
+    if (fieldName[0]=='m' && strcmp(fieldName, "messageId")==0) return base+6;
+    if (fieldName[0]=='r' && strcmp(fieldName, "replyMessageId")==0) return base+7;
+    if (fieldName[0]=='m' && strcmp(fieldName, "messageType")==0) return base+8;
     return basedesc ? basedesc->findField(fieldName) : -1;
 }
 
@@ -377,8 +478,14 @@ const char *NegotiationMessageDescriptor::getFieldTypeString(int field) const
         "int",
         "int",
         "string",
+        "int",
+        "IntSet",
+        "bool",
+        "int",
+        "int",
+        "int",
     };
-    return (field>=0 && field<3) ? fieldTypeStrings[field] : nullptr;
+    return (field>=0 && field<9) ? fieldTypeStrings[field] : nullptr;
 }
 
 const char **NegotiationMessageDescriptor::getFieldPropertyNames(int field) const
@@ -448,6 +555,12 @@ std::string NegotiationMessageDescriptor::getFieldValueAsString(void *object, in
         case 0: return long2string(pp->getVehicleId());
         case 1: return long2string(pp->getDestinationId());
         case 2: return oppstring2string(pp->getExternalId());
+        case 3: return long2string(pp->getPlatoonId());
+        case 4: {std::stringstream out; out << pp->getTargets(); return out.str();}
+        case 5: return bool2string(pp->getForWholePlatoon());
+        case 6: return long2string(pp->getMessageId());
+        case 7: return long2string(pp->getReplyMessageId());
+        case 8: return long2string(pp->getMessageType());
         default: return "";
     }
 }
@@ -465,6 +578,11 @@ bool NegotiationMessageDescriptor::setFieldValueAsString(void *object, int field
         case 0: pp->setVehicleId(string2long(value)); return true;
         case 1: pp->setDestinationId(string2long(value)); return true;
         case 2: pp->setExternalId((value)); return true;
+        case 3: pp->setPlatoonId(string2long(value)); return true;
+        case 5: pp->setForWholePlatoon(string2bool(value)); return true;
+        case 6: pp->setMessageId(string2long(value)); return true;
+        case 7: pp->setReplyMessageId(string2long(value)); return true;
+        case 8: pp->setMessageType(string2long(value)); return true;
         default: return false;
     }
 }
@@ -478,6 +596,7 @@ const char *NegotiationMessageDescriptor::getFieldStructName(int field) const
         field -= basedesc->getFieldCount();
     }
     switch (field) {
+        case 4: return omnetpp::opp_typename(typeid(IntSet));
         default: return nullptr;
     };
 }
@@ -492,6 +611,7 @@ void *NegotiationMessageDescriptor::getFieldStructValuePointer(void *object, int
     }
     NegotiationMessage *pp = (NegotiationMessage *)object; (void)pp;
     switch (field) {
+        case 4: return (void *)(&pp->getTargets()); break;
         default: return nullptr;
     }
 }

@@ -30,7 +30,7 @@ bool MessageCache::allResponded(long msgId){
     return status;
 }
 
-void MessageCache::insertEntry(long msgId, MarketMessage* msgPointer, const std::vector<int>& ids){
+void MessageCache::insertEntry(long msgId, NegotiationMessage* msgPointer, const std::vector<int>& ids){
     deleteEntry(msgId);
     MessageStatus* ms = new MessageStatus;
     ms->message_backup = msgPointer;
@@ -51,7 +51,7 @@ bool MessageCache::existsEntry(long msgId){
     return messageCacheMap.find(msgId) != messageCacheMap.end();
 }
 
-MarketMessage* MessageCache::getMessageReference(long msgId){
+NegotiationMessage* MessageCache::getMessageReference(long msgId){
     if(existsEntry(msgId)) return messageCacheMap[msgId]->message_backup;
     return NULL;
 }

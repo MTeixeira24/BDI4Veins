@@ -21,8 +21,8 @@
 //Entry point plan
 +!main.
 
-+!setup/beliefs(IsLeader, UtilityFunct, UtilityFactor, SingleRule, ComRule, RouteMap, Members) : true <-
-    initialize/agent(IsLeader, UtilityFunct, UtilityFactor, SingleRule, ComRule, RouteMap, Members);
++!setup/beliefs(IsLeader, PlatoonSpeed, PrefSpeed, PrefRoute, Members) : true <-
+    initialize/agent(IsLeader, PlatoonSpeed, PrefSpeed, PrefRoute, Members);
     return(0)
 .
 

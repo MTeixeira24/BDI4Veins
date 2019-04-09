@@ -426,7 +426,6 @@ void VotingAppl::handleSelfMsg(cMessage* msg){
     }else {
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
-
 }
 
 void VotingAppl::handleNotifyVote(const NotifyVote* msg){

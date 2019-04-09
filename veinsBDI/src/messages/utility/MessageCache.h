@@ -16,7 +16,7 @@
 #include "../market/MarketMessage_m.h"
 
 struct MessageStatus{
-    MarketMessage* message_backup;
+    NegotiationMessage* message_backup;
     std::vector<int> receiverIds;
     std::unordered_map<int, bool> receiverStatus;
     std::unordered_set<int> remainders;
@@ -38,10 +38,10 @@ private:
 public:
     bool allResponded(long msgId);
     std::unordered_set<int>& getRemainerIds(long msgId){return messageCacheMap[msgId]->remainders;};
-    void insertEntry(long msgId, MarketMessage* msgPointer, const std::vector<int>& ids);
+    void insertEntry(long msgId, NegotiationMessage* msgPointer, const std::vector<int>& ids);
     void deleteEntry(long msgId);
     bool existsEntry(long msgId);
-    MarketMessage* getMessageReference(long msgId);
+    NegotiationMessage* getMessageReference(long msgId);
     void markReceived(long msgId, int id);
     void setSenderId(int _senderId){senderId = _senderId;}
     void saveReceived(long id){receivedMessages.insert(id);}
