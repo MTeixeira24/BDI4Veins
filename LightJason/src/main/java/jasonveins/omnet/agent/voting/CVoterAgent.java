@@ -284,7 +284,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     p_stream,
                     Stream.concat(
                             CCommon.actionsFromPackage(),
-                            CCommon.actionsFromAgentClass( CBargainAgent.class )
+                            CCommon.actionsFromAgentClass( CVoterAgent.class )
                     ).collect(Collectors.toSet()),
                     new CVariableBuilder()
             );

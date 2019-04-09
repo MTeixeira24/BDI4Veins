@@ -35,7 +35,7 @@ private:
     typedef struct _trigger_sequence{
         struct _trigger_sequence *next;
         DataType type;
-        uint8_t dataLength;
+        uint32_t dataLength;
         void *dataSequence;
     } TriggerSequence;
 

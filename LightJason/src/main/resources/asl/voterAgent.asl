@@ -40,7 +40,7 @@
 +!handle/vote/submit(VOTE, ID) <-
     generic/print(MyName,": Got vote", VOTE, "from", ID);
     //CANDIDATESIZE = utility/get/candidates/size();
-    vote/store(VOTE);
+    vote/store(VOTE)
 .
 
 +!handle/results(VALUE) <-

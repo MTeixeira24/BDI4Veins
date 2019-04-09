@@ -71,6 +71,11 @@ std::vector<int> VoteAgentManager::getPreferredPath(int agentId){
     return preferredPaths[agentId];
 }
 
+int VoteAgentManager::getPreferredSpeed(int agentId){
+    return iterationSpeeds[agentId];
+}
+
+
 void VoteAgentManager::assertType(LightJasonBuffer& buf, int value){
     uint16_t type;
     buf >> type;

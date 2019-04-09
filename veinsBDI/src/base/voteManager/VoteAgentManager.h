@@ -15,6 +15,7 @@
 #include "../../utilities/json.hpp"
 #include <fstream>
 using json = nlohmann::json;
+class BaseVoteAppl;
 class VoteAgentManager : public LightJasonManager {
 public:
     VoteAgentManager(){}

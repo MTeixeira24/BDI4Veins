@@ -7,8 +7,9 @@
 
 #include "BaseVoteAppl.h"
 
+Define_Module(BaseVoteAppl);
+
 BaseVoteAppl::BaseVoteAppl() {
-    voteManager = (VoteManager*)manager;
     voteTimer = NULL;
 }
 
@@ -24,6 +25,7 @@ void BaseVoteAppl::initialize(int stage){
                         gate("lowerControlIn"), gate("lowerControlOut"));
         traciVehicle->setSpeed(mobility->getSpeed());
         traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), false);
+        voteManager = (VoteAgentManager*)manager;
     }
 }
 
@@ -45,7 +47,7 @@ void BaseVoteAppl::initialLeaderBehaviour(){
     voteTimer = new cMessage("VoteTimerInitial");
     std::vector<int> members = positionHelper->getPlatoonFormation();
     voteMembers.insert(members.begin() + 1, members.end());
-    scheduleAt(simTime() + 0.5, voteTimer);
+    scheduleAt(simTime() + 1, voteTimer);
     for (uint32_t i = 0; i < members.size(); i++){
         received_votes[members[i]] = false;
     }
@@ -190,9 +192,10 @@ void BaseVoteAppl::handleSelfMsg(cMessage* msg){
            }
        }else if(msg == voteTimer){
            delete msg;
-           //traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
-           //Trigger beliefs(Belief("bargain/start"), myId, myId + 1);
-           //manager->QueueTrigger(beliefs);
+           Trigger trig(Belief("handle/vote/start"), myId, CONTEXT_SPEED);
+           std::vector<int> context(1,0);
+           trig.appendVector(context);
+           manager->QueueTrigger(trig);
        }else if(NegotiationMessage* delayMessage = dynamic_cast<NegotiationMessage*>(msg)){
           sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
        } else{
@@ -236,7 +239,7 @@ void BaseVoteAppl::handleSubmitVote(const SubmitVote* msg){
                 for(int i = 0; i < size; i++){
                     votes[i] = msg->getVotes(i);
                 }
-                Trigger voteSubmission(Belief("handle/submit/vote"), myId);
+                Trigger voteSubmission(Belief("handle/vote/vote"), myId);
                 voteSubmission.appendVector(votes);
                 voteSubmission.appendInt(origin);
                 manager->QueueTrigger(voteSubmission);
@@ -305,8 +308,8 @@ void BaseVoteAppl::handleNotificationOfResults(const NotifyResults* msg){
                         //startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
                     }
                     else{
-                        Trigger result(Belief("handlerejection"), myId, msg->getPlatoonId());
-                        manager->QueueTrigger(result);
+//                        Trigger result(Belief("handlerejection"), myId, msg->getPlatoonId());
+//                        manager->QueueTrigger(result);
                     }
                 }
             }else{

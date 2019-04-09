@@ -27,8 +27,8 @@
 
 #include "../../../../utilities/LeaderPositionHelper.h"
 #include "../../../../base/manager/constants/VoteConstants.h"
-#include "../../../../base/voteManager/VoteManager.h"
-
+#include "../../../../base/voteManager/VoteAgentManager.h"
+class VoteAgentManager;
 class BaseVoteAppl: public GeneralPlexeAgentAppl {
 public:
     BaseVoteAppl();
@@ -93,7 +93,7 @@ protected:
             std::vector<int>& candidates);
     std::map<int, bool> received_votes;
     cMessage* voteTimer;
-    VoteManager* voteManager;
+    VoteAgentManager* voteManager;
     VoteData election_data;
     VoteState negotiationState;
     std::unordered_set<int> voteMembers;

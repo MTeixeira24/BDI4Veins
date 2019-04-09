@@ -190,7 +190,7 @@ public final class ConnectionManager extends Thread {
                         am = new AgentManager("vehicle.asl", this);
                         break;
                     case "CVoterAgentManager":
-                        am = new CVoterAgentManager("iterativeVoter.asl", this);
+                        am = new CVoterAgentManager("voterAgent.asl", this);
                         break;
                     case "CRouterManager":
                         am = new CRouterManager("router.asl", this);

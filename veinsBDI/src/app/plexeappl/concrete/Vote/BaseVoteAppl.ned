@@ -13,23 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.joinCaseRevisited;
+package veinsbdi.app.plexeappl.concrete.Vote;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.voteManager.voteManager;
-import veinsbdi.base.voteManager.VoteAgentManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
 
-network JoinNetworkAI extends Scenario
-{
+simple BaseVoteAppl extends GeneralPlexeAgentAppl{
     parameters:
-        string traffic_type;
-    submodules:
-        //ljmanager: voteManager;
-        ljmanager: VoteAgentManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+        int targetPlatoon = default(-1);
+        double desiredSpeed @unit("kmph") = default(100 kmph);
+        bool engageNegotiations = default(true);
+        @class(BaseVoteAppl);
 }
