@@ -148,7 +148,7 @@ public class AgentManager extends Thread {
         }
 
 
-        stats.dumpCSV();
+        //stats.dumpCSV();
         cmanager.finish();
     }
 
@@ -364,7 +364,7 @@ public class AgentManager extends Thread {
                 }else if(dataType == Constants.TYPE_STRING){
                     terms.add(CRawTerm.from(CByteUtils.extractString(buffer)));
                 }else if(dataType == Constants.TYPE_NONE){
-                    break;
+                    //break;
                 }else{
                     throw new RuntimeException("bulkTrigger: invalid data type");
                 }

@@ -26,7 +26,8 @@ void NoisePlatoonTrafficManager::scenarioLoaded()  {
     /*Compute the estimated size of the platoon, in order to reserve space*/
     int platoonSize = int(par("platoonSize").doubleValue());
     double platoonSpeed = par("platoonInsertSpeed").doubleValue() / 3.6;
-    int minDistance = platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed) + 4;
+    int plength = (platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed) + 4) + (platoonLeaderHeadway * platoonInsertSpeed->doubleValue() / 3.6);
+    int minDistance = (platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed) + 4) + (platoonLeaderHeadway * platoonInsertSpeed->doubleValue() / 3.6);
 
     int initialVehicleCount = 20;
     int length = 300;
@@ -49,7 +50,7 @@ void NoisePlatoonTrafficManager::scenarioLoaded()  {
             //If the platoon will be generated in this lane, break before vehicles are generated on top of each other
             //otherwise prevent negative values
             if(i < nLanes || (joinerLane > -1 && i == joinerLane )){
-                if(insertPosition < minDistance + 10) break;
+                if(insertPosition < minDistance) break;
             }else{
                 if(insertPosition < 4) break;
             }

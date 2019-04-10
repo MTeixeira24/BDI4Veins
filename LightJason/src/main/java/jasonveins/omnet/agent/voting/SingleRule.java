@@ -40,11 +40,9 @@ public class SingleRule {
     int expectedVoteSize(int candidateCount){return votingRule.getExpectedVoteSize(candidateCount);}
 
     List<Integer> generateVoteVector(List<Integer> p_candidates, IUtilityFunction ufunc){
-        ArrayList<Integer> l_candidates = new ArrayList<>(p_candidates.size());
-        l_candidates.addAll(p_candidates);
-        List<CUtilityPair> utils = new ArrayList<>(l_candidates.size());
-        for(int i = 0; i < l_candidates.size(); i++) {
-            double util = ufunc.computeUtilitySpeed(l_candidates.get(i));
+        List<CUtilityPair> utils = new ArrayList<>(p_candidates.size());
+        for(int i = 0; i < p_candidates.size(); i++) {
+            double util = ufunc.computeUtilitySpeed(p_candidates.get(i));
             utils.add(new CUtilityPair(i, util));
         }
         return votingRule.getVote(utils);

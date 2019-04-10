@@ -71,6 +71,8 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 p_platoonSpeed.intValue(), p_isLeader.intValue(), null, p_members,
                 p_preferredRoute
         );
+        utility.setPreferredSpeed(p_preferredSpeed.intValue());
+        utility.setPreferredRoute(p_preferredRoute);
     }
 
     @IAgentActionFilter
@@ -171,6 +173,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 break;
             }
         }
+        iOb.pushIntArray(l_candidates);
         if( (p_voteType.shortValue() == VoteConstants.CONTEXT_JOIN)  ||
                 (p_voteType.shortValue() == VoteConstants.CONTEXT_SPEED ) )
             iOb.pushInt(singleRule.expectedVoteSize(l_candidates.size()));
@@ -199,9 +202,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
     @IAgentActionFilter
     @IAgentActionName(  name = "vote/store" )
     private void saveVote(List<Integer> vote){
-        m_context.pushVotes(vote);
-        agentManager.notifyOfReturn(0);
-        if(m_context.allVotesSubmitted()){
+        if(m_context.pushVotes(vote)){
             if(m_context.isIterative()  && !m_context.iterationOver()){
                 System.out.println("PREPARING NEXT ITERATION");
                 InstructionModel iOb = new InstructionModel(this.id, VoteConstants.NOTIFY_START_VOTE);
@@ -236,7 +237,9 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                     if(winner < 0){
                         m_context.increaseVoterCount();
                         m_context.pushVotes(singleRule.tieBrakeVote(m_context, utility));
+                        winner = singleRule.determineWinner(m_context);
                     }
+                    iOb.pushInt(winner);
                 }
                 agentManager.addInstruction(iOb);
             }
@@ -254,9 +257,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         }else{
             votes = committeeRule.generateVoteVector(p_candidates, p_context, votingState.getPreferredPath());
         }
-        InstructionModel iOb = new InstructionModel(this.id, VoteConstants.SUBMIT_VOTE);
-        iOb.pushIntArray(new ArrayList<>(votes));
-        agentManager.addInstruction(iOb);
+        m_context.pushVotes(votes);
 
     }
 

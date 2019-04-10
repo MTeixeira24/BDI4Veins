@@ -11,6 +11,7 @@ Define_Module(BaseVoteAppl);
 
 BaseVoteAppl::BaseVoteAppl() {
     voteTimer = NULL;
+    negotiationState = VoteState::NONE;
 }
 
 BaseVoteAppl::~BaseVoteAppl() {
@@ -43,15 +44,21 @@ void BaseVoteAppl::setInitialBeliefs(){
 }
 
 void BaseVoteAppl::initialLeaderBehaviour(){
-
+    negotiationState = VoteState::SPEED;
     voteTimer = new cMessage("VoteTimerInitial");
     std::vector<int> members = positionHelper->getPlatoonFormation();
     voteMembers.insert(members.begin() + 1, members.end());
     scheduleAt(simTime() + 1, voteTimer);
-    for (uint32_t i = 0; i < members.size(); i++){
-        received_votes[members[i]] = false;
+}
+
+void BaseVoteAppl::handleEndOfVote(){
+    if(negotiationState == VoteState::SPEED){
+        negotiationState = VoteState::ROUTE;
+        voteTimer = new cMessage("VoteTimerRoute");
+        scheduleAt(simTime() + 1, voteTimer);
     }
 }
+
 
 void BaseVoteAppl::fillNegotiationMessage(NegotiationMessage* msg, int originId,
         int targetId, int idOfOriginMessage, bool forWholePlatoon){
@@ -83,16 +90,10 @@ void BaseVoteAppl::sendVoteSubmition(std::vector<int>& votes){
         msg->setVotes(i, votes[i]);
     }
     sendMessageDelayed(msg, leaderId);
-    //Vote sent, wait for ack.
-    negotiationState = VoteState::AWAITING_ACK_SUBMIT;
 }
-/*
-void BaseVoteAppl::fillNegotiationMessage(NegotiationMessage* msg, int originId,
-        int targetId, std::unordered_set<int>& targets, int idOfOriginMessage,
-        ol forWholePlatoon){
- */
+
 void BaseVoteAppl::sendVoteResults(int winnerValue, int joinerId){
-    negotiationState = VoteState::CHAIR_ELECTION_END;
+    Enter_Method_Silent();
     NotifyResults* msg = new NotifyResults("NotifyResults");
     //Save results for future use
     election_data.currentResult = winnerValue;
@@ -103,12 +104,12 @@ void BaseVoteAppl::sendVoteResults(int winnerValue, int joinerId){
     std::vector<int> members(positionHelper->getPlatoonFormation().begin() + 1,
             positionHelper->getPlatoonFormation().end());
     sendMessageWithAck(msg, members);
+    handleEndOfVote();
 }
 
 void BaseVoteAppl::sendCommitteeVoteResults(std::vector<int>& results){
     Enter_Method_Silent();
-    negotiationState = VoteState::CHAIR_ELECTION_END;
-    NotifyResults* msg = new NotifyResults("NotifyResults");
+    NotifyResults* msg = new NotifyResults("NotifyCommitteeResults");
     //Save results for future use
     election_data.currentResult = -1;
     election_data.committeeResult = results;
@@ -119,6 +120,7 @@ void BaseVoteAppl::sendCommitteeVoteResults(std::vector<int>& results){
     std::vector<int> members(positionHelper->getPlatoonFormation().begin() + 1,
             positionHelper->getPlatoonFormation().end());
     sendMessageWithAck(msg, members);
+    handleEndOfVote();
     //Set a delay to start the speed vote
     /*if(startSpeedVoteDelay == NULL)
         startSpeedVoteDelay = new cMessage("startSpeedVoteDelay");
@@ -128,12 +130,11 @@ void BaseVoteAppl::sendCommitteeVoteResults(std::vector<int>& results){
 
 void BaseVoteAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<double>& contextArgs, std::vector<int>& candidates, int expectedVoteVector){
     Enter_Method_Silent();
-    negotiationState = VoteState::CHAIR_ELECTION_ONGOING;
     NotifyVote* msg = fillNotificationOfVote(contextId, contextArgs, candidates);
     //Set the the list of received votes
     std::vector<int> members(positionHelper->getPlatoonFormation().begin() + 1,
             positionHelper->getPlatoonFormation().end());
-    for (uint32_t i = 1; i < members.size(); i++){
+    for (uint32_t i = 0; i < members.size(); i++){
         received_votes[members[i]] = false;
     }
     //cancelEvent(voteTimer);
@@ -143,7 +144,7 @@ void BaseVoteAppl::sendNotificationOfVoteGeneral(int contextId, std::vector<doub
     election_data.candidates = candidates;
     election_data.contextId = contextId;
     election_data.contextArgs = contextArgs;
-    fillNegotiationMessage(msg, myId, -1, voteMembers);
+    sendMessageWithAck(msg, members);
     //sendUnicast(msg, -1);
 }
 
@@ -192,10 +193,18 @@ void BaseVoteAppl::handleSelfMsg(cMessage* msg){
            }
        }else if(msg == voteTimer){
            delete msg;
-           Trigger trig(Belief("handle/vote/start"), myId, CONTEXT_SPEED);
-           std::vector<int> context(1,0);
-           trig.appendVector(context);
-           manager->QueueTrigger(trig);
+           voteTimer = NULL;
+           if(negotiationState == VoteState::SPEED){
+               Trigger trig(Belief("handle/vote/start"), myId, CONTEXT_SPEED);
+               std::vector<int> context(1,0);
+               trig.appendVector(context);
+               manager->QueueTrigger(trig);
+           }else if(negotiationState == VoteState::ROUTE){
+               Trigger trig(Belief("handle/vote/start"), myId, CONTEXT_PATH);
+               std::vector<int> context(1,0);
+               trig.appendVector(context);
+               manager->QueueTrigger(trig);
+           }
        }else if(NegotiationMessage* delayMessage = dynamic_cast<NegotiationMessage*>(msg)){
           sendMessageWithAck(delayMessage, delayMessage->getDestinationId());
        } else{
@@ -208,14 +217,14 @@ void BaseVoteAppl::delegateNegotiationMessage(NegotiationMessage* nm){
         handleRequestToJoinNegotiation(msg);
         delete msg;
     }else*/ if (SubmitVote* msg = dynamic_cast<SubmitVote*>(nm)) {
-        handleSubmitVote(msg);
+        if(isReceiver(msg)) handleSubmitVote(msg);
         delete msg;
     }else if (NotifyResults* msg = dynamic_cast<NotifyResults*>(nm)) {
-        handleNotificationOfResults(msg);
+        if(isReceiver(msg)) handleNotificationOfResults(msg);
         delete msg;
     }else if (NotifyVote* msg = dynamic_cast<NotifyVote*>(nm)) {
         if((msg->getDestinationId() == -1) || (msg->getDestinationId() == myId)){
-            handleNotifyVote(msg);
+            if(isReceiver(msg)) handleNotifyVote(msg);
         }
         delete msg;
     }/*else if(RequestResults* msg = dynamic_cast<RequestResults*>(nm)) {
@@ -239,7 +248,7 @@ void BaseVoteAppl::handleSubmitVote(const SubmitVote* msg){
                 for(int i = 0; i < size; i++){
                     votes[i] = msg->getVotes(i);
                 }
-                Trigger voteSubmission(Belief("handle/vote/vote"), myId);
+                Trigger voteSubmission(Belief("handle/vote/submit"), myId);
                 voteSubmission.appendVector(votes);
                 voteSubmission.appendInt(origin);
                 manager->QueueTrigger(voteSubmission);
@@ -261,7 +270,6 @@ void BaseVoteAppl::handleSubmitVote(const SubmitVote* msg){
 void BaseVoteAppl::handleNotifyVote(const NotifyVote* msg){
     if(!msg->getIsAck()){
         if(!messageCache.hasReceived(msg->getMessageId())){
-            negotiationState = VoteState::NONE;
             Trigger voteNotify(Belief("handle/vote/notification"), myId);
             std::vector<int> contextArgs(1 + msg->getContextArgumentsArraySize());
             uint32_t size = msg->getCandidatesArraySize();
@@ -272,7 +280,7 @@ void BaseVoteAppl::handleNotifyVote(const NotifyVote* msg){
             voteNotify.appendVector(candidates);
 
 
-            contextArgs.push_back(msg->getContextId());
+            contextArgs[0] = msg->getContextId();
             if(msg->getContextId() == CONTEXT_JOIN)
             {
                 for(uint32_t i = 1; i < msg->getContextArgumentsArraySize() + 1; i++){
@@ -299,26 +307,14 @@ void BaseVoteAppl::handleNotifyVote(const NotifyVote* msg){
 void BaseVoteAppl::handleNotificationOfResults(const NotifyResults* msg){
     if(!msg->getIsAck()){
         if(!messageCache.hasReceived(msg->getMessageId())){
-            if(msg->getJoinerId() != -1){
-                negotiationState = VoteState::NONE;
-                if( (positionHelper->getPlatoonId()) == (msg->getPlatoonId()) ){
-                    //TODO: Handle insertion of beliefs
-                }else if (myId == msg->getJoinerId()){
-                    if(msg->getResult() == 1){
-                        //startJoinManeuver(msg->getPlatoonId(), msg->getVehicleId(), -1);
-                    }
-                    else{
-//                        Trigger result(Belief("handlerejection"), myId, msg->getPlatoonId());
-//                        manager->QueueTrigger(result);
-                    }
-                }
+            if(msg->getResult() == -1){
+                std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
+                for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
+                Trigger result(Belief("handle/results"), myId, resultsVector);
+                manager->QueueTrigger(result);
             }else{
-                if(positionHelper->getPlatoonId() != msg->getPlatoonId()) return;
-                //if(negotiationState != VoteState::AWAITING_RESULTS) return;
-                //cancelEvent(awaitAckTimer);
                 Trigger result(Belief("handle/results"), myId, msg->getResult());
                 manager->QueueTrigger(result);
-                negotiationState = VoteState::NONE;
             }
         }
         NotifyResults* reply = new NotifyResults("NotifyResultsAck");
@@ -329,9 +325,6 @@ void BaseVoteAppl::handleNotificationOfResults(const NotifyResults* msg){
         messageCache.markReceived(msg->getReplyMessageId(), msg->getVehicleId());
     }
 }
-
-
-
 
 void BaseVoteAppl::sendMessageWithAck(NegotiationMessage* msg, int target){
     std::vector<int> targets({target});

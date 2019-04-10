@@ -4,7 +4,7 @@ veinsBDI/.settings/*
 SumoSummary.xml
 veinsBDI/.settings/language.settings.xml
 csvResults/
-
+sumoTimeStep.temp
 #Log files
 LightJason/logs/*
 #Omnet files

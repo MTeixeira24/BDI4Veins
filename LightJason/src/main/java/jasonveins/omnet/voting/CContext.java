@@ -1,15 +1,13 @@
 package jasonveins.omnet.voting;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class CContext {
     private List<Integer> m_candidates;
     private int m_voteType;
-    private CopyOnWriteArrayList<List<Integer>> m_votes;
+    private ConcurrentLinkedQueue<List<Integer>> m_votes;
     private int m_voterCount;
     private Map<String, Number> m_contextArguments;
     private boolean m_isIterative;
@@ -17,7 +15,7 @@ public class CContext {
     public CContext(List<Integer> p_candidates, int p_voteType, int p_voterCount, boolean p_isIterative){
         m_candidates = p_candidates;
         m_voteType = p_voteType;
-        m_votes = new CopyOnWriteArrayList<>();
+        m_votes = new ConcurrentLinkedQueue<>();
         m_voterCount = p_voterCount;
         m_contextArguments = new HashMap<>();
         m_isIterative = p_isIterative;
@@ -41,17 +39,17 @@ public class CContext {
         this.m_voteType = m_voteType;
     }
 
-    public CopyOnWriteArrayList<List<Integer>> getVotes() {
-        return m_votes;
+    public List<List<Integer>> getVotes() {
+        return new ArrayList<>(m_votes);
     }
 
-    public void pushVotes(List<Integer> p_votes){
-        m_votes.add(p_votes);
+    public synchronized boolean pushVotes(List<Integer> p_votes){
+        m_votes.offer(p_votes);
+        return this.m_voterCount == m_votes.size();
     }
 
     public boolean allVotesSubmitted(){
-        if(this.m_voterCount == m_votes.size()) return true;
-        return false;
+        return this.m_voterCount == m_votes.size();
     }
 
     public void debug(){

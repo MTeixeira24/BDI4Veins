@@ -48,13 +48,12 @@ public:
     };
     enum class VoteState : size_t {
             NONE,
-            AWAITING_ACK_SUBMIT,
-            AWAITING_RESULTS,
-            CHAIR_ELECTION_END,
-            CHAIR_ELECTION_ONGOING,
-            CHAIR_SEARCHING_JOINERS,
-            JOINER_AWAITING_ACK_JOIN_REQUEST
+            SPEED,
+            ROUTE,
+            REGROUP,
+            OTHER
      };
+    virtual void handleEndOfVote();
     void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId,
             int idOfOriginMessage=-1, bool forWholePlatoon=false);
     void fillNegotiationMessage(NegotiationMessage* msg, int originId, int targetId,
