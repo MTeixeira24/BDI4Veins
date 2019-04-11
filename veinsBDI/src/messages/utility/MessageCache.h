@@ -38,6 +38,7 @@ private:
 public:
     bool allResponded(long msgId);
     std::unordered_set<int>& getRemainerIds(long msgId){return messageCacheMap[msgId]->remainders;};
+    int getReceiverCount(long msgId){return messageCacheMap[msgId]->receiverIds.size();}
     void insertEntry(long msgId, NegotiationMessage* msgPointer, const std::vector<int>& ids);
     void deleteEntry(long msgId);
     bool existsEntry(long msgId);

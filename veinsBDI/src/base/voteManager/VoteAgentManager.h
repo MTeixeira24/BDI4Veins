@@ -51,6 +51,14 @@ protected:
        uint32_t agentAction;
    };
 private:
+
+   //Capture calls to queue and send trigger for statistical purposes
+   cOutVector queryCountStats;
+   cOutVector responseTimes;
+   std::chrono::time_point<std::chrono::steady_clock> startTime;
+   uint32_t queryCount = 0;
+   void QueueTrigger(Trigger& trigger) override;
+   void sendTriggers() override;
     /**
      * Store the preferred paths of the agents
      */

@@ -34,6 +34,7 @@ public:
     BaseVoteAppl();
     virtual ~BaseVoteAppl();
     virtual void initialize(int stage) override;
+    virtual void finish() override;
     /**
     * Data structure for the leader to hold data about the election without having to query the agent
     */
@@ -100,6 +101,11 @@ protected:
 
 private:
     std::vector<int> vote;
+
+    //stats
+    cOutVector pdrOverTime;
+    int totalReceivedMessages;
+    int totalFailedMessages;
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_VOTE_BASEVOTEAPPL_H_ */

@@ -33,7 +33,24 @@ public class CSatisfactionCollector {
     }
 
     public void setValue(int rowId, String columnName, String value){
-        rows.get(rowId).putEntry(columnMap.get(columnName), value);
+        try{
+            rows
+                    .get(rowId)
+                    .putEntry(
+                            columnMap
+                                    .get(columnName),
+                            value);
+        }catch (NullPointerException e){
+            e.printStackTrace();
+            System.out.println("rowId: " + rowId);
+            System.out.println("columnName: " + columnName);
+            System.out.println("value: " + value);
+
+            System.out.println("columnMap"+columnMap);
+            System.out.println("rows.get(rowId)"+rows.get(rowId));
+            System.exit(2);
+        }
+
     }
 
     private String csvHeader(){

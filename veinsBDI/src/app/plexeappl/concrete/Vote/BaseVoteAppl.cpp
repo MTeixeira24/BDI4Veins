@@ -27,7 +27,17 @@ void BaseVoteAppl::initialize(int stage){
         traciVehicle->setSpeed(mobility->getSpeed());
         traciVehicle->setFixedLane(traciVehicle->getLaneIndex(), false);
         voteManager = (VoteAgentManager*)manager;
+
+        pdrOverTime.setName("pdrOverTime");
+        totalReceivedMessages = 0;
+        totalFailedMessages = 0;
     }
+}
+
+void BaseVoteAppl::finish(){
+    recordScalar("totalReceivedMessages", totalReceivedMessages);
+    recordScalar("totalFailedMessages", totalFailedMessages);
+    GeneralPlexeAgentAppl::finish();
 }
 
 void BaseVoteAppl::setInitialBeliefs(){
@@ -188,7 +198,16 @@ void BaseVoteAppl::handleSelfMsg(cMessage* msg){
        long msgId = at->getMessageId();
            if(messageCache.allResponded(msgId)){
                delete at;
+               pdrOverTime.record(1);
+               totalReceivedMessages += messageCache.getReceiverCount(msgId);
            }else{
+               //int targetCount = messageCache.getMessageReference(msgId)->getTargets().size();
+               int remainders = messageCache.getRemainerIds(msgId).size();
+               int receivers =  messageCache.getReceiverCount(msgId);
+               double pdr = (receivers-remainders)/receivers;
+               pdrOverTime.record(pdr);
+               totalFailedMessages += remainders;
+               totalReceivedMessages += receivers - remainders;
                resendMessage(msgId, at);
            }
        }else if(msg == voteTimer){

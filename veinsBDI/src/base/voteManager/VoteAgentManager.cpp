@@ -12,6 +12,9 @@ Define_Module(VoteAgentManager);
 void VoteAgentManager::initialize(int stage){
     LightJasonManager::initialize(stage);
     if(stage == 0){
+        queryCountStats.setName("queryCount");
+        responseTimes.setName("responseTimes");
+
         std::string platoonType = par("platoon_type").stdstringValue();
         int platoonSize = par("platoon_size").intValue();
         int iteration = par("iteration").intValue();
@@ -40,7 +43,18 @@ void VoteAgentManager::initialize(int stage){
 }
 
 void VoteAgentManager::finish(){
+    LightJasonManager::finish();
 }
+
+void VoteAgentManager::QueueTrigger(Trigger& trigger){
+    queryCount++;
+    LightJasonManager::QueueTrigger(trigger);
+}
+void VoteAgentManager::sendTriggers(){
+    startTime = std::chrono::steady_clock::now();
+    LightJasonManager::sendTriggers();
+}
+
 
 void VoteAgentManager::setLightJasonParameters(){
     //Collect information about the current run
@@ -157,6 +171,11 @@ void VoteAgentManager::parseResponse(LightJasonBuffer rbf, uint32_t msgLength) {
                 break;
             }
         }
+        auto delta = std::chrono::steady_clock::now() - startTime;
+        double ms = std::chrono::duration <double, std::milli> (delta).count();
+        queryCountStats.record(queryCount);
+        responseTimes.record(ms);
+        queryCount = 0;
     }
 }
 
