@@ -6,20 +6,21 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class CSatisfactionCollector {
 
     private HashMap<String, Integer> columnMap;
     private LinkedList<String> columnNames;
     private LinkedList<Integer> columnIds;
-    private HashMap<Integer, RowObj> rows;
+    private ConcurrentHashMap<Integer, RowObj> rows;
     private String filename;
 
     public CSatisfactionCollector(String p_filename, String... p_columns){
         columnMap  = new HashMap<>();
         columnIds = new LinkedList<>();
         columnNames = new LinkedList<>();
-        rows = new HashMap<>();
+        rows = new ConcurrentHashMap<>(40);
         filename = p_filename;
         for(int i = 0; i < p_columns.length; i++){
             columnNames.add(p_columns[i]);
@@ -33,7 +34,10 @@ public class CSatisfactionCollector {
     }
 
     public void setValue(int rowId, String columnName, String value){
+        while(rows.get(rowId) == null)
+            addRow(rowId);
         try{
+
             rows
                     .get(rowId)
                     .putEntry(
@@ -48,6 +52,7 @@ public class CSatisfactionCollector {
 
             System.out.println("columnMap"+columnMap);
             System.out.println("rows.get(rowId)"+rows.get(rowId));
+            System.out.println("rows"+rows);
             System.exit(2);
         }
 
@@ -86,7 +91,7 @@ public class CSatisfactionCollector {
         HashMap<Integer, String> rowValues;
 
         RowObj(List<Integer> p_columns){
-            rowValues = new HashMap<>();
+            rowValues = new HashMap<>(40);
             if(p_columns != null){
                 for(Integer colId : p_columns){
                     putEntry(colId, "0");
