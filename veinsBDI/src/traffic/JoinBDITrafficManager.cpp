@@ -83,6 +83,10 @@ void JoinBDITrafficManager::injectPlatoon(){
         l = (l + 1) % nLanes;
     }
 
+    for(int l = 0; l < nLanes; l++){
+        lengths[l] = 500 + (lengths[l]/2);
+    }
+
     // finally inject vehicles
     double totalLength;
     for (l = 0; l < nLanes; l++) {

@@ -1,4 +1,96 @@
 package jasonveins.omnet.agent.voting;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+
 public class CSatisfactionCollector {
+
+    private HashMap<String, Integer> columnMap;
+    private LinkedList<String> columnNames;
+    private LinkedList<Integer> columnIds;
+    private HashMap<Integer, RowObj> rows;
+    private String filename;
+
+    CSatisfactionCollector(String p_filename, String... p_columns){
+        columnMap  = new HashMap<>();
+        columnIds = new LinkedList<>();
+        columnNames = new LinkedList<>();
+        rows = new HashMap<>();
+        filename = p_filename;
+        for(int i = 0; i < p_columns.length; i++){
+            columnNames.add(p_columns[i]);
+            columnIds.add(i);
+            columnMap.put(p_columns[i], i);
+        }
+    }
+
+    public void addRow(int rowId){
+        rows.put(rowId, new RowObj(columnIds));
+    }
+
+    public void setValue(int rowId, String columnName, String value){
+        rows.get(rowId).putEntry(columnMap.get(columnName), value);
+    }
+
+    private String csvHeader(){
+        StringBuilder sb = new StringBuilder();
+        for(String col : columnNames){
+            sb.append(col);
+            sb.append(" ");
+        }
+        return sb.toString().trim().replace(" ", ",");
+    }
+
+    public void exportCsv(){
+        try {
+            FileWriter out;
+            File f = new File("testResults/"+filename);
+            if(!f.exists() || f.isDirectory()) {
+                out = new FileWriter(f);
+                out.write(csvHeader()+"\n");
+            }else{
+                out = new FileWriter(f, true);
+            }
+            for(Integer rowId : rows.keySet()){
+                String toWrite = rows.get(rowId).toCsv(columnIds)+"\n";
+                out.write(toWrite);
+            }
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    class RowObj{
+        HashMap<Integer, String> rowValues;
+
+        RowObj(List<Integer> p_columns){
+            rowValues = new HashMap<>();
+            if(p_columns != null){
+                for(Integer colId : p_columns){
+                    putEntry(colId, "0");
+                }
+            }
+        }
+
+        void putEntry(int p_columnId, String p_entryValue){
+            rowValues.put(p_columnId, p_entryValue);
+        }
+
+        String toCsv(LinkedList<Integer> p_collumnIds){
+            StringBuilder sb = new StringBuilder();
+            for(Integer id : p_collumnIds){
+                sb.append(rowValues.get(id));
+                sb.append(" ");
+            }
+            String t1 = sb.toString();
+            t1 = t1.trim();
+            t1 = t1.replace(" ", ",");
+            return t1;
+        }
+    }
 }
