@@ -1,17 +1,9 @@
 #!/bin/bash
-
-RUN=237
-
-while [ $RUN -lt 500  ]
-do
-    ../../src/veinsBDI -r $RUN -m -u Cmdenv -c MiniSumScenario -n ..:../../src:../../../../Plexe/plexe-veins/examples:../../../../Plexe/plexe-veins/src/veins --image-path=../../../../Plexe/plexe-veins/images -l ../../../../Plexe/plexe-veins/src/veins omnetpp.ini
-	((RUN++))
-done
-
 RUN=0
-while [ $RUN -lt 500  ]
+
+while [ $RUN -lt 1680  ]
 do
-    ../../src/veinsBDI -r $RUN -m -u Cmdenv -c MiniMaxScenario -n ..:../../src:../../../../Plexe/plexe-veins/examples:../../../../Plexe/plexe-veins/src/veins --image-path=../../../../Plexe/plexe-veins/images -l ../../../../Plexe/plexe-veins/src/veins omnetpp.ini
+    opp_run -r 0 -m -u Cmdenv -c MiniMaxScenario -n ..:../../src:../../../../PlexeSrc/plexe-veins/examples/veins:../../../../PlexeSrc/plexe-veins/src/veins --image-path=../../../../PlexeSrc/plexe-veins/images -l ../../src/veinsBDI -l ../../../../PlexeSrc/plexe-veins/src/veins omnetpp.ini
 	((RUN++))
 done
-mv ../../../LightJason/testResults/JoinResults.csv ./JoinResultsGaussian.csv
+

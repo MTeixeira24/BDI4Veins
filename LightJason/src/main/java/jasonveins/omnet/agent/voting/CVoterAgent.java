@@ -229,6 +229,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                 if(m_context.getVoteType() == VoteConstants.CONTEXT_PATH) {
                     result = committeeRule.determineWinner(m_context, votingState);
                     iOb.pushIntArray(result);
+                    collectData(result,m_context.getVoteType());
                 }else if( m_context.getVoteType() == VoteConstants.CONTEXT_REGROUP){
                     //Scenario 3 requires all votes to be sent over
                     iOb.pushInt(-1);
@@ -242,6 +243,7 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
                         winner = singleRule.determineWinner(m_context);
                     }
                     iOb.pushInt(winner);
+                    collectData(winner,m_context.getVoteType());
                 }
                 agentManager.addInstruction(iOb);
             }
