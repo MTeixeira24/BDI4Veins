@@ -37,6 +37,30 @@ public class CGaussianUtility implements IUtilityFunction {
         return Math.pow(Math.E, exponent);
     }
 
+    public double computeUtilityRouteBitVector(List<Integer> route, Graph routeGraph){
+
+        Set<Integer> vertexes = routeGraph.getVertexesMap().keySet();
+        ArrayList<Integer> preferredVector = new ArrayList<>(Collections.nCopies(vertexes.size(), 0));
+        Iterator<Integer> it = vertexes.iterator();
+        int position = 0;
+        while(it.hasNext()){
+            int node = it.next();
+            if(preferredRoute.contains(node))
+                preferredVector.set(position, 1);
+            position++;
+        }
+        int hammingDistance = preferredVector.size();
+        for(int i = 0; i < route.size(); i++){
+            if(!route.get(i).equals(preferredVector.get(i))) hammingDistance--;
+        }
+        hammingBuffer = hammingDistance;
+
+
+        int maxHamming = routeGraph.getVertexes().size();
+        double exponent = -1*(Math.pow((hammingDistance - maxHamming),2) / committeeTolerance);
+        return Math.pow(Math.E, exponent);
+    }
+
     @Override
     public int getHammingDistance(List<Integer> evalArray, Graph route) {
         Set<Integer> vertexes = route.getVertexesMap().keySet();
@@ -63,6 +87,7 @@ public class CGaussianUtility implements IUtilityFunction {
         [2,4,7,8]
         [0,0,0,0,0,0,0]
          */
+
         //get hamming distance, inverted in order to work with preexisting plans
         int hammingDistance = preferredVector.size();
         for(int i = 0; i < evalArray.size(); i++){

@@ -15,7 +15,7 @@ public class CSatisfactionCollector {
     private HashMap<Integer, RowObj> rows;
     private String filename;
 
-    CSatisfactionCollector(String p_filename, String... p_columns){
+    public CSatisfactionCollector(String p_filename, String... p_columns){
         columnMap  = new HashMap<>();
         columnIds = new LinkedList<>();
         columnNames = new LinkedList<>();

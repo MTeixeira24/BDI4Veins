@@ -43,7 +43,8 @@
     vote/store(VOTE)
 .
 
-+!handle/results(VALUE) <-
-    generic/print("Vote ended");
++!handle/results(VALUE, CONTEXT) <-
+    collect(VALUE, CONTEXT);
+    generic/print(MyName, ": Vote ended");
     return(0)
 .

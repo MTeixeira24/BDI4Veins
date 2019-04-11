@@ -311,9 +311,11 @@ void BaseVoteAppl::handleNotificationOfResults(const NotifyResults* msg){
                 std::vector<int> resultsVector(msg->getCommitteeResultArraySize());
                 for(uint32_t i = 0; i < msg->getCommitteeResultArraySize(); i++) resultsVector[i] = msg->getCommitteeResult(i);
                 Trigger result(Belief("handle/results"), myId, resultsVector);
+                result.appendInt(CONTEXT_PATH);
                 manager->QueueTrigger(result);
             }else{
                 Trigger result(Belief("handle/results"), myId, msg->getResult());
+                result.appendInt(CONTEXT_SPEED);
                 manager->QueueTrigger(result);
             }
         }

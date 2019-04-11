@@ -3,6 +3,7 @@ package jasonveins.omnet.managers;
 import jasonveins.omnet.agent.CVoterAgentGenerator;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
+import jasonveins.omnet.agent.voting.CSatisfactionCollector;
 import jasonveins.omnet.agent.voting.CVoterAgent;
 import jasonveins.omnet.environment.dijkstra.Graph;
 import jasonveins.omnet.statistics.CBaseStatistics;
@@ -20,10 +21,13 @@ import java.util.stream.Collectors;
 public class CVoterAgentManager extends AgentManager {
 
     private String voteRule;
+    private int platoonSize;
+    int trafficDensity;
     private double factor;
     private String utility;
     private String committee_vote_rule;
     private Graph scenarioRoute;
+    private int run;
 
     /**
      * Class constructor
@@ -81,19 +85,22 @@ public class CVoterAgentManager extends AgentManager {
      */
     @Override
     public void setSimParams(ByteBuffer params) {
-        String statsType = CByteUtils.extractString(params);
-        switch (statsType){
-            case "CJoinStatistics":{
-                stats = new CJoinStatistics();
-                break;
-            }
-            case "CBaseStatistics":{
-                stats = new CBaseStatistics();
-                break;
-            }
-            default:
-                throw new RuntimeException("VoterAgentManager: Unknown stats type");
-        }
+
+
+        dataCollector = new CSatisfactionCollector("VoteResultsCruise.csv",
+                "AgentId","PlatoonSize", "SingleRule", "CommRule",
+                "Density", "Run", "SpeedUtility", "RouteUtility");
+
+        platoonSize = params.getInt();
+        voteRule = CByteUtils.extractString(params);
+        committee_vote_rule = CByteUtils.extractString(params);
+        trafficDensity = params.getInt();
+        run = params.getInt();
+
+        factor = params.getDouble();
+        utility = CByteUtils.extractString(params);
+
+        /*String statsType = CByteUtils.extractString(params);
         int platoonSize = params.getInt();
         String rule = CByteUtils.extractString(params);
         String type = CByteUtils.extractString(params);
@@ -103,26 +110,28 @@ public class CVoterAgentManager extends AgentManager {
         String committee_vote_rule = CByteUtils.extractString(params);
         getStats().setSimParams(platoonSize,iteration,rule,type,committee_vote_rule);
 
-        //Create a new file output stream.
-        /*PrintStream fileOut = null;
-        PrintStream fileErr = null;
-        try {
-            fileOut = new PrintStream("logs/out"+iteration+".txt");
-            fileErr = new PrintStream("logs/err"+iteration+".txt");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        System.setOut(fileOut);
-        System.setErr(fileErr);*/
         voteRule = rule;
         this.committee_vote_rule = committee_vote_rule;
         this.factor = factor;
-        this.utility = utility;
-        /*getStats().setSimParams((int)params[0], (int)params[1], (String)params[2], (String)params[3], (String)params[6]);
-        voteRule = (String)params[2];
-        committee_vote_rule = (String)params[6];
-        factor = (double)params[4];
-        utility = (String)params[5];*/
+        this.utility = utility;*/
+    }
+
+    @Override
+    public void initRow(int id){
+        dataCollector.addRow(id);
+        dataCollector.setValue(id, "AgentId", String.valueOf(id));
+        dataCollector.setValue(id, "PlatoonSize", String.valueOf(platoonSize));
+        dataCollector.setValue(id, "SingleRule", voteRule);
+        dataCollector.setValue(id, "CommRule", committee_vote_rule);
+        dataCollector.setValue(id, "Density", String.valueOf(trafficDensity));
+        dataCollector.setValue(id, "Run", String.valueOf(run));
+        dataCollector.setValue(id, "SpeedUtility", "-1");
+        dataCollector.setValue(id, "RouteUtility", "-1");
+    }
+
+    @Override
+    protected void exportData(){
+        dataCollector.exportCsv();
     }
 
     public CJoinStatistics getStats(){

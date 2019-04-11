@@ -60,6 +60,8 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             this.utility = new CGaussianUtility();
         else
             throw new RuntimeException("Unknown utility function type");
+
+        agentManager.initRow(id);
     }
 
     @IAgentActionFilter
@@ -245,6 +247,22 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             }
         }else{
             agentManager.notifyOfReturn(0);
+        }
+    }
+
+
+    @IAgentActionFilter
+    @IAgentActionName(  name = "collect" )
+    private void collectData(Object result, Number contextId){
+        if(contextId.intValue() == VoteConstants.CONTEXT_SPEED){
+            Integer speed = ((Integer) result);
+            agentManager.updateRow(id, "SpeedUtility", String.valueOf(utility.computeUtilitySpeed(speed)));
+        }
+        if(contextId.intValue() == VoteConstants.CONTEXT_PATH){
+            @SuppressWarnings("unchecked")
+            List<Integer> route = ((List<Integer>) result);
+            double util = utility.computeUtilityRouteBitVector(route,votingState.getRoute());
+            agentManager.updateRow(id, "RouteUtility", String.valueOf(util));
         }
     }
 

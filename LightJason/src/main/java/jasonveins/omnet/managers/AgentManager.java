@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import jasonveins.omnet.agent.IVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleAgent;
 import jasonveins.omnet.agent.NormalVehicleGenerator;
+import jasonveins.omnet.agent.voting.CSatisfactionCollector;
 import jasonveins.omnet.decision.DecisionDataModel;
 import jasonveins.omnet.decision.InstructionModel;
 import jasonveins.omnet.managers.constants.Constants;
@@ -53,6 +54,8 @@ public class AgentManager extends Thread {
     private CountDownLatch decisionLatch, loopLatch;
 
     private int planCount;
+
+    protected CSatisfactionCollector dataCollector;
     protected HashMap<Integer, String> planMap;
     Set<IAgent<?>> l_agents_active;
 
@@ -66,6 +69,7 @@ public class AgentManager extends Thread {
      * @param m_cm Reference to the connection manager
      */
     public AgentManager(String m_aslpath, ConnectionManager m_cm) {
+        dataCollector = null;
         stats = null;
         cmanager = m_cm;
         aslpath = m_aslpath;
@@ -148,9 +152,11 @@ public class AgentManager extends Thread {
         }
 
 
-        //stats.dumpCSV();
+        exportData();
         cmanager.finish();
     }
+
+    protected void exportData(){}
 
     private void loop(){
         System.out.println("#################################");
@@ -580,6 +586,13 @@ public class AgentManager extends Thread {
 
     public IStatistics getStats(){
         return stats;
+    }
+
+    public void initRow(int id){
+    }
+
+    public void updateRow(int id, String column, String value){
+        dataCollector.setValue(id, column, value);
     }
 
     public void setSimParams(ByteBuffer params) {

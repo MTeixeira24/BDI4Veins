@@ -8,6 +8,7 @@ public interface IUtilityFunction {
 
     double computeUtilitySpeed(double val);
     double computeUtilityRoute(List<Integer> route, Graph routeGraph);
+    double computeUtilityRouteBitVector(List<Integer> route, Graph routeGraph);
     int getHammingDistance(List<Integer> evalArray, Graph route);
     int getHammingDistance();
 

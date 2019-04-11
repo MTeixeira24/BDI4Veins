@@ -19,5 +19,6 @@ simple NoisePlatoonTrafficManager extends JoinBDITrafficManager {
     parameters:
         string noiseVType;
         int noiseLanes = default(1);
+        int background_density = default(50)
         @class(NoisePlatoonTrafficManager);
 }

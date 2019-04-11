@@ -33,7 +33,7 @@ void NoisePlatoonTrafficManager::scenarioLoaded()  {
 
 
     int length = 1000, insertPosition = 1000;
-    int vehicleDensity = 90;
+    int vehicleDensity = par("background_density").intValue();
     int vehiclePerLane = vehicleDensity/noiseLanes;
 
     int base_speed = baseSpeed;
