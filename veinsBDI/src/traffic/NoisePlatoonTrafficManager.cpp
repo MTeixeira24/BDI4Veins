@@ -14,11 +14,11 @@ NoisePlatoonTrafficManager::~NoisePlatoonTrafficManager(){
 }
 
 void NoisePlatoonTrafficManager::initialize(int stage) {
-    JoinBDITrafficManager::initialize(stage);
 
     noiseVType = par("noiseVType").stdstringValue();
     noiseLanes = par("noiseLanes").intValue();
     addNoise = new cMessage("addNoise");
+    JoinBDITrafficManager::initialize(stage);
    // scheduleAt(simTime() + 0.5, addNoise);
 }
 
@@ -69,28 +69,6 @@ void NoisePlatoonTrafficManager::scenarioLoaded()  {
         }
         base_speed += 10;
     }
-
-//    for(int i = 0; i < noiseLanes; i++){
-//        int insertPosition = length - speed_distribution(gen);
-//        for(int v = 0; v < initialVehicleCount; v++){
-//            int speed = base_speed + speed_distribution(gen);
-//            int separation = distance_distribution(gen);
-//            insertPosition -= separation;
-//            //If the platoon will be generated in this lane, break before vehicles are generated on top of each other
-//            //otherwise prevent negative values
-//            if(i < nLanes || (joinerLane > -1 && i == joinerLane )){
-//                if( insertPosition < minDistance ) break;
-//            }else{
-//                if(insertPosition < 4) break;
-//            }
-//            automated.speed = speed / 3.6;
-//            automated.position = insertPosition;
-//            automated.lane = i;
-//            addVehicleToQueue(0, automated);
-//            insertPosition -= 8;
-//        }
-//        base_speed += 10;
-//    }
 
     JoinBDITrafficManager::injectPlatoon();
 }

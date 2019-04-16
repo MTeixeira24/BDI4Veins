@@ -53,7 +53,7 @@ public class CGaussianUtility implements IUtilityFunction {
         for(int i = 0; i < route.size(); i++){
             if(!route.get(i).equals(preferredVector.get(i))) hammingDistance--;
         }
-        hammingBuffer = hammingDistance;
+        hammingBuffer = preferredVector.size() - hammingDistance;
 
 
         int maxHamming = routeGraph.getVertexes().size();

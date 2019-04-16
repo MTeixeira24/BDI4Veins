@@ -65,6 +65,7 @@ void VoteAgentManager::setLightJasonParameters(){
     jp.setSimParameters(buff, par("vote_rule").stdstringValue());
     jp.setSimParameters<std::string>(buff, par("committee_vote_rule").stdstringValue());
     jp.setSimParameters<int>(buff, par("background_density").intValue());
+    int x = par("iteration").intValue();
     jp.setSimParameters<int>(buff, par("iteration").intValue());
 
 

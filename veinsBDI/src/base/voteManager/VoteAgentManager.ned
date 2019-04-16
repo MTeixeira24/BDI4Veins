@@ -21,7 +21,7 @@ simple VoteAgentManager extends LightJasonManager{
         @class(VoteAgentManager);
         string vote_rule = default("Borda");
         string committee_vote_rule = default("Minisum");
-        string platoon_type = default("Stable");
+        string platoon_type = default("Unstable");
         int platoon_size = default(4);
         double factor = default(0.7);
 		string utilityFunction = default("distribution");

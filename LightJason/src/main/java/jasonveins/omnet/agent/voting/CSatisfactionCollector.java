@@ -34,6 +34,12 @@ public class CSatisfactionCollector {
     }
 
     public void setValue(int rowId, String columnName, String value){
+        if(columnMap.get(columnName) == null){
+            columnNames.add(columnName);
+            columnIds.add(columnNames.size() - 1);
+            columnMap.put(columnName, columnNames.size() - 1);
+        }
+
         while(rows.get(rowId) == null)
             addRow(rowId);
         try{
@@ -58,6 +64,19 @@ public class CSatisfactionCollector {
 
     }
 
+    public void setValue(int p_rowId, String p_columnName, int p_value){
+        setValue(p_rowId, p_columnName, String.valueOf(p_value));
+    }
+
+    public void setValue(int p_rowId, String p_columnName, double p_value){
+        setValue(p_rowId, p_columnName, String.valueOf(p_value));
+    }
+
+    public void setValue(int p_rowId, String p_columnName, List<Integer> p_value){
+        String csvArray = p_value.toString().replaceAll(",", "");
+        setValue(p_rowId, p_columnName, csvArray);
+    }
+
     private String csvHeader(){
         StringBuilder sb = new StringBuilder();
         for(String col : columnNames){
@@ -66,6 +85,7 @@ public class CSatisfactionCollector {
         }
         return sb.toString().trim().replace(" ", ",");
     }
+
 
     public void exportCsv(){
         try {
@@ -78,7 +98,7 @@ public class CSatisfactionCollector {
                 out = new FileWriter(f, true);
             }
             for(Integer rowId : rows.keySet()){
-                String toWrite = rows.get(rowId).toCsv(columnIds)+"\n";
+                String toWrite = rows.get(rowId).toCsv(columnIds);
                 out.write(toWrite);
             }
             out.close();
@@ -107,11 +127,9 @@ public class CSatisfactionCollector {
             StringBuilder sb = new StringBuilder();
             for(Integer id : p_collumnIds){
                 sb.append(rowValues.get(id));
-                sb.append(" ");
+                sb.append(",");
             }
-            String t1 = sb.toString();
-            t1 = t1.trim();
-            t1 = t1.replace(" ", ",");
+            String t1 = sb.deleteCharAt(sb.length() - 1).append("\n").toString();
             return t1;
         }
     }

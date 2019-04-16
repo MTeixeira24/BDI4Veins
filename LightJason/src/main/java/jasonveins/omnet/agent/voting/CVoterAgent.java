@@ -24,12 +24,12 @@ import org.lightjason.agentspeak.language.instantiable.plan.IPlan;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 @IAgentAction
 public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
@@ -75,6 +75,9 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
         );
         utility.setPreferredSpeed(p_preferredSpeed.intValue());
         utility.setPreferredRoute(p_preferredRoute);
+
+        agentManager.updateRow(id, "PreferredSpeed", String.valueOf(p_preferredSpeed.intValue()));
+        agentManager.updateRow(id, "PreferredRoute", p_preferredRoute);
     }
 
     @IAgentActionFilter
@@ -264,7 +267,21 @@ public class CVoterAgent extends IVehicleAgent<CVoterAgent> {
             @SuppressWarnings("unchecked")
             List<Integer> route = ((List<Integer>) result);
             double util = utility.computeUtilityRouteBitVector(route,votingState.getRoute());
+
+            //Instanciate a list
+            List<Integer> winningRoute = IntStream.range(2,11)
+                    .boxed()
+                    .collect(toList());
+
+            //Filter by index
+            winningRoute = IntStream.range(0,9)
+                    .filter(i -> route.get(i) == 1)
+                    .mapToObj(winningRoute::get)
+                    .collect(toList());
+
             agentManager.updateRow(id, "RouteUtility", String.valueOf(util));
+            agentManager.updateRow(id, "HammingDistance", String.valueOf(utility.getHammingDistance()));
+            agentManager.updateRow(id, "WinningRoute", winningRoute);
         }
     }
 

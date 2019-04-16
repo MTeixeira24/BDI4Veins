@@ -11,6 +11,8 @@
 #include "veins/modules/mobility/traci/TraCIBaseTrafficManager.h"
 #include "veins/modules/application/platooning/utilities/DynamicPositionManager.h"
 
+#include <random>
+
 class JoinBDITrafficManager: public TraCIBaseTrafficManager {
 public:
     JoinBDITrafficManager()
@@ -61,6 +63,18 @@ protected:
     } Platoon;
 
     virtual void handleSelfMsg(cMessage* msg) override;
+
+
+
+
+    std::string noiseVType;
+    int noiseLanes;
+    //Prevent traffic injections from occurring at lanes occupied by platoons and joiners
+    bool suppressInjections;
+    //Current injection lane
+    int injectLane;
+    int baseSpeed;
+    int vehTypeId;
 };
 
 #endif /* TRAFFIC_JOINBDITRAFFICMANAGER_H_ */

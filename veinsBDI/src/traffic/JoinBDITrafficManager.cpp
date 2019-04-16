@@ -37,10 +37,62 @@ void JoinBDITrafficManager::initialize(int stage)
     joinerLane = par("joinerLane").intValue();
     addJoiner = new cMessage();
     scheduleAt(simTime() + 2.75, addJoiner);
+
+
+
+
+    noiseVType = par("noiseVType").stdstringValue();
+    noiseLanes = par("noiseLanes").intValue();
 }
 
 void JoinBDITrafficManager::scenarioLoaded()
 {
+    /*Compute the estimated size of the platoon, in order to reserve space*/
+    int platoonSize = int(par("platoonSize").doubleValue());
+    double platoonSpeed = par("platoonInsertSpeed").doubleValue() / 3.6;
+    //int plength = (platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed) + 4) + (platoonLeaderHeadway * platoonInsertSpeed->doubleValue() / 3.6);
+    int platoonLength = (platoonSize * 4 + (platoonSize - 1) * (platoonInsertDistance + platoonInsertHeadway * platoonSpeed) + 4) + (platoonLeaderHeadway * platoonInsertSpeed->doubleValue() / 3.6);
+    int maxDistance = 500 + (platoonLength/2);
+    int minDistance = 400 - (platoonLength/2);
+
+
+    int length = 1000, insertPosition = 1000;
+    int vehicleDensity = par("background_density").intValue();
+    int vehiclePerLane = vehicleDensity/noiseLanes;
+
+    int base_speed = 110;
+    struct Vehicle automated;
+    vehTypeId = findVehicleTypeIndex(noiseVType);
+    automated.id = vehTypeId;
+
+    std::random_device rd{};
+    std::mt19937 gen{rd()};
+    std::normal_distribution<double> distance_distribution(30,8);
+    std::normal_distribution<double> speed_distribution(10,2);
+
+    for(int i = 0; i < noiseLanes; i++){
+        insertPosition = length;
+        //int insertionCount = i < nLanes ? vehiclesInPlatoonLane : vehiclePerLane;
+        for(int v = 0; v < vehiclePerLane; v++){
+            int speed = base_speed + speed_distribution(gen);
+            //If the platoon will be generated in this lane, break before vehicles are generated on top of each other
+            //otherwise prevent negative values
+            if(i < nLanes || (joinerLane > -1 && i == joinerLane )){
+                if(insertPosition < maxDistance && insertPosition > minDistance) {
+                    insertPosition = insertPosition - (length/vehiclePerLane);
+                    continue;
+                }
+            }else{
+                if(insertPosition < 4) break;
+            }
+            automated.speed = speed / 3.6;
+            automated.position = insertPosition;
+            automated.lane = i;
+            addVehicleToQueue(0, automated);
+            insertPosition = insertPosition - (length/vehiclePerLane);
+        }
+        base_speed += 10;
+    }
     injectPlatoon();
 }
 

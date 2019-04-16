@@ -19,6 +19,7 @@ import org.car2x.veins.nodes.Scenario;
 import veinsbdi.base.voteManager.voteManager;
 import veinsbdi.base.voteManager.VoteAgentManager;
 import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+import veinsbdi.traffic.NoisePlatoonTrafficManager;
 
 network JoinNetworkAI extends Scenario
 {

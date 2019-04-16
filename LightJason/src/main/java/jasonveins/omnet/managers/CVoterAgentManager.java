@@ -89,7 +89,8 @@ public class CVoterAgentManager extends AgentManager {
 
         dataCollector = new CSatisfactionCollector("VoteResultsCruise.csv",
                 "AgentId","PlatoonSize", "SingleRule", "CommRule",
-                "Density", "Run", "SpeedUtility", "RouteUtility");
+                "Density", "Run", "SpeedUtility", "RouteUtility", "HammingDistance",
+                "PreferredSpeed", "PreferredRoute", "WinningRoute");
 
         platoonSize = params.getInt();
         voteRule = CByteUtils.extractString(params);
@@ -119,14 +120,18 @@ public class CVoterAgentManager extends AgentManager {
     @Override
     public void initRow(int id){
         dataCollector.addRow(id);
-        dataCollector.setValue(id, "AgentId", String.valueOf(id));
-        dataCollector.setValue(id, "PlatoonSize", String.valueOf(platoonSize));
+        dataCollector.setValue(id, "AgentId", id);
+        dataCollector.setValue(id, "PlatoonSize", platoonSize);
         dataCollector.setValue(id, "SingleRule", voteRule);
         dataCollector.setValue(id, "CommRule", committee_vote_rule);
-        dataCollector.setValue(id, "Density", String.valueOf(trafficDensity));
-        dataCollector.setValue(id, "Run", String.valueOf(run));
-        dataCollector.setValue(id, "SpeedUtility", "-1");
-        dataCollector.setValue(id, "RouteUtility", "-1");
+        dataCollector.setValue(id, "Density", trafficDensity);
+        dataCollector.setValue(id, "Run", run);
+        dataCollector.setValue(id, "SpeedUtility", -1);
+        dataCollector.setValue(id, "RouteUtility", -1);
+        dataCollector.setValue(id, "HammingDistance", -1);
+        dataCollector.setValue(id, "PreferredSpeed", -1);
+        dataCollector.setValue(id, "PreferredRoute", -1);
+        dataCollector.setValue(id, "WinningRoute", -1);
     }
 
     @Override

@@ -39,5 +39,7 @@ simple JoinBDITrafficManager like TraCIBaseTrafficManager {
         int joinerLane = default(-1);
         //Number of joiners to insert
         int numJoiners = default(1);
+        
+        
         @class(JoinBDITrafficManager);
 }

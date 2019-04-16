@@ -595,6 +595,10 @@ public class AgentManager extends Thread {
         dataCollector.setValue(id, column, value);
     }
 
+    public void updateRow(int id, String column, List<Integer> value){
+        dataCollector.setValue(id, column, value);
+    }
+
     public void setSimParams(ByteBuffer params) {
     }
 }
