@@ -19,7 +19,7 @@ T1=$(cat omnetpp.ini | grep vPairs | head -1  | awk '{print $5}')
 T2=$(cat omnetpp.ini | grep vLanes | head -1  | awk '{print $5}')
 vCount=$(( $T1 * $T2 *2  ))
 
-vCount=100
+vCount=50
 
 while [ $vCount -lt 1001 ]
 do
