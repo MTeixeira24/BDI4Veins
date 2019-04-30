@@ -11,13 +11,13 @@
 #include <random>
 #include <unordered_set>
 
+#include "../../managers/MarketManager/MarketManager.h"
 #include "veins/modules/application/platooning/utilities/DynamicPositionHelper.h"
 
 #include "../plexeappl/GeneralPlexeAgentAppl.h"
 #include "../../utilities/LeaderPositionHelper.h"
 #include "../../messages/AckTimer_m.h"
 #include "../../messages/utility/MessageCache.h"
-#include "../../base/MarketManager/MarketManager.h"
 #include "../../messages/market/AuctionStatusMessage_m.h"
 #include "../../messages/market/BidMessage_m.h"
 

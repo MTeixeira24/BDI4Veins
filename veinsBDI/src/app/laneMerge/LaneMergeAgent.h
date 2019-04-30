@@ -12,11 +12,11 @@
 #include <unordered_set>
 #include <chrono>
 
+#include "../../managers/MergeManager/MergeManager.h"
 
 #include "../plexeappl/GeneralPlexeAgentAppl.h"
 #include "../../messages/AckTimer_m.h"
 #include "../../messages/utility/MessageCache.h"
-#include "../../base/MergeManager/MergeManager.h"
 #include "../../messages/bargain/bargain_m.h"
 #include "../../messages/AckTimer_m.h"
 

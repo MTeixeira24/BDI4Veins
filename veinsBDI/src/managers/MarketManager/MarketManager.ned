@@ -13,21 +13,16 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.laneMergeBarganing;
+package veinsbdi.managers.MarketManager;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.managers.MergeManager.MergeManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+import veinsbdi.managers.manager.LightJasonManager;
 
-network MergeNetwork extends Scenario
-{
+simple marketManager extends LightJasonManager{
     parameters:
-        string traffic_type;
-    submodules:
-        ljmanager: MergeManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+        @class(MarketManager);
+        string platoon_type = default("Unstable");
+        int platoon_size = default(4);
+        double factor = default(0.7);
+		string utilityFunction = default("distribution");
+		string auctionModule = default("FirstPrice");
 }

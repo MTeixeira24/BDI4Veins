@@ -12,6 +12,8 @@
 #include <unordered_set>
 #include <chrono>
 
+#include "../../managers/manager/constants/VoteConstants.h"
+#include "../../managers/voteManager/VoteAgentManager.h"
 #include "../plexeappl/GeneralPlexeAgentAppl.h"
 #include "../../messages/utility/MessageCache.h"
 #include "../../messages/AckTimer_m.h"
@@ -25,8 +27,6 @@
 #include "../../messages/voting/RequestResults_m.h"
 
 #include "../../utilities/LeaderPositionHelper.h"
-#include "../../base/manager/constants/VoteConstants.h"
-#include "../../base/voteManager/VoteAgentManager.h"
 class VoteAgentManager;
 class BaseVoteAppl: public GeneralPlexeAgentAppl {
 public:

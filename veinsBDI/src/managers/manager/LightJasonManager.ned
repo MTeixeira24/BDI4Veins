@@ -13,21 +13,17 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.laneMergeBarganing;
+package veinsbdi.managers.manager;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.managers.MergeManager.MergeManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
-
-network MergeNetwork extends Scenario
-{
+simple LightJasonManager{
     parameters:
-        string traffic_type;
-    submodules:
-        ljmanager: MergeManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+        @class(LightJasonManager);
+        int port = default(4242);
+        string hostname = default("localhost");
+        double updateInterval @unit("s") = default(1s); //Update interval synchronized with TraCI updates
+        int iteration = default(1);
+        string statisticsCollector = default("CJoinStatistics");
+        string agentManager = default("AgentManager");
+        bool useBulkAgentCreation = default(false);
+        int vehicleCount;
 }

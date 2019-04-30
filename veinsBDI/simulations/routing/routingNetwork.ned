@@ -16,7 +16,7 @@
 package veinsbdi.simulations.routing;
 
 import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.routerManager.RouterManager;
+import veinsbdi.managers.routerManager.RouterManager;
 import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
 
 network routingNetwork extends Scenario

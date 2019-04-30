@@ -13,21 +13,10 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.laneMergeBarganing;
+package veinsbdi.managers.routerManager;
+import veinsbdi.managers.manager.LightJasonManager;
 
-import org.car2x.veins.nodes.Scenario;
-import veinsbdi.managers.MergeManager.MergeManager;
-import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
-
-network MergeNetwork extends Scenario
-{
+simple RouterManager extends LightJasonManager{
     parameters:
-        string traffic_type;
-    submodules:
-        ljmanager: MergeManager;
-        traffic: <traffic_type> like TraCIBaseTrafficManager {
-            parameters:
-                @display("p=200,200");
-        }
-    connections allowunconnected:
+        @class(RouterManager);
 }

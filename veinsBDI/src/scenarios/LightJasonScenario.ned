@@ -16,7 +16,7 @@
 package veinsbdi.scenarios;
 
 import org.car2x.veins.nodes.Scenario;
-import veinsbdi.base.manager.LightJasonManager;
+import veinsbdi.managers.manager.LightJasonManager;
 
 network LightJasonScenario extends Scenario
 {
