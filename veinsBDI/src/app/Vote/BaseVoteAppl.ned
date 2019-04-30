@@ -13,11 +13,14 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.concrete.router;
-import veinsbdi.app.plexeappl.BasePlexeAgentAppl;
+package veinsbdi.app.Vote;
 
-simple RouterAppl extends BasePlexeAgentAppl{
+import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
+
+simple BaseVoteAppl extends GeneralPlexeAgentAppl{
     parameters:
-        string blocked_link = default("n1,n2");
-        @class(RouterAppl);
+        int targetPlatoon = default(-1);
+        double desiredSpeed @unit("kmph") = default(100 kmph);
+        bool engageNegotiations = default(true);
+        @class(BaseVoteAppl);
 }

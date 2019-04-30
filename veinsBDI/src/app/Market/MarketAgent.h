@@ -13,13 +13,13 @@
 
 #include "veins/modules/application/platooning/utilities/DynamicPositionHelper.h"
 
-#include "../../GeneralPlexeAgentAppl.h"
-#include "../../../../utilities/LeaderPositionHelper.h"
-#include "../../../../messages/AckTimer_m.h"
-#include "../../../../messages/utility/MessageCache.h"
-#include "../../../../base/MarketManager/MarketManager.h"
-#include "../../../../messages/market/AuctionStatusMessage_m.h"
-#include "../../../../messages/market/BidMessage_m.h"
+#include "../plexeappl/GeneralPlexeAgentAppl.h"
+#include "../../utilities/LeaderPositionHelper.h"
+#include "../../messages/AckTimer_m.h"
+#include "../../messages/utility/MessageCache.h"
+#include "../../base/MarketManager/MarketManager.h"
+#include "../../messages/market/AuctionStatusMessage_m.h"
+#include "../../messages/market/BidMessage_m.h"
 
 
 class MarketAgent : public GeneralPlexeAgentAppl {

@@ -17,7 +17,7 @@
 #define SCENARIOS_LANEMERGESCENARIO_H_
 
 #include "veins/modules/application/platooning/scenarios/BaseScenario.h"
-#include "../app/plexeappl/concrete/laneMerge/LaneMergeAgent.h"
+#include "../app/laneMerge/LaneMergeAgent.h"
 
 
 class LaneMergeScenario : public BaseScenario {

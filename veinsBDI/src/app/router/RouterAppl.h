@@ -8,7 +8,7 @@
 #ifndef APP_PLEXEAPPL_CONCRETE_ROUTER_ROUTERAPPL_H_
 #define APP_PLEXEAPPL_CONCRETE_ROUTER_ROUTERAPPL_H_
 
-#include "../../BasePlexeAgentAppl.h"
+#include "../plexeappl/BasePlexeAgentAppl.h"
 
 class RouterAppl : public BasePlexeAgentAppl{
 public:

@@ -13,14 +13,15 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.concrete.Vote;
+package veinsbdi.app.Market;
+
 
 import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
 
-simple BaseVoteAppl extends GeneralPlexeAgentAppl{
+simple MarketAgent extends GeneralPlexeAgentAppl{
     parameters:
         int targetPlatoon = default(-1);
         double desiredSpeed @unit("kmph") = default(100 kmph);
         bool engageNegotiations = default(true);
-        @class(BaseVoteAppl);
+        @class(MarketAgent);
 }

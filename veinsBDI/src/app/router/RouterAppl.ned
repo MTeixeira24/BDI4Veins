@@ -13,12 +13,11 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.app.plexeappl.concrete.laneMerge;
+package veinsbdi.app.router;
+import veinsbdi.app.plexeappl.BasePlexeAgentAppl;
 
-import veinsbdi.app.plexeappl.GeneralPlexeAgentAppl;
-
-simple LaneMergeAgent extends GeneralPlexeAgentAppl{
+simple RouterAppl extends BasePlexeAgentAppl{
     parameters:
-        bool engageNegotiations = default(true);
-        @class(LaneMergeAgent);
+        string blocked_link = default("n1,n2");
+        @class(RouterAppl);
 }

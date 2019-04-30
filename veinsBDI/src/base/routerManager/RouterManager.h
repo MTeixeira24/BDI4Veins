@@ -9,7 +9,7 @@
 #define BASE_ROUTERMANAGER_ROUTERMANAGER_H_
 
 #include "../manager/LightJasonManager.h"
-#include "../../app/plexeappl/concrete/router/RouterAppl.h"
+#include "../../app/router/RouterAppl.h"
 
 class RouterManager : public LightJasonManager {
 public:

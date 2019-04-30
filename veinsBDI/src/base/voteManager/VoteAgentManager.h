@@ -9,7 +9,7 @@
 #define BASE_VOTEMANAGER_VOTEAGENTMANAGER_H_
 
 #include "../manager/LightJasonManager.h"
-#include "../../app/plexeappl/concrete/Vote/BaseVoteAppl.h"
+#include "../../app/Vote/BaseVoteAppl.h"
 #include <unistd.h>
 #include <thread>
 #include "../../utilities/json.hpp"

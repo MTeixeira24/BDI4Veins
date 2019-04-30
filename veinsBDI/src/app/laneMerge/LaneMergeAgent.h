@@ -13,12 +13,12 @@
 #include <chrono>
 
 
-#include "../../GeneralPlexeAgentAppl.h"
-#include "../../../../messages/AckTimer_m.h"
-#include "../../../../messages/utility/MessageCache.h"
-#include "../../../../base/MergeManager/MergeManager.h"
-#include "../../../../messages/bargain/bargain_m.h"
-#include "../../../../messages/AckTimer_m.h"
+#include "../plexeappl/GeneralPlexeAgentAppl.h"
+#include "../../messages/AckTimer_m.h"
+#include "../../messages/utility/MessageCache.h"
+#include "../../base/MergeManager/MergeManager.h"
+#include "../../messages/bargain/bargain_m.h"
+#include "../../messages/AckTimer_m.h"
 
 class LaneMergeAgent : public GeneralPlexeAgentAppl {
 public:

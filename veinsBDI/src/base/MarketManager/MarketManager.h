@@ -17,7 +17,7 @@
 #define BASE_MARKETMANAGER_MARKETMANAGER_H_
 
 #include "../manager/LightJasonManager.h"
-#include "../../app/plexeappl/concrete/Market/MarketAgent.h"
+#include "../../app/Market/MarketAgent.h"
 #include "../manager/constants/MarketConstants.h"
 
 #include <unistd.h>
