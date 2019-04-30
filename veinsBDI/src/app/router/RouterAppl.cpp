@@ -43,10 +43,10 @@ void RouterAppl::handleSelfMsg(cMessage* msg)
 {
     if(msg == notifyNodeClose){
         delete msg;
-        BeliefModel b("link/closed");
-        b.pushString(n1);
-        b.pushString(n2);
-        manager->sendInformationToAgents(myId, &b);
+        Trigger b(Belief("link/closed"), myId);
+        b.appendString(n1);
+        b.appendString(n2);
+        manager->QueueTrigger(b);
     }else{
         BasePlexeAgentAppl::handleSelfMsg(msg);
     }

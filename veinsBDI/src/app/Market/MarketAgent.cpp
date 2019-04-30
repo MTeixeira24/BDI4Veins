@@ -21,7 +21,7 @@ void MarketAgent::initialize(int stage){
         protocol->registerApplication(NEGOTIATION_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"),
                 gate("lowerControlIn"), gate("lowerControlOut"));
         //Setup beliefs
-        BeliefModel beliefs("setup/beliefs");
+        Trigger beliefs(Belief("setup/beliefs"), myId);
         int isManager = false;
         int platoonId, leaderId, platoonSpeed;
         int wtp = ((MarketManager*)manager)->getWTP(myId), endowment = ((MarketManager*)manager)->getEndowment(myId);
@@ -53,16 +53,16 @@ void MarketAgent::initialize(int stage){
             }
         }
         //Add to belief object
-        beliefs.pushInt(&platoonId);
-        beliefs.pushInt(&leaderId);
-        beliefs.pushInt(&platoonSpeed);
-        beliefs.pushInt(&isManager);
-        beliefs.pushIntArray(members);
-        beliefs.pushInt(&wtp);
-        beliefs.pushInt(&endowment);
-        beliefs.pushInt(&preferredSpeed);
-        beliefs.pushIntArray(preferredPath);
-        manager->sendInformationToAgents(myId, &beliefs);
+        beliefs.appendInt(platoonId);
+        beliefs.appendInt(leaderId);
+        beliefs.appendInt(platoonSpeed);
+        beliefs.appendInt(isManager);
+        beliefs.appendVector(members);
+        beliefs.appendInt(wtp);
+        beliefs.appendInt(endowment);
+        beliefs.appendInt(preferredSpeed);
+        beliefs.appendVector(preferredPath);
+        manager->QueueTrigger(beliefs);
     }
 }
 
@@ -158,9 +158,8 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
             agentBidTuples.push_back(msg->getVehicleId());
             agentBidTuples.push_back(msg->getBidValue());
             if(agentBidTuples.size() == auctionSize*2){
-                BeliefModel bids("receive/bids");
-                bids.pushIntArray(agentBidTuples);
-                manager->sendInformationToAgents(myId, &bids);
+                Trigger bids(Belief("receive/bids"), myId, agentBidTuples);
+                manager->QueueTrigger(bids);
                 agentBidTuples.clear();
             }
         }
@@ -173,19 +172,18 @@ void MarketAgent::handleBidMessage(BidMessage* msg){
     }else if (msg->getMessageType() == (int)MessageType::PAYMENT){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got a payment from:" << msg->getVehicleId() <<  std::endl;
-            BeliefModel payment("distribute/pay");
             int pay = msg->getBidValue(), speed, winnerWtp = msg->getWtp();
+            Trigger payment(Belief(("distribute/pay")), myId, pay);
             std::vector<int> path;
-            payment.pushInt(&pay);
             if(msg->getContext() == CONTEXT_PATH){
                 path = msg->getPropertyList();
-                payment.pushIntArray(path);
+                payment.appendVector(path);
             }else{
                 speed = msg->getProperty();
-                payment.pushInt(&speed);
+                payment.appendInt(speed);
             }
-            payment.pushInt(&winnerWtp);
-            manager->sendInformationToAgents(myId, &payment);
+            payment.appendInt(winnerWtp);
+            manager->QueueTrigger(payment);
         }
         BidMessage* reply = new BidMessage("PaymentAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
@@ -225,10 +223,10 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got notified of auction!" << std::endl;
             messageCache.saveReceived(msg->getMessageId());
-            BeliefModel notify("receive/auction");
             int auctionId = msg->getAuctionId(), context = msg->getContext(), auctionManager = msg->getManagerId();
-            notify.pushInt(&auctionId); notify.pushInt(&context); notify.pushInt(&auctionManager);
-            manager->sendInformationToAgents(myId, &notify);
+            Trigger notify(Belief("receive/auction"), myId, auctionId);
+            notify.appendInt(context); notify.appendInt(auctionManager);
+            manager->QueueTrigger(notify);
         }
         AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
@@ -240,10 +238,9 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got results of an iteration!" << std::endl;
             messageCache.saveReceived(msg->getMessageId());
-            BeliefModel iterationResult("receive/round/result");
             int status = msg->getWinnerId() == myId ? CONFIRMED : REJECTED;
-            iterationResult.pushInt(&status);
-            manager->sendInformationToAgents(myId, &iterationResult);
+            Trigger iterationResult (Belief("receive/round/result"), myId, status);
+            manager->QueueTrigger(iterationResult);
         }
         AuctionStatusMessage* reply = new AuctionStatusMessage("NotifyAuctionAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
@@ -253,12 +250,11 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
         if(!messageCache.hasReceived(msg->getMessageId())){
             std::cout << myId <<": Got results of the auction!" << std::endl;
             messageCache.saveReceived(msg->getMessageId());
-            BeliefModel auctionResult("receive/result");
             int status = msg->getWinnerId() == myId ? CONFIRMED : REJECTED;
             int duePayment = msg->getDuePayment();
-            auctionResult.pushInt(&status);
-            auctionResult.pushInt(&duePayment);
-            manager->sendInformationToAgents(myId, &auctionResult);
+            Trigger auctionResult(Belief("receive/result"), myId, status);
+            auctionResult.appendInt(duePayment);
+            manager->QueueTrigger(auctionResult);
         }
         AuctionStatusMessage* reply = new AuctionStatusMessage("AuctionEndAck");
         fillNegotiationMessage(reply, myId, msg->getVehicleId(), false, msg->getMessageId());
@@ -269,7 +265,6 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
             messageCache.saveReceived(msg->getMessageId());
             if(myId != msg->getWinnerId()){
                 std::cout << myId <<": Got results the payment of auction!" << std::endl;
-                BeliefModel auctionResult("receive/pay");
                 double percentage;
                 int pay;
                 if(msg->getContext() == CONTEXT_JOIN){
@@ -291,20 +286,20 @@ void MarketAgent::handleAuctionStatusMessage(AuctionStatusMessage* msg){
                 }
                 int speed;
                 std::vector<int> path;
-                auctionResult.pushInt(&pay);
+                Trigger auctionResult(Belief("receive/pay"), myId, pay);
                 if(msg->getContext() == CONTEXT_SPEED){
                     speed = msg->getProperty();
-                    auctionResult.pushInt(&speed);
+                    auctionResult.appendInt(speed);
                     ((MarketManager*)manager)->timeStampSpeed(simTime().dbl() * 1000);
                 }else if(msg->getContext() == CONTEXT_PATH){
                     path = msg->getPropertyList();
-                    auctionResult.pushIntArray(path);
+                    auctionResult.appendVector(path);
                     ((MarketManager*)manager)->timeStampRoute(simTime().dbl() * 1000);
                 }else{
                     speed = msg->getProperty();
-                    auctionResult.pushInt(&speed);
+                    auctionResult.appendInt(speed);
                 }
-                manager->sendInformationToAgents(myId, &auctionResult);
+                manager->QueueTrigger(auctionResult);
             }
         }
         AuctionStatusMessage* reply = new AuctionStatusMessage("DistributionAck");
@@ -414,17 +409,15 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
             ((MarketManager*)manager)->incrementRetransmission();
         }
     }else if(msg == auctionTrigger){
-        BeliefModel startAuction("start/auction");
-        startAuction.pushInt(&(atc.context));
+        Trigger startAuction(Belief("start/auction"), myId, atc.context);
         if(atc.context == CONTEXT_SPEED){
-            BeliefModel wtp("receive/wtp");
-            wtp.pushIntArray(wtpList);
-            manager->sendInformationToAgents(myId, &wtp);
+            Trigger wtp(Belief("receive/wtp"), myId, wtpList);
+            manager->QueueTrigger(wtp);
         }else if(atc.context == CONTEXT_JOIN){
             ((MarketManager*)manager)->startTimeStampJoin(simTime().dbl() * 1000);
         }
-        startAuction.pushIntArray(auctionMembers);
-        manager->sendInformationToAgents(myId, &startAuction);
+        startAuction.appendVector(auctionMembers);
+        manager->QueueTrigger(startAuction);
     }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
         switch(delayMessage->getMessageType()){
         case (int)MessageType::ACK:

@@ -194,12 +194,12 @@ void LightJasonManager::unsubscribeVehicle(int id){
     vehicles.erase(id);
 }
 
-uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){
-    LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
-    int n = int((unsigned char)result.getBuffer()[0]);
-    EV << n << "\n"; //DEBUG
-    return 0;
-}
+//uint8_t LightJasonManager::sendInformationToAgents(int id, const void* beliefModel){
+//    LightJasonBuffer result = writeToSocket(jp.buildAddGoalQuery(id, beliefModel).getBuffer());
+//    int n = int((unsigned char)result.getBuffer()[0]);
+//    EV << n << "\n"; //DEBUG
+//    return 0;
+//}
 
 LightJasonBuffer LightJasonManager::writeToSocket(std::string data){
     int n = write(connSocket,data.c_str(),data.length());

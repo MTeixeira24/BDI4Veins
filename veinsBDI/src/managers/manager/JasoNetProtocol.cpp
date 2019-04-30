@@ -17,91 +17,86 @@ JasoNetProtocol::~JasoNetProtocol(){
 
 }
 
-LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* beliefModel){//(int _id, std::string belief, double value){
-    BeliefModel* bm = (BeliefModel*) beliefModel;
-    LightJasonBuffer buffer;
-    uint32_t size = 6; //Minimum size is 2 bytes to represent the type of query and 4 bytes for agentID
-    //calculate the size of the query
-    size += bm->getTotalSize() + bm->getBelief().length();
-    uint16_t action = SET_BELIEF;
-    //First segment of query, size of message, action to perform(set belief), agentId,  and the belief string
-    buffer << size <<  action << id << bm->getBelief();
-    //Remainder segments: data type + data
-    for(uint32_t i = 0; i < bm->getValues().size(); i++){
-        BeliefObject bo = bm->getValues()[i];
-        buffer << bo.getDataType();
-        switch (bo.getDataType()){
-        case VALUE_BOOL:
-            throw cRuntimeError("Bool not implemented");
-            break;
-        case VALUE_CHAR:
-            throw cRuntimeError("Char not implemented");
-            break;
-        case VALUE_SHORT:
-            throw cRuntimeError("Short not implemented");
-            break;
-        case VALUE_INT:
-            buffer << *((int*)bo.getData());
-            break;
-        case VALUE_LONG:
-            throw cRuntimeError("Long not implemented");
-            break;
-        case VALUE_FLOAT:
-            throw cRuntimeError("Float not implemented");
-            break;
-        case VALUE_DOUBLE:
-            buffer << *((double*)bo.getData());
-            break;
-        case VALUE_ARRAY:
-        {
-            int* ptr = (int*)bo.getData();
-            buffer << *(ptr); //get type of data
-            int dataType = *(ptr);
-            uint32_t size = *(ptr + 1);
-            buffer << size; //size of array
-            switch (dataType){
-            case VALUE_INT:
-            {
-                for(uint32_t i = 0; i < size; i++){
-                    buffer << *(ptr + i + 2);
-                }
-                break;
-            }
-            case VALUE_DOUBLE:
-            {
-                double* dptr = (double*)(ptr + 2); //The double values start at the second address
-                for(uint32_t i = 0; i < size; i++){
-                    buffer << *(dptr + i);
-                }
-                break;
-            }
-            case VALUE_CHAR:
-            {
-                char* cptr = (char*)(ptr + 2) + 1;
-                for(uint32_t i = 0; i < size; i++){
-                    buffer << *(cptr + i);
-                }
-                break;
-            }
-            default:
-                throw cRuntimeError("JasoNetProtocol: Unknown array type!");
-                break;
-            }
-            delete[] ptr;
-            break;
-        }
-        default:
-            throw cRuntimeError("Invalid data type!");
-            break;
-        }
-    }
-
-    return buffer;
-
-    //uint32_t id = _id;
-    //double speed = value;
-    //return LightJasonBuffer() << size << action << id << speed;
-}
+//LightJasonBuffer JasoNetProtocol::buildAddGoalQuery(uint32_t id, const void* beliefModel){//(int _id, std::string belief, double value){
+//    BeliefModel* bm = (BeliefModel*) beliefModel;
+//    LightJasonBuffer buffer;
+//    uint32_t size = 6; //Minimum size is 2 bytes to represent the type of query and 4 bytes for agentID
+//    //calculate the size of the query
+//    size += bm->getTotalSize() + bm->getBelief().length();
+//    uint16_t action = SET_BELIEF;
+//    //First segment of query, size of message, action to perform(set belief), agentId,  and the belief string
+//    buffer << size <<  action << id << bm->getBelief();
+//    //Remainder segments: data type + data
+//    for(uint32_t i = 0; i < bm->getValues().size(); i++){
+//        BeliefObject bo = bm->getValues()[i];
+//        buffer << bo.getDataType();
+//        switch (bo.getDataType()){
+//        case VALUE_BOOL:
+//            throw cRuntimeError("Bool not implemented");
+//            break;
+//        case VALUE_CHAR:
+//            throw cRuntimeError("Char not implemented");
+//            break;
+//        case VALUE_SHORT:
+//            throw cRuntimeError("Short not implemented");
+//            break;
+//        case VALUE_INT:
+//            buffer << *((int*)bo.getData());
+//            break;
+//        case VALUE_LONG:
+//            throw cRuntimeError("Long not implemented");
+//            break;
+//        case VALUE_FLOAT:
+//            throw cRuntimeError("Float not implemented");
+//            break;
+//        case VALUE_DOUBLE:
+//            buffer << *((double*)bo.getData());
+//            break;
+//        case VALUE_ARRAY:
+//        {
+//            int* ptr = (int*)bo.getData();
+//            buffer << *(ptr); //get type of data
+//            int dataType = *(ptr);
+//            uint32_t size = *(ptr + 1);
+//            buffer << size; //size of array
+//            switch (dataType){
+//            case VALUE_INT:
+//            {
+//                for(uint32_t i = 0; i < size; i++){
+//                    buffer << *(ptr + i + 2);
+//                }
+//                break;
+//            }
+//            case VALUE_DOUBLE:
+//            {
+//                double* dptr = (double*)(ptr + 2); //The double values start at the second address
+//                for(uint32_t i = 0; i < size; i++){
+//                    buffer << *(dptr + i);
+//                }
+//                break;
+//            }
+//            case VALUE_CHAR:
+//            {
+//                char* cptr = (char*)(ptr + 2) + 1;
+//                for(uint32_t i = 0; i < size; i++){
+//                    buffer << *(cptr + i);
+//                }
+//                break;
+//            }
+//            default:
+//                throw cRuntimeError("JasoNetProtocol: Unknown array type!");
+//                break;
+//            }
+//            delete[] ptr;
+//            break;
+//        }
+//        default:
+//            throw cRuntimeError("Invalid data type!");
+//            break;
+//        }
+//    }
+//    return buffer;
+//}
 
 LightJasonBuffer JasoNetProtocol::connectionRequest(){
     uint32_t size = 16;

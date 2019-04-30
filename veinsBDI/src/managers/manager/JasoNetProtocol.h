@@ -15,7 +15,6 @@
 #include <iostream>
 #include "../../managers/manager/LightJasonConstants.h"
 #include "../../managers/manager/LightJasonBuffer.h"
-#include "../../managers/manager/BeliefModel.h"
 namespace Jason{
 class JasoNetProtocol{
 private:
@@ -23,7 +22,7 @@ public:
     JasoNetProtocol();
     ~JasoNetProtocol();
     /*Build a request to update associated agents beliefs*/
-    LightJasonBuffer buildAddGoalQuery(uint32_t, const void*);//(int id, std::string belief, double value); //TODO: Temp values for testing. Use the PLEXE:Vehicle struct
+    //LightJasonBuffer buildAddGoalQuery(uint32_t, const void*);//(int id, std::string belief, double value); //TODO: Temp values for testing. Use the PLEXE:Vehicle struct
     /*Build a request to verify successful connection*/
     LightJasonBuffer connectionRequest();
     /*Build a request to create a new agent and associate it*/

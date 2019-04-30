@@ -45,7 +45,7 @@ public:
     /*Subscribe the vehicle to the manager and send a request to LightJason to create an agent*/
     virtual uint8_t subscribeVehicle(BaseAgentAppl* vehicle, uint32_t id, std::string vType, std::string aslFile);
     /*Update belief base of the associated agent*/
-    uint8_t sendInformationToAgents(int, const void*);//(int id, std::string belief, double value);
+   // uint8_t sendInformationToAgents(int, const void*);//(int id, std::string belief, double value);
     /*Perform initialization and establish connection with LightJason server*/
     virtual void initialize(int stage) override;
     /*Remove vehicle from subscription and request agent deletion on server*/

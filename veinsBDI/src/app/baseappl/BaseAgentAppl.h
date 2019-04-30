@@ -12,7 +12,6 @@
 #include "veins/modules/mobility/traci/TraCIMobility.h"
 #include "veins/modules/mobility/traci/TraCICommandInterface.h"
 #include "../../managers/manager/Trigger/Trigger.h"
-#include "../../managers/manager/BeliefModel.h"
 #include "../../managers/manager/LightJasonManager.h"
 
 using Veins::TraCIMobility;
