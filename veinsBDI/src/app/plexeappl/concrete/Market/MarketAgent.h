@@ -69,24 +69,6 @@ protected:
      * Handle messages sent to self
      */
     void handleSelfMsg(cMessage* msg) override;
-    /**
-     * Resends a message from cache
-     */
-    void resendMessage(long msgId, AckTimer* at);
-    /*
-     * Send message with ack control
-     */
-    void sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets);
-    void sendMessageWithAck(MarketMessage* msg, int target);
-    void sendMessageDelayed(MarketMessage* msg, int target);
-    /*
-     * Check if this vehicle is the intended target of a message
-     */
-    virtual bool isReceiver(MarketMessage* msg);
-    /*
-     * Seconds to wait for ack messages
-     */
-    const double ackTime = 0.05;
     /*
      * Initial behaviours
      */
@@ -127,16 +109,6 @@ public:
 
     virtual void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, int speed);
     void distributePay(int auctionId, int auctionIteration, int winnerId, int payment, int wtpSum, std::vector<int> route);
-private:
-    /*
-     * Manage the messages that are sent
-     */
-    MessageCache messageCache;
-    /*
-     * Timers
-     */
-    cMessage* debugTimer = NULL;
-    void testFunction();
 };
 
 #endif /* APP_PLEXEAPPL_CONCRETE_MARKET_MARKETAGENT_H_ */

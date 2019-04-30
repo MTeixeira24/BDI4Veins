@@ -50,15 +50,6 @@ protected:
     //Is this agent a merger?
     bool isMerger;
 
-    void sendMessageWithAck(MarketMessage* msg, int target);
-
-    double randomOffset();
-
-    bool isReceiver(MarketMessage* msg);
-
-    void sendMessageDelayed(MarketMessage* msg, int target);
-
-    void resendMessage(long msgId, AckTimer* at);
 
     virtual void setInitialBeliefs() override;
 

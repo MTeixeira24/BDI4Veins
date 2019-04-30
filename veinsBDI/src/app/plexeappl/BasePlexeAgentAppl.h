@@ -48,15 +48,6 @@ public:
     virtual void sendUnicast(cPacket* msg, int destination);
 
 protected:
-    // id of this vehicle
-    //int myId;
-
-    //Veins::TraCIMobility* mobility;
-    //Veins::TraCICommandInterface* traci;
-    //Veins::TraCICommandInterface::Vehicle* traciVehicle;
-
-
-    inline uint8_t Belief(std::string key){return manager->getBeliefId(key);}
 
     // determines position and role of each vehicle
     BasePositionHelper* positionHelper;

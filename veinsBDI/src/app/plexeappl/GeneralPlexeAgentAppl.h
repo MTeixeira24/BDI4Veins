@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <random>
 
 #include "../../maneuvers/JoinAtBackAgent.h"
 #include "veins/modules/application/platooning/messages/ManeuverMessage_m.h"
@@ -19,6 +20,8 @@
 #include "veins/modules/application/platooning/protocols/BaseProtocol.h"
 #include "veins/modules/mobility/traci/TraCIColor.h"
 #include "veins/modules/mobility/traci/TraCIScenarioManager.h"
+#include "../../messages/utility/MessageCache.h"
+#include "../../messages/AckTimer_m.h"
 
 #include "BasePlexeAgentAppl.h"
 #include "../../maneuvers/JoinAtN.h"
@@ -189,6 +192,18 @@ protected:
 
     /** am i in a maneuver? */
     bool inManeuver;
+
+    MessageCache messageCache;
+    /*
+     * Seconds to wait for ack messages
+     */
+    const double ackTime = 0.05;
+    void sendMessageWithAck(NegotiationMessage* msg, int target);
+    void sendMessageWithAck(NegotiationMessage* msg, const std::vector<int>& targets);
+    double randomOffset();
+    bool isReceiver(NegotiationMessage* msg);
+    void sendMessageDelayed(NegotiationMessage* msg, int target);
+    void resendMessage(long msgId, AckTimer* at);
 
 private:
     /** the role of this vehicle */

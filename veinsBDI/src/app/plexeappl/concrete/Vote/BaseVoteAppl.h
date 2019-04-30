@@ -8,12 +8,11 @@
 #ifndef APP_PLEXEAPPL_CONCRETE_VOTE_BASEVOTEAPPL_H_
 #define APP_PLEXEAPPL_CONCRETE_VOTE_BASEVOTEAPPL_H_
 
-#include <random>
+
 #include <unordered_set>
 #include <chrono>
 
 #include "../../GeneralPlexeAgentAppl.h"
-#include "../../../../messages/AckTimer_m.h"
 #include "../../../../messages/utility/MessageCache.h"
 #include "../../../../messages/AckTimer_m.h"
 
@@ -75,17 +74,7 @@ public:
     void handleSubmitVote(const SubmitVote* msg);
     void handleNotificationOfResults(const NotifyResults* msg);
 protected:
-    MessageCache messageCache;
-    /*
-     * Seconds to wait for ack messages
-     */
-    const double ackTime = 0.05;
-    void sendMessageWithAck(NegotiationMessage* msg, int target);
-    void sendMessageWithAck(NegotiationMessage* msg, const std::vector<int>& targets);
-    double randomOffset();
-    bool isReceiver(NegotiationMessage* msg);
-    void sendMessageDelayed(NegotiationMessage* msg, int target);
-    void resendMessage(long msgId, AckTimer* at);
+
     virtual void setInitialBeliefs() override;
     virtual void initialLeaderBehaviour();
 

@@ -84,22 +84,6 @@ void LaneMergeAgent::sendPayout(int targetId, int payout){
     sendMessageDelayed(msg, targetId);
 }
 
-void LaneMergeAgent::sendMessageWithAck(MarketMessage* msg, int target){
-    std::vector<int> targets({target});
-    messageCache.insertEntry(msg->getMessageId(), msg->dup(), targets);
-    AckTimer* at = new AckTimer("AckTimer");
-    at->setMessageId(msg->getMessageId());
-    scheduleAt(simTime() + ackTime + randomOffset(), at);
-    sendUnicast(msg, -1);
-}
-
-double LaneMergeAgent::randomOffset(){
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,5.0);
-    return std::abs(distribution(gen) * 0.001);
-}
-
 void LaneMergeAgent::handleLowerMsg(cMessage* msg){
 
     UnicastMessage* unicast = check_and_cast<UnicastMessage*>(msg);
@@ -137,10 +121,6 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
             Trigger offerReceived(Belief("bargain/receive"), myId,targetId);
             offerReceived.appendInt(amount);
             manager->QueueTrigger(offerReceived);
-//            BeliefModel offerReceived("bargain/receive");
-//            offerReceived.pushInt(&targetId);
-//            offerReceived.pushInt(&amount);
-//            manager->sendInformationToAgents(myId, &offerReceived);
         }
         break;
     }
@@ -152,10 +132,6 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
             Trigger decisionReceived(Belief("bargain/receive/result"), myId,targetId);
             decisionReceived.appendInt(amount);
             manager->QueueTrigger(decisionReceived);
-//            BeliefModel decisionReceived("bargain/receive/result");
-//            decisionReceived.pushInt(&targetId);
-//            decisionReceived.pushInt(&amount);
-//            manager->sendInformationToAgents(myId, &decisionReceived);
         }
         break;
     }
@@ -167,10 +143,6 @@ void LaneMergeAgent::handleBargainMessage(BargainMessage* msg){
             Trigger payReceived(Belief("bargain/receive/payout"), myId,targetId);
             payReceived.appendInt(amount);
             manager->QueueTrigger(payReceived);
-//            BeliefModel payReceived("bargain/receive/payout");
-//            payReceived.pushInt(&targetId);
-//            payReceived.pushInt(&amount);
-//            manager->sendInformationToAgents(myId, &payReceived);
         }
         break;
     }
@@ -210,14 +182,9 @@ void LaneMergeAgent::handleSelfMsg(cMessage* msg){
         }
     }else if(msg == startMergeTimer){
         delete msg;
-        //traciVehicle->setFixedLane(traciVehicle->getLaneIndex() + 1, false);
         Trigger beliefs(Belief("bargain/start"), myId, myId + 1);
         manager->QueueTrigger(beliefs);
-//        BeliefModel beliefs("bargain/start");
-//        int targetVehicle = myId + 1;
-//        beliefs.pushInt(&targetVehicle);
-//        manager->sendInformationToAgents(myId, &beliefs);
-    }else if(MarketMessage* delayMessage = dynamic_cast<MarketMessage*>(msg)){
+    }else if(NegotiationMessage* delayMessage = dynamic_cast<NegotiationMessage*>(msg)){
         switch(delayMessage->getMessageType()){
         case (int)MessageType::ACK_PAYOUT:
         case (int)MessageType::ACK:
@@ -230,28 +197,4 @@ void LaneMergeAgent::handleSelfMsg(cMessage* msg){
     } else{
         GeneralPlexeAgentAppl::handleSelfMsg(msg);
     }
-}
-
-bool LaneMergeAgent::isReceiver(MarketMessage* msg){
-    if(msg->getDestinationId() == myId)
-        return true;
-    if(msg->getTargets().find(myId) != msg->getTargets().end())
-        return true;
-    return false;
-}
-
-void LaneMergeAgent::sendMessageDelayed(MarketMessage* msg, int target){
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,5.0);
-    double delay = std::abs(distribution(gen) * 0.001);
-    scheduleAt(simTime() + delay, msg);
-}
-
-void LaneMergeAgent::resendMessage(long msgId, AckTimer* at){
-    NegotiationMessage* resend = messageCache.getMessageReference(msgId);
-    resend->setForWholePlatoon(false);
-    resend->setTargets(messageCache.getRemainerIds(msgId));
-    scheduleAt(simTime() + ackTime + randomOffset(), at);
-    sendUnicast(resend->dup(), -1);
 }

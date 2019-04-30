@@ -43,31 +43,15 @@ void BasePlexeAgentAppl::initialize(int stage){
     }
 
     if (stage == 1) {
-        mobility = Veins::TraCIMobilityAccess().get(getParentModule());
-        traci = mobility->getCommandInterface();
-        traciVehicle = mobility->getVehicleCommandInterface();
         positionHelper = Veins::FindModule<BasePositionHelper*>::findSubModule(getParentModule());
         protocol = Veins::FindModule<BaseProtocol*>::findSubModule(getParentModule());
-        myId = positionHelper->getId(); //This causes the id to be repeated if various vtypes are used
-
         // connect application to protocol
         protocol->registerApplication(BaseProtocol::BEACON_TYPE, gate("lowerLayerIn"), gate("lowerLayerOut"), gate("lowerControlIn"), gate("lowerControlOut"));
-
+        myId = positionHelper->getId(); //This causes the id to be repeated if various vtypes are used
         recordData = new cMessage("recordData");
         // init statistics collection. round to 0.1 seconds
         SimTime rounded = SimTime(floor(simTime().dbl() * 1000 + 100), SIMTIME_MS);
         scheduleAt(rounded, recordData);
-
-        //Save pointer to LightJason Manager
-        manager = Veins::FindModule<LightJasonManager*>::findSubModule(getParentModule()->getParentModule()); //The network is 2 modules up
-        if(manager == nullptr){
-            throw new cRuntimeError("LightJason Application: No manager found");
-        }
-        /*
-         * Vehicle type must be specified
-         */
-        std::string aslFile = par("asl_file").stdstringValue();
-        manager->subscribeVehicle(this, myId, traciVehicle->getVType(), aslFile);
     }
 }
 

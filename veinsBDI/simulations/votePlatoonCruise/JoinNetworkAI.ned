@@ -13,17 +13,21 @@
 // along with this program.  If not, see http://www.gnu.org/licenses/.
 // 
 
-package veinsbdi.simulations.joinCaseStudy;
+package veinsbdi.simulations.votePlatoonCruise;
 
 import org.car2x.veins.nodes.Scenario;
+import veinsbdi.base.voteManager.voteManager;
+import veinsbdi.base.voteManager.VoteAgentManager;
 import org.car2x.veins.modules.mobility.traci.TraCIBaseTrafficManager;
+import veinsbdi.traffic.NoisePlatoonTrafficManager;
 
-network JoinNetwork extends Scenario
+network JoinNetworkAI extends Scenario
 {
     parameters:
         string traffic_type;
-        int numPcapRecorders;
     submodules:
+        //ljmanager: voteManager;
+        ljmanager: VoteAgentManager;
         traffic: <traffic_type> like TraCIBaseTrafficManager {
             parameters:
                 @display("p=200,200");

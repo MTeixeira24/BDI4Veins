@@ -21,6 +21,7 @@ using Veins::TraCICommandInterface;
 class LightJasonManager;
 class BaseAgentAppl : public Veins::BaseApplLayer/*BaseWaveApplLayer*/ {
 public:
+    BaseAgentAppl():manager(NULL){}
     virtual void initialize(int stage) override;
     virtual int numInitStages()const override{return 3;}
     virtual void finish();
@@ -34,12 +35,10 @@ protected:
     TraCICommandInterface::Vehicle* traciVehicle;
     simtime_t lastSent; //last time this sent a message
     LightJasonManager* manager;
+    uint8_t Belief(std::string key);
     virtual void onWSM(Veins::WaveShortMessage* wsm){
 
     }
-    /*virtual void handlePositionUpdate(cObject* obj){
-        BaseApplLayer::handlePositionUpdate(obj);
-    }*/
     virtual void handleLowerMsg(cMessage* msg){}
     virtual void handleSelfMsg(cMessage* msg);
     virtual void handleLowerControl(cMessage* msg){}

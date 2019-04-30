@@ -347,46 +347,4 @@ void BaseVoteAppl::handleNotificationOfResults(const NotifyResults* msg){
     }
 }
 
-void BaseVoteAppl::sendMessageWithAck(NegotiationMessage* msg, int target){
-    std::vector<int> targets({target});
-    sendMessageWithAck(msg, targets);
-}
 
-void BaseVoteAppl::sendMessageWithAck(NegotiationMessage* msg, const std::vector<int>& targets){
-    messageCache.insertEntry(msg->getMessageId(), msg->dup(), targets);
-    AckTimer* at = new AckTimer("AckTimer");
-    at->setMessageId(msg->getMessageId());
-    scheduleAt(simTime() + ackTime + randomOffset(), at);
-    sendUnicast(msg, -1);
-}
-
-double BaseVoteAppl::randomOffset(){
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,5.0);
-    return std::abs(distribution(gen) * 0.001);
-}
-
-bool BaseVoteAppl::isReceiver(NegotiationMessage* msg){
-    if(msg->getDestinationId() == myId)
-        return true;
-    if(msg->getTargets().find(myId) != msg->getTargets().end())
-        return true;
-    return false;
-}
-
-void BaseVoteAppl::sendMessageDelayed(NegotiationMessage* msg, int target){
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,5.0);
-    double delay = std::abs(distribution(gen) * 0.001);
-    scheduleAt(simTime() + delay, msg);
-}
-
-void BaseVoteAppl::resendMessage(long msgId, AckTimer* at){
-    NegotiationMessage* resend = messageCache.getMessageReference(msgId);
-    resend->setForWholePlatoon(false);
-    resend->setTargets(messageCache.getRemainerIds(msgId));
-    scheduleAt(simTime() + ackTime + randomOffset(), at);
-    sendUnicast(resend->dup(), -1);
-}

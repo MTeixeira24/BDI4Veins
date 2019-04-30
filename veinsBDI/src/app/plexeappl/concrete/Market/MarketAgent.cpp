@@ -9,8 +9,6 @@
 Define_Module(MarketAgent)
 
 MarketAgent::~MarketAgent() {
-    if(debugTimer != NULL)
-        cancelAndDelete(debugTimer);
     if(auctionTrigger != NULL)
         cancelAndDelete(auctionTrigger);
 }
@@ -110,16 +108,6 @@ void MarketAgent::fillNegotiationMessage(MarketMessage* msg, int originId, int t
     msg->setReplyMessageId(idOfOriginMessage);
     std::unordered_set<int> setTarget({targetId});
     fillNegotiationMessage(msg, originId, targetId, forWholePlatoon, setTarget);
-}
-
-bool MarketAgent::isReceiver(MarketMessage* msg){
-    if(msg->getForWholePlatoon() && positionHelper->getPlatoonId() == msg->getPlatoonId())
-        return true;
-    if(msg->getTargets().find(myId) != msg->getTargets().end())
-        return true;
-    if(msg->getDestinationId() == myId)
-        return true;
-    return false;
 }
 
 void MarketAgent::handleLowerMsg(cMessage* msg){
@@ -425,8 +413,6 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
             resendMessage(msgId, at);
             ((MarketManager*)manager)->incrementRetransmission();
         }
-    }else if(msg == debugTimer){
-        testFunction();
     }else if(msg == auctionTrigger){
         BeliefModel startAuction("start/auction");
         startAuction.pushInt(&(atc.context));
@@ -453,13 +439,6 @@ void MarketAgent::handleSelfMsg(cMessage* msg){
     }
 }
 
-void MarketAgent::testFunction(){
-    MarketMessage* testMsg = new MarketMessage("Test");
-    fillNegotiationMessage(testMsg, myId, -1, true);
-    testMsg->setMessageType((int)MessageType::HELLO);
-    sendMessageWithAck(testMsg, auctionMembers);
-}
-
 void MarketAgent::endOfAuctionTrigger(int winnerId){
     if(atc.context == CONTEXT_SPEED){
         scheduleAt(simTime() + 1, auctionTrigger);
@@ -467,37 +446,3 @@ void MarketAgent::endOfAuctionTrigger(int winnerId){
     }
 }
 
-void MarketAgent::sendMessageWithAck(MarketMessage* msg, const std::vector<int>& targets){
-    messageCache.insertEntry(msg->getMessageId(), msg->dup(), targets);
-    AckTimer* at = new AckTimer("AckTimer");
-    at->setMessageId(msg->getMessageId());
-    scheduleAt(simTime() + ackTime + randomOffset(), at);
-    sendUnicast(msg, -1);
-}
-
-void MarketAgent::sendMessageWithAck(MarketMessage* msg, int target){
-    std::vector<int> v_target({target});
-    sendMessageWithAck(msg, v_target);
-}
-void MarketAgent::sendMessageDelayed(MarketMessage* msg, int target){
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,5.0);
-    double delay = std::abs(distribution(gen) * 0.001);
-    scheduleAt(simTime() + delay, msg);
-}
-
-double MarketAgent::randomOffset(){
-    std::random_device rd{};
-    std::mt19937 gen{rd()};
-    std::normal_distribution<double> distribution(25,5.0);
-    return std::abs(distribution(gen) * 0.001);
-}
-
-void MarketAgent::resendMessage(long msgId, AckTimer* at){
-    NegotiationMessage* resend = messageCache.getMessageReference(msgId);
-    resend->setForWholePlatoon(false);
-    resend->setTargets(messageCache.getRemainerIds(msgId));
-    scheduleAt(simTime() + ackTime + randomOffset(), at);
-    sendUnicast(resend->dup(), -1);
-}
