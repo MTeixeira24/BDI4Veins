@@ -6,6 +6,7 @@ Integration between the LightJason BDI agent framework and the VEINs vehicular n
 * Install omnet
     * Download at https://omnetpp.org/download/ 
     * Follow install guide at https://doc.omnetpp.org/omnetpp/InstallGuide.pdf
+    * Install dependencies: `sudo apt install build-essential gcc g++ bison flex perl python python3 qt5-default libqt5opengl5-dev tcl-dev tk-dev libxml2-dev zlib1g-dev default-jre doxygen graphviz libwebkitgtk-1.0`
     * `. setenv`
     * `/configure WITH_OSGEARTH=no WITH_OSG=no`
     * `make -j <cpu cores>`
