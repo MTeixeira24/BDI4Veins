@@ -185,25 +185,9 @@ public final class ConnectionManager extends Thread {
                 break;
             case Constants.SET_SIM_PARAMS:{
                 String managerType = CByteUtils.extractString(buffer);
-                switch (managerType){
-                    case "AgentManager":
-                        am = new AgentManager("vehicle.asl", this);
-                        break;
-                    case "CVoterAgentManager":
-                        am = new CVoterAgentManager("voterAgent.asl", this);
-                        break;
-                    case "CRouterManager":
-                        am = new CRouterManager("router.asl", this);
-                        break;
-                    case "CMarketAgentManager":
-                        am = new CMarketAgentManager("marketAgent.asl", this);
-                        break;
-                    case "CBargainAgentManager":
-                        am = new CBargainAgentManager("bargainAgent.asl", this);
-                        break;
-                    default:
-                        throw new RuntimeException("ConnectionManager: Invalid manager specified!");
-                }
+                createManager(managerType);
+
+
                 am_latch = am.getLatch();
                 am.start();
                 am.setSimParams(buffer);
@@ -216,6 +200,28 @@ public final class ConnectionManager extends Thread {
                 break;
         }
         return response;
+    }
+
+    private void createManager(@notnull String managerType){
+        switch (managerType){
+            case "AgentManager":
+                am = new AgentManager("vehicle.asl", this);
+                break;
+            case "CVoterAgentManager":
+                am = new CVoterAgentManager("voterAgent.asl", this);
+                break;
+            case "CRouterManager":
+                am = new CRouterManager("router.asl", this);
+                break;
+            case "CMarketAgentManager":
+                am = new CMarketAgentManager("marketAgent.asl", this);
+                break;
+            case "CBargainAgentManager":
+                am = new CBargainAgentManager("bargainAgent.asl", this);
+                break;
+            default:
+                throw new RuntimeException("ConnectionManager: Invalid manager specified!");
+        }
     }
 
 }

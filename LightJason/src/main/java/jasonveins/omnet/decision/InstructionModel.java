@@ -96,10 +96,6 @@ public class InstructionModel {
         values.add(arrayData);
     }
 
-    /*public void pushRawBytes(short _type, byte[] _value){
-        values.add(new ByteData(_type, _value));
-    }*/
-
     public void setBelief(String _belief){
         agentBelief = _belief;
     }

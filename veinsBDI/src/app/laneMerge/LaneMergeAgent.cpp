@@ -33,14 +33,11 @@ void LaneMergeAgent::setInitialBeliefs(){
     //Setup beliefs
     int isMerger = myId % 2 == 0 ? true : false;
     Trigger beliefs(Belief("setup/beliefs"), myId, isMerger);
-//    BeliefModel beliefs("setup/beliefs");
-//    beliefs.pushInt(&isMerger);
     if(isMerger){
         startMergeTimer = new cMessage("startMergeTimer");
         scheduleAt(simTime()+1, startMergeTimer);
     }
     manager->QueueTrigger(beliefs);
-    //manager->sendInformationToAgents(myId, &beliefs);
 }
 
 void LaneMergeAgent::fillNegotiationMessage(BargainMessage* msg, int originId, int targetId){
